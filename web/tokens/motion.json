@@ -1,0 +1,95 @@
+{
+  "motion": {
+    "time": {
+      "0": {
+        "$value": {
+          "value": 0,
+          "unit": "ms"
+        },
+        "$description": "0ms."
+      },
+      "100": {
+        "$value": {
+          "value": 100,
+          "unit": "ms"
+        },
+        "$description": "100ms."
+      },
+      "150": {
+        "$value": {
+          "value": 150,
+          "unit": "ms"
+        },
+        "$description": "150ms."
+      },
+      "250": {
+        "$value": {
+          "value": 250,
+          "unit": "ms"
+        },
+        "$description": "250ms."
+      },
+      "400": {
+        "$value": {
+          "value": 400,
+          "unit": "ms"
+        },
+        "$description": "400ms."
+      },
+      "$type": "duration"
+    },
+    "curve": {
+      "$type": "cubicBezier",
+      "out": {
+        "$value": [0, 0, 0.2, 1],
+        "$description": "Decelerating curve."
+      },
+      "in": {
+        "$value": [0.4, 0, 1, 1],
+        "$description": "Accelerating curve."
+      },
+      "in-out": {
+        "$value": [0.4, 0, 0.2, 1],
+        "$description": "Accelerate then decelerate."
+      },
+      "linear": {
+        "$value": [0, 0, 1, 1],
+        "$description": "Constant rate."
+      }
+    },
+    "duration": {
+      "$type": "duration",
+      "instant": {
+        "$value": "{motion.time.100}",
+        "$description": "Immediate feedback, such as hover color changes."
+      },
+      "fast": {
+        "$value": "{motion.time.150}",
+        "$description": "Small state changes."
+      },
+      "base": {
+        "$value": "{motion.time.250}",
+        "$description": "Standard transitions."
+      },
+      "slow": {
+        "$value": "{motion.time.400}",
+        "$description": "Large or entering elements."
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "enter": {
+        "$value": "{motion.curve.out}",
+        "$description": "Elements entering or appearing."
+      },
+      "exit": {
+        "$value": "{motion.curve.in}",
+        "$description": "Elements leaving or disappearing."
+      },
+      "standard": {
+        "$value": "{motion.curve.in-out}",
+        "$description": "Elements moving or changing in place."
+      }
+    }
+  }
+}

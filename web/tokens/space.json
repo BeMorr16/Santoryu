@@ -1,0 +1,139 @@
+{
+  "space": {
+    "0": {
+      "$value": {
+        "value": 0,
+        "unit": "rem"
+      },
+      "$description": "Space step 0 (0px at the default root size)."
+    },
+    "1": {
+      "$value": {
+        "value": 0.25,
+        "unit": "rem"
+      },
+      "$description": "Space step 1 (4px at the default root size)."
+    },
+    "2": {
+      "$value": {
+        "value": 0.5,
+        "unit": "rem"
+      },
+      "$description": "Space step 2 (8px at the default root size)."
+    },
+    "3": {
+      "$value": {
+        "value": 0.75,
+        "unit": "rem"
+      },
+      "$description": "Space step 3 (12px at the default root size)."
+    },
+    "4": {
+      "$value": {
+        "value": 1,
+        "unit": "rem"
+      },
+      "$description": "Space step 4 (16px at the default root size)."
+    },
+    "6": {
+      "$value": {
+        "value": 1.5,
+        "unit": "rem"
+      },
+      "$description": "Space step 6 (24px at the default root size)."
+    },
+    "8": {
+      "$value": {
+        "value": 2,
+        "unit": "rem"
+      },
+      "$description": "Space step 8 (32px at the default root size)."
+    },
+    "12": {
+      "$value": {
+        "value": 3,
+        "unit": "rem"
+      },
+      "$description": "Space step 12 (48px at the default root size)."
+    },
+    "16": {
+      "$value": {
+        "value": 4,
+        "unit": "rem"
+      },
+      "$description": "Space step 16 (64px at the default root size)."
+    },
+    "24": {
+      "$value": {
+        "value": 6,
+        "unit": "rem"
+      },
+      "$description": "Space step 24 (96px at the default root size)."
+    },
+    "$type": "dimension",
+    "inset": {
+      "sm": {
+        "$value": "{space.2}",
+        "$description": "Padding inside small elements."
+      },
+      "md": {
+        "$value": "{space.4}",
+        "$description": "Padding inside standard containers."
+      },
+      "lg": {
+        "$value": "{space.6}",
+        "$description": "Padding inside large containers."
+      }
+    },
+    "stack": {
+      "xs": {
+        "$value": "{space.1}",
+        "$description": "Vertical gap between tightly related items."
+      },
+      "sm": {
+        "$value": "{space.2}",
+        "$description": "Vertical gap between related items."
+      },
+      "md": {
+        "$value": "{space.4}",
+        "$description": "Vertical gap between paragraphs and blocks."
+      },
+      "lg": {
+        "$value": "{space.6}",
+        "$description": "Vertical gap between groups."
+      },
+      "xl": {
+        "$value": "{space.8}",
+        "$description": "Vertical gap between sections."
+      }
+    },
+    "inline": {
+      "sm": {
+        "$value": "{space.2}",
+        "$description": "Horizontal gap between small inline items."
+      },
+      "md": {
+        "$value": "{space.4}",
+        "$description": "Horizontal gap between inline items, such as nav links."
+      }
+    },
+    "layout": {
+      "xs": {
+        "$value": "{space.4}",
+        "$description": "Page side gutter (16px)."
+      },
+      "sm": {
+        "$value": "{space.8}",
+        "$description": "Small layout gap between page regions."
+      },
+      "md": {
+        "$value": "{space.12}",
+        "$description": "Medium layout gap between page regions."
+      },
+      "lg": {
+        "$value": "{space.16}",
+        "$description": "Large layout gap between page regions."
+      }
+    }
+  }
+}

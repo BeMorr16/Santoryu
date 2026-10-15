@@ -1,0 +1,23 @@
+{
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "instant": {
+        "$value": "{motion.time.0}",
+        "$description": "Reduced-motion override for motion.duration.instant."
+      },
+      "fast": {
+        "$value": "{motion.time.0}",
+        "$description": "Reduced-motion override for motion.duration.fast."
+      },
+      "base": {
+        "$value": "{motion.time.0}",
+        "$description": "Reduced-motion override for motion.duration.base."
+      },
+      "slow": {
+        "$value": "{motion.time.0}",
+        "$description": "Reduced-motion override for motion.duration.slow."
+      }
+    }
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "color": {
+    "$type": "color",
+    "surface": {
+      "base": {
+        "$value": "{color.gray.0}",
+        "$description": "Page background."
+      },
+      "raised": {
+        "$value": "{color.gray.50}",
+        "$description": "Background of raised areas: cards, table headers, code."
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{color.gray.900}",
+        "$description": "Primary text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "muted": {
+        "$value": "{color.gray.600}",
+        "$description": "Secondary text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "subtle": {
+        "$value": "{color.gray.500}",
+        "$description": "Tertiary text, such as metadata. Still body text, so 4.5:1.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            }
+          ]
+        }
+      }
+    },
+    "link": {
+      "default": {
+        "$value": "{color.blue.700}",
+        "$description": "Link text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "hover": {
+        "$value": "{color.blue.800}",
+        "$description": "Link text on hover.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            }
+          ]
+        }
+      }
+    },
+    "border": {
+      "subtle": {
+        "$value": "{color.gray.200}",
+        "$description": "Decorative dividers only. Not contrast-checked; never the only boundary of a control."
+      },
+      "strong": {
+        "$value": "{color.gray.500}",
+        "$description": "Boundaries of UI components (3:1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            }
+          ]
+        }
+      }
+    },
+    "focus": {
+      "ring": {
+        "$value": "{color.blue.600}",
+        "$description": "Focus indicator color (3:1 against every surface).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "effect": {
+    "elevation": {
+      "$type": "shadow",
+      "raised": {
+        "$value": "{effect.shadow.sm}",
+        "$description": "Shadow for slightly raised surfaces."
+      },
+      "overlay": {
+        "$value": "{effect.shadow.md}",
+        "$description": "Shadow for overlays such as menus and dialogs."
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "radius": {
+    "0": {
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      },
+      "$description": "Corner radius 0px."
+    },
+    "2": {
+      "$value": {
+        "value": 2,
+        "unit": "px"
+      },
+      "$description": "Corner radius 2px."
+    },
+    "4": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
+      "$description": "Corner radius 4px."
+    },
+    "8": {
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
+      "$description": "Corner radius 8px."
+    },
+    "16": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$description": "Corner radius 16px."
+    },
+    "$type": "dimension",
+    "full": {
+      "$value": {
+        "value": 9999,
+        "unit": "px"
+      },
+      "$description": "Fully rounded ends."
+    },
+    "control": {
+      "$value": "{radius.4}",
+      "$description": "Corners of interactive controls."
+    },
+    "surface": {
+      "$value": "{radius.8}",
+      "$description": "Corners of cards and raised surfaces."
+    },
+    "pill": {
+      "$value": "{radius.full}",
+      "$description": "Fully rounded pills and tags."
+    }
+  }
+}

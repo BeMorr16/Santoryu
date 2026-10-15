@@ -1,0 +1,150 @@
+{
+  "effect": {
+    "shadow": {
+      "$type": "shadow",
+      "sm": {
+        "$value": {
+          "color": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0.08,
+            "hex": "#000000"
+          },
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 2,
+            "unit": "px"
+          },
+          "spread": {
+            "value": 0,
+            "unit": "px"
+          }
+        },
+        "$description": "Small shadow for light backgrounds."
+      },
+      "md": {
+        "$value": {
+          "color": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0.12,
+            "hex": "#000000"
+          },
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 4,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 12,
+            "unit": "px"
+          },
+          "spread": {
+            "value": 0,
+            "unit": "px"
+          }
+        },
+        "$description": "Medium shadow for light backgrounds."
+      },
+      "sm-dark": {
+        "$value": {
+          "color": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0.5,
+            "hex": "#000000"
+          },
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 2,
+            "unit": "px"
+          },
+          "spread": {
+            "value": 0,
+            "unit": "px"
+          }
+        },
+        "$description": "Small shadow for dark backgrounds."
+      },
+      "md-dark": {
+        "$value": {
+          "color": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0.6,
+            "hex": "#000000"
+          },
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 4,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 12,
+            "unit": "px"
+          },
+          "spread": {
+            "value": 0,
+            "unit": "px"
+          }
+        },
+        "$description": "Medium shadow for dark backgrounds."
+      }
+    },
+    "line": {
+      "1": {
+        "$value": {
+          "value": 1,
+          "unit": "px"
+        },
+        "$description": "1px line."
+      },
+      "2": {
+        "$value": {
+          "value": 2,
+          "unit": "px"
+        },
+        "$description": "2px line."
+      },
+      "3": {
+        "$value": {
+          "value": 3,
+          "unit": "px"
+        },
+        "$description": "3px line."
+      },
+      "$type": "dimension"
+    },
+    "focus-ring": {
+      "$type": "dimension",
+      "width": {
+        "$value": "{effect.line.2}",
+        "$description": "Focus indicator outline width."
+      },
+      "offset": {
+        "$value": "{effect.line.2}",
+        "$description": "Gap between an element and its focus indicator."
+      }
+    }
+  }
+}
