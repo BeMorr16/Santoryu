@@ -1,0 +1,34 @@
+{
+  "name": "personal-site",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.11.2",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "check": "pnpm run tokens && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test",
+    "dev": "pnpm --filter web run dev",
+    "build": "pnpm --filter web run build",
+    "preview": "pnpm --filter web run preview",
+    "tokens": "pnpm --filter web run tokens",
+    "typecheck": "pnpm --filter web run typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm run tokens && pnpm --filter web run test",
+    "test:build": "pnpm --filter web run test:build"
+  },
+  "devDependencies": {
+    "@eslint/compat": "2.1.1",
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.2",
+    "eslint": "10.12.0",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2"
+  }
+}

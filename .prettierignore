@@ -1,0 +1,5 @@
+web/build/
+.react-router/
+web/src/generated/
+coverage/
+pnpm-lock.yaml
