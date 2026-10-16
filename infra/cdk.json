@@ -6,7 +6,7 @@
     "personal-site:hostedZoneId": "Z07284863FFM0WAU0X6KK",
     "personal-site:githubRepository": "BeMorr16@157515353/Santoryu@1421294628",
     "personal-site:githubOidcSubject": "environment:production",
-    "personal-site:flatRatePlan": false,
+    "personal-site:flatRatePlan": true,
     "personal-site:rateLimitPer5Minutes": 500,
     "personal-site:monthlyBudgetUsd": 5,
     "personal-site:siteDir": "../web/build/client",
