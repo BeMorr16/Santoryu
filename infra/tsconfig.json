@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    // aws-cdk-lib's jsii-generated types are not compatible with this flag (e.g. Bucket is not
+    // assignable to IBucket under it). Every other strict option from the base config applies.
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["bin", "src", "test", "*.ts"]
+}

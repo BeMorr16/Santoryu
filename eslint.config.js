@@ -7,7 +7,13 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  globalIgnores(["web/build/", "**/.react-router/", "web/src/generated/", "**/coverage/"]),
+  globalIgnores([
+    "web/build/",
+    "**/.react-router/",
+    "web/src/generated/",
+    "**/coverage/",
+    "**/cdk.out/",
+  ]),
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
   {
@@ -43,5 +49,35 @@ export default defineConfig(
   {
     files: ["**/*.js"],
     extends: [tseslint.configs.disableTypeChecked],
+  },
+  {
+    // CloudFront Functions (cloudfront-js-2.0): classic scripts with no host globals. The runtime
+    // also lacks some ES2015+ syntax, so those forms are reported. Decision 0005.
+    files: ["infra/functions/*.js"],
+    languageOptions: {
+      sourceType: "script",
+      ecmaVersion: 2020,
+      globals: Object.fromEntries(
+        Object.keys({ ...globals.browser, ...globals.node }).map((name) => [name, "off"]),
+      ),
+    },
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...[
+          ["ForOfStatement", "for...of"],
+          ["SpreadElement", "Spread syntax"],
+          ["ObjectPattern, ArrayPattern", "Destructuring"],
+          ["AssignmentPattern", "Default parameters"],
+          ["ChainExpression", "Optional chaining"],
+          ["LogicalExpression[operator='??']", "Nullish coalescing"],
+          ["ClassDeclaration, ClassExpression", "class"],
+          ["ImportDeclaration, ExportNamedDeclaration, ExportDefaultDeclaration", "Modules"],
+        ].map(([selector, feature]) => ({
+          selector,
+          message: `${feature} is not supported by the cloudfront-js-2.0 runtime.`,
+        })),
+      ],
+    },
   },
 );

@@ -3,3 +3,4 @@ web/build/
 web/src/generated/
 coverage/
 pnpm-lock.yaml
+cdk.out/
