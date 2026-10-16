@@ -44,6 +44,27 @@ describe("CiAccessStack", () => {
     ]);
   });
 
+  it("puts an immutable owner@id/repo@id repository into the sub condition unchanged", () => {
+    const stack = new CiAccessStack(testApp(), "CiAccessStack", {
+      env: testEnv,
+      config: { ...testConfig, githubRepository: "owner@123/fake@456" },
+    });
+    Template.fromStack(stack).hasResourceProperties("AWS::IAM::Role", {
+      AssumeRolePolicyDocument: {
+        Statement: [
+          Match.objectLike({
+            Condition: {
+              StringEquals: Match.objectLike({
+                "token.actions.githubusercontent.com:sub":
+                  "repo:owner@123/fake@456:environment:production",
+              }),
+            },
+          }),
+        ],
+      },
+    });
+  });
+
   it("lets the role do nothing but assume this account's CDK bootstrap roles", () => {
     const policies = Object.values(template.findResources("AWS::IAM::Policy")) as {
       Properties: { PolicyDocument: { Statement: unknown[] } };

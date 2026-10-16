@@ -563,7 +563,7 @@ describe.each([false, true])("safety checks with flatRatePlan %s", (flatRatePlan
       "bemorrison",
       cdkJson.context["personal-site:domainName"],
       cdkJson.context["personal-site:hostedZoneId"],
-      ...(cdkJson.context["personal-site:githubRepository"] ?? "").split("/"),
+      ...(cdkJson.context["personal-site:githubRepository"] ?? "").split(/[/@]/),
     ];
     for (const stack of stacks) {
       const json = JSON.stringify(stack.toJSON());

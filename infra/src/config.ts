@@ -5,8 +5,9 @@ export interface SiteConfig {
   region: string;
   domainName: string;
   hostedZoneId: string;
+  /** As the OIDC `sub` claim names it: `owner/repo`, or `owner@id/repo@id` for immutable subjects. */
   githubRepository: string;
-  /** The part of the GitHub OIDC `sub` claim after `repo:<owner>/<repo>:`. */
+  /** The part of the GitHub OIDC `sub` claim after `repo:<githubRepository>:`. */
   githubOidcSubject: string;
   flatRatePlan: boolean;
   rateLimitPer5Minutes: number;
@@ -28,7 +29,7 @@ const patterns = {
   region: /^[a-z]{2}(-[a-z]+)+-\d+$/,
   domainName: /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/,
   hostedZoneId: /^Z[A-Z0-9]{1,31}$/,
-  githubRepository: /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/,
+  githubRepository: /^([A-Za-z0-9-]+\/[A-Za-z0-9._-]+|[A-Za-z0-9-]+@\d+\/[A-Za-z0-9._-]+@\d+)$/,
   githubOidcSubject: /^(environment:[^:\s]+|ref:refs\/heads\/[^:\s]+)$/,
   email: /^[^@\s]+@([^@\s.]+\.)+[^@\s.]+$/,
 };
@@ -84,7 +85,11 @@ export function readConfig(node: Node): SiteConfig {
     region: string("region", patterns.region, "an AWS region such as us-east-1"),
     domainName: string("domainName", patterns.domainName, "a lower-case domain name"),
     hostedZoneId: string("hostedZoneId", patterns.hostedZoneId, "a Route 53 zone ID (Z…)"),
-    githubRepository: string("githubRepository", patterns.githubRepository, "owner/repo"),
+    githubRepository: string(
+      "githubRepository",
+      patterns.githubRepository,
+      "owner/repo or owner@id/repo@id",
+    ),
     githubOidcSubject: string(
       "githubOidcSubject",
       patterns.githubOidcSubject,
