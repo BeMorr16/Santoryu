@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+cdk.out/
+web/build/
+.react-router/
+web/src/generated/
+.env
+.env.*
+!.env.example
+.DS_Store
