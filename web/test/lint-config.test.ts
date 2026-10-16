@@ -57,4 +57,23 @@ describe("ESLint config canary", () => {
 
     expect(await ruleIdsFor(code, "typed.ts")).toContain("@typescript-eslint/no-floating-promises");
   });
+
+  it("lints CloudFront Functions as classic scripts without Node globals or unsupported syntax", async () => {
+    const code = [
+      `/* exported handler */`,
+      `function handler(event) {`,
+      `  for (const key of Object.keys(event)) {`,
+      `    process.stdout.write(key);`,
+      `  }`,
+      `  return { ...event };`,
+      `}`,
+      ``,
+    ].join("\n");
+
+    const [result] = await eslint.lintText(code, { filePath: "infra/functions/fixture.js" });
+    const messages = result?.messages.map(
+      (message) => `${String(message.line)} ${message.ruleId ?? ""}`,
+    );
+    expect(messages).toEqual(["3 no-restricted-syntax", "4 no-undef", "6 no-restricted-syntax"]);
+  });
 });

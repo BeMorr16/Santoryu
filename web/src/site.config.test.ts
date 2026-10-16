@@ -7,4 +7,8 @@ describe("siteUrl", () => {
     expect(siteUrl.endsWith("/")).toBe(false);
     expect(new URL(siteUrl).origin).toBe(siteUrl);
   });
+
+  it("is the production domain", () => {
+    expect(siteUrl).toBe("https://ben-morrison.com");
+  });
 });

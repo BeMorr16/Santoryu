@@ -1,5 +1,6 @@
 packages:
   - web
+  - infra
 
 minimumReleaseAgeExclude:
   - "@asamuzakjp/dom-selector@10.0.3"

@@ -1,5 +1,5 @@
-/** The site origin, with no trailing slash. The static-hosting spec sets the real domain here. */
-export const siteUrl = "https://example.com";
+/** The site origin, with no trailing slash. */
+export const siteUrl = "https://ben-morrison.com";
 
 export const siteName = "Ben";
 

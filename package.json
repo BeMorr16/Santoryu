@@ -12,12 +12,13 @@
     "build": "pnpm --filter web run build",
     "preview": "pnpm --filter web run preview",
     "tokens": "pnpm --filter web run tokens",
-    "typecheck": "pnpm --filter web run typecheck",
+    "typecheck": "pnpm --filter web run typecheck && pnpm --filter infra run typecheck",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "pnpm run tokens && pnpm --filter web run test",
-    "test:build": "pnpm --filter web run test:build"
+    "test": "pnpm run tokens && pnpm --filter web run test && pnpm --filter infra run test",
+    "test:build": "pnpm --filter web run test:build",
+    "test:smoke": "pnpm --filter infra run test:smoke"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.1",
