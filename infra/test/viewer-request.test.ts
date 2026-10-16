@@ -12,6 +12,7 @@ interface Request {
   method: string;
   uri: string;
   querystring: QueryString;
+  rawQueryString: () => string | undefined;
   headers: Record<string, { value: string }>;
 }
 
@@ -23,11 +24,13 @@ interface Response {
 
 const handler = loadHandler(renderViewerRequest(testConfig));
 
-function run(uri: string, options: { host?: string; query?: [string, string][] } = {}) {
+/** `query` is the raw query string without the `?`, as `rawQueryString()` returns it. */
+function run(uri: string, options: { host?: string; query?: string } = {}) {
   const request: Request = {
     method: "GET",
     uri,
-    querystring: querystring(options.query ?? []),
+    querystring: querystring(options.query),
+    rawQueryString: () => options.query,
     headers: { host: { value: options.host ?? "example.test" } },
   };
   return handler({ request }) as Request | Response;
@@ -52,12 +55,17 @@ function expectRewrite(result: Request | Response, uri: string) {
 
 describe("viewer-request: alternate hosts (R1.4)", () => {
   it.each([
-    ["www.example.test", "/lab", [["a", "1"]], "https://example.test/lab?a=1"],
-    ["d123.cloudfront.net", "/", [], "https://example.test/"],
-    ["WWW.Example.TEST", "/lab/index.html", [], "https://example.test/lab/index.html"],
-    ["www.example.test", "/assets/app-1a2b.js", [], "https://example.test/assets/app-1a2b.js"],
+    ["www.example.test", "/lab", "a=1", "https://example.test/lab?a=1"],
+    ["d123.cloudfront.net", "/", undefined, "https://example.test/"],
+    ["WWW.Example.TEST", "/lab/index.html", undefined, "https://example.test/lab/index.html"],
+    [
+      "www.example.test",
+      "/assets/app-1a2b.js",
+      undefined,
+      "https://example.test/assets/app-1a2b.js",
+    ],
   ] as const)("%s%s → %s", (host, uri, query, location) => {
-    expectRedirect(run(uri, { host, query: [...query] as [string, string][] }), location);
+    expectRedirect(run(uri, { host, query }), location);
   });
 
   it("treats the apex in mixed case as the apex", () => {
@@ -79,25 +87,14 @@ describe("viewer-request: canonical paths (R2.3, R2.4)", () => {
 });
 
 describe("viewer-request: query strings on redirects", () => {
-  const cases: [string, [string, string][], string][] = [
-    [
-      "keeps repeated keys in order",
-      [
-        ["a", "1"],
-        ["b", "2"],
-        ["a", "3"],
-      ],
-      "?a=1&a=3&b=2",
-    ],
-    ["keeps an empty value", [["a", ""]], "?a="],
-    [
-      "keeps percent-encoded values as received",
-      [
-        ["q", "a%20b"],
-        ["e", "%C3%A9"],
-      ],
-      "?q=a%20b&e=%C3%A9",
-    ],
+  const cases: [string, string | undefined, string][] = [
+    ["keeps parameter order", "x=1&y=2", "?x=1&y=2"],
+    ["keeps repeated keys in their original positions", "a=1&b=2&a=3", "?a=1&b=2&a=3"],
+    ["keeps an empty value", "a=", "?a="],
+    ["keeps a bare key", "a", "?a"],
+    ["keeps percent-encoded values as received", "q=a%20b&e=%C3%A9", "?q=a%20b&e=%C3%A9"],
+    ["adds no ? when there is no query", undefined, ""],
+    ["drops a bare ? with nothing after it", "", ""],
   ];
 
   describe.each([
@@ -131,7 +128,7 @@ describe("viewer-request: routing (R2.1, R2.2, R2.5, R2.8)", () => {
   });
 
   it("leaves the query string of a rewritten request alone", () => {
-    const result = run("/lab", { query: [["a", "1"]] }) as Request;
+    const result = run("/lab", { query: "a=1" }) as Request;
     expect(result.querystring).toEqual({ a: { value: "1" } });
   });
 });

@@ -5,21 +5,11 @@
 // CONFIG is replaced at synth time with { apex, files, headers } (src/edge-functions.ts).
 var CONFIG = __CONFIG__;
 
-function querySuffix(querystring) {
-  const pairs = [];
-  Object.keys(querystring).forEach((key) => {
-    const entry = querystring[key];
-    const values = entry.multiValue ? entry.multiValue : [entry];
-    values.forEach((item) => {
-      pairs.push(`${key}=${item.value}`);
-    });
-  });
-  return pairs.length > 0 ? `?${pairs.join("&")}` : "";
-}
-
-function redirect(path, querystring) {
+// The raw query, not the parsed querystring object, whose key order is not the request's.
+function redirect(path, request) {
+  const query = request.rawQueryString();
   const headers = {
-    location: { value: `https://${CONFIG.apex}${path}${querySuffix(querystring)}` },
+    location: { value: `https://${CONFIG.apex}${path}${query ? `?${query}` : ""}` },
   };
   Object.keys(CONFIG.headers).forEach((name) => {
     headers[name] = { value: CONFIG.headers[name] };
@@ -38,16 +28,13 @@ function handler(event) {
   const host = request.headers.host ? request.headers.host.value.toLowerCase() : "";
 
   if (host !== CONFIG.apex) {
-    return redirect(uri, request.querystring);
+    return redirect(uri, request);
   }
   if (uri.endsWith("/index.html")) {
-    return redirect(
-      withoutTrailingSlashes(uri.slice(0, -"index.html".length)),
-      request.querystring,
-    );
+    return redirect(withoutTrailingSlashes(uri.slice(0, -"index.html".length)), request);
   }
   if (uri !== "/" && uri.endsWith("/")) {
-    return redirect(withoutTrailingSlashes(uri), request.querystring);
+    return redirect(withoutTrailingSlashes(uri), request);
   }
   if (uri.startsWith("/assets/")) {
     return request;
