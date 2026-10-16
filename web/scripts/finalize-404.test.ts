@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { finalize404 } from "./finalize-404.ts";
+import { finalize404, removeSpaFallback } from "./finalize-404.ts";
 
 let clientDir: string;
 
@@ -41,5 +41,21 @@ describe("finalize404", () => {
 
   it("throws, naming the path, if the prerendered 404 page is missing", async () => {
     await expect(finalize404(clientDir)).rejects.toThrow(join(clientDir, "404", "index.html"));
+  });
+});
+
+describe("removeSpaFallback", () => {
+  it("removes __spa-fallback.html and leaves other files", async () => {
+    await writeFile(join(clientDir, "__spa-fallback.html"), "<html></html>");
+    await writeFile(join(clientDir, "index.html"), "<h1>Home</h1>");
+
+    await removeSpaFallback(clientDir);
+
+    expect(existsSync(join(clientDir, "__spa-fallback.html"))).toBe(false);
+    expect(existsSync(join(clientDir, "index.html"))).toBe(true);
+  });
+
+  it("does not fail when there is no __spa-fallback.html", async () => {
+    await expect(removeSpaFallback(clientDir)).resolves.toBeUndefined();
   });
 });

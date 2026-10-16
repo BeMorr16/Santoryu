@@ -15,3 +15,11 @@ export async function finalize404(clientDir: string): Promise<void> {
   await rm(join(clientDir, "404"), { recursive: true, force: true });
   await rm(join(clientDir, "404.data"), { force: true });
 }
+
+/**
+ * React Router always emits a client-only __spa-fallback.html. Every route is prerendered and
+ * unknown paths get 404.html, so nothing uses it; drop it so it is never published.
+ */
+export async function removeSpaFallback(clientDir: string): Promise<void> {
+  await rm(join(clientDir, "__spa-fallback.html"), { force: true });
+}

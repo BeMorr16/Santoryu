@@ -1,12 +1,25 @@
 import { join } from "node:path";
 import type { Config } from "@react-router/dev/config";
-import { finalize404 } from "./scripts/finalize-404.ts";
+import { writeCrawlFiles } from "./scripts/crawl-files.ts";
+import { finalize404, removeSpaFallback } from "./scripts/finalize-404.ts";
+import { writeSiteManifest } from "./scripts/site-manifest.ts";
+import { siteUrl } from "./src/site.config.ts";
+
+const prerender = ["/", "/lab", "/404"];
 
 export default {
   appDirectory: "src",
   ssr: false,
-  prerender: ["/", "/lab", "/404"],
+  prerender,
   async buildEnd({ reactRouterConfig }) {
-    await finalize404(join(reactRouterConfig.buildDirectory, "client"));
+    const clientDir = join(reactRouterConfig.buildDirectory, "client");
+    await finalize404(clientDir);
+    await removeSpaFallback(clientDir);
+    await writeCrawlFiles(clientDir, prerender, siteUrl);
+    // Last, so it sees the final file set. Written next to client/, so it is never published.
+    await writeSiteManifest(
+      clientDir,
+      join(reactRouterConfig.buildDirectory, "site-manifest.json"),
+    );
   },
 } satisfies Config;

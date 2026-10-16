@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { within } from "@testing-library/dom";
 import { JSDOM } from "jsdom";
@@ -59,6 +59,20 @@ describe("build output files", () => {
     expect(existsSync(`${clientDir}404`)).toBe(false);
   });
 
+  it("does not emit __spa-fallback.html", () => {
+    expect(existsSync(`${clientDir}__spa-fallback.html`)).toBe(false);
+  });
+
+  it("names every HTML file index.html, <route>/index.html or 404.html, so a publish group covers it", () => {
+    const htmlFiles = readdirSync(clientDir, { recursive: true, encoding: "utf8" }).filter((path) =>
+      path.endsWith(".html"),
+    );
+    expect(htmlFiles.length).toBeGreaterThan(0);
+    for (const path of htmlFiles) {
+      expect(path).toMatch(/^((.+\/)?index\.html|404\.html)$/);
+    }
+  });
+
   it("gives every page a unique title", () => {
     const titles = pages.map(({ file }) => documentFor(file).title);
     expect(new Set(titles).size).toBe(pages.length);
@@ -96,6 +110,7 @@ describe.each(pages)("$file", (page) => {
       const links = head().querySelectorAll('link[rel="canonical"]');
       expect(links).toHaveLength(1);
       expect(links[0]?.getAttribute("href")).toBe(canonical);
+      expect(links[0]?.getAttribute("href")?.startsWith("https://ben-morrison.com/")).toBe(true);
       expect(head().querySelector('meta[name="robots"]')).toBeNull();
     });
   }
