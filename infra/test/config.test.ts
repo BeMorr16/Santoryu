@@ -60,6 +60,12 @@ describe("readConfig", () => {
     ).toMatchObject({ githubOidcSubject: "ref:refs/heads/main" });
   });
 
+  it("accepts a repository in GitHub's immutable owner@id/repo@id form", () => {
+    expect(
+      configWith({ "personal-site:githubRepository": "owner@123/fake-repo@456" })(),
+    ).toMatchObject({ githubRepository: "owner@123/fake-repo@456" });
+  });
+
   const prefixedKeys = Object.keys(validContext).filter((key) => key.startsWith("personal-site:"));
 
   it.each(prefixedKeys)("throws naming %s when it is missing", (key) => {
@@ -81,6 +87,9 @@ describe("readConfig", () => {
     ["personal-site:hostedZoneId", "z0123"],
     ["personal-site:githubRepository", "fake-repo"],
     ["personal-site:githubRepository", "owner/repo/extra"],
+    ["personal-site:githubRepository", "owner@123/repo"],
+    ["personal-site:githubRepository", "owner/repo@456"],
+    ["personal-site:githubRepository", "owner@abc/repo@456"],
     ["personal-site:githubOidcSubject", "pull_request"],
     ["personal-site:githubOidcSubject", "environment:"],
     ["personal-site:githubOidcSubject", "ref:refs/tags/v1"],
@@ -122,5 +131,13 @@ describe("cdk.json", () => {
     };
 
     expect(cdkJson.context["personal-site:region"]).toBe("us-east-1");
+  });
+
+  it("names the repository in the immutable form its OIDC tokens' sub claim uses", () => {
+    const cdkJson = JSON.parse(readFileSync(new URL("../cdk.json", import.meta.url), "utf8")) as {
+      context: Record<string, unknown>;
+    };
+
+    expect(cdkJson.context["personal-site:githubRepository"]).toMatch(/^[^@/]+@\d+\/[^@/]+@\d+$/);
   });
 });
