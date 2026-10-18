@@ -1,5 +1,10 @@
-/* Wide tables scroll sideways on narrow screens instead of squeezing token names. */
+/*
+ * Wide tables scroll sideways on narrow screens instead of squeezing token names. Positioned, so
+ * absolutely positioned descendants (visually hidden text) are clipped here too instead of
+ * widening the page.
+ */
 .scroll {
+  position: relative;
   overflow-x: auto;
 }
 

@@ -1,55 +1,82 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const tokensDir = new URL("../tokens/", import.meta.url);
 
-const categories = ["color", "type", "space", "radius", "motion", "effect"] as const;
+const categories = ["color", "type", "space", "size", "radius", "motion", "effect"] as const;
 type Category = (typeof categories)[number];
 
-// Second path segment of every token, per design §4.3.
+// Second path segment of every token: site-foundation design §4.3, component-library design §4.1.
 const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
-  color: { primitive: ["gray", "blue"], semantic: ["surface", "text", "link", "border", "focus"] },
+  color: {
+    primitive: ["gray", "blue", "gold", "cyan", "sand", "overlay"],
+    semantic: ["surface", "text", "link", "action", "accent", "border", "focus", "grid", "fill"],
+  },
   type: {
-    primitive: ["font-stack", "font-size", "font-weight", "line-height"],
-    semantic: ["family", "size", "weight", "leading"],
+    primitive: ["font-stack", "font-size", "font-weight", "line-height", "letter-spacing"],
+    semantic: ["family", "size", "weight", "leading", "tracking"],
   },
   space: {
     primitive: ["0", "1", "2", "3", "4", "6", "8", "12", "16", "24"],
     semantic: ["inset", "stack", "inline", "layout"],
+  },
+  size: {
+    primitive: ["4", "5", "6", "8", "10", "48", "64", "80"],
+    semantic: ["control", "icon", "column", "pattern"],
   },
   radius: {
     primitive: ["0", "2", "4", "8", "16", "full"],
     semantic: ["control", "surface", "pill"],
   },
   motion: { primitive: ["time", "curve"], semantic: ["duration", "easing"] },
-  effect: { primitive: ["shadow", "line"], semantic: ["elevation", "focus-ring"] },
+  effect: {
+    primitive: ["shadow", "line", "blur-radius"],
+    semantic: ["elevation", "focus-ring", "backdrop", "border", "underline"],
+  },
 };
 
-// Every semantic token, per design §4.3. Adding or renaming one is a one-way door.
+// Every semantic token, per site-foundation design §4.3 and component-library design §4.1.
+// Adding or renaming one is a one-way door.
 const expectedSemantic = [
   "color.surface.base",
   "color.surface.raised",
+  "color.surface.sunken",
+  "color.surface.glass",
   "color.text.default",
   "color.text.muted",
   "color.text.subtle",
   "color.link.default",
   "color.link.hover",
+  "color.action.background",
+  "color.action.background-hover",
+  "color.action.text",
+  "color.accent.text",
+  "color.accent.background",
+  "color.accent.border",
   "color.border.subtle",
   "color.border.strong",
   "color.focus.ring",
+  "color.grid.line",
+  "color.fill.none",
   "type.family.body",
+  "type.family.heading",
   "type.family.code",
+  "type.family.label",
   "type.size.small",
   "type.size.body",
   "type.size.lead",
   "type.size.h1",
   "type.size.h2",
   "type.size.h3",
+  "type.size.label",
   "type.weight.body",
   "type.weight.strong",
   "type.weight.heading",
   "type.leading.body",
   "type.leading.heading",
+  "type.tracking.display",
+  "type.tracking.body",
+  "type.tracking.label",
   "space.inset.sm",
   "space.inset.md",
   "space.inset.lg",
@@ -58,12 +85,24 @@ const expectedSemantic = [
   "space.stack.md",
   "space.stack.lg",
   "space.stack.xl",
+  "space.inline.xs",
   "space.inline.sm",
   "space.inline.md",
+  "space.inline.lg",
+  "space.inline.xl",
   "space.layout.xs",
   "space.layout.sm",
   "space.layout.md",
   "space.layout.lg",
+  "size.control.sm",
+  "size.control.md",
+  "size.icon.sm",
+  "size.icon.md",
+  "size.icon.lg",
+  "size.column.sm",
+  "size.column.md",
+  "size.column.lg",
+  "size.pattern.cell",
   "radius.control",
   "radius.surface",
   "radius.pill",
@@ -78,7 +117,14 @@ const expectedSemantic = [
   "effect.elevation.overlay",
   "effect.focus-ring.width",
   "effect.focus-ring.offset",
+  "effect.backdrop.glass",
+  "effect.border.width",
+  "effect.underline.thickness",
+  "effect.underline.offset",
 ];
+
+// Translucent primitives and the only semantic tokens allowed to alias them (decision 0004 amendment).
+const overlayAliases = ["color.surface.glass", "color.grid.line", "color.fill.none"];
 
 interface SourceToken {
   path: string;
@@ -142,6 +188,11 @@ const dark = load("themes/dark.json");
 const reducedMotion = load("themes/reduced-motion.json");
 const allTokens = [...categoryTokens, ...light, ...dark, ...reducedMotion];
 
+const componentFiles = existsSync(new URL("components/", tokensDir))
+  ? readdirSync(new URL("components/", tokensDir)).filter((file) => file.endsWith(".json"))
+  : [];
+const componentTokens = componentFiles.flatMap((file) => load(`components/${file}`));
+
 const primitives = new Map(
   categoryTokens.filter((token) => !containsAlias(token.value)).map((t) => [t.path, t]),
 );
@@ -189,6 +240,24 @@ describe("token source files", () => {
       allTokens.filter((token) => containsAlias(token.value)).map((token) => token.path),
     );
     expect([...semanticPaths].sort()).toEqual([...expectedSemantic].sort());
+  });
+
+  it("aliases color.overlay.* primitives only from glass, grid lines and the empty fill", () => {
+    const aliasing = allTokens.filter((t) => aliasTarget(t.value)?.startsWith("color.overlay."));
+    expect(aliasing.length).toBeGreaterThan(0);
+    for (const token of aliasing) {
+      expect(overlayAliases, `${token.file}: ${token.path}`).toContain(token.path);
+    }
+  });
+
+  it("keeps every non-overlay color primitive opaque", () => {
+    const translucent = [...primitives.values()].filter(
+      (t) =>
+        t.type === "color" &&
+        !t.path.startsWith("color.overlay.") &&
+        (t.value as { alpha?: number }).alpha !== 1,
+    );
+    expect(translucent.map((t) => t.path)).toEqual([]);
   });
 
   it("defines each semantic token in exactly one place outside the override files", () => {
@@ -261,7 +330,14 @@ describe("token source files", () => {
 describe("contrast pairing coverage (design §4.5)", () => {
   const minimums = ["text", "large-text", "non-text"];
   const mustPair = (path: string) =>
-    /^color\.(text|link|focus)\./.test(path) || path === "color.border.strong";
+    /^color\.(text|link|focus)\./.test(path) ||
+    ["color.border.strong", "color.action.text", "color.accent.text"].includes(path);
+  // Fills that foregrounds sit on directly, besides surfaces.
+  const fills = [
+    "color.action.background",
+    "color.action.background-hover",
+    "color.accent.background",
+  ];
 
   function pairingsOf(token: SourceToken): { against: string; min: string }[] {
     const raw = token.extensions?.["personal-site.contrast"];
@@ -274,31 +350,106 @@ describe("contrast pairing coverage (design §4.5)", () => {
     expect(pairingsOf(token).length).toBeGreaterThan(0);
   });
 
-  it("covers every surface, with valid minimums and known foregrounds", () => {
+  it("covers every surface and fill, with valid minimums and known backgrounds", () => {
     const surfaces = light.filter((t) => t.path.startsWith("color.surface.")).map((t) => t.path);
     const declared = light.flatMap((token) => pairingsOf(token));
     expect(surfaces.length).toBeGreaterThan(0);
-    for (const surface of surfaces) {
-      expect(declared.map((p) => p.against)).toContain(surface);
+    for (const background of [...surfaces, ...fills]) {
+      expect(declared.map((p) => p.against)).toContain(background);
     }
     for (const pairing of declared) {
-      expect(surfaces).toContain(pairing.against);
+      expect([...surfaces, ...fills]).toContain(pairing.against);
       expect(minimums).toContain(pairing.min);
     }
   });
 
-  it("only pairs colors that resolve to alpha 1", () => {
+  function backdropOf(token: SourceToken | undefined): unknown {
+    return token?.extensions?.["personal-site.contrast-backdrop"];
+  }
+
+  it("pairs only opaque foregrounds, on opaque backgrounds or translucent ones with an opaque backdrop set", () => {
     for (const theme of [light, dark]) {
       const byPath = new Map(theme.map((t) => [t.path, t]));
+      const alphaOf = (path: string) => {
+        const target = aliasTarget(byPath.get(path)?.value) ?? "";
+        return (primitives.get(target)?.value as { alpha?: number } | undefined)?.alpha;
+      };
       for (const token of theme) {
         const pairings = pairingsOf(token);
         if (pairings.length === 0) continue;
-        for (const path of [token.path, ...pairings.map((p) => p.against)]) {
-          const target = aliasTarget(byPath.get(path)?.value) ?? "";
-          const value = primitives.get(target)?.value as { alpha?: number } | undefined;
-          expect(value?.alpha, `${path} -> ${target}`).toBe(1);
+        expect(alphaOf(token.path), token.path).toBe(1);
+        for (const { against } of pairings) {
+          if (alphaOf(against) === 1) continue;
+          const backdrop = backdropOf(byPath.get(against));
+          expect(Array.isArray(backdrop), `${against} is translucent with no backdrop set`).toBe(
+            true,
+          );
+          for (const under of backdrop as string[]) {
+            expect(alphaOf(under), `${against} backdrop ${under}`).toBe(1);
+          }
         }
       }
     }
+  });
+
+  it("declares the same glass backdrop set in light.json and dark.json", () => {
+    const glass = (tokens: SourceToken[]) =>
+      backdropOf(tokens.find((t) => t.path === "color.surface.glass"));
+    expect(glass(light)).toEqual(expect.arrayContaining(["color.action.background"]));
+    expect(glass(dark)).toEqual(glass(light));
+  });
+});
+
+describe("component tier (decision 0004 amendment)", () => {
+  const semanticPaths = new Set(
+    [...categoryTokens, ...light].filter((t) => containsAlias(t.value)).map((t) => t.path),
+  );
+  const componentsDir = new URL("../src/components/", import.meta.url);
+  const pascal = (kebab: string) =>
+    kebab
+      .split("-")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join("");
+
+  it.each(componentTokens.map((t) => [`${t.file}: ${t.path}`, t] as const))(
+    "%s is exactly one alias to a semantic token, with a $type and $description",
+    (_label, token) => {
+      const target = aliasTarget(token.value);
+      expect(target, "component tokens must be exactly one alias").toBeDefined();
+      expect(primitives.has(target ?? ""), `{${target ?? ""}} is a primitive`).toBe(false);
+      expect(target?.startsWith("component."), `{${target ?? ""}} is a component token`).toBe(
+        false,
+      );
+      expect(semanticPaths.has(target ?? ""), `{${target ?? ""}} is not a semantic token`).toBe(
+        true,
+      );
+      expect(token.type).toEqual(expect.any(String));
+      expect(token.description).toEqual(expect.stringMatching(/\S/));
+    },
+  );
+
+  it.each(componentFiles)("%s holds only component.<its name>.* tokens", (file) => {
+    const kebab = file.replace(/\.json$/, "");
+    for (const token of load(`components/${file}`)) {
+      expect(token.path.startsWith(`component.${kebab}.`), token.path).toBe(true);
+    }
+  });
+
+  it.each(componentFiles)("%s has a matching src/components/<PascalCase>/ directory", (file) => {
+    const directory = pascal(file.replace(/\.json$/, ""));
+    expect(existsSync(new URL(`${directory}/`, componentsDir)), directory).toBe(true);
+  });
+
+  it("puts no component tokens in the theme files", () => {
+    const themed = [...light, ...dark, ...reducedMotion].filter((t) =>
+      t.path.startsWith("component."),
+    );
+    expect(themed.map((t) => `${t.file}: ${t.path}`)).toEqual([]);
+  });
+
+  it("puts no component tokens in the category files", () => {
+    expect(
+      categoryTokens.filter((t) => t.path.startsWith("component.")).map((t) => t.path),
+    ).toEqual([]);
   });
 });

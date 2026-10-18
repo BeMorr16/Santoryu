@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { tokens } from "../src/generated/tokens.ts";
+import {
+  componentTokens as component,
+  semanticTokens as semantic,
+} from "../src/tokens/metadata.ts";
 
 const css = readFileSync(new URL("../src/generated/tokens.css", import.meta.url), "utf8");
 
@@ -14,7 +17,7 @@ function blocks(source: string): Block[] {
   const result: Block[] = [];
   const pattern = /([^{}]+)\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g;
   for (const match of source.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(pattern)) {
-    const selector = (match[1] ?? "").trim();
+    const selector = (match[1] ?? "").trim().replace(/\s+/g, " ");
     const body = match[2] ?? "";
     const inner = /([^{}]+)\{([^{}]*)\}/.exec(body);
     if (selector.startsWith("@media") && inner) {
@@ -41,20 +44,24 @@ const rootDecls = bySelector.get(":root");
 const darkMedia = bySelector.get(
   '@media (prefers-color-scheme: dark) :root:not([data-theme="light"])',
 );
-const darkAttr = bySelector.get(':root[data-theme="dark"]');
-const lightAttr = bySelector.get(':root[data-theme="light"]');
+const darkAttr = bySelector.get('[data-theme="dark"]');
+const lightAttr = bySelector.get('[data-theme="light"]');
+const componentBlock = bySelector.get(":root, [data-theme]");
 const reducedMotion = bySelector.get("@media (prefers-reduced-motion: reduce) :root");
 
-const themed = tokens.filter((t) => t.themed);
-const durations = tokens.filter((t) => t.name.startsWith("motion.duration."));
+const themed = semantic.filter((t) => t.themed);
+const durations = semantic.filter((t) => t.name.startsWith("motion.duration."));
+const cssVars = (block: Map<string, string> | undefined) =>
+  [...(block?.keys() ?? [])].filter((name) => name.startsWith("--")).sort();
 
 describe("generated tokens.css", () => {
-  it("has the selector and media-block structure from design §4.5, in order", () => {
+  it("has the selector and media-block structure from component-library design §4.4, in order", () => {
     expect(parsed.map((block) => block.selector)).toEqual([
       ":root",
       '@media (prefers-color-scheme: dark) :root:not([data-theme="light"])',
-      ':root[data-theme="dark"]',
-      ':root[data-theme="light"]',
+      '[data-theme="dark"]',
+      '[data-theme="light"]',
+      ":root, [data-theme]",
       "@media (prefers-reduced-motion: reduce) :root",
     ]);
   });
@@ -66,9 +73,10 @@ describe("generated tokens.css", () => {
     expect(lightAttr?.get("color-scheme")).toBe("light");
   });
 
-  it("declares every semantic token in :root with its light or unthemed value", () => {
-    expect(tokens.length).toBeGreaterThan(0);
-    for (const token of tokens) {
+  it("declares every semantic token in :root with its light or unthemed value, and nothing else", () => {
+    expect(semantic.length).toBeGreaterThan(0);
+    expect(cssVars(rootDecls)).toEqual(semantic.map((t) => t.cssVar).sort());
+    for (const token of semantic) {
       const value = token.themed ? token.values.light.css : token.values.all.css;
       expect(rootDecls?.get(token.cssVar), token.cssVar).toBe(value);
     }
@@ -77,11 +85,34 @@ describe("generated tokens.css", () => {
   it("declares every themed token's dark value in both dark selectors, and nothing else", () => {
     expect(themed.length).toBeGreaterThan(0);
     for (const block of [darkMedia, darkAttr]) {
-      const vars = [...(block?.keys() ?? [])].filter((name) => name.startsWith("--"));
-      expect(vars.sort()).toEqual(themed.map((t) => t.cssVar).sort());
+      expect(cssVars(block)).toEqual(themed.map((t) => t.cssVar).sort());
       for (const token of themed) {
         expect(block?.get(token.cssVar), token.cssVar).toBe(token.values.dark.css);
       }
+    }
+  });
+
+  it("declares the full light themed set under [data-theme=light], so a scoped panel can opt out of dark", () => {
+    expect(cssVars(lightAttr)).toEqual(themed.map((t) => t.cssVar).sort());
+    for (const token of themed) {
+      expect(lightAttr?.get(token.cssVar), token.cssVar).toBe(token.values.light.css);
+    }
+  });
+
+  it("declares every component token as var(--<semantic>) in `:root, [data-theme]`, and nothing else", () => {
+    expect(component.length).toBeGreaterThan(0);
+    expect(cssVars(componentBlock)).toEqual(component.map((t) => t.cssVar).sort());
+    for (const token of component) {
+      const target = semantic.find((t) => t.name === token.aliases);
+      expect(target, `${token.name} aliases ${token.aliases}`).toBeDefined();
+      expect(componentBlock?.get(token.cssVar), token.cssVar).toBe(`var(${target?.cssVar ?? ""})`);
+    }
+  });
+
+  it("emits em values only for type.tracking tokens (the letter-spacing/em transform)", () => {
+    for (const token of semantic) {
+      const value = token.themed ? token.values.light.css : token.values.all.css;
+      expect(/\dem$/.test(value), token.name).toBe(token.name.startsWith("type.tracking."));
     }
   });
 
@@ -99,7 +130,7 @@ describe("generated tokens.css", () => {
 
   it("emits no primitive token names", () => {
     const primitivePrefixes =
-      /^--(color-(gray|blue)-|type-(font-stack|font-size|font-weight|line-height)-|space-\d|radius-(\d|full)|motion-(time|curve)-|effect-(shadow|line)-)/;
+      /^--(color-(gray|blue|gold|cyan|sand|overlay)-|type-(font-stack|font-size|font-weight|line-height|letter-spacing)-|space-\d|size-\d|radius-(\d|full)|motion-(time|curve)-|effect-(shadow|line|blur-radius)-)/;
     const emitted = [...css.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1] ?? "");
     expect(emitted.length).toBeGreaterThan(0);
     expect(emitted.filter((name) => primitivePrefixes.test(name))).toEqual([]);

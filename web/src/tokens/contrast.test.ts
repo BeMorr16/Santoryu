@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contrastRatio, minimumRatio, relativeLuminance } from "./contrast.ts";
+import { composite, contrastRatio, minimumRatio, relativeLuminance } from "./contrast.ts";
 import type { Srgb } from "./types.ts";
 
 function gray(byte: number): Srgb {
@@ -49,5 +49,26 @@ describe("contrastRatio", () => {
 describe("minimumRatio", () => {
   it("maps WCAG AA thresholds", () => {
     expect(minimumRatio).toEqual({ text: 4.5, "large-text": 3, "non-text": 3 });
+  });
+});
+
+describe("composite", () => {
+  it("is the backdrop at alpha 0 and the color itself at alpha 1", () => {
+    expect(composite(white, 0, black)).toEqual(black);
+    expect(composite(white, 1, black)).toEqual(white);
+  });
+
+  it("blends each gamma-encoded sRGB channel source-over, as browsers composite by default", () => {
+    const [r, g, b] = composite([1, 0.5, 0], 0.25, [0, 0.5, 1]);
+    expect(r).toBeCloseTo(0.25, 10);
+    expect(g).toBeCloseTo(0.5, 10);
+    expect(b).toBeCloseTo(0.75, 10);
+  });
+
+  it("reproduces the dark glass worst case from design §4.6 (subtle text about 4.08:1 over gold)", () => {
+    const navy: Srgb = [0x12 / 255, 0x3e / 255, 0x5e / 255];
+    const gold: Srgb = [0xef / 255, 0xd0 / 255, 0x9b / 255];
+    const subtle: Srgb = [0xad / 255, 0xba / 255, 0xc8 / 255];
+    expect(contrastRatio(subtle, composite(navy, 0.85, gold))).toBeCloseTo(4.08, 1);
   });
 });

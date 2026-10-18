@@ -61,7 +61,7 @@
           "color": {
             "colorSpace": "srgb",
             "components": [0, 0, 0],
-            "alpha": 0.5,
+            "alpha": 0.3,
             "hex": "#000000"
           },
           "offsetX": {
@@ -88,7 +88,7 @@
           "color": {
             "colorSpace": "srgb",
             "components": [0, 0, 0],
-            "alpha": 0.6,
+            "alpha": 0.4,
             "hex": "#000000"
           },
           "offsetX": {
@@ -135,6 +135,16 @@
       },
       "$type": "dimension"
     },
+    "blur-radius": {
+      "$type": "dimension",
+      "12": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        },
+        "$description": "12px blur radius."
+      }
+    },
     "focus-ring": {
       "$type": "dimension",
       "width": {
@@ -144,6 +154,31 @@
       "offset": {
         "$value": "{effect.line.2}",
         "$description": "Gap between an element and its focus indicator."
+      }
+    },
+    "backdrop": {
+      "$type": "dimension",
+      "glass": {
+        "$value": "{effect.blur-radius.12}",
+        "$description": "Backdrop blur behind glass surfaces."
+      }
+    },
+    "border": {
+      "$type": "dimension",
+      "width": {
+        "$value": "{effect.line.1}",
+        "$description": "Border width of controls and surfaces, and of the backdrop grid lines."
+      }
+    },
+    "underline": {
+      "$type": "dimension",
+      "thickness": {
+        "$value": "{effect.line.1}",
+        "$description": "Thickness of link underlines."
+      },
+      "offset": {
+        "$value": "{effect.line.2}",
+        "$description": "Gap between link text and its underline."
       }
     }
   }

@@ -1,225 +1,375 @@
 {
   "color": {
     "$type": "color",
-    "$description": "Color primitives. Never used directly; semantic color tokens live in themes/.",
+    "$description": "Color primitives (decision 0006), plus the unthemed color.fill semantic. Themed semantic color tokens live in themes/.",
     "gray": {
       "0": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [1, 1, 1],
+          "components": [1.0, 1.0, 1.0],
           "alpha": 1,
           "hex": "#ffffff"
         },
-        "$description": "Neutral gray 0."
+        "$description": "Neutral 0: white."
       },
       "50": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.9725, 0.9765, 0.9804],
+          "components": [0.9294, 0.949, 0.9725],
           "alpha": 1,
-          "hex": "#f8f9fa"
+          "hex": "#edf2f8"
         },
-        "$description": "Neutral gray 50."
+        "$description": "Blue-tinted neutral 50. Dark-theme default text."
       },
       "100": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.9451, 0.9529, 0.9608],
+          "components": [0.8667, 0.902, 0.9333],
           "alpha": 1,
-          "hex": "#f1f3f5"
+          "hex": "#dde6ee"
         },
-        "$description": "Neutral gray 100."
+        "$description": "Blue-tinted neutral 100."
       },
       "200": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.8863, 0.898, 0.9137],
+          "components": [0.7725, 0.8275, 0.8784],
           "alpha": 1,
-          "hex": "#e2e5e9"
+          "hex": "#c5d3e0"
         },
-        "$description": "Neutral gray 200."
+        "$description": "Blue-tinted neutral 200. Dark-theme muted text."
       },
       "300": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.8039, 0.8235, 0.8471],
+          "components": [0.6784, 0.7294, 0.7843],
           "alpha": 1,
-          "hex": "#cdd2d8"
+          "hex": "#adbac8"
         },
-        "$description": "Neutral gray 300."
+        "$description": "Blue-tinted neutral 300. Dark-theme subtle text."
       },
       "400": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.6078, 0.6392, 0.6824],
+          "components": [0.5451, 0.6078, 0.6706],
           "alpha": 1,
-          "hex": "#9ba3ae"
+          "hex": "#8b9bab"
         },
-        "$description": "Neutral gray 400."
+        "$description": "Blue-tinted neutral 400. Dark-theme UI boundaries."
       },
       "500": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.4196, 0.4471, 0.502],
+          "components": [0.4275, 0.4941, 0.5647],
           "alpha": 1,
-          "hex": "#6b7280"
+          "hex": "#6d7e90"
         },
-        "$description": "Neutral gray 500."
+        "$description": "Blue-tinted neutral 500. Light-theme UI boundaries."
       },
       "600": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.3216, 0.3451, 0.4],
+          "components": [0.3647, 0.4078, 0.4627],
           "alpha": 1,
-          "hex": "#525866"
+          "hex": "#5d6876"
         },
-        "$description": "Neutral gray 600."
+        "$description": "Blue-tinted neutral 600. Light-theme subtle text."
       },
       "700": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.2392, 0.2627, 0.3098],
+          "components": [0.2706, 0.3294, 0.3922],
           "alpha": 1,
-          "hex": "#3d434f"
+          "hex": "#455464"
         },
-        "$description": "Neutral gray 700."
+        "$description": "Blue-tinted neutral 700. Light-theme muted text."
       },
       "800": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.1647, 0.1843, 0.2196],
+          "components": [0.1725, 0.2157, 0.2667],
           "alpha": 1,
-          "hex": "#2a2f38"
+          "hex": "#2c3744"
         },
-        "$description": "Neutral gray 800."
+        "$description": "Blue-tinted neutral 800."
       },
       "900": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.102, 0.1137, 0.1373],
+          "components": [0.0902, 0.1255, 0.1686],
           "alpha": 1,
-          "hex": "#1a1d23"
+          "hex": "#17202b"
         },
-        "$description": "Neutral gray 900."
+        "$description": "Blue-tinted neutral 900. Light-theme default text."
       },
       "950": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.0627, 0.0706, 0.0863],
+          "components": [0.0549, 0.0784, 0.1059],
           "alpha": 1,
-          "hex": "#101216"
+          "hex": "#0e141b"
         },
-        "$description": "Neutral gray 950."
+        "$description": "Blue-tinted neutral 950."
       },
       "1000": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0, 0, 0],
+          "components": [0.0, 0.0, 0.0],
           "alpha": 1,
           "hex": "#000000"
         },
-        "$description": "Neutral gray 1000."
+        "$description": "Neutral 1000: black."
       }
     },
     "blue": {
       "50": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.9373, 0.9647, 1],
+          "components": [0.9333, 0.9647, 0.9882],
           "alpha": 1,
-          "hex": "#eff6ff"
+          "hex": "#eef6fc"
         },
-        "$description": "Accent blue 50."
+        "$description": "Blueprint blue 50."
       },
       "100": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.8588, 0.9176, 0.9961],
+          "components": [0.8667, 0.9294, 0.9725],
           "alpha": 1,
-          "hex": "#dbeafe"
+          "hex": "#ddedf8"
         },
-        "$description": "Accent blue 100."
+        "$description": "Blueprint blue 100."
       },
       "200": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.749, 0.8588, 0.9961],
+          "components": [0.7294, 0.8588, 0.949],
           "alpha": 1,
-          "hex": "#bfdbfe"
+          "hex": "#badbf2"
         },
-        "$description": "Accent blue 200."
+        "$description": "Blueprint blue 200."
       },
       "300": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.5765, 0.7725, 0.9922],
+          "components": [0.5294, 0.7529, 0.9098],
           "alpha": 1,
-          "hex": "#93c5fd"
+          "hex": "#87c0e8"
         },
-        "$description": "Accent blue 300."
+        "$description": "Blueprint blue 300."
       },
       "400": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.3765, 0.6471, 0.9804],
+          "components": [0.2941, 0.6275, 0.8667],
           "alpha": 1,
-          "hex": "#60a5fa"
+          "hex": "#4ba0dd"
         },
-        "$description": "Accent blue 400."
+        "$description": "Blueprint blue 400."
       },
       "500": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.2314, 0.5098, 0.9647],
+          "components": [0.1412, 0.4902, 0.7373],
           "alpha": 1,
-          "hex": "#3b82f6"
+          "hex": "#247dbc"
         },
-        "$description": "Accent blue 500."
+        "$description": "Blueprint blue 500."
       },
       "600": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.1451, 0.3882, 0.9216],
+          "components": [0.1098, 0.3804, 0.549],
           "alpha": 1,
-          "hex": "#2563eb"
+          "hex": "#1c618c"
         },
-        "$description": "Accent blue 600."
+        "$description": "Blueprint blue 600 (brand blue #1C618C)."
       },
       "700": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.1137, 0.3059, 0.8471],
+          "components": [0.0941, 0.3294, 0.502],
           "alpha": 1,
-          "hex": "#1d4ed8"
+          "hex": "#185480"
         },
-        "$description": "Accent blue 700."
+        "$description": "Blueprint blue 700 (brand blue #185480). Light-theme links and actions."
       },
       "800": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.1176, 0.251, 0.6863],
+          "components": [0.0784, 0.2667, 0.4039],
           "alpha": 1,
-          "hex": "#1e40af"
+          "hex": "#144467"
         },
-        "$description": "Accent blue 800."
+        "$description": "Blueprint blue 800. Dark-theme raised surfaces."
+      },
+      "850": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.0706, 0.2431, 0.3686],
+          "alpha": 1,
+          "hex": "#123e5e"
+        },
+        "$description": "Blueprint blue 850. Dark-theme page."
       },
       "900": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.1176, 0.2275, 0.5412],
+          "components": [0.0588, 0.2039, 0.3137],
           "alpha": 1,
-          "hex": "#1e3a8a"
+          "hex": "#0f3450"
         },
-        "$description": "Accent blue 900."
+        "$description": "Blueprint blue 900. Dark-theme sunken surfaces."
       },
       "950": {
         "$value": {
           "colorSpace": "srgb",
-          "components": [0.0902, 0.1451, 0.3294],
+          "components": [0.0431, 0.1373, 0.2196],
           "alpha": 1,
-          "hex": "#172554"
+          "hex": "#0b2338"
         },
-        "$description": "Accent blue 950."
+        "$description": "Blueprint blue 950. Navy text on gold."
+      }
+    },
+    "gold": {
+      "100": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9725, 0.9333, 0.8588],
+          "alpha": 1,
+          "hex": "#f8eedb"
+        },
+        "$description": "Champagne gold 100. Light-theme accent fill."
+      },
+      "200": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9608, 0.8902, 0.7608],
+          "alpha": 1,
+          "hex": "#f5e3c2"
+        },
+        "$description": "Champagne gold 200. Dark-theme hover."
+      },
+      "300": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9373, 0.8157, 0.6078],
+          "alpha": 1,
+          "hex": "#efd09b"
+        },
+        "$description": "Champagne gold 300 (#efd09b). Dark-theme actions and links."
+      },
+      "500": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.7686, 0.6039, 0.3059],
+          "alpha": 1,
+          "hex": "#c49a4e"
+        },
+        "$description": "Gold 500. Light-theme accent border."
+      },
+      "700": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.4784, 0.3373, 0.0941],
+          "alpha": 1,
+          "hex": "#7a5618"
+        },
+        "$description": "Bronze 700. Gold as text on light surfaces."
+      }
+    },
+    "cyan": {
+      "300": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.5608, 0.8275, 0.9686],
+          "alpha": 1,
+          "hex": "#8fd3f7"
+        },
+        "$description": "Drafting-line cyan 300. Dark-theme focus ring."
+      }
+    },
+    "sand": {
+      "50": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9843, 0.9725, 0.949],
+          "alpha": 1,
+          "hex": "#fbf8f2"
+        },
+        "$description": "Paper sand 50. Light-theme page."
+      },
+      "100": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.949, 0.9294, 0.8863],
+          "alpha": 1,
+          "hex": "#f2ede2"
+        },
+        "$description": "Paper sand 100. Light-theme sunken surfaces."
+      },
+      "200": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.898, 0.8627, 0.7961],
+          "alpha": 1,
+          "hex": "#e5dccb"
+        },
+        "$description": "Paper sand 200. Light-theme decorative borders."
+      }
+    },
+    "overlay": {
+      "$description": "Translucent primitives. Only color.surface.glass and color.grid.line may alias them.",
+      "sand-50-85": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9843, 0.9725, 0.949],
+          "alpha": 0.85,
+          "hex": "#fbf8f2"
+        },
+        "$description": "sand.50 at 85% opacity. Light-theme glass."
+      },
+      "blue-850-85": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.0706, 0.2431, 0.3686],
+          "alpha": 0.85,
+          "hex": "#123e5e"
+        },
+        "$description": "blue.850 at 85% opacity. Dark-theme glass."
+      },
+      "blue-700-8": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.0941, 0.3294, 0.502],
+          "alpha": 0.08,
+          "hex": "#185480"
+        },
+        "$description": "blue.700 at 8% opacity. Light-theme grid lines."
+      },
+      "cyan-300-10": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.5608, 0.8275, 0.9686],
+          "alpha": 0.1,
+          "hex": "#8fd3f7"
+        },
+        "$description": "cyan.300 at 10% opacity. Dark-theme grid lines."
+      },
+      "transparent": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0, 0, 0],
+          "alpha": 0,
+          "hex": "#000000"
+        },
+        "$description": "Fully transparent."
+      }
+    },
+    "fill": {
+      "none": {
+        "$value": "{color.overlay.transparent}",
+        "$description": "No fill: the resting background and border of ghost buttons. The same in every theme."
       }
     }
   }

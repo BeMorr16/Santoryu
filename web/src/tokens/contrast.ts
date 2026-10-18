@@ -21,3 +21,12 @@ export function contrastRatio(a: Srgb, b: Srgb): number {
   const lb = relativeLuminance(b);
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
+
+/**
+ * A translucent color painted over an opaque backdrop (source-over). Browsers composite in
+ * gamma-encoded sRGB by default, so this blends the encoded channels, not linear light.
+ */
+export function composite(color: Srgb, alpha: number, backdrop: Srgb): Srgb {
+  const [r, g, b] = color.map((channel, i) => alpha * channel + (1 - alpha) * (backdrop[i] ?? 0));
+  return [r ?? 0, g ?? 0, b ?? 0];
+}

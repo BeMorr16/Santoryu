@@ -3,12 +3,28 @@
     "$type": "color",
     "surface": {
       "base": {
-        "$value": "{color.gray.950}",
+        "$value": "{color.blue.850}",
         "$description": "Page background."
       },
       "raised": {
-        "$value": "{color.gray.900}",
-        "$description": "Background of raised areas: cards, table headers, code."
+        "$value": "{color.blue.800}",
+        "$description": "Background of raised areas: cards, menus, table headers."
+      },
+      "sunken": {
+        "$value": "{color.blue.900}",
+        "$description": "Background of recessed areas: code, wells, preview panels."
+      },
+      "glass": {
+        "$value": "{color.overlay.blue-850-85}",
+        "$description": "Translucent sticky-header background over the page (blurred). Only default and muted text, links and focus rings may sit on it.",
+        "$extensions": {
+          "personal-site.contrast-backdrop": [
+            "color.surface.base",
+            "color.surface.raised",
+            "color.surface.sunken",
+            "color.action.background"
+          ]
+        }
       }
     },
     "text": {
@@ -24,12 +40,20 @@
             {
               "against": "color.surface.raised",
               "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "text"
             }
           ]
         }
       },
       "muted": {
-        "$value": "{color.gray.300}",
+        "$value": "{color.gray.200}",
         "$description": "Secondary text.",
         "$extensions": {
           "personal-site.contrast": [
@@ -40,13 +64,21 @@
             {
               "against": "color.surface.raised",
               "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "text"
             }
           ]
         }
       },
       "subtle": {
-        "$value": "{color.gray.400}",
-        "$description": "Tertiary text, such as metadata. Still body text, so 4.5:1.",
+        "$value": "{color.gray.300}",
+        "$description": "Tertiary text, such as metadata. Still body text, so 4.5:1. Not allowed on glass.",
         "$extensions": {
           "personal-site.contrast": [
             {
@@ -56,6 +88,10 @@
             {
               "against": "color.surface.raised",
               "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
             }
           ]
         }
@@ -63,7 +99,7 @@
     },
     "link": {
       "default": {
-        "$value": "{color.blue.300}",
+        "$value": "{color.gold.300}",
         "$description": "Link text.",
         "$extensions": {
           "personal-site.contrast": [
@@ -74,12 +110,20 @@
             {
               "against": "color.surface.raised",
               "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "text"
             }
           ]
         }
       },
       "hover": {
-        "$value": "{color.blue.200}",
+        "$value": "{color.gold.200}",
         "$description": "Link text on hover.",
         "$extensions": {
           "personal-site.contrast": [
@@ -90,18 +134,86 @@
             {
               "against": "color.surface.raised",
               "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "text"
             }
           ]
         }
       }
     },
+    "action": {
+      "background": {
+        "$value": "{color.gold.300}",
+        "$description": "Fill of primary actions and current-state markers."
+      },
+      "background-hover": {
+        "$value": "{color.gold.200}",
+        "$description": "Fill of primary actions on hover."
+      },
+      "text": {
+        "$value": "{color.blue.950}",
+        "$description": "Text and icons on an action fill.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.action.background",
+              "min": "text"
+            },
+            {
+              "against": "color.action.background-hover",
+              "min": "text"
+            }
+          ]
+        }
+      }
+    },
+    "accent": {
+      "text": {
+        "$value": "{color.gold.300}",
+        "$description": "Accent text: accent badges and label highlights.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.accent.background",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "background": {
+        "$value": "{color.blue.900}",
+        "$description": "Accent fill behind accent text."
+      },
+      "border": {
+        "$value": "{color.gold.300}",
+        "$description": "Decorative accent outline. Not contrast-checked; never the only boundary of a control."
+      }
+    },
     "border": {
       "subtle": {
-        "$value": "{color.gray.800}",
+        "$value": "{color.blue.700}",
         "$description": "Decorative dividers only. Not contrast-checked; never the only boundary of a control."
       },
       "strong": {
-        "$value": "{color.gray.500}",
+        "$value": "{color.gray.400}",
         "$description": "Boundaries of UI components (3:1).",
         "$extensions": {
           "personal-site.contrast": [
@@ -112,6 +224,10 @@
             {
               "against": "color.surface.raised",
               "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
             }
           ]
         }
@@ -119,8 +235,8 @@
     },
     "focus": {
       "ring": {
-        "$value": "{color.blue.400}",
-        "$description": "Focus indicator color (3:1 against every surface).",
+        "$value": "{color.cyan.300}",
+        "$description": "Focus indicator color (3:1 against every surface it can sit on).",
         "$extensions": {
           "personal-site.contrast": [
             {
@@ -130,9 +246,23 @@
             {
               "against": "color.surface.raised",
               "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "non-text"
             }
           ]
         }
+      }
+    },
+    "grid": {
+      "line": {
+        "$value": "{color.overlay.cyan-300-10}",
+        "$description": "Faint blueprint grid lines on the page backdrop. Decorative; not contrast-checked."
       }
     }
   },

@@ -2,21 +2,41 @@
   "type": {
     "font-stack": {
       "$type": "fontFamily",
-      "system": {
+      "sans": {
         "$value": [
+          "Inter Variable",
+          "Inter Fallback",
           "system-ui",
           "-apple-system",
           "Segoe UI",
           "Roboto",
-          "sans-serif",
-          "Apple Color Emoji",
-          "Segoe UI Emoji"
+          "sans-serif"
         ],
-        "$description": "Platform UI font stack with emoji fallbacks."
+        "$description": "Inter (self-hosted variable font), its metric-matched fallback, then the platform UI stack."
+      },
+      "display": {
+        "$value": [
+          "Space Grotesk Variable",
+          "Space Grotesk Fallback",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif"
+        ],
+        "$description": "Space Grotesk (self-hosted variable font), its metric-matched fallback, then the platform UI stack."
       },
       "mono": {
-        "$value": ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
-        "$description": "Platform monospace font stack."
+        "$value": [
+          "Fira Code Variable",
+          "Fira Code Fallback",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Consolas",
+          "monospace"
+        ],
+        "$description": "Fira Code (self-hosted variable font), its metric-matched fallback, then platform monospace fonts."
       }
     },
     "font-size": {
@@ -97,15 +117,39 @@
         "$description": "Comfortable line height for running text."
       }
     },
+    "letter-spacing": {
+      "$type": "number",
+      "$description": "Letter spacing in em, as numbers. The letter-spacing/em transform appends em (decision 0004 amendment).",
+      "neg-2": {
+        "$value": -0.02,
+        "$description": "-0.02em."
+      },
+      "0": {
+        "$value": 0,
+        "$description": "0em."
+      },
+      "16": {
+        "$value": 0.16,
+        "$description": "0.16em."
+      }
+    },
     "family": {
       "$type": "fontFamily",
       "body": {
-        "$value": "{type.font-stack.system}",
-        "$description": "Font family for all body and UI text."
+        "$value": "{type.font-stack.sans}",
+        "$description": "Font family for body and UI text."
+      },
+      "heading": {
+        "$value": "{type.font-stack.display}",
+        "$description": "Font family for headings."
       },
       "code": {
         "$value": "{type.font-stack.mono}",
         "$description": "Font family for code and token names."
+      },
+      "label": {
+        "$value": "{type.font-stack.mono}",
+        "$description": "Font family for small uppercase annotation labels and badges."
       }
     },
     "size": {
@@ -133,6 +177,10 @@
       "h3": {
         "$value": "{type.font-size.xl}",
         "$description": "Subsection heading (h3)."
+      },
+      "label": {
+        "$value": "{type.font-size.xs}",
+        "$description": "Small uppercase annotation labels."
       }
     },
     "weight": {
@@ -159,6 +207,21 @@
       "heading": {
         "$value": "{type.line-height.tight}",
         "$description": "Line height for headings."
+      }
+    },
+    "tracking": {
+      "$type": "number",
+      "display": {
+        "$value": "{type.letter-spacing.neg-2}",
+        "$description": "Letter spacing for large display headings."
+      },
+      "body": {
+        "$value": "{type.letter-spacing.0}",
+        "$description": "Letter spacing for running text."
+      },
+      "label": {
+        "$value": "{type.letter-spacing.16}",
+        "$description": "Letter spacing for small uppercase mono labels."
       }
     }
   }

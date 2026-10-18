@@ -108,6 +108,10 @@
       }
     },
     "inline": {
+      "xs": {
+        "$value": "{space.1}",
+        "$description": "Horizontal gap between tightly related items."
+      },
       "sm": {
         "$value": "{space.2}",
         "$description": "Horizontal gap between small inline items."
@@ -115,6 +119,14 @@
       "md": {
         "$value": "{space.4}",
         "$description": "Horizontal gap between inline items, such as nav links."
+      },
+      "lg": {
+        "$value": "{space.6}",
+        "$description": "Horizontal gap between groups."
+      },
+      "xl": {
+        "$value": "{space.8}",
+        "$description": "Horizontal gap between large groups."
       }
     },
     "layout": {

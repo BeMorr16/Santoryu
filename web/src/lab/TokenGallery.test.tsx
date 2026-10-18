@@ -1,27 +1,28 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import { tokens } from "../generated/tokens.ts";
-import { tokenCategories, type TokenMeta } from "../tokens/types.ts";
-import { TokenGallery } from "./TokenGallery.tsx";
+import { componentTokensOf, semanticTokens as semantic } from "../tokens/metadata.ts";
+import { tokenCategories, type SemanticTokenMeta } from "../tokens/types.ts";
+import { TokenGallery, tokenizedComponents } from "./TokenGallery.tsx";
 
 const labels = {
   color: "Color",
   type: "Type",
   space: "Space",
+  size: "Size",
   radius: "Radius",
   motion: "Motion",
   effect: "Effect",
 } as const;
 
-const tokensIn = (category: string): readonly TokenMeta[] =>
-  tokens.filter((token) => token.category === category);
+const tokensIn = (category: string): readonly SemanticTokenMeta[] =>
+  semantic.filter((token) => token.category === category);
 
 function tableFor(category: keyof typeof labels) {
   return screen.getByRole("table", { name: `${labels[category]} tokens` });
 }
 
-function rowFor(token: TokenMeta) {
+function rowFor(token: SemanticTokenMeta) {
   const table = tableFor(token.category);
   const header = within(table).getByRole("rowheader", { name: token.cssVar });
   const row = header.closest("tr");
@@ -30,13 +31,51 @@ function rowFor(token: TokenMeta) {
 }
 
 describe("TokenGallery", () => {
-  it("renders one h2 per category, in order", () => {
+  it("renders one h2 per category, in order, then Component tokens", () => {
     render(<TokenGallery />);
 
-    expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual(
-      tokenCategories.map((category) => labels[category]),
-    );
+    expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual([
+      ...tokenCategories.map((category) => labels[category]),
+      "Component tokens",
+    ]);
   });
+
+  it("lists every component with tokens under Component tokens, one h3 and table each (R14.3)", () => {
+    render(<TokenGallery />);
+
+    const section = screen.getByRole("region", { name: "Component tokens" });
+    expect(tokenizedComponents.length).toBeGreaterThan(0);
+    expect(
+      within(section)
+        .getAllByRole("heading", { level: 3 })
+        .map((h) => h.textContent),
+    ).toEqual(tokenizedComponents);
+  });
+
+  it.each(tokenizedComponents)(
+    "shows every %s component token with its alias and both themes",
+    (component) => {
+      render(<TokenGallery />);
+
+      const table = screen.getByRole("table", { name: `${component} component tokens` });
+      expect(
+        within(table)
+          .getAllByRole("columnheader")
+          .map((h) => h.textContent),
+      ).toEqual(["Token", "Aliases", "Light", "Dark", "Preview"]);
+      const tokens = componentTokensOf(component);
+      const rows = within(table).getAllByRole("rowheader");
+      expect(rows.map((row) => row.querySelector("code")?.textContent)).toEqual(
+        tokens.map((t) => t.cssVar),
+      );
+      for (const [index, token] of tokens.entries()) {
+        const row = rows[index]?.closest("tr");
+        expect(row).toHaveTextContent(token.aliases);
+        expect(row).toHaveTextContent(token.values.light.css);
+        expect(row).toHaveTextContent(token.values.dark.css);
+      }
+    },
+  );
 
   it("labels each category section with its heading", () => {
     render(<TokenGallery />);
@@ -88,7 +127,7 @@ describe("TokenGallery", () => {
     );
   });
 
-  it.each(tokens.map((token) => [token.cssVar, token] as const))(
+  it.each(semantic.map((token) => [token.cssVar, token] as const))(
     "shows %s with its description and value text",
     (_name, token) => {
       render(<TokenGallery />);
@@ -112,7 +151,7 @@ describe("TokenGallery", () => {
     },
   );
 
-  it.each(tokens.map((token) => [token.cssVar, token] as const))(
+  it.each(semantic.map((token) => [token.cssVar, token] as const))(
     "renders the %s preview as a hidden specimen styled by the token, or a dash for motion",
     (_name, token) => {
       render(<TokenGallery />);

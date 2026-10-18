@@ -7,22 +7,38 @@ const kindByGroup: Record<string, string> = {
   "type.size": "fontSize",
   "type.weight": "fontWeight",
   "type.leading": "lineHeight",
+  "type.tracking": "letterSpacing",
   "effect.elevation": "shadow",
   "effect.focus-ring.width": "ringWidth",
   "effect.focus-ring.offset": "ringOffset",
+  "effect.backdrop": "blur",
+  "effect.border": "lineWidth",
+  "effect.underline.thickness": "underlineThickness",
+  "effect.underline.offset": "underlineOffset",
 };
 
 const kindByCategory: Partial<Record<TokenMeta["category"], string>> = {
   color: "swatch",
   space: "bar",
+  size: "bar",
   radius: "radius",
 };
 
-const textKinds = new Set(["fontFamily", "fontSize", "fontWeight", "lineHeight"]);
+const textKinds = new Set([
+  "fontFamily",
+  "fontSize",
+  "fontWeight",
+  "lineHeight",
+  "letterSpacing",
+  "underlineThickness",
+  "underlineOffset",
+]);
 
+/** A component token previews like the semantic token it aliases. */
 function specimenKind(token: TokenMeta): string | undefined {
-  const group = token.name.split(".").slice(0, 2).join(".");
-  return kindByGroup[token.name] ?? kindByGroup[group] ?? kindByCategory[token.category];
+  const name = token.tier === "component" ? token.aliases : token.name;
+  const group = name.split(".").slice(0, 2).join(".");
+  return kindByGroup[name] ?? kindByGroup[group] ?? kindByCategory[token.category];
 }
 
 /** A decorative preview styled with the token's own custom property. Motion has none (R7.6). */

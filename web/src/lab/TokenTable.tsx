@@ -1,5 +1,5 @@
 import { useId } from "react";
-import type { TokenMeta, TokenValue } from "../tokens/types.ts";
+import type { SemanticTokenMeta, TokenValue } from "../tokens/types.ts";
 import { Specimen } from "./Specimen.tsx";
 import styles from "./TokenTable.module.css";
 
@@ -17,7 +17,13 @@ function Value({ value, reduced }: { value: TokenValue; reduced?: TokenValue | u
   );
 }
 
-export function TokenTable({ caption, tokens }: { caption: string; tokens: readonly TokenMeta[] }) {
+export function TokenTable({
+  caption,
+  tokens,
+}: {
+  caption: string;
+  tokens: readonly SemanticTokenMeta[];
+}) {
   const themed = tokens.some((token) => token.themed);
   const captionId = useId();
   return (
