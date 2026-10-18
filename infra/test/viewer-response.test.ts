@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderViewerResponse } from "../src/edge-functions.ts";
 import { buildCsp, SECURITY_HEADERS } from "../src/security-headers.ts";
-import { loadHandler } from "./edge-harness.ts";
+import { loadHandler } from "../src/edge-runtime.ts";
 
 interface Response {
   statusCode: number;
