@@ -1,0 +1,24 @@
+/* Phosphor writes width/height attributes; these classes size the icon instead (R6.4). */
+.icon {
+  flex-shrink: 0;
+}
+
+.size-inherit {
+  inline-size: 1em;
+  block-size: 1em;
+}
+
+.size-sm {
+  inline-size: var(--size-icon-sm);
+  block-size: var(--size-icon-sm);
+}
+
+.size-md {
+  inline-size: var(--size-icon-md);
+  block-size: var(--size-icon-md);
+}
+
+.size-lg {
+  inline-size: var(--size-icon-lg);
+  block-size: var(--size-icon-lg);
+}

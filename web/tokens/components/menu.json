@@ -1,0 +1,169 @@
+{
+  "component": {
+    "menu": {
+      "popup": {
+        "background": {
+          "$value": "{color.surface.raised}",
+          "$type": "color",
+          "$description": "Popup surface."
+        },
+        "border": {
+          "$value": "{color.border.subtle}",
+          "$type": "color",
+          "$description": "Popup outline."
+        },
+        "radius": {
+          "$value": "{radius.surface}",
+          "$type": "dimension",
+          "$description": "Popup corners."
+        },
+        "elevation": {
+          "$value": "{effect.elevation.overlay}",
+          "$type": "shadow",
+          "$description": "Popup shadow, so it reads above the page."
+        },
+        "padding": {
+          "$value": "{space.inset.sm}",
+          "$type": "dimension",
+          "$description": "Padding around the items."
+        },
+        "min-width": {
+          "$value": "{size.column.sm}",
+          "$type": "dimension",
+          "$description": "Minimum popup width."
+        }
+      },
+      "item": {
+        "text": {
+          "$value": "{color.text.default}",
+          "$type": "color",
+          "$description": "Item text.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.menu.popup.background",
+                "min": "text"
+              },
+              {
+                "against": "component.menu.item.background-focus",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "background-focus": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Item background while focused or hovered."
+        },
+        "text-focus": {
+          "$value": "{color.text.default}",
+          "$type": "color",
+          "$description": "Item text while focused or hovered.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.menu.item.background-focus",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "padding-inline": {
+          "$value": "{space.inline.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of an item."
+        },
+        "height": {
+          "$value": "{size.control.sm}",
+          "$type": "dimension",
+          "$description": "Minimum block size of an item (32px, above the 24px target minimum)."
+        },
+        "radius": {
+          "$value": "{radius.control}",
+          "$type": "dimension",
+          "$description": "Item corners."
+        },
+        "gap": {
+          "$value": "{space.inline.sm}",
+          "$type": "dimension",
+          "$description": "Gap between an item's icons and label."
+        },
+        "checked-indicator": {
+          "$value": "{color.action.background}",
+          "$type": "color",
+          "$description": "Check mark of the checked radio item (3:1, it carries state).",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.menu.popup.background",
+                "min": "non-text"
+              },
+              {
+                "against": "component.menu.item.background-focus",
+                "min": "non-text"
+              }
+            ]
+          }
+        },
+        "disabled-text": {
+          "$value": "{color.text.subtle}",
+          "$type": "color",
+          "$description": "Text of a disabled item.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.menu.popup.background",
+                "min": "text"
+              },
+              {
+                "against": "component.menu.item.background-focus",
+                "min": "text"
+              }
+            ]
+          }
+        }
+      },
+      "group-label": {
+        "text": {
+          "$value": "{color.text.subtle}",
+          "$type": "color",
+          "$description": "Radio group label.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.menu.popup.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "font-family": {
+          "$value": "{type.family.label}",
+          "$type": "fontFamily",
+          "$description": "Radio group label font (mono)."
+        },
+        "font-size": {
+          "$value": "{type.size.label}",
+          "$type": "dimension",
+          "$description": "Radio group label size."
+        },
+        "tracking": {
+          "$value": "{type.tracking.label}",
+          "$type": "number",
+          "$description": "Radio group label letter spacing."
+        }
+      },
+      "transition-duration": {
+        "$value": "{motion.duration.fast}",
+        "$type": "duration",
+        "$description": "Duration of the popup's fade (0ms under reduced motion)."
+      },
+      "transition-easing": {
+        "$value": "{motion.easing.enter}",
+        "$type": "cubicBezier",
+        "$description": "Easing of the popup's fade."
+      }
+    }
+  }
+}

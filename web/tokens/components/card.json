@@ -1,0 +1,118 @@
+{
+  "component": {
+    "card": {
+      "background": {
+        "$value": "{color.surface.raised}",
+        "$type": "color",
+        "$description": "Card surface."
+      },
+      "border": {
+        "$value": "{color.border.subtle}",
+        "$type": "color",
+        "$description": "Card outline."
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Card outline width."
+      },
+      "radius": {
+        "$value": "{radius.surface}",
+        "$type": "dimension",
+        "$description": "Card corners."
+      },
+      "padding": {
+        "$value": "{space.inset.lg}",
+        "$type": "dimension",
+        "$description": "Padding inside the card."
+      },
+      "elevation": {
+        "$value": "{effect.elevation.raised}",
+        "$type": "shadow",
+        "$description": "Card shadow."
+      },
+      "heading-color": {
+        "$value": "{color.text.default}",
+        "$type": "color",
+        "$description": "Heading text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "component.card.background",
+              "min": "text"
+            },
+            {
+              "against": "component.card.interactive.background-hover",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "heading-font-family": {
+        "$value": "{type.family.heading}",
+        "$type": "fontFamily",
+        "$description": "Heading font."
+      },
+      "body-color": {
+        "$value": "{color.text.muted}",
+        "$type": "color",
+        "$description": "Body text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "component.card.background",
+              "min": "text"
+            },
+            {
+              "against": "component.card.interactive.background-hover",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "interactive": {
+        "border-hover": {
+          "$value": "{color.border.strong}",
+          "$type": "color",
+          "$description": "Outline of a link card on hover."
+        },
+        "background-hover": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Surface of a link card on hover."
+        },
+        "transition-duration": {
+          "$value": "{motion.duration.fast}",
+          "$type": "duration",
+          "$description": "Duration of a link card's hover change (0ms under reduced motion)."
+        },
+        "transition-easing": {
+          "$value": "{motion.easing.standard}",
+          "$type": "cubicBezier",
+          "$description": "Easing of a link card's hover change."
+        }
+      },
+      "focus-ring-color": {
+        "$value": "{color.focus.ring}",
+        "$type": "color",
+        "$description": "Focus indicator drawn around a link card while its link has focus.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

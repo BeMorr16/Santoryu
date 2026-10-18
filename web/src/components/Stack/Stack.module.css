@@ -1,0 +1,99 @@
+/* Children are spaced with gap only, never margins (R8.3). */
+.stack {
+  display: flex;
+}
+
+.vertical {
+  flex-direction: column;
+  row-gap: var(--_stack);
+}
+
+.horizontal {
+  flex-direction: row;
+  column-gap: var(--_inline);
+  row-gap: var(--_stack);
+}
+
+.gap-none {
+  --_stack: 0;
+  --_inline: 0;
+}
+
+.gap-xs {
+  --_stack: var(--space-stack-xs);
+  --_inline: var(--space-inline-xs);
+}
+
+.gap-sm {
+  --_stack: var(--space-stack-sm);
+  --_inline: var(--space-inline-sm);
+}
+
+.gap-md {
+  --_stack: var(--space-stack-md);
+  --_inline: var(--space-inline-md);
+}
+
+.gap-lg {
+  --_stack: var(--space-stack-lg);
+  --_inline: var(--space-inline-lg);
+}
+
+.gap-xl {
+  --_stack: var(--space-stack-xl);
+  --_inline: var(--space-inline-xl);
+}
+
+.align-start {
+  align-items: flex-start;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.align-end {
+  align-items: flex-end;
+}
+
+.align-stretch {
+  align-items: stretch;
+}
+
+.align-baseline {
+  align-items: baseline;
+}
+
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+/* Lists keep their semantics; only markers and default spacing go (R8.2). */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fieldset {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}

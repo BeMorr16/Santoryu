@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router";
+import { ThemeSwitcher } from "../components/ThemeSwitcher/ThemeSwitcher.tsx";
 import { footerText, siteName } from "../site.config.ts";
 import styles from "./SiteShell.module.css";
 
@@ -40,12 +41,13 @@ export function SiteShell({ children }: { children: ReactNode }) {
               </NavLink>
             </li>
             <li>
-              <NavLink className={navLinkClassName} to="/lab">
+              <NavLink className={navLinkClassName} to="/lab" end>
                 Lab
               </NavLink>
             </li>
           </ul>
         </nav>
+        <ThemeSwitcher />
       </header>
       <main className={styles.main} id="main" tabIndex={-1} ref={mainRef}>
         {children}

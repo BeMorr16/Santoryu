@@ -1,0 +1,113 @@
+/*
+ * One anchor name for every menu, scoped per instance (design §9.9). Never display: contents
+ * here: WebKit bug 309239 breaks anchor-scope on such elements.
+ */
+.menu {
+  display: inline-block;
+  anchor-scope: --menu-trigger;
+}
+
+.trigger {
+  anchor-name: --menu-trigger;
+}
+
+/* In the top layer (popover="manual"), so overflow ancestors can't clip it (R12.8). */
+.popup {
+  position-anchor: --menu-trigger;
+  position-area: block-end span-inline-end;
+  /* Near a corner, only flipping both ways fits (R12.8: stay inside the viewport). */
+  position-try-fallbacks:
+    flip-block,
+    flip-inline,
+    flip-block flip-inline;
+  inset: auto;
+  min-inline-size: var(--component-menu-popup-min-width);
+  /* Never taller than the room it's placed in (the position-area cell, less the gap): it scrolls. */
+  max-block-size: calc(100% - var(--space-stack-sm));
+  overflow-y: auto;
+  margin: 0;
+  margin-block-start: var(--space-stack-sm);
+  padding: var(--component-menu-popup-padding);
+  border: var(--effect-border-width) solid var(--component-menu-popup-border);
+  border-radius: var(--component-menu-popup-radius);
+  background-color: var(--component-menu-popup-background);
+  box-shadow: var(--component-menu-popup-elevation);
+  color: var(--component-menu-item-text);
+  opacity: 1;
+  translate: 0 0;
+  transition-property: opacity, translate, overlay, display;
+  transition-duration: var(--component-menu-transition-duration);
+  transition-timing-function: var(--component-menu-transition-easing);
+  transition-behavior: allow-discrete;
+}
+
+/* Fades and slides in by a few pixels (R3.7: 0ms under reduced motion). */
+@starting-style {
+  .popup:popover-open {
+    opacity: 0;
+    translate: 0 calc(-1 * var(--space-stack-xs));
+  }
+}
+
+.popup:not(:popover-open) {
+  opacity: 0;
+  translate: 0 calc(-1 * var(--space-stack-xs));
+}
+
+.group + .group,
+.item + .group,
+.group + .item {
+  margin-block-start: var(--space-stack-sm);
+}
+
+.groupLabel {
+  padding-inline: var(--component-menu-item-padding-inline);
+  padding-block: var(--space-stack-xs);
+  color: var(--component-menu-group-label-text);
+  font-family: var(--component-menu-group-label-font-family);
+  font-size: var(--component-menu-group-label-font-size);
+  letter-spacing: var(--component-menu-group-label-tracking);
+  text-transform: uppercase;
+  font-variant-ligatures: none;
+}
+
+.item {
+  display: flex;
+  gap: var(--component-menu-item-gap);
+  align-items: center;
+  min-block-size: var(--component-menu-item-height);
+  padding-inline: var(--component-menu-item-padding-inline);
+  border-radius: var(--component-menu-item-radius);
+  color: var(--component-menu-item-text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.item:hover,
+.item:focus {
+  background-color: var(--component-menu-item-background-focus);
+  color: var(--component-menu-item-text-focus);
+}
+
+.item:focus-visible {
+  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: calc(-1 * var(--effect-focus-ring-width));
+}
+
+.item[aria-disabled="true"] {
+  color: var(--component-menu-item-disabled-text);
+  cursor: not-allowed;
+}
+
+.label {
+  flex: 1;
+}
+
+/* The check mark shows radio state by shape, not color alone (design §9.8). */
+.check {
+  color: var(--component-menu-item-checked-indicator);
+}
+
+.item:not([aria-checked="true"]) .check {
+  visibility: hidden;
+}

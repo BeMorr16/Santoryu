@@ -1,0 +1,56 @@
+.card {
+  position: relative;
+  padding: var(--component-card-padding);
+  border: var(--component-card-border-width) solid var(--component-card-border);
+  border-radius: var(--component-card-radius);
+  background-color: var(--component-card-background);
+  box-shadow: var(--component-card-elevation);
+  color: var(--component-card-body-color);
+}
+
+.heading {
+  margin: 0;
+  color: var(--component-card-heading-color);
+  font-family: var(--component-card-heading-font-family);
+}
+
+.interactive {
+  transition-property: background-color, border-color;
+  transition-duration: var(--component-card-interactive-transition-duration);
+  transition-timing-function: var(--component-card-interactive-transition-easing);
+}
+
+.interactive:hover {
+  border-color: var(--component-card-interactive-border-hover);
+  background-color: var(--component-card-interactive-background-hover);
+}
+
+/* The heading link is the card's one link; its overlay makes the whole surface clickable (R10.3). */
+.card .link {
+  color: inherit;
+  text-decoration-line: none;
+}
+
+.card .link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* The focus ring goes around the whole card instead of the heading (R10.4), where :has() works. */
+@supports selector(:has(*)) {
+  .card .link:focus-visible {
+    outline: none;
+  }
+}
+
+.card:has(.link:focus-visible) {
+  outline: var(--effect-focus-ring-width) solid var(--component-card-focus-ring-color);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+/* Other controls sit above the overlay and get their own clicks (R10.5). */
+.interactive :is(a, button, input, select, textarea, summary, [tabindex]):not(.link) {
+  position: relative;
+  z-index: 1;
+}

@@ -1,0 +1,81 @@
+/*
+ * Button's look, shared by Button, Link appearance="button" and MenuTrigger (design §4.3), so it
+ * belongs to the button component's tokens. Variants and sizes set private --_* properties.
+ */
+.button {
+  display: inline-flex;
+  gap: var(--component-button-gap);
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--_height);
+  min-block-size: var(--_height);
+  padding-inline: var(--_padding-inline);
+  border: var(--component-button-border-width) solid var(--_border);
+  border-radius: var(--component-button-radius);
+  background-color: var(--_background);
+  color: var(--_text);
+  font-family: var(--component-button-font-family);
+  font-size: var(--_font-size);
+  font-weight: var(--component-button-font-weight);
+  line-height: var(--type-leading-heading);
+  text-decoration: none;
+  cursor: pointer;
+  transition-property: background-color, border-color, color;
+  transition-duration: var(--component-button-transition-duration);
+  transition-timing-function: var(--component-button-transition-easing);
+}
+
+/* Also beats the global a:hover link color when a Link looks like a button. */
+.button:hover {
+  color: var(--_text);
+}
+
+.button:hover:not([aria-disabled="true"]) {
+  background-color: var(--_background-hover);
+}
+
+.button:focus-visible {
+  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+.primary {
+  --_background: var(--component-button-primary-background);
+  --_background-hover: var(--component-button-primary-background-hover);
+  --_text: var(--component-button-primary-text);
+  --_border: var(--component-button-primary-border);
+}
+
+.secondary {
+  --_background: var(--component-button-secondary-background);
+  --_background-hover: var(--component-button-secondary-background-hover);
+  --_text: var(--component-button-secondary-text);
+  --_border: var(--component-button-secondary-border);
+}
+
+.ghost {
+  --_background: var(--component-button-ghost-background);
+  --_background-hover: var(--component-button-ghost-background-hover);
+  --_text: var(--component-button-ghost-text);
+  --_border: var(--component-button-ghost-border);
+}
+
+.sm {
+  --_height: var(--component-button-height-sm);
+  --_padding-inline: var(--component-button-padding-inline-sm);
+  --_font-size: var(--component-button-font-size-sm);
+}
+
+.md {
+  --_height: var(--component-button-height-md);
+  --_padding-inline: var(--component-button-padding-inline-md);
+  --_font-size: var(--component-button-font-size-md);
+}
+
+/* Our own disabled state (decision 0007 G): focusable, announced, never activated. */
+.button[aria-disabled="true"] {
+  --_background: var(--component-button-disabled-background);
+  --_text: var(--component-button-disabled-text);
+  --_border: var(--component-button-disabled-border);
+  cursor: not-allowed;
+}

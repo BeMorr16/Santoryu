@@ -1,0 +1,41 @@
+/* Without JavaScript the switcher can't work, so it isn't shown; the OS theme applies (R13.9). */
+:global(:root:not([data-js])) .switcher {
+  display: none;
+}
+
+/*
+ * The icon for the theme in effect, from the same conditions as the generated theme CSS: a
+ * choice on <html>, or else the OS scheme.
+ */
+.darkIcon {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .lightIcon {
+    display: none;
+  }
+
+  :global(:root:not([data-theme="light"])) .darkIcon {
+    display: inline;
+  }
+}
+
+:global(:root[data-theme="dark"]) .lightIcon {
+  display: none;
+}
+
+:global(:root[data-theme="dark"]) .darkIcon {
+  display: inline;
+}
+
+/* Icon-only on narrow screens; the visible word "Theme" joins the icon from 30em up. */
+.label {
+  display: none;
+}
+
+@media (min-width: 30em) {
+  .label {
+    display: inline;
+  }
+}

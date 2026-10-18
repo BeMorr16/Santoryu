@@ -1,0 +1,216 @@
+{
+  "component": {
+    "button": {
+      "radius": {
+        "$value": "{radius.control}",
+        "$type": "dimension",
+        "$description": "Corner radius."
+      },
+      "font-family": {
+        "$value": "{type.family.body}",
+        "$type": "fontFamily",
+        "$description": "Label font."
+      },
+      "font-weight": {
+        "$value": "{type.weight.strong}",
+        "$type": "fontWeight",
+        "$description": "Label weight."
+      },
+      "gap": {
+        "$value": "{space.inline.sm}",
+        "$type": "dimension",
+        "$description": "Gap between the label and its icons."
+      },
+      "height": {
+        "sm": {
+          "$value": "{size.control.sm}",
+          "$type": "dimension",
+          "$description": "Block size of small buttons (32px, above the 24px target minimum)."
+        },
+        "md": {
+          "$value": "{size.control.md}",
+          "$type": "dimension",
+          "$description": "Block size of standard buttons (40px)."
+        }
+      },
+      "padding-inline": {
+        "sm": {
+          "$value": "{space.inline.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of small buttons."
+        },
+        "md": {
+          "$value": "{space.inline.md}",
+          "$type": "dimension",
+          "$description": "Inline padding of standard buttons."
+        }
+      },
+      "font-size": {
+        "sm": {
+          "$value": "{type.size.small}",
+          "$type": "dimension",
+          "$description": "Label size of small buttons."
+        },
+        "md": {
+          "$value": "{type.size.body}",
+          "$type": "dimension",
+          "$description": "Label size of standard buttons."
+        }
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Border width."
+      },
+      "transition-duration": {
+        "$value": "{motion.duration.instant}",
+        "$type": "duration",
+        "$description": "Duration of hover color changes (0ms under reduced motion)."
+      },
+      "transition-easing": {
+        "$value": "{motion.easing.standard}",
+        "$type": "cubicBezier",
+        "$description": "Easing of hover color changes."
+      },
+      "primary": {
+        "background": {
+          "$value": "{color.action.background}",
+          "$type": "color",
+          "$description": "Primary background."
+        },
+        "background-hover": {
+          "$value": "{color.action.background-hover}",
+          "$type": "color",
+          "$description": "Primary background on hover."
+        },
+        "text": {
+          "$value": "{color.action.text}",
+          "$type": "color",
+          "$description": "Primary text and icon color.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.button.primary.background",
+                "min": "text"
+              },
+              {
+                "against": "component.button.primary.background-hover",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.action.background}",
+          "$type": "color",
+          "$description": "Primary border color."
+        }
+      },
+      "secondary": {
+        "background": {
+          "$value": "{color.surface.raised}",
+          "$type": "color",
+          "$description": "Secondary background."
+        },
+        "background-hover": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Secondary background on hover."
+        },
+        "text": {
+          "$value": "{color.text.default}",
+          "$type": "color",
+          "$description": "Secondary text and icon color.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.button.secondary.background",
+                "min": "text"
+              },
+              {
+                "against": "component.button.secondary.background-hover",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.border.strong}",
+          "$type": "color",
+          "$description": "Secondary border color."
+        }
+      },
+      "ghost": {
+        "background": {
+          "$value": "{color.fill.none}",
+          "$type": "color",
+          "$description": "Ghost background."
+        },
+        "background-hover": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Ghost background on hover."
+        },
+        "text": {
+          "$value": "{color.text.default}",
+          "$type": "color",
+          "$description": "Ghost text and icon color.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.button.ghost.background-hover",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.base",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.raised",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.sunken",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.glass",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.fill.none}",
+          "$type": "color",
+          "$description": "Ghost border color."
+        }
+      },
+      "disabled": {
+        "background": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Background while disabled."
+        },
+        "text": {
+          "$value": "{color.text.subtle}",
+          "$type": "color",
+          "$description": "Text while disabled. Exempt from contrast minimums (WCAG 1.4.3), but kept at 4.5:1 anyway.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.button.disabled.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.border.subtle}",
+          "$type": "color",
+          "$description": "Border while disabled."
+        }
+      }
+    }
+  }
+}

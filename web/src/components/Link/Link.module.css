@@ -1,0 +1,27 @@
+/* Underlined, so it's distinguished from running text by more than color (R5.7). */
+.link {
+  color: var(--component-link-color);
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--component-link-underline-thickness);
+  text-underline-offset: var(--component-link-underline-offset);
+}
+
+.link:hover {
+  color: var(--component-link-color-hover);
+}
+
+.link:focus-visible {
+  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+/* The consumer sets aria-current; it's marked by weight as well as color (R5.8). */
+.link[aria-current]:not([aria-current="false"]) {
+  color: var(--component-link-color-current);
+  font-weight: var(--component-link-font-weight-current);
+}
+
+.newTabIcon {
+  margin-inline-start: var(--space-inline-xs);
+  vertical-align: middle;
+}

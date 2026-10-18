@@ -1,0 +1,100 @@
+{
+  "component": {
+    "badge": {
+      "font-family": {
+        "$value": "{type.family.label}",
+        "$type": "fontFamily",
+        "$description": "Badge font (mono)."
+      },
+      "font-size": {
+        "sm": {
+          "$value": "{type.size.label}",
+          "$type": "dimension",
+          "$description": "Small badge text."
+        },
+        "md": {
+          "$value": "{type.size.small}",
+          "$type": "dimension",
+          "$description": "Standard badge text."
+        }
+      },
+      "tracking": {
+        "$value": "{type.tracking.label}",
+        "$type": "number",
+        "$description": "Letter spacing of the uppercase label."
+      },
+      "radius": {
+        "$value": "{radius.control}",
+        "$type": "dimension",
+        "$description": "Badge corners."
+      },
+      "padding-inline": {
+        "sm": {
+          "$value": "{space.inline.xs}",
+          "$type": "dimension",
+          "$description": "Inline padding of small badges."
+        },
+        "md": {
+          "$value": "{space.inline.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of standard badges."
+        }
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Badge outline width."
+      },
+      "neutral": {
+        "background": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Neutral badge fill."
+        },
+        "text": {
+          "$value": "{color.text.muted}",
+          "$type": "color",
+          "$description": "Neutral badge text.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.badge.neutral.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.border.subtle}",
+          "$type": "color",
+          "$description": "Neutral badge outline (decorative)."
+        }
+      },
+      "accent": {
+        "background": {
+          "$value": "{color.accent.background}",
+          "$type": "color",
+          "$description": "Accent badge fill."
+        },
+        "text": {
+          "$value": "{color.accent.text}",
+          "$type": "color",
+          "$description": "Accent badge text.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.badge.accent.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.accent.border}",
+          "$type": "color",
+          "$description": "Accent badge outline (decorative)."
+        }
+      }
+    }
+  }
+}

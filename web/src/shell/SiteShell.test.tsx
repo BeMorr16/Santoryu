@@ -28,6 +28,8 @@ function renderAt(path: string, { strict = false } = {}) {
           Component: () => <h1>Lab page</h1>,
           meta: () => [{ title: "Lab title" }],
         },
+        { path: "lab/tokens", Component: () => <h1>Tokens page</h1> },
+        { path: "lab/components", Component: () => <h1>Components page</h1> },
       ],
     },
   ]);
@@ -44,6 +46,16 @@ describe("SiteShell", () => {
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeInTheDocument();
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
+  });
+
+  it("puts the theme switcher in the header (R13.1)", () => {
+    renderAt("/");
+
+    const banner = screen.getByRole("banner");
+    expect(within(banner).getByRole("button", { name: "Theme: Light" })).toHaveAttribute(
+      "aria-haspopup",
+      "menu",
+    );
   });
 
   it("puts the site name link to / in the header", () => {
@@ -99,6 +111,18 @@ describe("SiteShell", () => {
     );
     expect(within(nav).getByRole("link", { name: other })).not.toHaveAttribute("aria-current");
   });
+
+  it.each(["/lab/tokens", "/lab/components"])(
+    "on %s marks no primary nav link as current (R14.5)",
+    async (path) => {
+      renderAt(path);
+
+      const nav = await screen.findByRole("navigation", { name: "Primary" });
+      for (const link of within(nav).getAllByRole("link")) {
+        expect(link).not.toHaveAttribute("aria-current");
+      }
+    },
+  );
 
   it("navigates client-side to Lab, updating content and title, and focuses main", async () => {
     const user = userEvent.setup();

@@ -1,0 +1,39 @@
+/* Non-interactive: no pointer cursor, no hover state (R11.3). */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--_padding-inline);
+  border: var(--component-badge-border-width) solid var(--_border);
+  border-radius: var(--component-badge-radius);
+  background-color: var(--_background);
+  color: var(--_text);
+  font-family: var(--component-badge-font-family);
+  font-size: var(--_font-size);
+  letter-spacing: var(--component-badge-tracking);
+  line-height: var(--type-leading-body);
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-variant-ligatures: none;
+}
+
+.neutral {
+  --_background: var(--component-badge-neutral-background);
+  --_text: var(--component-badge-neutral-text);
+  --_border: var(--component-badge-neutral-border);
+}
+
+.accent {
+  --_background: var(--component-badge-accent-background);
+  --_text: var(--component-badge-accent-text);
+  --_border: var(--component-badge-accent-border);
+}
+
+.sm {
+  --_font-size: var(--component-badge-font-size-sm);
+  --_padding-inline: var(--component-badge-padding-inline-sm);
+}
+
+.md {
+  --_font-size: var(--component-badge-font-size-md);
+  --_padding-inline: var(--component-badge-padding-inline-md);
+}
