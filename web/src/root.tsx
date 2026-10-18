@@ -10,13 +10,30 @@ import {
 import type { Route } from "./+types/root";
 import { SiteShell } from "./shell/SiteShell.tsx";
 import { siteName } from "./site.config.ts";
+import { themeScript } from "./theme/theme-script.ts";
+import interWoff2 from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import spaceGroteskWoff2 from "@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2?url";
 import "./generated/tokens.css";
+import "./styles/fonts.css";
 import "./styles/global.css";
+
+/** Body and heading faces are above the fold on every page (R1.6). Fira Code isn't. */
+export function links(): Route.LinkDescriptors {
+  return [interWoff2, spaceGroteskWoff2].map((href) => ({
+    rel: "preload",
+    href,
+    as: "font",
+    type: "font/woff2",
+    crossOrigin: "anonymous",
+  }));
+}
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // The pre-paint script sets data-theme/data-js on <html> before hydration (R13.4, R13.8).
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
