@@ -13,6 +13,8 @@ export default defineConfig(
     "web/src/generated/",
     "**/coverage/",
     "**/cdk.out/",
+    "e2e/playwright-report/",
+    "e2e/test-results/",
   ]),
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
