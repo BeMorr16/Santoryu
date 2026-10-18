@@ -6,11 +6,33 @@
 
 html {
   text-size-adjust: 100%;
+  /*
+   * Keeps focused elements and in-page anchor targets clear of the sticky header (WCAG 2.4.11):
+   * its padding, a nav row (link padding + one line), its border, and the focus ring.
+   */
+  scroll-padding-block-start: calc(
+    2 * var(--space-inset-md) + 2 * var(--space-inset-sm) + var(--type-leading-body) *
+      var(--type-size-body) + var(--effect-border-width) + var(--effect-focus-ring-width) +
+      var(--effect-focus-ring-offset)
+  );
 }
 
+/* The blueprint backdrop: a faint drafting grid drawn with two gradients, no images. */
 body {
   margin: 0;
   background-color: var(--color-surface-base);
+  background-image:
+    linear-gradient(
+      to right,
+      var(--color-grid-line) var(--effect-border-width),
+      transparent var(--effect-border-width)
+    ),
+    linear-gradient(
+      to bottom,
+      var(--color-grid-line) var(--effect-border-width),
+      transparent var(--effect-border-width)
+    );
+  background-size: var(--size-pattern-cell) var(--size-pattern-cell);
   color: var(--color-text-default);
   font-family: var(--type-family-body);
   font-size: var(--type-size-body);
@@ -22,8 +44,19 @@ h1,
 h2,
 h3 {
   margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--type-family-heading);
   font-weight: var(--type-weight-heading);
   line-height: var(--type-leading-heading);
+  letter-spacing: var(--type-tracking-display);
+  font-variant-ligatures: none;
 }
 
 h1 {
@@ -58,4 +91,14 @@ a:hover {
 
 code {
   font-family: var(--type-family-code);
+  font-variant-ligatures: normal;
+}
+
+/* Small uppercase mono annotation, e.g. a kicker above a heading. */
+.label {
+  font-family: var(--type-family-label);
+  font-size: var(--type-size-label);
+  letter-spacing: var(--type-tracking-label);
+  text-transform: uppercase;
+  font-variant-ligatures: none;
 }
