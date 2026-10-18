@@ -21,6 +21,7 @@ function Section({ showcase }: { showcase: Showcase }) {
       </PreviewPanel>
       <h3>Props</h3>
       <p>Any native prop not listed here goes to the root element unchanged.</p>
+      {showcase.propsNote && <p>{showcase.propsNote}</p>}
       {showcase.props.map(({ part, docs }) => (
         <PropsTable key={part} caption={`${part} props`} props={docs} />
       ))}

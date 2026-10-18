@@ -54,7 +54,7 @@ describe("Button", () => {
 
   it("renders start and end icons as decorative, in order, around the label (R4.3)", () => {
     render(
-      <Button iconStart="theme-light" iconEnd="arrow-right">
+      <Button iconStart="sun" iconEnd="arrow-right">
         Next
       </Button>,
     );

@@ -45,6 +45,18 @@ describe("library types", () => {
         <Icon key="b" name="check" aria-label="Done" />,
         // @ts-expect-error -- not a normalized weight.
         <Icon key="c" name="check" weight="thin" />,
+        // @ts-expect-error -- the accessible name comes from `label` only (refinement R1.11).
+        <Icon key="h" name="check" aria-labelledby="other" />,
+        // @ts-expect-error -- an icon is never focusable (refinement R1.11).
+        <Icon key="i" name="check" tabIndex={0} />,
+        // @ts-expect-error -- renamed to sun (refinement R1.3).
+        <Icon key="d" name="theme-light" />,
+        // @ts-expect-error -- renamed to moon (refinement R1.3).
+        <Icon key="e" name="theme-dark" />,
+        // @ts-expect-error -- renamed to external-link (refinement R1.3).
+        <Icon key="f" name="new-tab" />,
+        // @ts-expect-error -- removed (refinement R1.3).
+        <Icon key="g" name="theme-system" />,
       ];
     }
     expectTypeOf(invalid).toBeFunction();
@@ -170,7 +182,7 @@ describe("library types", () => {
     function invalid() {
       return [
         // @ts-expect-error -- an icon-only trigger needs an accessible name, as Button does.
-        <MenuTrigger key="a" iconStart="theme-system" />,
+        <MenuTrigger key="a" iconStart="sun" />,
         // @ts-expect-error -- a radio group needs a label.
         <MenuRadioGroup key="b" defaultValue="x" />,
         // @ts-expect-error -- a radio item needs a value.
@@ -182,7 +194,7 @@ describe("library types", () => {
     function valid() {
       return (
         <Menu>
-          <MenuTrigger iconStart="theme-system" aria-label="Theme" />
+          <MenuTrigger iconStart="sun" aria-label="Theme" />
           <MenuPopup>
             <MenuRadioGroup label="Theme" value="light" onValueChange={() => undefined}>
               <MenuRadioItem value="light">Light</MenuRadioItem>

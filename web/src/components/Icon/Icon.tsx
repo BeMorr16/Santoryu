@@ -14,16 +14,27 @@ export interface IconOwnProps {
 }
 
 /**
- * `color` is omitted: icons always use currentColor (R6.4). The accessibility attributes are
- * `never` because `label` owns them, and hyphenated JSX props are only checked when declared.
+ * SVG attributes and `children` reach the `<svg>` as escape hatches (refinement R1.5): `fill`
+ * replaces the default currentColor, `viewBox` and `children` work on the family's 256-unit grid,
+ * and the size classes override `width`/`height`. `color` is omitted because it duplicates
+ * `fill`. The accessibility attributes are `never` because `label` owns them (`tabIndex` too: an
+ * icon is never focusable), and hyphenated JSX props are only checked when declared.
  */
 export type IconProps = IconOwnProps & {
   "aria-label"?: never;
   "aria-hidden"?: never;
+  "aria-labelledby"?: never;
   role?: never;
+  tabIndex?: never;
 } & Omit<
     ComponentPropsWithRef<"svg">,
-    keyof IconOwnProps | "aria-label" | "aria-hidden" | "role" | "color"
+    | keyof IconOwnProps
+    | "aria-label"
+    | "aria-hidden"
+    | "aria-labelledby"
+    | "role"
+    | "tabIndex"
+    | "color"
   >;
 
 /** One icon from the registry, colored by `currentColor` (R6). */
@@ -36,10 +47,14 @@ export function Icon({
   ...rest
 }: IconProps) {
   const Glyph = icons[name];
-  const accessibility =
-    label === undefined
+  // Cleared after the rest props, so only `label` can name the icon and nothing can focus it.
+  const accessibility = {
+    "aria-labelledby": undefined,
+    tabIndex: undefined,
+    ...(label === undefined
       ? ({ "aria-hidden": true, focusable: "false" } as const)
-      : ({ role: "img", "aria-label": label } as const);
+      : ({ role: "img", "aria-label": label } as const)),
+  };
   return (
     <Glyph
       {...rest}

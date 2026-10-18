@@ -103,12 +103,8 @@ function Examples() {
         </MenuTrigger>
         <MenuPopup>
           <MenuRadioGroup label="View" defaultValue="grid">
-            <MenuRadioItem value="grid" icon="theme-system">
-              Grid
-            </MenuRadioItem>
-            <MenuRadioItem value="list" icon="arrow-right">
-              List
-            </MenuRadioItem>
+            <MenuRadioItem value="grid">Grid</MenuRadioItem>
+            <MenuRadioItem value="list">List</MenuRadioItem>
             <MenuRadioItem value="compact" disabled>
               Compact (soon)
             </MenuRadioItem>

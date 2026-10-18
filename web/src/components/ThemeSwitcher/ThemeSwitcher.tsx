@@ -10,7 +10,7 @@ import { useEffectiveTheme } from "../../theme/useEffectiveTheme.ts";
 import styles from "./ThemeSwitcher.module.css";
 
 const labels: Record<ThemePreference, string> = { light: "Light", dark: "Dark" };
-const icons: Record<ThemePreference, IconName> = { light: "theme-light", dark: "theme-dark" };
+const icons: Record<ThemePreference, IconName> = { light: "sun", dark: "moon" };
 
 export type ThemeSwitcherOwnProps = Pick<ButtonLookProps, "variant" | "size">;
 
@@ -32,8 +32,8 @@ export function ThemeSwitcher({
     <Menu {...rest} className={cx(styles.switcher, className)}>
       <MenuTrigger variant={variant} size={size}>
         {/* CSS shows the icon for the theme in effect, so it's right from the first paint. */}
-        <Icon name="theme-light" className={styles.lightIcon} />
-        <Icon name="theme-dark" className={styles.darkIcon} />
+        <Icon name="sun" className={styles.lightIcon} />
+        <Icon name="moon" className={styles.darkIcon} />
         <span className={styles.label} aria-hidden="true">
           Theme
         </span>

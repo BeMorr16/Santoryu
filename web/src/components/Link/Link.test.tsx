@@ -5,6 +5,7 @@ import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { expectHydratesCleanly } from "../../../test/component.tsx";
+import { Icon } from "../Icon/Icon.tsx";
 import buttonStyles from "../shared/button-styles.module.css";
 import { Link } from "./Link.tsx";
 import styles from "./Link.module.css";
@@ -56,7 +57,11 @@ describe("Link", () => {
     expect(link).toHaveAccessibleName("GitHub (opens in new tab)");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
-    expect(link.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    const icon = link.querySelector("svg");
+    expect(icon).toHaveAttribute("aria-hidden", "true");
+    expect(icon?.innerHTML).toBe(
+      render(<Icon name="external-link" />).container.querySelector("svg")?.innerHTML,
+    );
   });
 
   it("without newTab, sets no target or rel", () => {

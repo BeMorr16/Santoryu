@@ -6,11 +6,17 @@ import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { setSystemTheme } from "../../../test/system-theme.ts";
+import { Icon } from "../Icon/Icon.tsx";
+import type { IconName } from "../Icon/registry.ts";
 import { ThemeSwitcher } from "./ThemeSwitcher.tsx";
 import styles from "./ThemeSwitcher.module.css";
 
 const root = document.documentElement;
 const css = readFileSync(join(import.meta.dirname, "ThemeSwitcher.module.css"), "utf8");
+
+/** The glyph inside an Icon's svg, to tell which icon a component drew. */
+const glyphOf = (name: IconName) =>
+  render(<Icon name={name} />).container.querySelector("svg")?.innerHTML;
 
 beforeEach(() => {
   localStorage.clear();
@@ -112,18 +118,16 @@ describe("ThemeSwitcher", () => {
     expect(screen.getByRole("button", { name: "Theme: Dark" })).toBeInTheDocument();
   });
 
-  it("renders a decorative icon for each theme, shown by CSS for the theme in effect", () => {
+  it("renders a decorative sun and moon, shown by CSS for the theme in effect", () => {
     render(<ThemeSwitcher />);
 
     const trigger = screen.getByRole("button", { name: /^Theme/ });
-    expect(trigger.querySelector(`.${styles.lightIcon ?? ""}`)).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
-    expect(trigger.querySelector(`.${styles.darkIcon ?? ""}`)).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
+    const lightIcon = trigger.querySelector(`.${styles.lightIcon ?? ""}`);
+    const darkIcon = trigger.querySelector(`.${styles.darkIcon ?? ""}`);
+    expect(lightIcon).toHaveAttribute("aria-hidden", "true");
+    expect(darkIcon).toHaveAttribute("aria-hidden", "true");
+    expect(lightIcon?.innerHTML).toBe(glyphOf("sun"));
+    expect(darkIcon?.innerHTML).toBe(glyphOf("moon"));
     expect(css).toMatch(/:global\(:root\[data-theme="dark"\]\) \.darkIcon \{\s*display: inline;/);
     expect(css).toMatch(/@media \(prefers-color-scheme: dark\)/);
   });

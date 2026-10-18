@@ -19,7 +19,7 @@ function Fixture({
         <MenuPopup>
           <MenuRadioGroup label="Theme" defaultValue={defaultValue ?? undefined}>
             <MenuRadioItem value="system">System</MenuRadioItem>
-            <MenuRadioItem value="light" icon="theme-light">
+            <MenuRadioItem value="light" icon="sun">
               Light
             </MenuRadioItem>
             <MenuRadioItem value="dark">Dark</MenuRadioItem>

@@ -10,15 +10,13 @@ import { CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
 import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr/EnvelopeSimple";
 import { GithubLogoIcon } from "@phosphor-icons/react/dist/ssr/GithubLogo";
 import { LinkedinLogoIcon } from "@phosphor-icons/react/dist/ssr/LinkedinLogo";
-import { MonitorIcon } from "@phosphor-icons/react/dist/ssr/Monitor";
 import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
 import { SunIcon } from "@phosphor-icons/react/dist/ssr/Sun";
 
 export const icons = {
-  "theme-system": MonitorIcon,
-  "theme-light": SunIcon,
-  "theme-dark": MoonIcon,
-  "new-tab": ArrowSquareOutIcon,
+  sun: SunIcon,
+  moon: MoonIcon,
+  "external-link": ArrowSquareOutIcon,
   "arrow-right": ArrowRightIcon,
   "chevron-down": CaretDownIcon,
   check: CheckIcon,

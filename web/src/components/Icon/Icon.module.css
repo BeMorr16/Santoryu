@@ -1,6 +1,11 @@
 /* Phosphor writes width/height attributes; these classes size the icon instead (R6.4). */
+/*
+ * Inline in text, centers a 1em icon near the cap height (Font Awesome's offset). Flex and grid
+ * items ignore vertical-align, so icons in Button and Menu are unaffected (refinement R1.1).
+ */
 .icon {
   flex-shrink: 0;
+  vertical-align: -0.125em;
 }
 
 .size-inherit {

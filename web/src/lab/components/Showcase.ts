@@ -15,6 +15,8 @@ export interface Showcase {
   Examples: ComponentType;
   /** One props table per exported part. */
   props: readonly { part: string; docs: Readonly<Record<string, PropDoc>> }[];
+  /** What else reaches the root element, beyond the native props, when it needs saying. */
+  propsNote?: string;
   /** Kebab-case name of its component tokens, or null when it has none. */
   tokens: string | null;
   /** Why there are no component tokens, when `tokens` is null. */

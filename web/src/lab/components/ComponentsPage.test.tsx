@@ -2,6 +2,9 @@ import { render, screen, within } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
+import iconStyles from "../../components/Icon/Icon.module.css";
+import { icons } from "../../components/Icon/registry.ts";
+import showcaseStyles from "./Showcase.module.css";
 import { ComponentsPage } from "./ComponentsPage.tsx";
 import { showcases } from "./registry.ts";
 
@@ -83,6 +86,70 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       }
     },
   );
+
+  it.each(showcases.map((s) => [s.name, s] as const))(
+    "renders %s's props note under the native-props sentence only when it has one",
+    async (_name, showcase) => {
+      renderPage();
+      const section = await screen.findByRole("region", { name: showcase.name });
+
+      const native = within(section).getByText(/^Any native prop not listed here/);
+      const next = native.nextElementSibling;
+      if (showcase.propsNote === undefined) {
+        expect(next?.tagName).not.toBe("P");
+      } else {
+        expect(next?.tagName).toBe("P");
+        expect(next).toHaveTextContent(showcase.propsNote);
+      }
+    },
+  );
+
+  it("documents Icon's SVG escape hatches in a props note (refinement R1.6, R1.11)", () => {
+    expect(showcases.find((s) => s.id === "icon")?.propsNote).toMatch(
+      /fill.+stroke.+viewBox.+width.+height.+transform.+children.+fill replaces currentColor.+256-unit grid.+overridden by the size classes.+Children must not be focusable or include <title> or <desc>/,
+    );
+  });
+
+  it("captions every registry icon with its name, and keeps those icons decorative (refinement R1.7)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Icon" });
+
+    const registry = within(section).getByText("Registry", { selector: "p" }).parentElement;
+    if (registry === null) throw new Error("no Registry example");
+    const captions = within(registry)
+      .getAllByRole("listitem")
+      .map((item) => item.textContent);
+    expect(captions).toEqual(Object.keys(icons));
+    expect(within(registry).queryAllByRole("img")).toEqual([]);
+    expect(registry.querySelectorAll('svg[aria-hidden="true"]')).toHaveLength(captions.length);
+  });
+
+  it("shows icons following their text's size and color (refinement R1.8)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Icon" });
+
+    for (const size of [showcaseStyles.textH2, showcaseStyles.textSmall]) {
+      const icon = section.querySelector(`p.${size ?? ""} > svg`);
+      expect(icon).toHaveClass(iconStyles["size-inherit"] ?? "");
+    }
+    const link = within(section).getByRole("link", { name: "Design tokens" });
+    const accent = section.querySelector(`span.${showcaseStyles.accentText ?? ""}`);
+    for (const icon of [link.querySelector("svg"), accent?.querySelector("svg")]) {
+      expect(icon).toHaveAttribute("fill", "currentColor");
+      expect(icon).toHaveAttribute("aria-hidden", "true");
+    }
+  });
+
+  it("renders the Menu showcase's View items with no icon of their own (refinement R1.10)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Menu" });
+
+    for (const name of ["Grid", "List"]) {
+      const item = within(section).getByRole("menuitemradio", { name, hidden: true });
+      // Only the checked-state indicator, which every radio item draws.
+      expect(item.querySelectorAll("svg")).toHaveLength(1);
+    }
+  });
 
   it("has no axe violations (R3.9)", async () => {
     const { container } = renderPage();

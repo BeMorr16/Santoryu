@@ -55,7 +55,7 @@ export function Link({
       </ButtonContent>
       {newTab && (
         <>
-          <Icon name="new-tab" className={styles.newTabIcon} />
+          <Icon name="external-link" className={styles.newTabIcon} />
           {/* The space sits outside the hidden span so every name computation keeps it. */}{" "}
           <VisuallyHidden>(opens in new tab)</VisuallyHidden>
         </>
