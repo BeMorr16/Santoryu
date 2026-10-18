@@ -13,6 +13,7 @@ const categoryLabels: Record<TokenCategory, string> = {
   radius: "Radius",
   motion: "Motion",
   effect: "Effect",
+  layer: "Layer",
 };
 
 function CategorySection({ category }: { category: TokenCategory }) {

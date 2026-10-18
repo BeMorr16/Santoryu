@@ -1,12 +1,15 @@
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import iconStyles from "../../components/Icon/Icon.module.css";
 import { icons } from "../../components/Icon/registry.ts";
+import hiddenStyles from "../../components/VisuallyHidden/VisuallyHidden.module.css";
 import showcaseStyles from "./Showcase.module.css";
 import { ComponentsPage } from "./ComponentsPage.tsx";
 import { showcases } from "./registry.ts";
+import { announced } from "./showcases/visually-hidden.tsx";
 
 function renderPage() {
   const Stub = createRoutesStub([
@@ -148,6 +151,56 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       const item = within(section).getByRole("menuitemradio", { name, hidden: true });
       // Only the checked-state indicator, which every radio item draws.
       expect(item.querySelectorAll("svg")).toHaveLength(1);
+    }
+  });
+
+  it("captions each VisuallyHidden example with the role and name it announces (refinement R2.8, R2.9)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "VisuallyHidden" });
+
+    const queries = {
+      button: ["button", {}],
+      link: ["link", {}],
+      "heading level 4": ["heading", { level: 4 }],
+      "search field": ["searchbox", {}],
+    } as const;
+    for (const { name, role } of Object.values(announced)) {
+      const [ariaRole, options] = queries[role];
+      expect(within(section).getByRole(ariaRole, { ...options, name })).toBeInTheDocument();
+      expect(within(section).getByText(`Announced as: “${name}, ${role}”`)).toBeInTheDocument();
+    }
+  });
+
+  it("toggles the VisuallyHidden examples' hidden content with a pressed button (refinement R2.10)", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    const section = await screen.findByRole("region", { name: "VisuallyHidden" });
+    const panel = within(section).getByRole("group", { name: "VisuallyHidden examples" });
+    const examples = () =>
+      [...panel.querySelectorAll(`.${hiddenStyles.root ?? ""}`)].filter(
+        // The panel's own theme trigger keeps its hidden "(VisuallyHidden preview)".
+        (element) => element.closest("[aria-haspopup]") === null,
+      );
+    const toggle = within(panel).getByRole("button", { name: "Show hidden content" });
+
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+    expect(examples()).toHaveLength(Object.keys(announced).length);
+    for (const element of examples()) {
+      expect(element).not.toHaveClass(showcaseStyles.revealHidden ?? "");
+    }
+
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+    for (const element of examples()) {
+      expect(element).toHaveClass(showcaseStyles.revealHidden ?? "");
+    }
+
+    await user.keyboard(" ");
+
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+    for (const element of examples()) {
+      expect(element).not.toHaveClass(showcaseStyles.revealHidden ?? "");
     }
   });
 

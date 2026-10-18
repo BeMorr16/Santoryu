@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router";
 import { ThemeSwitcher } from "../components/ThemeSwitcher/ThemeSwitcher.tsx";
+import { VisuallyHidden } from "../components/VisuallyHidden/VisuallyHidden.tsx";
 import { footerText, siteName } from "../site.config.ts";
 import styles from "./SiteShell.module.css";
 
@@ -20,7 +21,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <a
+      <VisuallyHidden
+        as="a"
+        focusable
         className={styles.skipLink}
         href="#main"
         onClick={() => {
@@ -28,7 +31,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         }}
       >
         Skip to main content
-      </a>
+      </VisuallyHidden>
       <header className={styles.header}>
         <Link className={styles.siteName} to="/">
           {siteName}

@@ -23,6 +23,7 @@ describe("lab tokens route (R14.2, R14.3, R14.5)", () => {
       "Radius",
       "Motion",
       "Effect",
+      "Layer",
       "Component tokens",
     ]);
   });

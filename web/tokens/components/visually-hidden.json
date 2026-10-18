@@ -20,9 +20,14 @@
             ]
           }
         },
-        "padding": {
+        "padding-block": {
           "$value": "{space.inset.sm}",
-          "$description": "Padding while focused.",
+          "$description": "Block padding while focused.",
+          "$type": "dimension"
+        },
+        "padding-inline": {
+          "$value": "{space.inset.md}",
+          "$description": "Inline padding while focused.",
           "$type": "dimension"
         },
         "radius": {
@@ -34,6 +39,11 @@
           "$value": "{effect.elevation.overlay}",
           "$description": "Shadow while focused, so it reads above the page.",
           "$type": "shadow"
+        },
+        "layer": {
+          "$value": "{layer.overlay}",
+          "$description": "Stacking order while focused, above sticky page chrome.",
+          "$type": "number"
         }
       }
     }

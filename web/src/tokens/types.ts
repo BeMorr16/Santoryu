@@ -6,6 +6,7 @@ export const tokenCategories = [
   "radius",
   "motion",
   "effect",
+  "layer",
 ] as const;
 
 export type TokenCategory = (typeof tokenCategories)[number];

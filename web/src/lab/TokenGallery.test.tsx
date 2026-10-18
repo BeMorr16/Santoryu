@@ -13,6 +13,7 @@ const labels = {
   radius: "Radius",
   motion: "Motion",
   effect: "Effect",
+  layer: "Layer",
 } as const;
 
 const tokensIn = (category: string): readonly SemanticTokenMeta[] =>
@@ -152,12 +153,12 @@ describe("TokenGallery", () => {
   );
 
   it.each(semantic.map((token) => [token.cssVar, token] as const))(
-    "renders the %s preview as a hidden specimen styled by the token, or a dash for motion",
+    "renders the %s preview as a hidden specimen styled by the token, or a dash for motion and layer",
     (_name, token) => {
       render(<TokenGallery />);
 
       const preview = within(rowFor(token)).getAllByRole("cell").at(-1);
-      if (token.category === "motion") {
+      if (token.category === "motion" || token.category === "layer") {
         expect(preview).toHaveTextContent("—");
         expect(preview).toHaveTextContent("No preview");
         expect(preview?.querySelector("[style]")).toBeNull();

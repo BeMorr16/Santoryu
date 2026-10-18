@@ -3,10 +3,20 @@ import { describe, expect, it } from "vitest";
 
 const tokensDir = new URL("../tokens/", import.meta.url);
 
-const categories = ["color", "type", "space", "size", "radius", "motion", "effect"] as const;
+const categories = [
+  "color",
+  "type",
+  "space",
+  "size",
+  "radius",
+  "motion",
+  "effect",
+  "layer",
+] as const;
 type Category = (typeof categories)[number];
 
-// Second path segment of every token: site-foundation design §4.3, component-library design §4.1.
+// Second path segment of every token: site-foundation design §4.3, component-library design §4.1,
+// component-library-refinement design §3.3.
 const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
   color: {
     primitive: ["gray", "blue", "gold", "cyan", "sand", "overlay"],
@@ -33,9 +43,11 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
     primitive: ["shadow", "line", "blur-radius"],
     semantic: ["elevation", "focus-ring", "backdrop", "border", "underline"],
   },
+  layer: { primitive: ["1", "2", "3"], semantic: ["raised", "sticky", "overlay"] },
 };
 
-// Every semantic token, per site-foundation design §4.3 and component-library design §4.1.
+// Every semantic token, per site-foundation design §4.3, component-library design §4.1 and
+// component-library-refinement design §3.3.
 // Adding or renaming one is a one-way door.
 const expectedSemantic = [
   "color.surface.base",
@@ -121,6 +133,9 @@ const expectedSemantic = [
   "effect.border.width",
   "effect.underline.thickness",
   "effect.underline.offset",
+  "layer.raised",
+  "layer.sticky",
+  "layer.overlay",
 ];
 
 // Translucent primitives and the only semantic tokens allowed to alias them (decision 0004 amendment).

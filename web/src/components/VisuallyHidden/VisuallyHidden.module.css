@@ -1,16 +1,25 @@
-/* Hidden visually, still announced (R7.1). The standard clip pattern. */
-.root:not(.focusable:focus-within) {
+/* Positioned in both states: hidden, it's out of flow; revealed, it overlays its static position (refinement R2.2). */
+.root {
   position: absolute;
+}
+
+/* Hidden visually, still announced (R7.1, refinement R2.1). The standard clip pattern, with box resets. */
+.root:not(.focusable:focus-within) {
   overflow: hidden;
   clip-path: inset(50%);
   inline-size: 1px;
   block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
   white-space: nowrap;
 }
 
-/* Shown while it or a descendant has focus: the skip-link pattern (R7.2). */
+/* Shown while it or a descendant has focus: the skip-link pattern. A caller places it with className. */
 .focusable:focus-within {
-  padding: var(--component-visually-hidden-focusable-padding);
+  z-index: var(--component-visually-hidden-focusable-layer);
+  padding-block: var(--component-visually-hidden-focusable-padding-block);
+  padding-inline: var(--component-visually-hidden-focusable-padding-inline);
   border-radius: var(--component-visually-hidden-focusable-radius);
   background-color: var(--component-visually-hidden-focusable-background);
   box-shadow: var(--component-visually-hidden-focusable-elevation);

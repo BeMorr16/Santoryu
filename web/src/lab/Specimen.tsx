@@ -41,7 +41,7 @@ function specimenKind(token: TokenMeta): string | undefined {
   return kindByGroup[name] ?? kindByGroup[group] ?? kindByCategory[token.category];
 }
 
-/** A decorative preview styled with the token's own custom property. Motion has none (R7.6). */
+/** A decorative preview styled with the token's own custom property. Motion and layer have none (R7.6). */
 export function Specimen({ token }: { token: TokenMeta }) {
   const kind = specimenKind(token);
   if (kind === undefined) {

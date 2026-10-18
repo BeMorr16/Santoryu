@@ -208,10 +208,42 @@ describe("library types", () => {
     expectTypeOf(valid).toBeFunction();
   });
 
+  it('VisuallyHidden: as="a" requires focusable, and `as` is a closed text-element union (refinement R2.5, R2.6)', () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- a hidden link must be focusable.
+        <VisuallyHidden key="a" as="a" href="#main" />,
+        // @ts-expect-error -- a hidden link must be focusable.
+        <VisuallyHidden key="b" as="a" focusable={false} href="#main" />,
+        // @ts-expect-error -- inline technical elements aren't in the union.
+        <VisuallyHidden key="c" as="code" />,
+        // @ts-expect-error -- a Tab stop must be focusable (refinement R2.12).
+        <VisuallyHidden key="d" as="h2" tabIndex={0} />,
+        // @ts-expect-error -- a Tab stop must be focusable (refinement R2.12).
+        <VisuallyHidden key="e" focusable={false} tabIndex={0} />,
+      ];
+    }
+    function valid() {
+      return [
+        <VisuallyHidden key="a" as="a" focusable href="#main" />,
+        <VisuallyHidden key="b" as="h2" />,
+        <VisuallyHidden key="c" as="label" htmlFor="search" />,
+        <VisuallyHidden key="d" as="strong" />,
+        <VisuallyHidden key="e" as="li" />,
+        <VisuallyHidden key="f" focusable={false} />,
+        <VisuallyHidden key="g" as="h2" tabIndex={-1} />,
+        <VisuallyHidden key="h" as="div" focusable tabIndex={0} />,
+        <VisuallyHidden key="i" focusable={Math.random() > 0.5} />,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
   it("VisuallyHidden, ThemeSwitcher and the remaining unions reject invalid values (R3.4)", () => {
     function invalid() {
       return [
-        // @ts-expect-error -- VisuallyHidden is span, div, p or a.
+        // @ts-expect-error -- a hidden button has the same problem as a hidden link (refinement R2.6).
         <VisuallyHidden key="a" as="button" />,
         // @ts-expect-error -- href needs as="a".
         <VisuallyHidden key="b" href="/" />,

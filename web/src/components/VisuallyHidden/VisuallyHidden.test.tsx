@@ -1,11 +1,37 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createRef } from "react";
-import { describe, expect, it } from "vitest";
+import { createRef, type ReactNode } from "react";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { expectHydratesCleanly } from "../../../test/component.tsx";
-import { VisuallyHidden } from "./VisuallyHidden.tsx";
+import { VisuallyHidden, type VisuallyHiddenElement } from "./VisuallyHidden.tsx";
 import styles from "./VisuallyHidden.module.css";
+
+// Every element in the `as` union (refinement R2.6).
+const elements = [
+  "span",
+  "div",
+  "p",
+  "a",
+  "label",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "strong",
+  "em",
+  "small",
+  "mark",
+  "s",
+  "blockquote",
+  "figcaption",
+  "caption",
+  "li",
+  "dt",
+  "dd",
+] as const satisfies readonly VisuallyHiddenElement[];
 
 describe("VisuallyHidden", () => {
   it("keeps its content in the accessibility tree, clipped by the hidden class (R7.1)", () => {
@@ -23,16 +49,60 @@ describe("VisuallyHidden", () => {
     expect(hidden).not.toHaveClass(styles.focusable ?? "");
   });
 
-  it("renders a span by default and another element with `as` (R7.3)", () => {
+  it("renders a span by default (R7.3)", () => {
+    render(<VisuallyHidden>One</VisuallyHidden>);
+
+    expect(screen.getByText("One").tagName).toBe("SPAN");
+  });
+
+  const parents: Partial<Record<VisuallyHiddenElement, (child: ReactNode) => ReactNode>> = {
+    li: (child) => <ul>{child}</ul>,
+    dt: (child) => <dl>{child}</dl>,
+    dd: (child) => <dl>{child}</dl>,
+    figcaption: (child) => <figure>{child}</figure>,
+    caption: (child) => <table>{child}</table>,
+  };
+
+  it("tests every element in the `as` union", () => {
+    expectTypeOf<(typeof elements)[number]>().toEqualTypeOf<VisuallyHiddenElement>();
+  });
+
+  it.each(elements)("renders <%s> with `as` (refinement R2.6)", (element) => {
+    const hidden =
+      element === "a" ? (
+        <VisuallyHidden as="a" focusable href="#main">
+          Hidden
+        </VisuallyHidden>
+      ) : (
+        <VisuallyHidden as={element}>Hidden</VisuallyHidden>
+      );
+    render(<>{parents[element]?.(hidden) ?? hidden}</>);
+
+    const root = screen.getByText("Hidden");
+    expect(root.tagName).toBe(element.toUpperCase());
+    expect(root).toHaveClass(styles.root ?? "");
+  });
+
+  it("names a field as a hidden label, and a table as a hidden caption (refinement R2.6)", () => {
     render(
       <>
-        <VisuallyHidden>One</VisuallyHidden>
-        <VisuallyHidden as="p">Two</VisuallyHidden>
+        <VisuallyHidden as="label" htmlFor="search">
+          Search the lab
+        </VisuallyHidden>
+        <input id="search" type="search" />
+        <table>
+          <VisuallyHidden as="caption">Token values</VisuallyHidden>
+          <tbody>
+            <tr>
+              <td>1</td>
+            </tr>
+          </tbody>
+        </table>
       </>,
     );
 
-    expect(screen.getByText("One").tagName).toBe("SPAN");
-    expect(screen.getByText("Two").tagName).toBe("P");
+    expect(screen.getByRole("searchbox", { name: "Search the lab" })).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "Token values" })).toBeInTheDocument();
   });
 
   it("with `focusable`, is reachable by Tab and marked to show while focused (R7.2)", async () => {
@@ -48,7 +118,6 @@ describe("VisuallyHidden", () => {
     const link = screen.getByRole("link", { name: "Skip to main content" });
     expect(link).toHaveFocus();
     expect(link).toHaveClass(styles.focusable ?? "");
-    expect(link.matches(".focusable:focus-within, :focus-within")).toBe(true);
   });
 
   it("shows while a focusable descendant has focus (R7.2)", async () => {

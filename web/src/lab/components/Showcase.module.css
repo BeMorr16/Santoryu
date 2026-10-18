@@ -54,6 +54,25 @@
   color: var(--color-accent-text);
 }
 
+/*
+ * The VisuallyHidden section's "Show hidden content" toggle (refinement R2.10). The repeated class
+ * outranks VisuallyHidden's hidden rule (0,3,0), since library CSS has no layers (decision 0008).
+ */
+.revealHidden.revealHidden.revealHidden.revealHidden {
+  position: static;
+  overflow: visible;
+  clip-path: none;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  white-space: normal;
+}
+
+/* Outlined unless focused, so a revealed skip link keeps its focus ring (WCAG 2.4.7). */
+.revealHidden.revealHidden.revealHidden.revealHidden:not(:focus-visible) {
+  outline: var(--effect-border-width) dashed var(--color-border-strong);
+}
+
 .notes {
   margin: 0;
   padding-inline-start: var(--space-inline-lg);

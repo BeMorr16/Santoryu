@@ -1,29 +1,15 @@
+/* VisuallyHidden reveals it as an overlay; this only places it, below the header's top edge. */
 .skipLink {
-  position: absolute;
-  /* Above the sticky header, which would otherwise cover it when focused. */
-  z-index: 2;
   inset-block-start: var(--space-stack-sm);
   inset-inline-start: var(--space-layout-xs);
-  padding: var(--space-inset-sm) var(--space-inset-md);
-  border-radius: var(--radius-control);
-  background-color: var(--color-surface-raised);
-  box-shadow: var(--effect-elevation-overlay);
-}
-
-/* Standard visually-hidden pattern: still focusable and announced, shown once focused. */
-.skipLink:not(:focus) {
-  overflow: hidden;
-  clip-path: inset(50%);
-  inline-size: 1px;
-  block-size: 1px;
-  white-space: nowrap;
 }
 
 /* Sticky glass header: blurred translucent surface over the grid backdrop (decision 0006). */
 .header {
   position: sticky;
   inset-block-start: 0;
-  z-index: 1;
+  /* Below revealed overlays such as the skip link (layer.overlay). */
+  z-index: var(--layer-sticky);
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-stack-sm) var(--space-inline-md);
