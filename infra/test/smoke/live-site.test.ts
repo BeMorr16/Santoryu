@@ -150,19 +150,26 @@ describe("R1 domain, TLS and canonical host", () => {
 });
 
 describe("R2 URL handling and status codes", () => {
-  it.each(["/", "/lab"])("R2.1/R2.2: %s is 200 HTML for that page", async (path) => {
-    const response = await request(path);
-    expect(response.status).toBe(200);
-    expect(response.headers.get("content-type")).toBe(HTML);
-    const document = new JSDOM(await response.text()).window.document;
-    const canonical = [...document.querySelectorAll('link[rel="canonical"]')].map((link) =>
-      link.getAttribute("href"),
-    );
-    expect(canonical).toEqual([`https://${apex}${path}`]);
-  });
+  it.each(["/", "/lab", "/lab/tokens", "/lab/components"])(
+    "R2.1/R2.2: %s is 200 HTML for that page",
+    async (path) => {
+      const response = await request(path);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toBe(HTML);
+      const document = new JSDOM(await response.text()).window.document;
+      const canonical = [...document.querySelectorAll('link[rel="canonical"]')].map((link) =>
+        link.getAttribute("href"),
+      );
+      expect(canonical).toEqual([`https://${apex}${path}`]);
+    },
+  );
 
   it.each([
     ["/lab/", "/lab"],
+    ["/lab/tokens/", "/lab/tokens"],
+    ["/lab/components/", "/lab/components"],
+    ["/lab/tokens/index.html", "/lab/tokens"],
+    ["/lab/components/index.html", "/lab/components"],
     ["/index.html", "/"],
     ["/lab/index.html", "/lab"],
   ])("R2.3/R2.4: %s redirects to %s with security headers", async (path, canonical) => {
@@ -171,7 +178,7 @@ describe("R2 URL handling and status codes", () => {
     expectSecurityHeaders(response);
   });
 
-  it.each(["/nope", "/404.html", "/__spa-fallback.html"])(
+  it.each(["/nope", "/lab/nope", "/404.html", "/__spa-fallback.html"])(
     "R2.5/R2.8: %s is a 404 with the not-found page",
     async (path) => {
       const response = await request(path);
@@ -202,7 +209,7 @@ describe("R2 URL handling and status codes", () => {
 
 describe("R3 caching and content types", () => {
   it("R3.1/R3.5: pages and the 404 revalidate and are UTF-8 HTML", async () => {
-    for (const path of ["/", "/lab", "/nope"]) {
+    for (const path of ["/", "/lab", "/lab/tokens", "/lab/components", "/nope"]) {
       const response = await request(path);
       expect(response.headers.get("cache-control"), path).toBe(REVALIDATE);
       expect(response.headers.get("content-type"), path).toBe(HTML);

@@ -50,6 +50,19 @@ describe("sitemap.xml", () => {
     }
   });
 
+  it("lists the lab sub-pages (R14.2)", () => {
+    const locs = [...sitemap().getElementsByTagNameNS(sitemapNamespace, "loc")].map(
+      (loc) => loc.textContent,
+    );
+    expect(locs).toEqual(
+      expect.arrayContaining([
+        `${siteUrl}/lab`,
+        `${siteUrl}/lab/tokens`,
+        `${siteUrl}/lab/components`,
+      ]),
+    );
+  });
+
   it("lists exactly the canonical URLs of the built pages", () => {
     const locs = [...sitemap().getElementsByTagNameNS(sitemapNamespace, "loc")].map(
       (loc) => loc.textContent,

@@ -5,7 +5,7 @@ import { finalize404, removeSpaFallback } from "./scripts/finalize-404.ts";
 import { writeSiteManifest } from "./scripts/site-manifest.ts";
 import { siteUrl } from "./src/site.config.ts";
 
-const prerender = ["/", "/lab", "/404"];
+const prerender = ["/", "/lab", "/lab/tokens", "/lab/components", "/404"];
 
 export default {
   appDirectory: "src",

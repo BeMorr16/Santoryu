@@ -1,0 +1,64 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+}
+
+.example {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-stack-sm) var(--space-inline-md);
+  align-items: center;
+}
+
+/* Outlined boxes so layout examples show their gaps. */
+.box {
+  padding: var(--space-inset-sm) var(--space-inset-md);
+  border: var(--effect-border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-raised);
+}
+
+.frame {
+  border: var(--effect-border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-control);
+}
+
+.narrow {
+  max-inline-size: var(--size-column-sm);
+}
+
+.notes {
+  margin: 0;
+  padding-inline-start: var(--space-inline-lg);
+}
+
+.toc {
+  margin: 0;
+  padding-inline-start: var(--space-inline-lg);
+  columns: var(--size-column-sm) 3;
+}
+
+/* The documented styling API (design §4.3): override a component token on a wrapper. */
+.brandCta {
+  --component-button-primary-background: var(--color-accent-text);
+  --component-button-primary-border: var(--color-accent-text);
+  --component-button-primary-background-hover: var(--color-link-hover);
+}
+
+/* Wraps rather than scrolling sideways, so nothing is out of keyboard reach (WCAG 2.1.1, 1.4.10). */
+.code {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  padding: var(--space-inset-sm);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-raised);
+  font-size: var(--type-size-small);
+}

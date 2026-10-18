@@ -1,11 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { renderViewerRequest } from "../src/edge-functions.ts";
 import { SECURITY_HEADERS } from "../src/security-headers.ts";
-import { loadHandler, querystring, type QueryString } from "./edge-harness.ts";
+import { loadHandler } from "../src/edge-runtime.ts";
+import { querystring, type QueryString } from "./edge-harness.ts";
 
 const testConfig = {
   apex: "example.test",
-  files: ["/404.html", "/index.html", "/lab/index.html", "/robots.txt", "/sitemap.xml"],
+  files: [
+    "/404.html",
+    "/index.html",
+    "/lab/components/index.html",
+    "/lab/index.html",
+    "/lab/tokens/index.html",
+    "/robots.txt",
+    "/sitemap.xml",
+  ],
 };
 
 interface Request {
@@ -81,6 +90,10 @@ describe("viewer-request: canonical paths (R2.3, R2.4)", () => {
     ["/index.html", "https://example.test/"],
     ["/lab/index.html", "https://example.test/lab"],
     ["/lab//index.html", "https://example.test/lab"],
+    ["/lab/tokens/", "https://example.test/lab/tokens"],
+    ["/lab/components/", "https://example.test/lab/components"],
+    ["/lab/tokens/index.html", "https://example.test/lab/tokens"],
+    ["/lab/components/index.html", "https://example.test/lab/components"],
   ])("%s → %s", (uri, location) => {
     expectRedirect(run(uri), location);
   });
@@ -112,6 +125,8 @@ describe("viewer-request: routing (R2.1, R2.2, R2.5, R2.8)", () => {
   it.each([
     ["/", "/index.html"],
     ["/lab", "/lab/index.html"],
+    ["/lab/tokens", "/lab/tokens/index.html"],
+    ["/lab/components", "/lab/components/index.html"],
     ["/robots.txt", "/robots.txt"],
     ["/sitemap.xml", "/sitemap.xml"],
     ["/404.html", "/404.html"],

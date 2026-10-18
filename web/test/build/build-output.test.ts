@@ -21,7 +21,21 @@ const pages = [
     title: "Lab · Ben",
     canonical: `${siteUrl}/lab`,
     h1: "Lab",
-    bodyText: "--color-text-default",
+    bodyText: "Components",
+  },
+  {
+    file: "lab/tokens/index.html",
+    title: "Tokens · Lab · Ben",
+    canonical: `${siteUrl}/lab/tokens`,
+    h1: "Tokens",
+    bodyText: "--component-button-primary-background",
+  },
+  {
+    file: "lab/components/index.html",
+    title: "Components · Lab · Ben",
+    canonical: `${siteUrl}/lab/components`,
+    h1: "Components",
+    bodyText: "Back to Lab",
   },
   {
     file: "404.html",
@@ -52,9 +66,11 @@ beforeAll(() => {
 });
 
 describe("build output files", () => {
-  it("emits /lab as lab/index.html and the not-found page as a root 404.html", () => {
+  it("emits each route as <route>/index.html and the not-found page as a root 404.html (R14.2)", () => {
     expect(existsSync(`${clientDir}index.html`)).toBe(true);
     expect(existsSync(`${clientDir}lab/index.html`)).toBe(true);
+    expect(existsSync(`${clientDir}lab/tokens/index.html`)).toBe(true);
+    expect(existsSync(`${clientDir}lab/components/index.html`)).toBe(true);
     expect(existsSync(`${clientDir}404.html`)).toBe(true);
     expect(existsSync(`${clientDir}404`)).toBe(false);
   });
@@ -128,6 +144,19 @@ describe.each(pages)("$file", (page) => {
     expect(body().getByRole("navigation", { name: "Primary" })).toBeTruthy();
     expect(body().getAllByRole("main")).toHaveLength(1);
     expect(body().getAllByRole("contentinfo")).toHaveLength(1);
+  });
+
+  it("runs the pre-paint theme script before any stylesheet or body content (R13.4)", () => {
+    const head = documentFor(page.file).head;
+    const script = [...head.querySelectorAll("script:not([src])")].find((s) =>
+      s.textContent.includes('localStorage.getItem("theme")'),
+    );
+    expect(script, "theme script").toBeDefined();
+    for (const stylesheet of head.querySelectorAll('link[rel="stylesheet"], style')) {
+      expect(script?.compareDocumentPosition(stylesheet), stylesheet.outerHTML).toBe(
+        4 /* DOCUMENT_POSITION_FOLLOWING */,
+      );
+    }
   });
 
   it("makes the skip link the first focusable element, targeting main", () => {

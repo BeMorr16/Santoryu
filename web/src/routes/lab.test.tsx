@@ -1,34 +1,47 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import { siteUrl } from "../site.config.ts";
-import Lab, { links, meta } from "./lab.tsx";
+import Lab, { labPages, links, meta } from "./lab.tsx";
 
 function renderLab() {
   const Stub = createRoutesStub([{ path: "/lab", Component: Lab }]);
   render(<Stub initialEntries={["/lab"]} />);
 }
 
-describe("lab route", () => {
-  it("renders an h1 of Lab, then the six category h2s in order, with no deeper levels", async () => {
+describe("lab hub route (R14.1)", () => {
+  it("renders an h1 of Lab and a short intro", async () => {
     renderLab();
 
-    const headings = await screen.findAllByRole("heading");
-    expect(headings.map((h) => [h.tagName, h.textContent])).toEqual([
-      ["H1", "Lab"],
-      ["H2", "Color"],
-      ["H2", "Type"],
-      ["H2", "Space"],
-      ["H2", "Radius"],
-      ["H2", "Motion"],
-      ["H2", "Effect"],
-    ]);
+    expect(await screen.findByRole("heading", { level: 1, name: "Lab" })).toBeVisible();
+    expect(screen.getByText(/design system/i, { selector: "p" })).toBeVisible();
   });
 
-  it("has a short intro", async () => {
+  it("links Tokens and Components, each with a one-line description", async () => {
     renderLab();
 
-    expect(await screen.findByText(/design tokens/i, { selector: "p" })).toBeVisible();
+    const list = await screen.findByRole("list");
+    const items = within(list).getAllByRole("listitem");
+    expect(items).toHaveLength(2);
+    expect(labPages.map((page) => [page.title, page.href])).toEqual([
+      ["Tokens", "/lab/tokens"],
+      ["Components", "/lab/components"],
+    ]);
+    for (const [index, page] of labPages.entries()) {
+      const item = items[index];
+      if (!item) throw new Error(`missing item ${String(index)}`);
+      expect(within(item).getByRole("link", { name: page.title })).toHaveAttribute(
+        "href",
+        page.href,
+      );
+      expect(item).toHaveTextContent(page.description);
+    }
+  });
+
+  it("has only the one heading", async () => {
+    renderLab();
+
+    expect(await screen.findAllByRole("heading")).toHaveLength(1);
   });
 
   it("is titled Lab · Ben, with a description", () => {

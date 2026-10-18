@@ -1,0 +1,16 @@
+/* A scoped theme here comes from the generated [data-theme] blocks alone (R15.7). */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+  padding: var(--space-inset-md);
+  border: var(--effect-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-sunken);
+  color: var(--color-text-default);
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
