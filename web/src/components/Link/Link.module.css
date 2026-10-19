@@ -4,23 +4,46 @@
   text-decoration-line: underline;
   text-decoration-thickness: var(--component-link-underline-thickness);
   text-underline-offset: var(--component-link-underline-offset);
+  /* Its own transition, in place of the global `a` rule's. Thickness snaps, so it doesn't jitter. */
+  transition-property: color;
+  transition-duration: var(--component-link-transition-duration);
+  transition-timing-function: var(--component-link-transition-easing);
 }
 
+/* Resets the global a:hover color. It's not a hover style, so it isn't gated (refinement R4.4). */
 .link:hover {
-  color: var(--component-link-color-hover);
+  color: var(--component-link-color);
+}
+
+/* Opt-in (refinement R4.9). Browsers only allow color here, and hide it from scripts. */
+.showVisited:visited {
+  color: var(--component-link-color-visited);
+}
+
+/* No hover look on touch screens, where it would stick after a tap (refinement R4.4). */
+@media (hover: hover) {
+  .link:hover {
+    color: var(--component-link-color-hover);
+    text-decoration-thickness: var(--component-link-underline-thickness-hover);
+  }
 }
 
 .link:focus-visible {
-  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline: var(--effect-focus-ring-width) solid var(--component-link-focus-ring-color);
   outline-offset: var(--effect-focus-ring-offset);
 }
 
-/* The consumer sets aria-current; it's marked by weight as well as color (R5.8). */
+/* Set automatically or by the consumer; it's marked by weight as well as color (R5.8, refinement R4.8). */
 .link[aria-current]:not([aria-current="false"]) {
   color: var(--component-link-color-current);
   font-weight: var(--component-link-font-weight-current);
 }
 
+/* Keeps the new-tab icon on the last word's line (refinement R4.2). */
+.newTab {
+  white-space: nowrap;
+}
+
 .newTabIcon {
-  margin-inline-start: var(--space-inline-xs);
+  margin-inline-start: var(--component-link-new-tab-gap);
 }

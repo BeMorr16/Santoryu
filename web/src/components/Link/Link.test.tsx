@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef, type ReactNode } from "react";
-import { createRoutesStub } from "react-router";
+import { createRoutesStub, MemoryRouter, useLocation } from "react-router";
 import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { expectHydratesCleanly } from "../../../test/component.tsx";
@@ -17,6 +17,12 @@ function renderInRouter(ui: ReactNode) {
     { path: "/projects", Component: () => <h1>Projects page</h1> },
   ]);
   return render(<Stub initialEntries={["/"]} />);
+}
+
+/** Renders `ui` on every path, starting at `path`. */
+function renderAt(path: string, ui: ReactNode) {
+  const Stub = createRoutesStub([{ path: "*", Component: () => <main>{ui}</main> }]);
+  return render(<Stub initialEntries={[path]} />);
 }
 
 describe("Link", () => {
@@ -55,7 +61,7 @@ describe("Link", () => {
     );
 
     const link = await screen.findByRole("link", { name: /^GitHub/ });
-    expect(link).toHaveAccessibleName("GitHub (opens in new tab)");
+    expect(link).toHaveAccessibleName("GitHub, opens in new tab");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
     const icon = link.querySelector("svg");
@@ -63,6 +69,88 @@ describe("Link", () => {
     expect(icon?.innerHTML).toBe(
       render(<Icon name="external-link" />).container.querySelector("svg")?.innerHTML,
     );
+  });
+
+  it("keeps an inline new-tab icon on the last word's line, with nothing after it (refinement R4.2, R4.3)", () => {
+    render(
+      <Link href="https://github.com/" newTab>
+        GitHub
+      </Link>,
+    );
+
+    const link = screen.getByRole("link");
+    const icon = link.querySelector("svg");
+    const wrapper = icon?.parentElement;
+    expect(wrapper).toHaveClass(styles.newTab ?? "");
+    expect(wrapper).toHaveAttribute("aria-hidden", "true");
+    expect(wrapper?.firstChild?.textContent).toBe("\u2060");
+    expect(icon).toHaveClass(styles.newTabIcon ?? "");
+    expect(wrapper?.nextSibling).toBe(link.lastChild);
+    expect(link.lastChild?.textContent).toBe(", opens in new tab");
+  });
+
+  it("spaces a button-styled new-tab icon with Button's gap alone (refinement R4.3)", () => {
+    render(
+      <Link href="https://github.com/" newTab appearance="button">
+        GitHub
+      </Link>,
+    );
+
+    const link = screen.getByRole("link", { name: "GitHub, opens in new tab" });
+    const icon = link.querySelector("svg");
+    expect(icon).not.toHaveClass(styles.newTabIcon ?? "");
+    expect(link.textContent).not.toContain("\u2060");
+  });
+
+  it.each([
+    ["alone", "me", false, "me"],
+    ["with newTab", "me", true, "me noopener noreferrer"],
+    ["with newTab, without duplicates", "noopener  me", true, "noopener me noreferrer"],
+  ])("takes rel %s (refinement R4.6)", (_kind, rel, newTab, expected) => {
+    render(
+      <Link href="https://github.com/" rel={rel} newTab={newTab}>
+        GitHub
+      </Link>,
+    );
+
+    expect(screen.getByRole("link", { name: /^GitHub/ })).toHaveAttribute("rel", expected);
+  });
+
+  it("passes React Router's options to a routed link (refinement R4.7)", async () => {
+    const user = userEvent.setup();
+    function Destination() {
+      const { state } = useLocation() as { state: unknown };
+      return <h1>{String(state)}</h1>;
+    }
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => (
+          <Link href="/projects" state="from home" prefetch="none">
+            Projects
+          </Link>
+        ),
+      },
+      { path: "/projects", Component: Destination },
+    ]);
+    render(<Stub initialEntries={["/"]} />);
+
+    await user.click(await screen.findByRole("link", { name: "Projects" }));
+
+    expect(await screen.findByRole("heading", { name: "from home" })).toBeInTheDocument();
+  });
+
+  it("drops React Router's options on a plain link (refinement R4.7)", () => {
+    render(
+      <Link href="https://github.com/" prefetch="intent" state="x" discover="none" replace>
+        GitHub
+      </Link>,
+    );
+
+    const link = screen.getByRole("link");
+    for (const name of ["prefetch", "state", "discover", "replace"]) {
+      expect(link).not.toHaveAttribute(name);
+    }
   });
 
   it("without newTab, sets no target or rel", () => {
@@ -123,6 +211,182 @@ describe("Link", () => {
     );
   });
 
+  it.each([
+    ["an exact match", "/lab/tokens", "/lab/tokens", undefined, "page"],
+    ["a trailing slash", "/lab/tokens/", "/lab/tokens", undefined, "page"],
+    ["a different case", "/Lab/Tokens", "/lab/tokens", undefined, "page"],
+    ["a query and hash", "/lab/tokens", "/lab/tokens?view=all#color", undefined, "page"],
+    ["a child page with section", "/lab/tokens", "/lab", "section", "true"],
+    ["the same page with section", "/lab", "/lab", "section", "page"],
+  ] as const)("marks %s as current (refinement R4.8)", async (_kind, at, href, match, expected) => {
+    renderAt(
+      at,
+      <Link href={href} currentMatch={match}>
+        Here
+      </Link>,
+    );
+
+    expect(await screen.findByRole("link", { name: "Here" })).toHaveAttribute(
+      "aria-current",
+      expected,
+    );
+  });
+
+  it.each([
+    ["a child page without section", "/lab/tokens", "/lab", undefined],
+    ["a child page of / with section", "/lab", "/", "section"],
+    ["a sibling sharing a prefix", "/labs", "/lab", "section"],
+  ] as const)("doesn't mark %s (refinement R4.8)", async (_kind, at, href, match) => {
+    renderAt(
+      at,
+      <Link href={href} currentMatch={match}>
+        Here
+      </Link>,
+    );
+
+    expect(await screen.findByRole("link", { name: "Here" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("never marks a plain link (refinement R4.8)", async () => {
+    renderAt(
+      "/lab",
+      <>
+        <Link href="#lab">Hash</Link>
+        <Link href="https://example.com/lab">Absolute</Link>
+      </>,
+    );
+
+    for (const name of ["Hash", "Absolute"]) {
+      expect(await screen.findByRole("link", { name })).not.toHaveAttribute("aria-current");
+    }
+  });
+
+  it.each([
+    [false, "false"],
+    ["step", "step"],
+  ] as const)(
+    "lets the caller's aria-current=%s win (refinement R4.8)",
+    async (value, expected) => {
+      renderAt(
+        "/lab",
+        <Link href="/lab" aria-current={value}>
+          Lab
+        </Link>,
+      );
+
+      expect(await screen.findByRole("link", { name: "Lab" })).toHaveAttribute(
+        "aria-current",
+        expected,
+      );
+    },
+  );
+
+  it("doesn't mark a button-styled link by itself, but keeps the caller's aria-current (refinement R4.8)", async () => {
+    renderAt(
+      "/lab",
+      <>
+        <Link href="/lab" appearance="button">
+          Lab
+        </Link>
+        <Link href="/lab" appearance="button" aria-current="page">
+          Marked
+        </Link>
+      </>,
+    );
+
+    expect(await screen.findByRole("link", { name: "Lab" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "Marked" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("adds the new-tab text to an aria-label (refinement R4.2)", () => {
+    render(
+      <Link
+        href="mailto:hello@example.com"
+        appearance="button"
+        iconStart="mail"
+        aria-label="Email me"
+        newTab
+      />,
+    );
+
+    expect(screen.getByRole("link")).toHaveAccessibleName("Email me, opens in new tab");
+  });
+
+  it("adds the new-tab text to aria-labelledby (refinement R4.2)", () => {
+    render(
+      <>
+        <span id="profile-label">GitHub profile</span>
+        <Link
+          href="https://github.com/"
+          appearance="button"
+          iconStart="github"
+          aria-labelledby="profile-label"
+          newTab
+        />
+      </>,
+    );
+
+    expect(screen.getByRole("link")).toHaveAccessibleName(/^GitHub profile ?, opens in new tab$/);
+  });
+
+  it("leaves aria-label alone without newTab (refinement R4.2)", () => {
+    render(<Link href="#x" appearance="button" iconStart="check" aria-label="Done" />);
+
+    expect(screen.getByRole("link")).toHaveAccessibleName("Done");
+  });
+
+  it("follows a routed link by keyboard, moving the mark (R5.2, refinement R4.8)", async () => {
+    const user = userEvent.setup();
+    renderAt(
+      "/lab",
+      <>
+        <Link href="/lab">Lab</Link>
+        <Link href="/lab/tokens">Tokens</Link>
+      </>,
+    );
+    await screen.findByRole("link", { name: "Lab" });
+
+    await user.tab();
+    await user.tab();
+    expect(screen.getByRole("link", { name: "Tokens" })).toHaveFocus();
+    await user.keyboard("{Enter}");
+
+    expect(screen.getByRole("link", { name: "Tokens" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Lab" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("moves the mark after client-side navigation (refinement R4.8)", async () => {
+    const user = userEvent.setup();
+    renderAt(
+      "/lab",
+      <>
+        <Link href="/lab">Lab</Link>
+        <Link href="/lab/tokens">Tokens</Link>
+      </>,
+    );
+
+    await user.click(await screen.findByRole("link", { name: "Tokens" }));
+
+    expect(screen.getByRole("link", { name: "Tokens" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Lab" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("adds the visited class only with showVisited (refinement R4.9)", () => {
+    render(
+      <>
+        <Link href="#a" showVisited>
+          Tracked
+        </Link>
+        <Link href="#b">Untracked</Link>
+      </>,
+    );
+
+    expect(screen.getByRole("link", { name: "Tracked" })).toHaveClass(styles.showVisited ?? "");
+    expect(screen.getByRole("link", { name: "Untracked" })).not.toHaveClass(
+      styles.showVisited ?? "",
+    );
+  });
+
   it("passes aria-current through, as the current-state styling hook (R5.8)", async () => {
     renderInRouter(
       <Link href="/" aria-current="page">
@@ -169,7 +433,18 @@ describe("Link", () => {
     );
   });
 
-  it("has no axe violations, inline, current, new-tab and as a button (R3.9)", async () => {
+  it("hydrates a current routed link with no mismatch (R3.6, refinement R4.8)", () => {
+    expectHydratesCleanly(
+      <MemoryRouter initialEntries={["/lab/tokens"]}>
+        <Link href="/lab/tokens">Tokens</Link>
+        <Link href="/lab" currentMatch="section">
+          Lab
+        </Link>
+      </MemoryRouter>,
+    );
+  });
+
+  it("has no axe violations, inline, current, new-tab, visited, rel and as buttons (R3.9)", async () => {
     const { container } = renderInRouter(
       <>
         <p>
@@ -184,6 +459,21 @@ describe("Link", () => {
         <Link href="#contact" appearance="button" variant="primary">
           Contact
         </Link>
+        <Link href="/projects" currentMatch="section">
+          Projects
+        </Link>
+        <Link href="#visited" showVisited>
+          Visited
+        </Link>
+        <Link href="https://github.com/" rel="me" newTab>
+          Profile
+        </Link>
+        <Link
+          href="mailto:hello@example.com"
+          appearance="button"
+          iconStart="mail"
+          aria-label="Email me"
+        />
       </>,
     );
     await screen.findByRole("link", { name: "Home" });

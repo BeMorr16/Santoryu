@@ -145,6 +145,30 @@
             }
           ]
         }
+      },
+      "visited": {
+        "$value": "{color.violet.200}",
+        "$description": "Text of a visited link, where a Link opts in with showVisited (violet).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "text"
+            }
+          ]
+        }
       }
     },
     "action": {

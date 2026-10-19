@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { Outlet, createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
+import linkStyles from "../components/Link/Link.module.css";
 import * as notFoundModule from "./not-found.tsx";
 
 const { default: NotFound, meta } = notFoundModule;
@@ -25,6 +26,12 @@ describe("not-found route", () => {
 
     expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("Page not found");
     expect(screen.getByRole("link", { name: /home/i })).toHaveAttribute("href", "/");
+  });
+
+  it("uses the library Link for the home link (refinement R4.10)", async () => {
+    renderAt("/does-not-exist");
+
+    expect(await screen.findByRole("link", { name: /home/i })).toHaveClass(linkStyles.link ?? "");
   });
 
   it("renders for unknown nested paths", async () => {

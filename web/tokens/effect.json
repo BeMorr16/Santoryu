@@ -179,6 +179,10 @@
       "offset": {
         "$value": "{effect.line.2}",
         "$description": "Gap between link text and its underline."
+      },
+      "thickness-hover": {
+        "$value": "{effect.line.2}",
+        "$description": "Thickness of a hovered link underline."
       }
     }
   }

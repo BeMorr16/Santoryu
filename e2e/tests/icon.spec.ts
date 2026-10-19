@@ -27,7 +27,7 @@ test.describe("inline icons sit -0.125em below the baseline (refinement R1.1, R1
     await page.goto("/lab/components#link");
 
     const icon = section(page, "Link")
-      .getByRole("link", { name: "GitHub (opens in new tab)" })
+      .getByRole("link", { name: /^GitHub ?, opens in new tab$/ })
       .first()
       .locator("svg");
     const { actual, expected, unit } = await offsets(icon);

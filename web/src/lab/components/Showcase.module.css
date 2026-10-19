@@ -91,6 +91,11 @@
   --component-button-primary-background-hover: var(--color-link-hover);
 }
 
+.quietLinks {
+  --component-link-color: var(--color-text-default);
+  --component-link-color-hover: var(--color-link-hover);
+}
+
 /* Wraps rather than scrolling sideways, so nothing is out of keyboard reach (WCAG 2.1.1, 1.4.10). */
 .code {
   margin: 0;

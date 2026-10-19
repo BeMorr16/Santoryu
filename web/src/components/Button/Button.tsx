@@ -1,15 +1,13 @@
-import type { ComponentPropsWithRef, MouseEvent, ReactNode } from "react";
-import type { IconName } from "../Icon/registry.ts";
-import { ButtonContent, buttonClassName, type ButtonLookProps } from "../shared/button.tsx";
+import type { ComponentPropsWithRef, MouseEvent } from "react";
+import {
+  ButtonContent,
+  buttonClassName,
+  type ButtonLabel,
+  type ButtonLookProps,
+} from "../shared/button.tsx";
 import { cx } from "../shared/cx.ts";
 
 export type ButtonOwnProps = ButtonLookProps;
-
-/** A label, or an icon plus an accessible name (R4.4, refinement R3.6). */
-type ButtonLabel =
-  | { children: ReactNode }
-  | ({ children?: never } & ({ "aria-label": string } | { "aria-labelledby": string }) &
-      ({ iconStart: IconName } | { iconEnd: IconName }));
 
 /**
  * Disabled only through `disabled` (refinement R3.7). `aria-disabled` is `never`, since hyphenated

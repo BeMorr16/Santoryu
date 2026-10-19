@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
+import linkStyles from "../components/Link/Link.module.css";
 import { homeContent } from "../content/home.ts";
 import { siteUrl } from "../site.config.ts";
 import Home, { links, meta } from "./home.tsx";
@@ -29,6 +30,14 @@ describe("home route", () => {
 
     const link = await screen.findByRole("link", { name: homeContent.labLinkText });
     expect(link).toHaveAttribute("href", "/lab");
+  });
+
+  it("uses the library Link for the lab link (refinement R4.10)", async () => {
+    renderHome();
+
+    expect(await screen.findByRole("link", { name: homeContent.labLinkText })).toHaveClass(
+      linkStyles.link ?? "",
+    );
   });
 
   it("sets the title and description from the content module", () => {

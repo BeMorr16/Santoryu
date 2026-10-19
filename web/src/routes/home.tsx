@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "../components/Link/Link.tsx";
 import { homeContent } from "../content/home.ts";
 import { siteUrl } from "../site.config.ts";
 import type { Route } from "./+types/home";
@@ -18,7 +18,7 @@ export default function Home() {
       <h1>{homeContent.name}</h1>
       <p className={styles.intro}>{homeContent.intro}</p>
       <p>
-        <Link to="/lab">{homeContent.labLinkText}</Link>
+        <Link href="/lab">{homeContent.labLinkText}</Link>
       </p>
     </>
   );

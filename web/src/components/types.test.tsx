@@ -163,6 +163,57 @@ describe("library types", () => {
     expectTypeOf(valid).toBeFunction();
   });
 
+  it("Link always has a name, and takes rel, router options and current matching (refinement R4.1, R4.6–R4.9)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- an inline link needs text.
+        <Link key="a" href="/" />,
+        // @ts-expect-error -- an inline link needs text, even with aria-label.
+        <Link key="b" href="/" aria-label="Home" />,
+        // @ts-expect-error -- a button-styled link with no text needs a name.
+        <Link key="c" href="/" appearance="button" iconStart="github" />,
+        // @ts-expect-error -- a button-styled link with no text needs an icon.
+        <Link key="d" href="/" appearance="button" aria-label="Home" />,
+        // @ts-expect-error -- showVisited is for inline links.
+        <Link key="e" href="/" appearance="button" showVisited>
+          x
+        </Link>,
+        // @ts-expect-error -- currentMatch is for inline links.
+        <Link key="g" href="/" appearance="button" currentMatch="section">
+          x
+        </Link>,
+        // @ts-expect-error -- not a match mode.
+        <Link key="f" href="/" currentMatch="prefix">
+          x
+        </Link>,
+      ];
+    }
+    function valid(variant: ButtonLookProps["variant"]) {
+      return [
+        <Link
+          key="a"
+          href="/"
+          appearance="button"
+          variant={variant}
+          iconStart="check"
+          aria-label="x"
+        />,
+        <Link key="b" href="/" appearance="button" iconEnd="mail" aria-labelledby="label" />,
+        <Link key="c" href="https://github.com/" rel="me" newTab showVisited>
+          GitHub
+        </Link>,
+        <Link key="d" href="/lab" prefetch="intent" state={{ from: "home" }} currentMatch="section">
+          Lab
+        </Link>,
+        <Link key="e" href="/lab" aria-current={false}>
+          Lab
+        </Link>,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
   it("Stack and Grid allow only the closed element set and no reverse directions (R8.2, R8.4, R9.3)", () => {
     function invalid() {
       return [

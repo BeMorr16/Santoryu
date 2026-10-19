@@ -14,6 +14,12 @@ export interface ButtonLookProps {
   iconEnd?: IconName | undefined;
 }
 
+/** A label, or an icon plus an accessible name (R4.4, refinement R3.6, R4.1). */
+export type ButtonLabel =
+  | { children: ReactNode }
+  | ({ children?: never } & ({ "aria-label": string } | { "aria-labelledby": string }) &
+      ({ iconStart: IconName } | { iconEnd: IconName }));
+
 type IconOnlyProps = Pick<ButtonLookProps, "iconStart" | "iconEnd"> & {
   children?: ReactNode;
   /** Another visible icon the caller adds, such as Link's new-tab icon. */

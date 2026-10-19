@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import iconStyles from "../../components/Icon/Icon.module.css";
 import { icons } from "../../components/Icon/registry.ts";
+import linkStyles from "../../components/Link/Link.module.css";
 import buttonStyles from "../../components/shared/button-styles.module.css";
 import hiddenStyles from "../../components/VisuallyHidden/VisuallyHidden.module.css";
 import showcaseStyles from "./Showcase.module.css";
@@ -270,6 +271,42 @@ describe("/lab/components page (R15.1, R15.3)", () => {
         name: "Send me a note about a project you have in mind",
       }),
     ).toBeInTheDocument();
+  });
+
+  it("shows Link's current-page, visited, new-tab, icon-only and customized examples (refinement R4.11)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Link" });
+    const example = (title: string) => {
+      const element = within(section).getByText(title, { selector: "p" }).parentElement;
+      if (element === null) throw new Error(`no ${title} example`);
+      return element;
+    };
+
+    const current = example("Current page");
+    const expected = [
+      ["Components", "page", "Announced as: “Components, link, current page”"],
+      ["This page, unmarked", "false", "Announced as: “This page, unmarked, link”"],
+    ] as const;
+    for (const [name, ariaCurrent, caption] of expected) {
+      const link = within(current).getByRole("link", { name });
+      expect(link).toHaveAttribute("aria-current", ariaCurrent);
+      expect(within(current).getByText(caption)).toBeInTheDocument();
+    }
+
+    for (const link of within(example("Visited (opt-in)")).getAllByRole("link")) {
+      expect(link).toHaveClass(linkStyles.showVisited ?? "");
+    }
+    const narrow = within(example("New tab")).getByText(/The code for this site is on/);
+    expect(narrow).toHaveClass(showcaseStyles.narrow ?? "");
+    expect(
+      within(narrow).getByRole("link", { name: "GitHub, opens in new tab" }),
+    ).toBeInTheDocument();
+    expect(within(example("As a button")).getByRole("link", { name: "Email me" })).toHaveClass(
+      buttonStyles.iconOnly ?? "",
+    );
+    const quiet = within(example("Customized with a component token")).getByText(/Quiet links/);
+    expect(quiet).toHaveClass(showcaseStyles.quietLinks ?? "");
+    expect(within(quiet).getByRole("link", { name: "token reference" })).toBeInTheDocument();
   });
 
   it("has no axe violations (R3.9)", async () => {

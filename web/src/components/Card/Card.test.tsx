@@ -99,7 +99,7 @@ describe("Card", () => {
     it("says when the card link opens a new tab", () => {
       render(<Card heading="GitHub profile" href="https://github.com/" newTab />);
 
-      expect(screen.getByRole("link")).toHaveAccessibleName("GitHub profile (opens in new tab)");
+      expect(screen.getByRole("link")).toHaveAccessibleName("GitHub profile, opens in new tab");
     });
   });
 

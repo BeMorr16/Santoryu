@@ -62,7 +62,7 @@ export const cardShowcase: Showcase = {
   ],
   a11y: [
     "An article by default, or section, div or li.",
-    "A link card has one link: its heading, named by the heading text alone (plus “(opens in new tab)” with newTab).",
+    "A link card has one link: its heading, named by the heading text alone (plus “, opens in new tab” with newTab).",
     "The whole surface is clickable for pointers; nested controls keep their own clicks and focus.",
   ],
 };

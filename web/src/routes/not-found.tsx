@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "../components/Link/Link.tsx";
 import { siteName } from "../site.config.ts";
 import type { Route } from "./+types/not-found";
 
@@ -16,7 +16,7 @@ export default function NotFound() {
       <h1>Page not found</h1>
       <p>The page you were looking for doesn't exist or has moved.</p>
       <p>
-        <Link to="/">Go to the home page</Link>
+        <Link href="/">Go to the home page</Link>
       </p>
     </>
   );
