@@ -1,6 +1,7 @@
 import type { ElementType } from "react";
 import { cx } from "../shared/cx.ts";
 import { listRole, type Gap, type LayoutElement } from "../shared/layout.ts";
+import layout from "../shared/layout.module.css";
 import type { PolymorphicProps } from "../shared/polymorphic.ts";
 import styles from "./Grid.module.css";
 
@@ -31,9 +32,10 @@ export function Grid<E extends LayoutElement = "div">({
       className={cx(
         styles.grid,
         styles[`min-${min}`],
-        styles[`gap-${gap}`],
-        (tag === "ul" || tag === "ol") && styles.list,
-        tag === "fieldset" && styles.fieldset,
+        layout[`row-gap-${gap}`],
+        layout[`column-gap-${gap}`],
+        (tag === "ul" || tag === "ol") && layout.list,
+        tag === "fieldset" && layout.fieldset,
         className,
       )}
     />

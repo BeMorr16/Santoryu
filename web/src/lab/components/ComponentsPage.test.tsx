@@ -351,6 +351,53 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     expect(within(quiet).getByRole("link", { name: "token reference" })).toBeInTheDocument();
   });
 
+  it("shows the Stack examples, the labelled lab-pages list and the legend-named fieldset (refinement R6.7)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Stack" });
+    const example = (title: string) => {
+      const element = within(section).getByText(title, { selector: "p" }).parentElement;
+      if (element === null) throw new Error(`no ${title} example`);
+      return element;
+    };
+
+    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    expect(labels).toEqual([
+      "Vertical (default), gaps none to xl",
+      "Horizontal, gaps none to xl",
+      "Align",
+      "Justify",
+      "Vertical alignment",
+      "Wrapping by default",
+      "One line",
+      "Row and column gaps",
+      "Semantics",
+    ]);
+
+    const alignment = example("Vertical alignment");
+    expect(within(alignment).getByRole("button", { name: "Stretched (default)" })).toBeVisible();
+    expect(within(alignment).getByRole("button", { name: "align start" })).toBeVisible();
+    for (const title of ["Wrapping by default", "Row and column gaps"]) {
+      const list = within(example(title)).getByRole("list");
+      expect(list).toHaveClass(showcaseStyles.narrow ?? "");
+      expect(within(list).getAllByRole("listitem")).toHaveLength(6);
+    }
+    const oneLine = example("One line");
+    expect(within(oneLine).getByText("Project")).toBeVisible();
+    expect(within(oneLine).getByRole("button", { name: "Edit project" })).toBeVisible();
+
+    const semantics = example("Semantics");
+    const pages = within(semantics).getByRole("list", { name: "Lab pages (example)" });
+    expect(within(semantics).queryByRole("navigation")).toBeNull();
+    expect(
+      within(pages)
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href")),
+    ).toEqual(["/lab", "/lab/tokens", "/lab/components"]);
+    const group = within(semantics).getByRole("group", { name: "Contact preference" });
+    expect(within(group).getByRole("radio", { name: "Email" })).toBeChecked();
+    expect(within(group).getByRole("radio", { name: "Phone" })).not.toBeChecked();
+  });
+
   it("has no axe violations (R3.9)", async () => {
     const { container } = renderPage();
     await screen.findByRole("list", { name: "On this page" });

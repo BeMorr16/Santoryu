@@ -50,7 +50,7 @@ function sizeCaption(size: (typeof sizes)[number]): string {
 /** Icons with visible captions. The caption names each one, so the icons are decorative. */
 function Tiles({ tiles }: { tiles: readonly { caption: string; icon: ReactNode }[] }) {
   return (
-    <Stack as="ul" direction="horizontal" gap="md" wrap>
+    <Stack as="ul" direction="horizontal" gap="md">
       {tiles.map(({ caption, icon }) => (
         <li key={caption} className={styles.tile}>
           {icon}

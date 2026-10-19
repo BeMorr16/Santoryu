@@ -156,7 +156,7 @@ function Examples() {
         <Button iconStart="mail">Email me</Button>
       </Example>
       <Example title="Icon-only">
-        <Stack as="ul" direction="horizontal" gap="md" wrap>
+        <Stack as="ul" direction="horizontal" gap="md">
           {iconOnly.map(({ caption, button }) => (
             <li key={caption} className={styles.tile}>
               {button}

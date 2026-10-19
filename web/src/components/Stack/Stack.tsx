@@ -1,15 +1,22 @@
 import type { ElementType } from "react";
 import { cx } from "../shared/cx.ts";
 import { listRole, type Gap, type LayoutElement } from "../shared/layout.ts";
+import layout from "../shared/layout.module.css";
 import type { PolymorphicProps } from "../shared/polymorphic.ts";
 import styles from "./Stack.module.css";
 
 export interface StackOwnProps {
   /** No reverse directions, so DOM order is visual order (R8.4). */
   direction?: "vertical" | "horizontal" | undefined;
+  /** Sets both gaps; `rowGap` and `columnGap` override one axis. */
   gap?: Gap | undefined;
+  /** Between rows: items in a vertical Stack, wrapped lines in a horizontal one (`space.stack.*`). */
+  rowGap?: Gap | undefined;
+  /** Between columns: items in a horizontal Stack, wrapped columns in a vertical one (`space.inline.*`). */
+  columnGap?: Gap | undefined;
   align?: "start" | "center" | "end" | "stretch" | "baseline" | undefined;
   justify?: "start" | "center" | "end" | "between" | undefined;
+  /** Default: true when horizontal, so rows reflow (refinement R6.1). */
   wrap?: boolean | undefined;
 }
 
@@ -20,9 +27,11 @@ export function Stack<E extends LayoutElement = "div">({
   as,
   direction = "vertical",
   gap = "md",
+  rowGap = gap,
+  columnGap = gap,
   align,
   justify,
-  wrap = false,
+  wrap = direction === "horizontal",
   className,
   role,
   ...rest
@@ -38,12 +47,13 @@ export function Stack<E extends LayoutElement = "div">({
       className={cx(
         styles.stack,
         styles[direction],
-        styles[`gap-${gap}`],
+        layout[`row-gap-${rowGap}`],
+        layout[`column-gap-${columnGap}`],
         align && styles[`align-${align}`],
         justify && styles[`justify-${justify}`],
         wrap && styles.wrap,
-        list && styles.list,
-        tag === "fieldset" && styles.fieldset,
+        list && layout.list,
+        tag === "fieldset" && layout.fieldset,
         className,
       )}
     />

@@ -3,10 +3,12 @@ import { createRef } from "react";
 import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { expectHydratesCleanly } from "../../../test/component.tsx";
+import layout from "../shared/layout.module.css";
 import { Grid } from "./Grid.tsx";
 import styles from "./Grid.module.css";
 
 const cls = (name: string) => styles[name] ?? `missing:${name}`;
+const shared = (name: string) => layout[name] ?? `missing:${name}`;
 
 describe("Grid", () => {
   it("is a div with md columns and the md gap by default (R9.1)", () => {
@@ -14,7 +16,12 @@ describe("Grid", () => {
 
     const grid = screen.getByTestId("grid");
     expect(grid.tagName).toBe("DIV");
-    expect(grid).toHaveClass(cls("grid"), cls("min-md"), cls("gap-md"));
+    expect(grid).toHaveClass(
+      cls("grid"),
+      cls("min-md"),
+      shared("row-gap-md"),
+      shared("column-gap-md"),
+    );
   });
 
   it.each(["sm", "md", "lg"] as const)(
@@ -27,11 +34,14 @@ describe("Grid", () => {
   );
 
   it.each(["none", "xs", "sm", "md", "lg", "xl"] as const)(
-    "sets gap %s through its class",
+    "sets gap %s through the shared row and column classes (refinement R6.5)",
     (gap) => {
       render(<Grid data-testid="grid" gap={gap} />);
 
-      expect(screen.getByTestId("grid")).toHaveClass(cls(`gap-${gap}`));
+      expect(screen.getByTestId("grid")).toHaveClass(
+        shared(`row-gap-${gap}`),
+        shared(`column-gap-${gap}`),
+      );
     },
   );
 
@@ -45,8 +55,24 @@ describe("Grid", () => {
 
     const list = screen.getByRole("list");
     expect(list.tagName).toBe(as.toUpperCase());
-    expect(list).toHaveClass(cls("list"));
+    expect(list).toHaveClass(shared("list"));
     expect(within(list).getAllByRole("listitem")).toHaveLength(2);
+  });
+
+  it("resets a fieldset with the shared class, and the legend names its group (refinement R6.4)", () => {
+    render(
+      <Grid as="fieldset" gap="sm">
+        <legend>Projects to show</legend>
+        <label>
+          <input type="checkbox" defaultChecked /> Personal site
+        </label>
+      </Grid>,
+    );
+
+    expect(screen.getByRole("group", { name: "Projects to show" })).toHaveClass(
+      shared("fieldset"),
+      shared("row-gap-sm"),
+    );
   });
 
   it("renders as section (R9.3)", () => {

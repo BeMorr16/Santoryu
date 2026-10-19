@@ -26,7 +26,7 @@ function Examples() {
         </Badge>
       </Example>
       <Example title="A tech stack, as a list">
-        <Stack as="ul" direction="horizontal" gap="xs" wrap aria-label="Tech stack">
+        <Stack as="ul" direction="horizontal" gap="xs" aria-label="Tech stack">
           {["React", "TypeScript", "AWS"].map((item) => (
             <Badge key={item} as="li">
               {item}

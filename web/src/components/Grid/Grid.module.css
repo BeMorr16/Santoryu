@@ -5,7 +5,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(var(--_min), 100%), 1fr));
-  gap: var(--_stack) var(--_inline);
+  gap: var(--_row) var(--_column);
 }
 
 .min-sm {
@@ -18,47 +18,4 @@
 
 .min-lg {
   --_min: var(--size-column-lg);
-}
-
-.gap-none {
-  --_stack: 0;
-  --_inline: 0;
-}
-
-.gap-xs {
-  --_stack: var(--space-stack-xs);
-  --_inline: var(--space-inline-xs);
-}
-
-.gap-sm {
-  --_stack: var(--space-stack-sm);
-  --_inline: var(--space-inline-sm);
-}
-
-.gap-md {
-  --_stack: var(--space-stack-md);
-  --_inline: var(--space-inline-md);
-}
-
-.gap-lg {
-  --_stack: var(--space-stack-lg);
-  --_inline: var(--space-inline-lg);
-}
-
-.gap-xl {
-  --_stack: var(--space-stack-xl);
-  --_inline: var(--space-inline-xl);
-}
-
-.list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.fieldset {
-  min-inline-size: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
 }

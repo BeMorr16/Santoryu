@@ -38,10 +38,12 @@ const kebab = (pascal: string) => pascal.replace(/(?<!^)([A-Z])/g, "-$1").toLowe
 /**
  * Which component a CSS file belongs to. `src/components/<Pascal>/…` is `<kebab>`, and shared
  * styles named `src/components/shared/<kebab>-styles.module.css` belong to `<kebab>` (Button's
- * look is shared by Link and MenuTrigger, design §4.3).
+ * look is shared by Link and MenuTrigger, design §4.3). Other shared styles, such as
+ * `shared/layout.module.css` (Stack and Grid, refinement R6.5), belong to `<kebab>` too, which
+ * has no tokens, so they get semantic tokens and private --_* properties only.
  */
 function ownerOf(file: string): Owner {
-  const shared = /^src\/components\/shared\/([a-z-]+)-styles\.module\.css$/.exec(file);
+  const shared = /^src\/components\/shared\/([a-z-]+?)(?:-styles)?\.module\.css$/.exec(file);
   if (shared?.[1]) return { kind: "component", component: shared[1] };
   const own = /^src\/components\/([A-Z][A-Za-z]*)\//.exec(file);
   if (own?.[1]) return { kind: "component", component: kebab(own[1]) };
@@ -233,6 +235,25 @@ describe("scanCss self-test", () => {
     ).toEqual([]);
     expect(scanCss(fixture, "src/components/Menu/Menu.module.css", fixtureTokens)).toEqual([
       "src/components/Menu/Menu.module.css:1: --component-button-radius is not a semantic token, a menu component token or a private --_* property",
+    ]);
+  });
+
+  it("gives other shared/<kebab>.module.css files semantic tokens and --_* only", () => {
+    const fixture = [
+      ".a {",
+      "  --_row: var(--space-stack-sm);",
+      "  gap: var(--_row) var(--space-inline-sm);",
+      "  border-radius: var(--component-button-radius);",
+      "  background: var(--specimen);",
+      "}",
+      "",
+    ].join("\n");
+    const layout = "src/components/shared/layout.module.css";
+    const why = "is not a semantic token, a layout component token or a private --_* property";
+
+    expect(scanCss(fixture, layout, fixtureTokens)).toEqual([
+      `${layout}:4: --component-button-radius ${why}`,
+      `${layout}:5: --specimen ${why}`,
     ]);
   });
 
