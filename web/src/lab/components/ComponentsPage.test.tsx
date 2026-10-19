@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRoutesStub } from "react-router";
@@ -11,6 +13,7 @@ import hiddenStyles from "../../components/VisuallyHidden/VisuallyHidden.module.
 import showcaseStyles from "./Showcase.module.css";
 import { ComponentsPage } from "./ComponentsPage.tsx";
 import { showcases } from "./registry.ts";
+import { compactMenuCss } from "./showcases/menu.tsx";
 import { announced } from "./showcases/visually-hidden.tsx";
 
 function renderPage() {
@@ -154,6 +157,45 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       // Only the checked-state indicator, which every radio item draws.
       expect(item.querySelectorAll("svg")).toHaveLength(1);
     }
+  });
+
+  it("shows the Menu examples, link items and the customized CSS it applies (refinement R5.13)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Menu" });
+    const titles = [
+      "Actions",
+      "Icons and links",
+      "Radio group (controlled)",
+      "Checkboxes and a separator",
+      "Trigger looks",
+      "Placement",
+      "Controlled open",
+      "Customized with component tokens",
+    ];
+    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    expect(labels).toEqual(titles);
+
+    const github = within(section).getByRole("menuitem", {
+      name: "GitHub, opens in new tab",
+      hidden: true,
+    });
+    expect(github).toHaveAttribute("href", "https://github.com/");
+    expect(
+      within(section).getByRole("menuitem", { name: "LinkedIn, opens in new tab", hidden: true }),
+    ).toHaveAttribute("target", "_blank");
+    expect(within(section).getAllByRole("separator", { hidden: true })).toHaveLength(1);
+    expect(within(section).getByRole("button", { name: "More options" })).toHaveAttribute(
+      "aria-haspopup",
+      "menu",
+    );
+
+    const compact = within(section).getByRole("button", { name: "Compact" }).parentElement;
+    expect(compact).toHaveClass(showcaseStyles.compactMenu ?? "");
+    const shown = [...section.querySelectorAll("pre code")].map((code) => code.textContent);
+    expect(shown).toContain(compactMenuCss);
+    expect(readFileSync(join(import.meta.dirname, "Showcase.module.css"), "utf8")).toContain(
+      compactMenuCss,
+    );
   });
 
   it("captions each VisuallyHidden example with the role and name it announces (refinement R2.8, R2.9)", async () => {

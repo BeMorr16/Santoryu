@@ -31,6 +31,21 @@
           "$value": "{size.column.sm}",
           "$type": "dimension",
           "$description": "Minimum popup width."
+        },
+        "border-width": {
+          "$value": "{effect.border.width}",
+          "$type": "dimension",
+          "$description": "Popup outline width."
+        },
+        "offset": {
+          "$value": "{space.stack.sm}",
+          "$type": "dimension",
+          "$description": "Gap between the popup and its trigger (and the viewport edge in the JS fallback)."
+        },
+        "slide-distance": {
+          "$value": "{space.stack.xs}",
+          "$type": "dimension",
+          "$description": "How far the popup slides in from its trigger's side as it opens."
         }
       },
       "item": {
@@ -54,17 +69,34 @@
         "background-focus": {
           "$value": "{color.surface.sunken}",
           "$type": "color",
-          "$description": "Item background while focused or hovered."
+          "$description": "Item background while focused (pointing at an item focuses it)."
         },
         "text-focus": {
           "$value": "{color.text.default}",
           "$type": "color",
-          "$description": "Item text while focused or hovered.",
+          "$description": "Item text while focused.",
           "$extensions": {
             "personal-site.contrast": [
               {
                 "against": "component.menu.item.background-focus",
                 "min": "text"
+              }
+            ]
+          }
+        },
+        "focus-ring-color": {
+          "$value": "{color.focus.ring}",
+          "$type": "color",
+          "$description": "Focus indicator, drawn inside the item.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.menu.popup.background",
+                "min": "non-text"
+              },
+              {
+                "against": "component.menu.item.background-focus",
+                "min": "non-text"
               }
             ]
           }
@@ -92,7 +124,7 @@
         "checked-indicator": {
           "$value": "{color.action.background}",
           "$type": "color",
-          "$description": "Check mark of the checked radio item (3:1, it carries state).",
+          "$description": "Check mark of a checked radio or checkbox item (3:1, it carries state).",
           "$extensions": {
             "personal-site.contrast": [
               {
@@ -122,7 +154,32 @@
               }
             ]
           }
+        },
+        "font-family": {
+          "$value": "{type.family.body}",
+          "$type": "fontFamily",
+          "$description": "Item font, so items don't inherit the text the Menu sits in."
+        },
+        "font-size": {
+          "$value": "{type.size.body}",
+          "$type": "dimension",
+          "$description": "Item font size."
+        },
+        "line-height": {
+          "$value": "{type.leading.body}",
+          "$type": "number",
+          "$description": "Item line height."
+        },
+        "font-weight": {
+          "$value": "{type.weight.body}",
+          "$type": "fontWeight",
+          "$description": "Item font weight."
         }
+      },
+      "group-gap": {
+        "$value": "{space.stack.sm}",
+        "$type": "dimension",
+        "$description": "Space between a group and the items or groups beside it."
       },
       "group-label": {
         "text": {
@@ -152,6 +209,28 @@
           "$value": "{type.tracking.label}",
           "$type": "number",
           "$description": "Radio group label letter spacing."
+        },
+        "padding-block": {
+          "$value": "{space.stack.xs}",
+          "$type": "dimension",
+          "$description": "Block padding of a group label."
+        }
+      },
+      "separator": {
+        "color": {
+          "$value": "{color.border.subtle}",
+          "$type": "color",
+          "$description": "Separator line (decorative)."
+        },
+        "thickness": {
+          "$value": "{effect.border.width}",
+          "$type": "dimension",
+          "$description": "Separator line thickness."
+        },
+        "margin-block": {
+          "$value": "{space.stack.xs}",
+          "$type": "dimension",
+          "$description": "Space above and below a separator."
         }
       },
       "transition-duration": {

@@ -42,4 +42,37 @@ describe("placePopup (JS fallback for CSS anchor positioning)", () => {
       left: 100,
     });
   });
+
+  it("opens above the trigger with side top", () => {
+    expect(
+      placePopup(rect(100, 300), popup, viewport, gap, { side: "top", align: "start" }),
+    ).toEqual({ top: 142, left: 100 });
+  });
+
+  it("flips below with side top when there's no room above", () => {
+    expect(
+      placePopup(rect(100, 50), popup, viewport, gap, { side: "top", align: "start" }),
+    ).toEqual({ top: 90, left: 100 });
+  });
+
+  it("aligns to the trigger's end edge with align end", () => {
+    expect(
+      placePopup(rect(300, 50), popup, viewport, gap, { side: "bottom", align: "end" }),
+    ).toEqual({ top: 90, left: 200 });
+  });
+
+  it("falls back to the start edge with align end when the end would overflow the left", () => {
+    expect(
+      placePopup(rect(20, 50), popup, viewport, gap, { side: "bottom", align: "end" }),
+    ).toEqual({ top: 90, left: 20 });
+  });
+
+  it("combines side top and align end", () => {
+    expect(placePopup(rect(600, 400), popup, viewport, gap, { side: "top", align: "end" })).toEqual(
+      {
+        top: 242,
+        left: 500,
+      },
+    );
+  });
 });

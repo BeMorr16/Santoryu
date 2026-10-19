@@ -124,7 +124,7 @@ function RoutedLink({ href, currentMatch, "aria-current": ariaCurrent, ...rest }
   );
 }
 
-const newTabText = ", opens in new tab";
+export const newTabText = ", opens in new tab";
 
 /** Always an <a> with an href (R5.1), routed client-side for same-origin paths (R5.2). */
 export function Link({

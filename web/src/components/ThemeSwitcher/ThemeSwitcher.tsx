@@ -43,7 +43,8 @@ export function ThemeSwitcher({
       <MenuPopup>
         <MenuRadioGroup label="Theme" value={theme ?? undefined} onValueChange={writePreference}>
           {themePreferences.map((option) => (
-            <MenuRadioItem key={option} value={option} icon={icons[option]}>
+            // Closes on Space too, unlike other radio items (owner, refinement R5 review).
+            <MenuRadioItem key={option} value={option} icon={icons[option]} closeOnSelect>
               {labels[option]}
             </MenuRadioItem>
           ))}

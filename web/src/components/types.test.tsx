@@ -11,10 +11,12 @@ import {
   Icon,
   Link,
   Menu,
+  MenuCheckboxItem,
   MenuItem,
   MenuPopup,
   MenuRadioGroup,
   MenuRadioItem,
+  MenuSeparator,
   MenuTrigger,
   Stack,
   ThemeSwitcher,
@@ -292,6 +294,57 @@ describe("library types", () => {
               <MenuRadioItem value="light">Light</MenuRadioItem>
             </MenuRadioGroup>
             <MenuItem onSelect={() => undefined}>Action</MenuItem>
+          </MenuPopup>
+        </Menu>
+      );
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
+  it("Menu: link options need href, closed placement unions, no separator children (refinement R5.7, R5.8, R5.12)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- newTab does nothing without href.
+        <MenuItem key="a" newTab>
+          x
+        </MenuItem>,
+        // @ts-expect-error -- rel does nothing without href.
+        <MenuItem key="b" rel="me">
+          x
+        </MenuItem>,
+        // @ts-expect-error -- side is bottom or top.
+        <MenuPopup key="c" side="left" />,
+        // @ts-expect-error -- align is start or end.
+        <MenuPopup key="d" align="center" />,
+        // @ts-expect-error -- a separator has no content.
+        <MenuSeparator key="e">x</MenuSeparator>,
+        // @ts-expect-error -- a checkbox item's role is fixed.
+        <MenuCheckboxItem key="f" role="menuitemradio">
+          x
+        </MenuCheckboxItem>,
+      ];
+    }
+    function valid() {
+      return (
+        <Menu open onOpenChange={() => undefined}>
+          <MenuTrigger iconEnd="chevron-down">Options</MenuTrigger>
+          <MenuPopup side="top" align="end">
+            <MenuItem icon="mail" closeOnSelect={false}>
+              Action
+            </MenuItem>
+            <MenuItem href="https://github.com/" newTab rel="me" download>
+              GitHub
+            </MenuItem>
+            <MenuSeparator />
+            <MenuCheckboxItem checked onCheckedChange={() => undefined} closeOnSelect>
+              Wrap
+            </MenuCheckboxItem>
+            <MenuRadioGroup label="View" defaultValue="grid">
+              <MenuRadioItem value="grid" closeOnSelect>
+                Grid
+              </MenuRadioItem>
+            </MenuRadioGroup>
           </MenuPopup>
         </Menu>
       );

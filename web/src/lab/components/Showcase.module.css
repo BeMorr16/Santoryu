@@ -106,3 +106,9 @@
   background-color: var(--color-surface-raised);
   font-size: var(--type-size-small);
 }
+
+/* The Menu section's customized example (refinement R5.13); its CSS is shown beside it. */
+.compactMenu {
+  --component-menu-item-font-size: var(--type-size-small);
+  --component-menu-item-checked-indicator: var(--color-accent-2-text);
+}

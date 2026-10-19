@@ -79,6 +79,19 @@ describe("ThemeSwitcher", () => {
     },
   );
 
+  it("applies a theme on Space and closes, returning focus to the trigger (refinement R5.9)", async () => {
+    const user = userEvent.setup();
+    setSystemTheme("light");
+    render(<ThemeSwitcher />);
+    await user.click(screen.getByRole("button", { name: "Theme: Light" }));
+
+    await user.keyboard("{ArrowDown} ");
+
+    expect(screen.queryByRole("menu")).toBeNull();
+    expect(screen.getByRole("button", { name: "Theme: Dark" })).toHaveFocus();
+    expect(localStorage.getItem("theme")).toBe("dark");
+  });
+
   it("keeps a choice when the OS scheme changes", async () => {
     const user = userEvent.setup();
     render(<ThemeSwitcher />);

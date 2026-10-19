@@ -11,8 +11,29 @@
   anchor-name: --menu-trigger;
 }
 
+/* Open: the variant's pressed background, hovered or not (refinement R5.4). (0,2,0) beats the
+   variant classes whatever the module order. */
+.trigger[aria-expanded="true"] {
+  --_background: var(--_background-active);
+  --_background-hover: var(--_background-active);
+}
+
+/* An end chevron flips while open. ButtonContent renders the end icon last. */
+.chevron > svg:last-child {
+  transition-property: rotate;
+  transition-duration: var(--component-menu-transition-duration);
+  transition-timing-function: var(--component-menu-transition-easing);
+}
+
+.chevron[aria-expanded="true"] > svg:last-child {
+  rotate: 180deg;
+}
+
 /* In the top layer (popover="manual"), so overflow ancestors can't clip it (R12.8). */
 .popup {
+  /* Slides in from the trigger's side (refinement R5.12). */
+  --_slide: calc(-1 * var(--component-menu-popup-slide-distance));
+
   position-anchor: --menu-trigger;
   position-area: block-end span-inline-end;
   /* Near a corner, only flipping both ways fits (R12.8: stay inside the viewport). */
@@ -23,16 +44,21 @@
   inset: auto;
   min-inline-size: var(--component-menu-popup-min-width);
   /* Never taller than the room it's placed in (the position-area cell, less the gap): it scrolls. */
-  max-block-size: calc(100% - var(--space-stack-sm));
+  max-block-size: calc(100% - var(--component-menu-popup-offset));
   overflow-y: auto;
   margin: 0;
-  margin-block-start: var(--space-stack-sm);
+  margin-block-start: var(--component-menu-popup-offset);
   padding: var(--component-menu-popup-padding);
-  border: var(--effect-border-width) solid var(--component-menu-popup-border);
+  border: var(--component-menu-popup-border-width) solid var(--component-menu-popup-border);
   border-radius: var(--component-menu-popup-radius);
   background-color: var(--component-menu-popup-background);
   box-shadow: var(--component-menu-popup-elevation);
   color: var(--component-menu-item-text);
+  /* Its own type, not that of the text the Menu sits in (refinement R5.2). */
+  font-family: var(--component-menu-item-font-family);
+  font-size: var(--component-menu-item-font-size);
+  font-weight: var(--component-menu-item-font-weight);
+  line-height: var(--component-menu-item-line-height);
   opacity: 1;
   translate: 0 0;
   transition-property: opacity, translate, overlay, display;
@@ -41,34 +67,55 @@
   transition-behavior: allow-discrete;
 }
 
+.popup[data-align="end"] {
+  position-area: block-end span-inline-start;
+}
+
+.popup[data-side="top"] {
+  --_slide: var(--component-menu-popup-slide-distance);
+
+  position-area: block-start span-inline-end;
+  margin-block: 0 var(--component-menu-popup-offset);
+}
+
+.popup[data-side="top"][data-align="end"] {
+  position-area: block-start span-inline-start;
+}
+
 /* Fades and slides in by a few pixels (R3.7: 0ms under reduced motion). */
 @starting-style {
   .popup:popover-open {
     opacity: 0;
-    translate: 0 calc(-1 * var(--space-stack-xs));
+    translate: 0 var(--_slide);
   }
 }
 
 .popup:not(:popover-open) {
   opacity: 0;
-  translate: 0 calc(-1 * var(--space-stack-xs));
+  translate: 0 var(--_slide);
 }
 
 .group + .group,
 .item + .group,
 .group + .item {
-  margin-block-start: var(--space-stack-sm);
+  margin-block-start: var(--component-menu-group-gap);
 }
 
 .groupLabel {
   padding-inline: var(--component-menu-item-padding-inline);
-  padding-block: var(--space-stack-xs);
+  padding-block: var(--component-menu-group-label-padding-block);
   color: var(--component-menu-group-label-text);
   font-family: var(--component-menu-group-label-font-family);
   font-size: var(--component-menu-group-label-font-size);
   letter-spacing: var(--component-menu-group-label-tracking);
   text-transform: uppercase;
   font-variant-ligatures: none;
+}
+
+.separator {
+  margin-block: var(--component-menu-separator-margin-block);
+  border-block-start: var(--component-menu-separator-thickness) solid
+    var(--component-menu-separator-color);
 }
 
 .item {
@@ -79,18 +126,24 @@
   padding-inline: var(--component-menu-item-padding-inline);
   border-radius: var(--component-menu-item-radius);
   color: var(--component-menu-item-text);
+  text-decoration: none;
   cursor: pointer;
   user-select: none;
 }
 
-.item:hover,
+/* Resets the global a:hover color on link items. It's not a hover style, so it isn't gated. */
+.item:hover {
+  color: var(--component-menu-item-text);
+}
+
+/* Focus only: pointing focuses an item (refinement R5.3), so one item is ever highlighted. */
 .item:focus {
   background-color: var(--component-menu-item-background-focus);
   color: var(--component-menu-item-text-focus);
 }
 
 .item:focus-visible {
-  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline: var(--effect-focus-ring-width) solid var(--component-menu-item-focus-ring-color);
   outline-offset: calc(-1 * var(--effect-focus-ring-width));
 }
 
@@ -103,11 +156,38 @@
   flex: 1;
 }
 
-/* The check mark shows radio state by shape, not color alone (design §9.8). */
+/* The check mark shows checked state by shape, not color alone (design §9.8). */
 .check {
   color: var(--component-menu-item-checked-indicator);
 }
 
 .item:not([aria-checked="true"]) .check {
   visibility: hidden;
+}
+
+/* The forced palette drops backgrounds, so states use system colors (refinement R5.5). */
+@media (forced-colors: active) {
+  .item:focus {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .item:focus .check {
+    color: HighlightText;
+  }
+
+  /* GrayText on Highlight would be unreadable: a focused disabled item gets a ring instead. */
+  .item[aria-disabled="true"] {
+    background-color: Canvas;
+    color: GrayText;
+  }
+
+  .item[aria-disabled="true"] .check {
+    color: GrayText;
+  }
+
+  .item[aria-disabled="true"]:focus {
+    outline: var(--effect-focus-ring-width) solid Highlight;
+    outline-offset: calc(-1 * var(--effect-focus-ring-width));
+  }
 }

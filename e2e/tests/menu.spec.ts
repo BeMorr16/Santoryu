@@ -1,20 +1,46 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { section, tabKey } from "./support.ts";
+import { section, storeTheme, tabKey, themes } from "./support.ts";
 
-const actions = (page: Page) =>
-  section(page, "Menu").getByRole("button", { name: "Project actions" });
+const menuTrigger = (page: Page, name: string) =>
+  section(page, "Menu").getByRole("button", { name, exact: true });
+const actions = (page: Page) => menuTrigger(page, "Project actions");
 
 async function popupOf(page: Page, trigger: Locator) {
   return page.locator(`[id="${(await trigger.getAttribute("aria-controls")) ?? ""}"]`);
 }
 
+/** The live line after a menu in its lab example. */
+const liveLine = (trigger: Locator) => trigger.locator("xpath=../following-sibling::p[1]");
+
 const item = (menu: Locator, name: string) =>
   menu
     .getByRole("menuitem", { name, exact: true })
-    .or(menu.getByRole("menuitemradio", { name, exact: true }));
+    .or(menu.getByRole("menuitemradio", { name, exact: true }))
+    .or(menu.getByRole("menuitemcheckbox", { name, exact: true }));
+
+/**
+ * What `property: value` computes to inside `scope`, read from a probe element set through CSSOM
+ * (allowed by the CSP). A token's custom property resolves in the scope's theme. With `forced`,
+ * the probe opts out of forced colors, so a system color reads back as itself.
+ */
+async function probe(scope: Locator, property: string, value: string, forced = false) {
+  return scope.evaluate(
+    (element, { property, value, forced }) => {
+      const probe = document.createElement("div");
+      probe.style.setProperty(property, value);
+      if (forced) probe.style.setProperty("forced-color-adjust", "none");
+      element.append(probe);
+      const computed = getComputedStyle(probe).getPropertyValue(property);
+      probe.remove();
+      return computed;
+    },
+    { property, value, forced },
+  );
+}
 
 test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", () => {
-  test("opens on Enter at the checked item, moves, wraps, types ahead, and activates", async ({
+  test("opens on Enter at the first item, moves, wraps, types ahead, and activates", async ({
     page,
   }) => {
     await page.goto("/lab/components");
@@ -24,17 +50,17 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
     await trigger.focus();
     await page.keyboard.press("Enter");
     await expect(menu).toBeVisible();
-    await expect(item(menu, "Newest first")).toBeFocused();
+    await expect(item(menu, "Copy link")).toBeFocused();
     await page.keyboard.press("ArrowDown");
-    await expect(item(menu, "Oldest first")).toBeFocused();
+    await expect(item(menu, "Download")).toBeFocused();
     await page.keyboard.press("End");
     await expect(item(menu, "Delete")).toBeFocused();
     await page.keyboard.press("ArrowDown");
-    await expect(item(menu, "Newest first")).toBeFocused();
+    await expect(item(menu, "Copy link")).toBeFocused();
     await page.keyboard.press("ArrowUp");
     await expect(item(menu, "Delete")).toBeFocused();
     await page.keyboard.press("Home");
-    await expect(item(menu, "Newest first")).toBeFocused();
+    await expect(item(menu, "Copy link")).toBeFocused();
     await page.keyboard.press("d");
     await expect(item(menu, "Download")).toBeFocused();
     await page.keyboard.press("Enter");
@@ -42,7 +68,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
     await expect(menu).toBeHidden();
     await expect(trigger).toBeFocused();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
-    await expect(section(page, "Menu")).toContainText("last action: Download");
+    await expect(liveLine(trigger)).toHaveText("Last action: Download.");
   });
 
   test("opens with ArrowDown on the first item and ArrowUp on the last", async ({ page }) => {
@@ -52,14 +78,14 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
 
     await trigger.focus();
     await page.keyboard.press("ArrowDown");
-    await expect(item(menu, "Newest first")).toBeFocused();
+    await expect(item(menu, "Copy link")).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(trigger).toBeFocused();
     await page.keyboard.press("ArrowUp");
     await expect(item(menu, "Delete")).toBeFocused();
   });
 
-  test("selects a radio item with Space, closes, and doesn't reopen on the key release", async ({
+  test("runs an action with Space, closes, and doesn't reopen on the key release", async ({
     page,
   }) => {
     await page.goto("/lab/components");
@@ -70,15 +96,58 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
     await page.keyboard.press("Space");
     await expect(menu).toBeVisible();
     await page.keyboard.press("ArrowDown");
-    await page.keyboard.press("ArrowDown");
-    await expect(item(menu, "Name")).toBeFocused();
     await page.keyboard.press("Space");
 
     await expect(menu).toBeHidden();
     await expect(trigger).toBeFocused();
-    await expect(section(page, "Menu")).toContainText("Sorted by name");
-    await trigger.click();
+    await expect(liveLine(trigger)).toHaveText("Last action: Download.");
+  });
+
+  test("opens on the checked radio item, checks with Space and stays open, and closes on Enter (refinement R5.9)", async ({
+    page,
+  }) => {
+    await page.goto("/lab/components");
+    const trigger = menuTrigger(page, "Sort by");
+    const menu = await popupOf(page, trigger);
+
+    await trigger.focus();
+    await page.keyboard.press("Space");
+    await expect(item(menu, "Newest first")).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Space");
+
+    await expect(menu).toBeVisible();
+    await expect(item(menu, "Name")).toBeFocused();
     await expect(item(menu, "Name")).toHaveAttribute("aria-checked", "true");
+    await expect(liveLine(trigger)).toHaveText("Sorted by name.");
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("Enter");
+    await expect(menu).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await expect(liveLine(trigger)).toHaveText("Sorted by oldest.");
+  });
+
+  test("toggles a checkbox item with Space and stays open, and closes on Enter (refinement R5.9)", async ({
+    page,
+  }) => {
+    await page.goto("/lab/components");
+    const trigger = menuTrigger(page, "View");
+    const menu = await popupOf(page, trigger);
+
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    await expect(item(menu, "Grid")).toBeFocused();
+    await page.keyboard.press("End");
+    await page.keyboard.press("Space");
+
+    await expect(menu).toBeVisible();
+    await expect(item(menu, "Show archived")).toHaveAttribute("aria-checked", "true");
+    await expect(liveLine(trigger)).toHaveText("Descriptions shown; archived shown.");
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("Enter");
+    await expect(menu).toBeHidden();
+    await expect(liveLine(trigger)).toHaveText("Descriptions hidden; archived shown.");
   });
 
   test("never activates a disabled item, and stays open", async ({ page }) => {
@@ -92,7 +161,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
     await page.keyboard.press("Enter");
 
     await expect(menu).toBeVisible();
-    await expect(section(page, "Menu")).toContainText("last action: nothing yet");
+    await expect(liveLine(trigger)).toHaveText("Last action: nothing yet.");
   });
 
   test("closes on Escape with focus back on the trigger", async ({ page }) => {
@@ -133,6 +202,167 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
     await expect(trigger).not.toBeFocused();
   });
 });
+
+test.describe("Menu look and pointer behavior (refinement R5)", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/lab/components");
+  });
+
+  test("keeps its own item type inside larger text (R5.2)", async ({ page }) => {
+    const trigger = actions(page);
+    const menu = await popupOf(page, trigger);
+    const expected = await probe(menu, "font-size", "var(--component-menu-item-font-size)");
+    await trigger.evaluate((element) => {
+      element.parentElement?.parentElement?.style.setProperty("font-size", "2rem");
+    });
+
+    await trigger.click();
+
+    await expect(item(menu, "Copy link")).toHaveCSS("font-size", expected);
+  });
+
+  test("focuses the item under the mouse, so only it is highlighted (R5.3)", async ({ page }) => {
+    const trigger = actions(page);
+    const menu = await popupOf(page, trigger);
+    await trigger.click();
+    const highlight = await probe(
+      menu,
+      "background-color",
+      "var(--component-menu-item-background-focus)",
+    );
+
+    await item(menu, "Download").hover();
+
+    await expect(item(menu, "Download")).toBeFocused();
+    await expect(item(menu, "Download")).toHaveCSS("background-color", highlight);
+    for (const name of ["Copy link", "Delete"]) {
+      await expect(item(menu, name)).not.toHaveCSS("background-color", highlight);
+    }
+  });
+
+  test("shows an open trigger in its pressed background, hovered or not, and flips its chevron (R5.4)", async ({
+    page,
+  }) => {
+    const trigger = menuTrigger(page, "Sort by");
+    const active = await probe(
+      trigger.locator(".."),
+      "background-color",
+      "var(--component-button-secondary-background-active)",
+    );
+    const chevron = trigger.locator("svg").last();
+    await expect(chevron).toHaveCSS("rotate", "none");
+
+    await trigger.click();
+    await expect(trigger).toHaveCSS("background-color", active);
+    await expect(chevron).toHaveCSS("rotate", "180deg");
+    await section(page, "Menu").getByRole("heading", { name: "Menu", exact: true }).hover();
+    await expect(trigger).toHaveCSS("background-color", active);
+
+    await page.keyboard.press("Escape");
+    await expect(chevron).toHaveCSS("rotate", "none");
+  });
+
+  test("draws the keyboard focus ring in its own token color (R5.1)", async ({ page }) => {
+    const trigger = actions(page);
+    const menu = await popupOf(page, trigger);
+    const ring = await probe(menu, "color", "var(--component-menu-item-focus-ring-color)");
+
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+
+    await expect(item(menu, "Copy link")).toHaveCSS("outline-color", ring);
+  });
+
+  test("uses Highlight for the focused item and GrayText for disabled ones under forced colors (R5.5)", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== "chromium", "WebKit doesn't emulate forced colors.");
+    await page.emulateMedia({ forcedColors: "active" });
+    const trigger = actions(page);
+    const menu = await popupOf(page, trigger);
+    const highlight = await probe(menu, "background-color", "Highlight", true);
+    const highlightText = await probe(menu, "color", "HighlightText", true);
+    const grayText = await probe(menu, "color", "GrayText", true);
+
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    await expect(item(menu, "Copy link")).toHaveCSS("background-color", highlight);
+    await expect(item(menu, "Copy link")).toHaveCSS("color", highlightText);
+    await expect(item(menu, "Delete")).toHaveCSS("color", grayText);
+
+    await page.keyboard.press("End");
+    await expect(item(menu, "Delete")).toHaveCSS("color", grayText);
+    await expect(item(menu, "Delete")).not.toHaveCSS("background-color", highlight);
+    await expect(item(menu, "Delete")).toHaveCSS("outline-color", highlight);
+  });
+
+  test("leaves the menu open on a middle-click on a link item (R5.8)", async ({ page }) => {
+    await page
+      .context()
+      .route("https://github.com/**", (route) =>
+        route.fulfill({ contentType: "text/html", body: "<title>GitHub stub</title>" }),
+      );
+    const trigger = menuTrigger(page, "Contact");
+    const menu = await popupOf(page, trigger);
+    await trigger.click();
+
+    // A middle-click is an auxclick, not a click: the browser handles the link, the menu stays.
+    await menu
+      .getByRole("menuitem", { name: /^GitHub ?, opens in new tab$/ })
+      .click({ button: "middle" });
+
+    await expect(menu).toBeVisible();
+  });
+
+  test("follows a new-tab link item with Space (R5.8)", async ({ page }) => {
+    await page
+      .context()
+      .route("https://github.com/**", (route) =>
+        route.fulfill({ contentType: "text/html", body: "<title>GitHub stub</title>" }),
+      );
+    const trigger = menuTrigger(page, "Contact");
+    const menu = await popupOf(page, trigger);
+
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowDown");
+    const link = menu.getByRole("menuitem", { name: /^GitHub ?, opens in new tab$/ });
+    await expect(link).toBeFocused();
+    const [opened] = await Promise.all([
+      page.context().waitForEvent("page"),
+      page.keyboard.press("Space"),
+    ]);
+
+    expect(opened.url()).toBe("https://github.com/");
+    await expect(menu).toBeHidden();
+    await expect(trigger).toBeFocused();
+  });
+});
+
+for (const theme of themes) {
+  test(`open menus in ${theme} have no axe violations, contrast included (refinement R5)`, async ({
+    page,
+  }) => {
+    await storeTheme(page, theme);
+    await page.goto("/lab/components");
+
+    for (const name of ["View", "Contact"]) {
+      const trigger = menuTrigger(page, name);
+      await trigger.scrollIntoViewIfNeeded();
+      await trigger.click();
+      const menu = await popupOf(page, trigger);
+      await expect(menu).toBeVisible();
+
+      const { violations } = await new AxeBuilder({ page })
+        .include(`[id="${(await menu.getAttribute("id")) ?? ""}"]`)
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .analyze();
+      expect(violations.map((violation) => violation.id)).toEqual([]);
+      await page.keyboard.press("Escape");
+    }
+  });
+}
 
 /** Popup and trigger boxes, and whether the popup is fully in the viewport and on top. */
 async function placement(page: Page, trigger: Locator) {
@@ -260,6 +490,35 @@ for (const mode of ["anchor", "fallback"] as const) {
 
       expect(second.popup).toEqual(first.popup);
     });
+
+    for (const [label, side, align] of [
+      ["Bottom start", "bottom", "start"],
+      ["Bottom end", "bottom", "end"],
+      ["Top start", "top", "start"],
+      ["Top end", "top", "end"],
+    ] as const) {
+      test(`opens ${label.toLowerCase()} and slides in from that side (refinement R5.12)`, async ({
+        page,
+      }) => {
+        const trigger = menuTrigger(page, label);
+        await trigger.scrollIntoViewIfNeeded();
+
+        const result = await placement(page, trigger);
+
+        expect(result.inViewport).toBe(true);
+        if (side === "bottom") {
+          expect(result.popup.top).toBeGreaterThanOrEqual(result.trigger?.bottom ?? NaN);
+        } else {
+          expect(result.popup.bottom).toBeLessThanOrEqual(result.trigger?.top ?? NaN);
+        }
+        const edge = align === "start" ? "left" : "right";
+        expect(Math.abs(result.popup[edge] - (result.trigger?.[edge] ?? NaN))).toBeLessThanOrEqual(
+          1,
+        );
+        const slide = await probe(await popupOf(page, trigger), "margin-top", "var(--_slide)");
+        expect(Math.sign(parseFloat(slide))).toBe(side === "top" ? 1 : -1);
+      });
+    }
 
     test("isn't clipped by an overflow: hidden ancestor", async ({ page }) => {
       const trigger = actions(page);

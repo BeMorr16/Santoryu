@@ -17,6 +17,9 @@ async function durations(page: Page) {
         `[id="${(await section(page, "Menu").getByRole("button", { name: "Project actions" }).getAttribute("aria-controls")) ?? ""}"]`,
       ),
     ),
+    menuChevron: await duration(
+      section(page, "Menu").getByRole("button", { name: "Project actions" }).locator("svg").last(),
+    ),
   };
 }
 
