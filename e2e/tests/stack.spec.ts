@@ -1,28 +1,5 @@
-import { expect, test, type Locator } from "@playwright/test";
-import { section } from "./support.ts";
-
-/** An example in the Stack section, by its title. */
-const example = (stack: Locator, title: string) =>
-  stack.getByText(title, { exact: true }).locator("xpath=..");
-
-/** What `property: value` computes to inside `scope`, read from a probe element set through CSSOM. */
-async function probe(
-  scope: Locator,
-  property: "row-gap" | "column-gap" | "padding-block-end",
-  value: string,
-) {
-  return scope.evaluate(
-    (element, { property, value }) => {
-      const probe = document.createElement("div");
-      probe.style.setProperty(property, value);
-      element.append(probe);
-      const computed = getComputedStyle(probe).getPropertyValue(property);
-      probe.remove();
-      return computed;
-    },
-    { property, value },
-  );
-}
+import { expect, test } from "@playwright/test";
+import { example, probe, section } from "./support.ts";
 
 test.describe("Stack (refinement R6)", () => {
   test.beforeEach(async ({ page }) => {

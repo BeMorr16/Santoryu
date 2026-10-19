@@ -5,10 +5,12 @@ import userEvent from "@testing-library/user-event";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
+import gridStyles from "../../components/Grid/Grid.module.css";
 import iconStyles from "../../components/Icon/Icon.module.css";
 import { icons } from "../../components/Icon/registry.ts";
 import linkStyles from "../../components/Link/Link.module.css";
 import buttonStyles from "../../components/shared/button-styles.module.css";
+import layoutStyles from "../../components/shared/layout.module.css";
 import hiddenStyles from "../../components/VisuallyHidden/VisuallyHidden.module.css";
 import showcaseStyles from "./Showcase.module.css";
 import { ComponentsPage } from "./ComponentsPage.tsx";
@@ -396,6 +398,57 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     const group = within(semantics).getByRole("group", { name: "Contact preference" });
     expect(within(group).getByRole("radio", { name: "Email" })).toBeChecked();
     expect(within(group).getByRole("radio", { name: "Phone" })).not.toBeChecked();
+  });
+
+  it("shows the Grid examples, the column options and the legend-named fieldset (refinement R7.6)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Grid" });
+    const example = (title: string) => {
+      const element = within(section).getByText(title, { selector: "p" }).parentElement;
+      if (element === null) throw new Error(`no ${title} example`);
+      return element;
+    };
+
+    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    expect(labels).toEqual([
+      "min sm",
+      "min md",
+      "min lg",
+      "Narrow container",
+      "Row and column gaps",
+      "Few items, stretched (default)",
+      "Few items, stretch={false}",
+      "At most two columns",
+      "Semantics",
+    ]);
+
+    const list = (title: string) => within(example(title)).getByRole("list");
+    for (const min of ["sm", "md", "lg"]) {
+      expect(list(`min ${min}`)).toHaveClass(gridStyles[`min-${min}`] ?? "");
+    }
+    expect(list("Narrow container")).toHaveClass(
+      showcaseStyles.narrow ?? "",
+      gridStyles["min-md"] ?? "",
+    );
+    expect(list("Row and column gaps")).toHaveClass(
+      layoutStyles["row-gap-xs"] ?? "",
+      layoutStyles["column-gap-xl"] ?? "",
+    );
+    expect(within(list("Few items, stretched (default)")).getAllByRole("listitem")).toHaveLength(2);
+    expect(list("Few items, stretched (default)")).not.toHaveClass(gridStyles.fill ?? "");
+    expect(within(list("Few items, stretch={false}")).getAllByRole("listitem")).toHaveLength(2);
+    expect(list("Few items, stretch={false}")).toHaveClass(gridStyles.fill ?? "");
+    expect(within(list("At most two columns")).getAllByRole("listitem")).toHaveLength(4);
+    expect(list("At most two columns")).toHaveClass(gridStyles["max-2"] ?? "");
+
+    const group = within(example("Semantics")).getByRole("group", { name: "Projects to show" });
+    expect(within(group).getByRole("checkbox", { name: "Personal site" })).toBeChecked();
+    expect(within(group).getAllByRole("checkbox")).toHaveLength(4);
+
+    expect(within(section).getByText(/maxColumns is a ceiling, not a count/)).toBeInTheDocument();
+    for (const note of [/Grid never reorders items/, /the legend still names the group/]) {
+      expect(within(section).getByText(note)).toBeInTheDocument();
+    }
   });
 
   it("has no axe violations (R3.9)", async () => {

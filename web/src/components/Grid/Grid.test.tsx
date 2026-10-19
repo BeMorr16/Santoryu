@@ -45,6 +45,47 @@ describe("Grid", () => {
     },
   );
 
+  it("lets rowGap and columnGap override gap on their own axis (refinement R7.1)", () => {
+    render(
+      <>
+        <Grid data-testid="row" gap="sm" rowGap="xl" />
+        <Grid data-testid="column" gap="sm" columnGap="none" />
+      </>,
+    );
+
+    const row = screen.getByTestId("row");
+    expect(row).toHaveClass(shared("row-gap-xl"), shared("column-gap-sm"));
+    expect(row).not.toHaveClass(shared("row-gap-sm"));
+    const column = screen.getByTestId("column");
+    expect(column).toHaveClass(shared("row-gap-sm"), shared("column-gap-none"));
+    expect(column).not.toHaveClass(shared("column-gap-sm"));
+  });
+
+  it("stretches few items by default and keeps empty columns with stretch={false} (refinement R7.2)", () => {
+    render(
+      <>
+        <Grid data-testid="default" />
+        <Grid data-testid="fill" stretch={false} />
+      </>,
+    );
+
+    expect(screen.getByTestId("default")).not.toHaveClass(cls("fill"));
+    expect(screen.getByTestId("fill")).toHaveClass(cls("fill"));
+  });
+
+  it("has no column cap by default", () => {
+    render(<Grid data-testid="grid" />);
+
+    const grid = screen.getByTestId("grid");
+    for (const max of [2, 3, 4]) expect(grid).not.toHaveClass(cls(`max-${String(max)}`));
+  });
+
+  it.each([2, 3, 4] as const)("caps columns at %i through its class (refinement R7.3)", (max) => {
+    render(<Grid data-testid="grid" maxColumns={max} />);
+
+    expect(screen.getByTestId("grid")).toHaveClass(cls(`max-${String(max)}`));
+  });
+
   it.each(["ul", "ol"] as const)("keeps list semantics as %s, without markers (R9.3)", (as) => {
     render(
       <Grid as={as}>

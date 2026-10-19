@@ -7,15 +7,21 @@ test.describe("at 320px wide", () => {
   test("Grid shows one column with no horizontal overflow (R9.2)", async ({ page }) => {
     await page.goto("/lab/components");
 
-    const grids = section(page, "Grid")
-      .getByRole("group", { name: "Grid examples" })
-      .getByRole("list");
-    expect(await grids.count()).toBe(3);
-    for (const grid of await grids.all()) {
-      const columns = await grid.evaluate((element) =>
-        getComputedStyle(element).gridTemplateColumns.split(" ").filter(Boolean),
+    const examples = section(page, "Grid").getByRole("group", { name: "Grid examples" });
+    const grids = [
+      ...(await examples.getByRole("list").all()),
+      examples.getByRole("group", { name: "Projects to show" }),
+    ];
+    expect(grids).toHaveLength(9);
+    // Measured, not read from grid-template-columns: Chromium reports a fieldset's as specified.
+    for (const grid of grids) {
+      const lefts = await grid.evaluate((element) =>
+        [...element.children]
+          .filter((child) => child.tagName !== "LEGEND")
+          .map((child) => Math.round(child.getBoundingClientRect().left)),
       );
-      expect(columns).toHaveLength(1);
+      expect(lefts.length).toBeGreaterThan(1);
+      expect(new Set(lefts).size).toBe(1);
     }
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

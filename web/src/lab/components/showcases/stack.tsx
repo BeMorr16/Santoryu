@@ -18,7 +18,7 @@ export const gapDoc = {
   description: "Sets the row gap (space.stack.*) and the column gap (space.inline.*).",
 };
 
-const axisGap = (description: string) => ({
+export const axisGap = (description: string) => ({
   type: gapDoc.type,
   default: "gap",
   description,

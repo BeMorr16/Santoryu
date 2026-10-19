@@ -216,7 +216,7 @@ describe("library types", () => {
     expectTypeOf(valid).toBeFunction();
   });
 
-  it("Stack and Grid allow only the closed element set, no reverse directions and gap steps per axis (R8.2, R8.4, R9.3, refinement R6.2)", () => {
+  it("Stack and Grid allow only the closed element set, no reverse directions, gap steps per axis and 2–4 max columns (R8.2, R8.4, R9.3, refinement R6.2, R7.1, R7.3)", () => {
     function invalid() {
       return [
         // @ts-expect-error -- no reverse directions (DOM order is visual order).
@@ -233,6 +233,12 @@ describe("library types", () => {
         <Stack key="f" rowGap="2xl" />,
         // @ts-expect-error -- not a gap step.
         <Stack key="g" columnGap="around" />,
+        // @ts-expect-error -- not a gap step.
+        <Grid key="h" rowGap="2xl" />,
+        // @ts-expect-error -- at most 4 columns.
+        <Grid key="i" maxColumns={5} />,
+        // @ts-expect-error -- one column is a vertical Stack.
+        <Grid key="j" maxColumns={1} />,
       ];
     }
     function valid() {
@@ -240,6 +246,7 @@ describe("library types", () => {
         <Stack key="a" as="form" action="/x" />,
         <Grid key="b" as="ol" start={2} />,
         <Stack key="c" direction="vertical" wrap rowGap="xs" columnGap="lg" />,
+        <Grid key="d" min="sm" rowGap="xs" columnGap="lg" stretch={false} maxColumns={3} />,
       ];
     }
     expectTypeOf(invalid).toBeFunction();

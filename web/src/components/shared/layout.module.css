@@ -1,6 +1,9 @@
-/* Gap steps for Stack and Grid: rows from space.stack.*, columns from space.inline.* (refinement R6.2). */
+/*
+ * Gap steps for Stack and Grid: rows from space.stack.*, columns from space.inline.* (refinement
+ * R6.2). None is 0px, not 0: a unitless 0 is invalid in Grid's max-* calc (refinement R7.3).
+ */
 .row-gap-none {
-  --_row: 0;
+  --_row: 0px;
 }
 
 .row-gap-xs {
@@ -24,7 +27,7 @@
 }
 
 .column-gap-none {
-  --_column: 0;
+  --_column: 0px;
 }
 
 .column-gap-xs {

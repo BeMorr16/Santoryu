@@ -55,3 +55,22 @@ export const panelTrigger = (page: Page, name: string) =>
  */
 export const tabKey = (browserName: string, shift = false) =>
   `${browserName === "webkit" ? "Alt+" : ""}${shift ? "Shift+" : ""}Tab`;
+
+/** An example in a /lab/components section, by its title. */
+export const example = (scope: Locator, title: string) =>
+  scope.getByText(title, { exact: true }).locator("xpath=..");
+
+/** What `property: value` computes to inside `scope`, read from a probe element set through CSSOM. */
+export async function probe(scope: Locator, property: string, value: string) {
+  return scope.evaluate(
+    (element, { property, value }) => {
+      const probe = document.createElement("div");
+      probe.style.setProperty(property, value);
+      element.append(probe);
+      const computed = getComputedStyle(probe).getPropertyValue(property);
+      probe.remove();
+      return computed;
+    },
+    { property, value },
+  );
+}
