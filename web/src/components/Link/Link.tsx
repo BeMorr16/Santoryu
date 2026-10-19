@@ -24,9 +24,14 @@ export type LinkOwnProps = (LinkInline | LinkAsButton) & {
   newTab?: boolean | undefined;
 };
 
-/** An anchor's props, minus what Link owns. There's no `disabled` (R5.6). */
+/**
+ * An anchor's props, minus what Link owns. There's no `disabled` (R5.6), and no `aria-pressed`,
+ * which links don't support (refinement R3.13); hyphenated JSX props are only checked when declared.
+ */
 export type LinkProps = LinkOwnProps &
-  Omit<ComponentPropsWithRef<"a">, keyof LinkOwnProps | "target" | "rel">;
+  Omit<ComponentPropsWithRef<"a">, keyof LinkOwnProps | "target" | "rel" | "aria-pressed"> & {
+    "aria-pressed"?: never;
+  };
 
 /** A same-origin path, not a protocol-relative URL. */
 export const isRoutable = (href: string) => href.startsWith("/") && !href.startsWith("//");
@@ -45,7 +50,9 @@ export function Link({
   ...rest
 }: LinkProps) {
   const classes = cx(
-    appearance === "button" ? buttonClassName({ variant, size }) : styles.link,
+    appearance === "button"
+      ? buttonClassName({ variant, size, iconStart, iconEnd, children, extraIcon: newTab })
+      : styles.link,
     className,
   );
   const content = (

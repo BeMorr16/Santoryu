@@ -1,8 +1,12 @@
+import { useState, type ReactNode } from "react";
 import {
   Button,
   type ButtonOwnProps,
   type ButtonProps,
 } from "../../../components/Button/Button.tsx";
+import { Stack } from "../../../components/Stack/Stack.tsx";
+import { VisuallyHidden } from "../../../components/VisuallyHidden/VisuallyHidden.tsx";
+import { Announced } from "../Announced.tsx";
 import { Example } from "../Example.tsx";
 import type { PropDocs } from "../PropDocs.ts";
 import type { Showcase } from "../Showcase.ts";
@@ -36,7 +40,100 @@ export const buttonDocs = {
     description:
       "Sets aria-disabled, not the native attribute: still focusable, announced, and never activated.",
   },
-} satisfies PropDocs<ButtonOwnProps & Pick<ButtonProps, "type" | "disabled">>;
+  "aria-pressed": {
+    type: 'boolean | "mixed"',
+    description: 'Makes it a toggle button. "mixed" has no look of its own.',
+  },
+} satisfies PropDocs<ButtonOwnProps & Pick<ButtonProps, "type" | "disabled" | "aria-pressed">>;
+
+/** Icon-only buttons, captioned with their size and how they're named (refinement R3.11). */
+const iconOnly: readonly { caption: string; button: ReactNode }[] = [
+  {
+    caption: "sm · aria-label",
+    button: <Button size="sm" iconStart="check" aria-label="Mark as done" />,
+  },
+  { caption: "md · aria-label", button: <Button iconStart="arrow-right" aria-label="Next" /> },
+  {
+    caption: "sm · VisuallyHidden",
+    button: (
+      <Button size="sm" iconStart="chevron-down">
+        <VisuallyHidden>Show more</VisuallyHidden>
+      </Button>
+    ),
+  },
+  {
+    caption: "md · VisuallyHidden",
+    button: (
+      <Button iconStart="chevron-down">
+        <VisuallyHidden>Show more</VisuallyHidden>
+      </Button>
+    ),
+  },
+];
+
+/** A toggle's caption. The label stays the same; the state is announced with it (APG). */
+function AnnouncedToggle({ name, pressed }: { name: string; pressed: boolean }) {
+  const announced = { name, role: `toggle button, ${pressed ? "pressed" : "not pressed"}` };
+  return <Announced {...announced} />;
+}
+
+function Toggles() {
+  const [grid, setGrid] = useState(true);
+  const [wrap, setWrap] = useState(false);
+  const [done, setDone] = useState(false);
+  const [notify, setNotify] = useState(true);
+  return (
+    <Example title="Toggles" layout="column">
+      <div className={styles.row}>
+        <Button
+          aria-pressed={grid}
+          onClick={() => {
+            setGrid(!grid);
+          }}
+        >
+          Show grid
+        </Button>
+        <AnnouncedToggle name="Show grid" pressed={grid} />
+      </div>
+      <div className={styles.row}>
+        <Button
+          variant="ghost"
+          aria-pressed={wrap}
+          onClick={() => {
+            setWrap(!wrap);
+          }}
+        >
+          Wrap lines
+        </Button>
+        <AnnouncedToggle name="Wrap lines" pressed={wrap} />
+      </div>
+      <div className={styles.row}>
+        <Button
+          variant="ghost"
+          iconStart="check"
+          aria-label="Mark as done"
+          aria-pressed={done}
+          onClick={() => {
+            setDone(!done);
+          }}
+        />
+        <AnnouncedToggle name="Mark as done" pressed={done} />
+      </div>
+      <div className={styles.row}>
+        <Button
+          variant="primary"
+          aria-pressed={notify}
+          onClick={() => {
+            setNotify(!notify);
+          }}
+        >
+          Notify me
+        </Button>
+        <AnnouncedToggle name="Notify me" pressed={notify} />
+      </div>
+    </Example>
+  );
+}
 
 function Examples() {
   return (
@@ -57,14 +154,31 @@ function Examples() {
           Get in touch
         </Button>
         <Button iconStart="mail">Email me</Button>
-        <Button variant="ghost" size="sm" iconStart="github" aria-label="GitHub" />
       </Example>
+      <Example title="Icon-only">
+        <Stack as="ul" direction="horizontal" gap="md" wrap>
+          {iconOnly.map(({ caption, button }) => (
+            <li key={caption} className={styles.tile}>
+              {button}
+              <code>{caption}</code>
+            </li>
+          ))}
+        </Stack>
+      </Example>
+      <Toggles />
       <Example title="Disabled (still focusable)">
         {variants.map((variant) => (
           <Button key={variant} variant={variant} disabled>
             Sending…
           </Button>
         ))}
+      </Example>
+      <Example title="Long label" layout="column">
+        <div className={styles.narrow}>
+          <Button variant="primary" iconEnd="arrow-right">
+            Send me a note about a project you have in mind
+          </Button>
+        </div>
       </Example>
       <Example title="Customized with a component token" layout="column">
         <div className={styles.brandCta}>
@@ -93,13 +207,18 @@ export const buttonShowcase: Showcase = {
   props: [{ part: "Button", docs: buttonDocs }],
   tokens: "button",
   keyboard: [
-    { keys: "Enter / Space", action: "Activates the button (never while disabled)." },
+    {
+      keys: "Enter / Space",
+      action: "Activates the button, or flips a toggle (never while disabled).",
+    },
     { keys: "Tab", action: "Moves focus to it, including when disabled." },
   ],
   a11y: [
     'Always a native <button>, type="button" unless set.',
-    "Named by its text. Icon-only buttons need aria-label or aria-labelledby (a type error otherwise).",
+    "Named by its text. Icon-only buttons need an icon plus aria-label or aria-labelledby (a type error otherwise), or a VisuallyHidden label. With no visible text they're square.",
+    "aria-pressed makes a toggle on any variant: the label stays the same and the pressed look shows the state. A button whose label changes (“Show grid” ↔ “Hide grid”) is a plain button, without aria-pressed.",
     "disabled sets aria-disabled, not the native attribute: it stays focusable and announced, and blocks clicks, keys and form submission.",
-    "Target size at least 32px tall; focus ring 2px and 3:1 against the surface.",
+    "In forced colors, disabled shows GrayText and pressed shows Highlight, since the forced palette drops their background and border colors.",
+    "Target size at least 32px tall; focus ring 2px in component.button.focus-ring-color, 3:1 against the surface.",
   ],
 };

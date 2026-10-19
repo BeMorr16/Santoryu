@@ -16,7 +16,7 @@
       },
       "glass": {
         "$value": "{color.overlay.blue-850-85}",
-        "$description": "Translucent sticky-header background over the page (blurred). Only default and muted text, links and focus rings may sit on it.",
+        "$description": "Translucent sticky-header background over the page (blurred). Only default and muted text, links, focus rings and controls whose boundary is contrast-checked against glass may sit on it.",
         "$extensions": {
           "personal-site.contrast-backdrop": [
             "color.surface.base",
@@ -205,6 +205,238 @@
       "border": {
         "$value": "{color.gold.300}",
         "$description": "Decorative accent outline. Not contrast-checked; never the only boundary of a control."
+      }
+    },
+    "accent-2": {
+      "text": {
+        "$value": "{color.violet.300}",
+        "$description": "Second-accent (violet) text, on surfaces and on accent-2.background.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.accent-2.background",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "background": {
+        "$value": "{color.violet.900}",
+        "$description": "Subtle violet tint behind accent-2 text, such as badges and highlights."
+      },
+      "border": {
+        "$value": "{color.violet.300}",
+        "$description": "Boundary of a violet fill or tint (3:1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "fill": {
+        "$value": "{color.violet.700}",
+        "$description": "Solid violet fill: the pressed state of action.background (primary toggles). Its lightness is flipped against action.background (3:1), so it isn't a general-purpose violet button fill.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.action.background",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "fill-hover": {
+        "$value": "{color.violet.600}",
+        "$description": "accent-2.fill on hover and while pressing."
+      },
+      "fill-text": {
+        "$value": "{color.gray.50}",
+        "$description": "Text and icons on accent-2.fill and accent-2.fill-hover.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.accent-2.fill",
+              "min": "text"
+            },
+            {
+              "against": "color.accent-2.fill-hover",
+              "min": "text"
+            }
+          ]
+        }
+      }
+    },
+    "error": {
+      "text": {
+        "$value": "{color.red.300}",
+        "$description": "Error text. Never the only cue: the wording or an icon (with a text alternative) must convey the status on its own (WCAG 1.4.1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.error.background",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "background": {
+        "$value": "{color.red.900}",
+        "$description": "Error tint behind error text. Never the only cue: the wording or an icon (with a text alternative) must convey the status on its own (WCAG 1.4.1)."
+      },
+      "border": {
+        "$value": "{color.red.400}",
+        "$description": "Error boundary (3:1). Never the only cue: the wording or an icon (with a text alternative) must convey the status on its own (WCAG 1.4.1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      }
+    },
+    "success": {
+      "text": {
+        "$value": "{color.green.300}",
+        "$description": "Success text. Never the only cue: the wording or an icon (with a text alternative) must convey the status on its own (WCAG 1.4.1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.success.background",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "background": {
+        "$value": "{color.green.900}",
+        "$description": "Success tint behind success text. Never the only cue: the wording or an icon (with a text alternative) must convey the status on its own (WCAG 1.4.1)."
+      },
+      "border": {
+        "$value": "{color.green.400}",
+        "$description": "Success boundary (3:1). Never the only cue: the wording or an icon (with a text alternative) must convey the status on its own (WCAG 1.4.1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      }
+    },
+    "warning": {
+      "text": {
+        "$value": "{color.orange.300}",
+        "$description": "Warning text. Never the only cue: the wording or an icon (with a text alternative) must convey the status on its own (WCAG 1.4.1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.warning.background",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "background": {
+        "$value": "{color.orange.900}",
+        "$description": "Warning tint behind warning text. Never the only cue: the wording or an icon (with a text alternative) must convey the status on its own (WCAG 1.4.1)."
+      },
+      "border": {
+        "$value": "{color.orange.400}",
+        "$description": "Warning boundary (3:1). Never the only cue: the wording or an icon (with a text alternative) must convey the status on its own (WCAG 1.4.1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
       }
     },
     "border": {

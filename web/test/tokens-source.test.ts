@@ -16,11 +16,36 @@ const categories = [
 type Category = (typeof categories)[number];
 
 // Second path segment of every token: site-foundation design §4.3, component-library design §4.1,
-// component-library-refinement design §3.3.
+// component-library-refinement design §3.3, palette-expansion design §5.
 const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
   color: {
-    primitive: ["gray", "blue", "gold", "cyan", "sand", "overlay"],
-    semantic: ["surface", "text", "link", "action", "accent", "border", "focus", "grid", "fill"],
+    primitive: [
+      "gray",
+      "blue",
+      "gold",
+      "violet",
+      "red",
+      "green",
+      "orange",
+      "cyan",
+      "sand",
+      "overlay",
+    ],
+    semantic: [
+      "surface",
+      "text",
+      "link",
+      "action",
+      "accent",
+      "accent-2",
+      "error",
+      "success",
+      "warning",
+      "border",
+      "focus",
+      "grid",
+      "fill",
+    ],
   },
   type: {
     primitive: ["font-stack", "font-size", "font-weight", "line-height", "letter-spacing"],
@@ -46,8 +71,8 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
   layer: { primitive: ["1", "2", "3"], semantic: ["raised", "sticky", "overlay"] },
 };
 
-// Every semantic token, per site-foundation design §4.3, component-library design §4.1 and
-// component-library-refinement design §3.3.
+// Every semantic token, per site-foundation design §4.3, component-library design §4.1,
+// component-library-refinement design §3.3 and palette-expansion design §3.
 // Adding or renaming one is a one-way door.
 const expectedSemantic = [
   "color.surface.base",
@@ -65,6 +90,21 @@ const expectedSemantic = [
   "color.accent.text",
   "color.accent.background",
   "color.accent.border",
+  "color.accent-2.text",
+  "color.accent-2.background",
+  "color.accent-2.border",
+  "color.accent-2.fill",
+  "color.accent-2.fill-hover",
+  "color.accent-2.fill-text",
+  "color.error.text",
+  "color.error.background",
+  "color.error.border",
+  "color.success.text",
+  "color.success.background",
+  "color.success.border",
+  "color.warning.text",
+  "color.warning.background",
+  "color.warning.border",
   "color.border.subtle",
   "color.border.strong",
   "color.focus.ring",
@@ -342,16 +382,73 @@ describe("token source files", () => {
   );
 });
 
+describe("status colors (palette-expansion R2.4, R2.5)", () => {
+  function hue(token: SourceToken): number {
+    const [r = 0, g = 0, b = 0] = (token.value as { components: number[] }).components;
+    const max = Math.max(r, g, b);
+    const delta = max - Math.min(r, g, b);
+    if (delta === 0) return 0;
+    const sector =
+      max === r ? ((g - b) / delta + 6) % 6 : max === g ? (b - r) / delta + 2 : (r - g) / delta + 4;
+    return sector * 60;
+  }
+  const group = (name: string) =>
+    [...primitives.values()].filter((t) => t.path.startsWith(`color.${name}.`));
+
+  it("keeps every color.orange.* primitive at least 10° of hue from every color.gold.* primitive", () => {
+    const orange = group("orange");
+    const gold = group("gold");
+    expect(orange.length).toBeGreaterThan(0);
+    expect(gold.length).toBeGreaterThan(0);
+    for (const warning of orange) {
+      for (const accent of gold) {
+        const gap = Math.abs(hue(warning) - hue(accent));
+        expect(
+          Math.min(gap, 360 - gap),
+          `${warning.path} vs ${accent.path}`,
+        ).toBeGreaterThanOrEqual(10);
+      }
+    }
+  });
+
+  it.each(
+    [...light, ...dark]
+      .filter((t) => /^color\.(error|success|warning)\./.test(t.path))
+      .map((t) => [`${t.file}: ${t.path}`, t] as const),
+  )("%s says color is never the only cue (R2.5)", (_label, token) => {
+    expect(token.description).toEqual(
+      expect.stringMatching(
+        /Never the only cue: the wording or an icon \(with a text alternative\) must convey the status on its own \(WCAG 1\.4\.1\)\.$/,
+      ),
+    );
+  });
+});
+
 describe("contrast pairing coverage (design §4.5)", () => {
   const minimums = ["text", "large-text", "non-text"];
   const mustPair = (path: string) =>
     /^color\.(text|link|focus)\./.test(path) ||
-    ["color.border.strong", "color.action.text", "color.accent.text"].includes(path);
+    /^color\.(error|success|warning)\.(text|border)$/.test(path) ||
+    [
+      "color.border.strong",
+      "color.action.text",
+      "color.accent.text",
+      "color.accent-2.text",
+      "color.accent-2.fill-text",
+      "color.accent-2.border",
+      "color.accent-2.fill",
+    ].includes(path);
   // Fills that foregrounds sit on directly, besides surfaces.
   const fills = [
     "color.action.background",
     "color.action.background-hover",
     "color.accent.background",
+    "color.accent-2.background",
+    "color.accent-2.fill",
+    "color.accent-2.fill-hover",
+    "color.error.background",
+    "color.success.background",
+    "color.warning.background",
   ];
 
   function pairingsOf(token: SourceToken): { against: string; min: string }[] {

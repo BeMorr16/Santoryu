@@ -7,6 +7,7 @@ import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { expectHydratesCleanly } from "../../../test/component.tsx";
 import { Icon } from "../Icon/Icon.tsx";
 import buttonStyles from "../shared/button-styles.module.css";
+import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden.tsx";
 import { Link } from "./Link.tsx";
 import styles from "./Link.module.css";
 
@@ -95,6 +96,31 @@ describe("Link", () => {
     );
     expect(link).not.toHaveClass(styles.link ?? "");
     expect(link.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("with appearance=button, one icon and only VisuallyHidden, is square (refinement R3.5)", () => {
+    render(
+      <>
+        <Link href="#x" appearance="button" iconStart="github">
+          <VisuallyHidden>GitHub</VisuallyHidden>
+        </Link>
+        <Link href="#y" appearance="button" iconStart="mail">
+          Email me
+        </Link>
+        <Link href="https://github.com/" appearance="button" iconStart="github" newTab>
+          <VisuallyHidden>GitHub profile</VisuallyHidden>
+        </Link>
+      </>,
+    );
+
+    expect(screen.getByRole("link", { name: "GitHub" })).toHaveClass(buttonStyles.iconOnly ?? "");
+    expect(screen.getByRole("link", { name: "Email me" })).not.toHaveClass(
+      buttonStyles.iconOnly ?? "",
+    );
+    // The new-tab icon is a second visible icon, so it isn't square.
+    expect(screen.getByRole("link", { name: /^GitHub profile/ })).not.toHaveClass(
+      buttonStyles.iconOnly ?? "",
+    );
   });
 
   it("passes aria-current through, as the current-state styling hook (R5.8)", async () => {

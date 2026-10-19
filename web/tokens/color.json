@@ -1,7 +1,7 @@
 {
   "color": {
     "$type": "color",
-    "$description": "Color primitives (decision 0006), plus the unthemed color.fill semantic. Themed semantic color tokens live in themes/.",
+    "$description": "Color primitives (decisions 0006 and 0009), plus the unthemed color.fill semantic. Themed semantic color tokens live in themes/.",
     "gray": {
       "0": {
         "$value": {
@@ -276,6 +276,239 @@
           "hex": "#7a5618"
         },
         "$description": "Bronze 700. Gold as text on light surfaces."
+      }
+    },
+    "violet": {
+      "50": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9569, 0.9412, 0.9922],
+          "alpha": 1,
+          "hex": "#f4f0fd"
+        },
+        "$description": "Muted violet 50. Light-theme accent-2 tint."
+      },
+      "200": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.851, 0.8039, 0.9686],
+          "alpha": 1,
+          "hex": "#d9cdf7"
+        },
+        "$description": "Muted violet 200. Light-theme accent-2 fill."
+      },
+      "300": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.7882, 0.7216, 0.9608],
+          "alpha": 1,
+          "hex": "#c9b8f5"
+        },
+        "$description": "Dusty lavender 300. Light-theme accent-2 fill hover; dark-theme accent-2 text and border."
+      },
+      "600": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.3569, 0.2471, 0.651],
+          "alpha": 1,
+          "hex": "#5b3fa6"
+        },
+        "$description": "Plum violet 600. Light-theme accent-2 text and border; dark-theme accent-2 fill hover."
+      },
+      "700": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.2902, 0.1961, 0.5647],
+          "alpha": 1,
+          "hex": "#4a3290"
+        },
+        "$description": "Plum violet 700. Dark-theme accent-2 fill."
+      },
+      "800": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.2392, 0.1569, 0.4588],
+          "alpha": 1,
+          "hex": "#3d2875"
+        },
+        "$description": "Plum violet 800. Light-theme text on the accent-2 fill."
+      },
+      "900": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.1647, 0.1216, 0.3216],
+          "alpha": 1,
+          "hex": "#2a1f52"
+        },
+        "$description": "Plum violet 900. Dark-theme accent-2 tint."
+      }
+    },
+    "red": {
+      "50": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9882, 0.9255, 0.9176],
+          "alpha": 1,
+          "hex": "#fcecea"
+        },
+        "$description": "Red 50. Light-theme error tint."
+      },
+      "300": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9569, 0.6275, 0.5922],
+          "alpha": 1,
+          "hex": "#f4a097"
+        },
+        "$description": "Red 300. Dark-theme error text."
+      },
+      "400": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9098, 0.4667, 0.4235],
+          "alpha": 1,
+          "hex": "#e8776c"
+        },
+        "$description": "Red 400. Dark-theme error border."
+      },
+      "600": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.7843, 0.2157, 0.1725],
+          "alpha": 1,
+          "hex": "#c8372c"
+        },
+        "$description": "Red 600. Light-theme error border."
+      },
+      "700": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.702, 0.149, 0.1176],
+          "alpha": 1,
+          "hex": "#b3261e"
+        },
+        "$description": "Red 700. Light-theme error text."
+      },
+      "900": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.2902, 0.102, 0.1098],
+          "alpha": 1,
+          "hex": "#4a1a1c"
+        },
+        "$description": "Red 900. Dark-theme error tint."
+      }
+    },
+    "green": {
+      "50": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9098, 0.9608, 0.9333],
+          "alpha": 1,
+          "hex": "#e8f5ee"
+        },
+        "$description": "Green 50. Light-theme success tint."
+      },
+      "300": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.5608, 0.8392, 0.6588],
+          "alpha": 1,
+          "hex": "#8fd6a8"
+        },
+        "$description": "Green 300. Dark-theme success text."
+      },
+      "400": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.3725, 0.749, 0.5255],
+          "alpha": 1,
+          "hex": "#5fbf86"
+        },
+        "$description": "Green 400. Dark-theme success border."
+      },
+      "600": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.1647, 0.5216, 0.3373],
+          "alpha": 1,
+          "hex": "#2a8556"
+        },
+        "$description": "Green 600. Light-theme success border."
+      },
+      "700": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.1176, 0.4196, 0.2706],
+          "alpha": 1,
+          "hex": "#1e6b45"
+        },
+        "$description": "Green 700. Light-theme success text."
+      },
+      "900": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.0667, 0.2078, 0.1647],
+          "alpha": 1,
+          "hex": "#11352a"
+        },
+        "$description": "Green 900. Dark-theme success tint."
+      }
+    },
+    "orange": {
+      "50": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9922, 0.9412, 0.902],
+          "alpha": 1,
+          "hex": "#fdf0e6"
+        },
+        "$description": "Orange 50. Light-theme warning tint."
+      },
+      "300": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9686, 0.6784, 0.4863],
+          "alpha": 1,
+          "hex": "#f7ad7c"
+        },
+        "$description": "Orange 300. Dark-theme warning text."
+      },
+      "400": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.9255, 0.549, 0.3059],
+          "alpha": 1,
+          "hex": "#ec8c4e"
+        },
+        "$description": "Orange 400. Dark-theme warning border."
+      },
+      "600": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.698, 0.3529, 0.0706],
+          "alpha": 1,
+          "hex": "#b25a12"
+        },
+        "$description": "Orange 600. Light-theme warning border."
+      },
+      "700": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.5804, 0.2667, 0.0392],
+          "alpha": 1,
+          "hex": "#94440a"
+        },
+        "$description": "Orange 700. Light-theme warning text."
+      },
+      "900": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.2706, 0.1373, 0.051],
+          "alpha": 1,
+          "hex": "#45230d"
+        },
+        "$description": "Orange 900. Dark-theme warning tint."
       }
     },
     "cyan": {

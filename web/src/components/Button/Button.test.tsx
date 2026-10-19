@@ -5,7 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { expectHydratesCleanly } from "../../../test/component.tsx";
 import styles from "../shared/button-styles.module.css";
-import { Button } from "./Button.tsx";
+import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden.tsx";
+import { Button, type ButtonProps } from "./Button.tsx";
 
 const variants = ["primary", "secondary", "ghost"] as const;
 const sizes = ["sm", "md"] as const;
@@ -73,6 +74,60 @@ describe("Button", () => {
     expect(screen.getByRole("button", { name: "GitHub" })).toBeInTheDocument();
   });
 
+  describe("icon-only is square (refinement R3.5)", () => {
+    it.each([
+      ["an icon and no children", <Button key="a" iconStart="check" aria-label="Done" />],
+      [
+        "an icon and only VisuallyHidden",
+        <Button key="b" iconEnd="check">
+          <VisuallyHidden>Done</VisuallyHidden>
+        </Button>,
+      ],
+      [
+        "an icon and an empty child",
+        <Button key="c" iconStart="check" aria-label="Done">
+          {false}
+        </Button>,
+      ],
+    ])("with %s", (_, button) => {
+      render(button);
+
+      expect(screen.getByRole("button", { name: "Done" })).toHaveClass(styles.iconOnly ?? "");
+    });
+
+    it.each([
+      ["two icons", <Button key="d" iconStart="check" iconEnd="arrow-right" aria-label="Done" />],
+      [
+        "text",
+        <Button key="a" iconStart="check">
+          Done
+        </Button>,
+      ],
+      [
+        "text plus VisuallyHidden",
+        <Button key="b" iconStart="check">
+          Done <VisuallyHidden>today</VisuallyHidden>
+        </Button>,
+      ],
+      [
+        "VisuallyHidden and no icon",
+        <Button key="c">
+          <VisuallyHidden>Done</VisuallyHidden>
+        </Button>,
+      ],
+    ])("but not with %s", (_, button) => {
+      render(button);
+
+      expect(screen.getByRole("button")).not.toHaveClass(styles.iconOnly ?? "");
+    });
+  });
+
+  it("passes aria-pressed through, making a toggle button (refinement R3.1)", () => {
+    render(<Button aria-pressed>Show grid</Button>);
+
+    expect(screen.getByRole("button", { name: "Show grid", pressed: true })).toBeInTheDocument();
+  });
+
   it.each(["{Enter}", " "])("runs onClick once on %j (R4.6)", async (key) => {
     const user = userEvent.setup();
     const onClick = vi.fn();
@@ -101,6 +156,13 @@ describe("Button", () => {
       const button = screen.getByRole("button", { name: "Save" });
       expect(button).toHaveAttribute("aria-disabled", "true");
       expect(button).not.toHaveAttribute("disabled");
+    });
+
+    it("clears a cast-in aria-disabled (refinement R3.7)", () => {
+      const props = { "aria-disabled": true, children: "Save" } as ButtonProps;
+      render(<Button {...props} />);
+
+      expect(screen.getByRole("button", { name: "Save" })).not.toHaveAttribute("aria-disabled");
     });
 
     it("omits aria-disabled when enabled", () => {
@@ -217,20 +279,35 @@ describe("Button", () => {
     );
   });
 
-  it.each(variants)(
-    "has no axe violations as %s, enabled, disabled and icon-only (R3.9)",
-    async (variant) => {
-      const { container } = render(
-        <div>
-          <Button variant={variant}>Save</Button>
-          <Button variant={variant} disabled>
+  it("has no axe violations: every variant enabled and disabled, toggles and icon-only (R3.9, refinement R3.11)", async () => {
+    const { container } = render(
+      <div>
+        {variants.map((variant) => (
+          <Button key={variant} variant={variant}>
             Save
           </Button>
-          <Button variant={variant} size="sm" iconStart="github" aria-label="GitHub" />
-        </div>,
-      );
+        ))}
+        {variants.map((variant) => (
+          <Button key={variant} variant={variant} disabled>
+            Save
+          </Button>
+        ))}
+        <Button variant="secondary" aria-pressed>
+          Show grid
+        </Button>
+        <Button variant="ghost" aria-pressed>
+          Wrap lines
+        </Button>
+        <Button variant="primary" aria-pressed>
+          Notify me
+        </Button>
+        <Button variant="primary" size="sm" iconStart="github" aria-label="GitHub" />
+        <Button variant="ghost" iconStart="chevron-down">
+          <VisuallyHidden>Show more</VisuallyHidden>
+        </Button>
+      </div>,
+    );
 
-      await expectNoAxeViolations(container);
-    },
-  );
+    await expectNoAxeViolations(container);
+  });
 });

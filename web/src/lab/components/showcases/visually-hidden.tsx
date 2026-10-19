@@ -6,6 +6,7 @@ import {
   type VisuallyHiddenOwnProps,
   type VisuallyHiddenProps,
 } from "../../../components/VisuallyHidden/VisuallyHidden.tsx";
+import { Announced } from "../Announced.tsx";
 import { Example } from "../Example.tsx";
 import type { PropDocs } from "../PropDocs.ts";
 import type { Showcase } from "../Showcase.ts";
@@ -41,14 +42,6 @@ export const announced = {
   skipLink: { name: "Skip to the VisuallyHidden section", role: "link" },
   wrapper: { name: "Back to the section top", role: "link" },
 } as const;
-
-function Announced({ name, role }: { name: string; role: string }) {
-  return (
-    <p>
-      Announced as: “{name}, {role}”
-    </p>
-  );
-}
 
 function Examples() {
   const searchId = useId();

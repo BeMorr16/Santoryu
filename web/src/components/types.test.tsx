@@ -20,6 +20,7 @@ import {
   ThemeSwitcher,
   VisuallyHidden,
 } from "./index.ts";
+import type { ButtonLookProps } from "./shared/button.tsx";
 import type { PolymorphicProps } from "./shared/polymorphic.ts";
 
 describe("library types", () => {
@@ -88,6 +89,42 @@ describe("library types", () => {
     expectTypeOf(valid).toBeFunction();
   });
 
+  it("Button: no aria-disabled, and icon-only needs an icon (refinement R3.6, R3.7)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- disabled only through `disabled`.
+        <Button key="c" aria-disabled>
+          x
+        </Button>,
+        // @ts-expect-error -- an accessible name with nothing to show.
+        <Button key="d" aria-label="x" />,
+      ];
+    }
+    function valid(variant: ButtonLookProps["variant"]) {
+      return [
+        <Button key="a" variant="secondary" aria-pressed>
+          x
+        </Button>,
+        <Button key="b" variant="ghost" aria-pressed={false}>
+          x
+        </Button>,
+        <Button key="c" aria-pressed="mixed">
+          x
+        </Button>,
+        <Button key="d" variant="primary" aria-pressed>
+          x
+        </Button>,
+        <Button key="e" aria-label="x" iconEnd="check" />,
+        <Button key="f" variant={variant} iconStart="check" aria-label="x" />,
+        <Menu key="g">
+          <MenuTrigger variant={variant}>x</MenuTrigger>
+        </Menu>,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
   it("Link takes Button props only as a button, and has no disabled state (R5.5, R5.6)", () => {
     function invalid() {
       return [
@@ -107,6 +144,10 @@ describe("library types", () => {
         <Link key="d">x</Link>,
         // @ts-expect-error -- target is owned by newTab.
         <Link key="e" href="/" target="_blank">
+          x
+        </Link>,
+        // @ts-expect-error -- links don't support aria-pressed (refinement R3.13).
+        <Link key="f" href="/" appearance="button" aria-pressed>
           x
         </Link>,
       ];

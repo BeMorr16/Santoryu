@@ -1,18 +1,24 @@
 import type { ComponentPropsWithRef, MouseEvent, ReactNode } from "react";
+import type { IconName } from "../Icon/registry.ts";
 import { ButtonContent, buttonClassName, type ButtonLookProps } from "../shared/button.tsx";
 import { cx } from "../shared/cx.ts";
 
 export type ButtonOwnProps = ButtonLookProps;
 
-/** A label, or an accessible name for an icon-only button (R4.4). */
+/** A label, or an icon plus an accessible name (R4.4, refinement R3.6). */
 type ButtonLabel =
   | { children: ReactNode }
-  | { children?: never; "aria-label": string }
-  | { children?: never; "aria-labelledby": string };
+  | ({ children?: never } & ({ "aria-label": string } | { "aria-labelledby": string }) &
+      ({ iconStart: IconName } | { iconEnd: IconName }));
 
+/**
+ * Disabled only through `disabled` (refinement R3.7). `aria-disabled` is `never`, since hyphenated
+ * JSX props are only checked when declared.
+ */
 export type ButtonProps = ButtonOwnProps &
-  Omit<ComponentPropsWithRef<"button">, keyof ButtonOwnProps | "children"> &
-  ButtonLabel;
+  Omit<ComponentPropsWithRef<"button">, keyof ButtonOwnProps | "children" | "aria-disabled"> & {
+    "aria-disabled"?: never;
+  } & ButtonLabel;
 
 /**
  * Always a native <button> (R4.1). `disabled` renders aria-disabled, never the native attribute,
@@ -44,7 +50,7 @@ export function Button({
       type={type}
       aria-disabled={disabled ? true : undefined}
       onClick={handleClick}
-      className={cx(buttonClassName({ variant, size }), className)}
+      className={cx(buttonClassName({ variant, size, iconStart, iconEnd, children }), className)}
     >
       <ButtonContent iconStart={iconStart} iconEnd={iconEnd}>
         {children}
