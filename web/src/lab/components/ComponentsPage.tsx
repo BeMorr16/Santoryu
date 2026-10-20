@@ -1,5 +1,7 @@
 import { useId } from "react";
+import { Accordion, AccordionItem } from "../../components/Accordion/Accordion.tsx";
 import { Link } from "../../components/Link/Link.tsx";
+import { Stack } from "../../components/Stack/Stack.tsx";
 import { Typography } from "../../components/Typography/Typography.tsx";
 import { ComponentTokenTable } from "../ComponentTokenTable.tsx";
 import { KeyboardTable } from "./KeyboardTable.tsx";
@@ -20,30 +22,39 @@ function Section({ showcase }: { showcase: Showcase }) {
       <PreviewPanel label={showcase.name}>
         <Examples />
       </PreviewPanel>
-      <h3>Props</h3>
-      <p>Any native prop not listed here goes to the root element unchanged.</p>
-      {showcase.propsNote && <p>{showcase.propsNote}</p>}
-      {showcase.props.map(({ part, docs }) => (
-        <PropsTable key={part} caption={`${part} props`} props={docs} />
-      ))}
-      <h3>Component tokens</h3>
-      {showcase.tokens === null ? (
-        <p>{showcase.tokensNote}</p>
-      ) : (
-        <ComponentTokenTable
-          component={showcase.tokens}
-          caption={`${showcase.name} component tokens`}
-        />
-      )}
-      <h3>Accessibility</h3>
-      <ul className={styles.notes}>
-        {showcase.a11y.map((note) => (
-          <li key={note}>{note}</li>
-        ))}
-      </ul>
-      {showcase.keyboard && (
-        <KeyboardTable caption={`${showcase.name} keyboard`} rows={showcase.keyboard} />
-      )}
+      <Accordion headingLevel={3} headingVariant="h3">
+        <AccordionItem heading="Props">
+          <Stack>
+            <p>Any native prop not listed here goes to the root element unchanged.</p>
+            {showcase.propsNote && <p>{showcase.propsNote}</p>}
+            {showcase.props.map(({ part, docs }) => (
+              <PropsTable key={part} caption={`${part} props`} props={docs} />
+            ))}
+          </Stack>
+        </AccordionItem>
+        <AccordionItem heading="Component tokens">
+          {showcase.tokens === null ? (
+            <p>{showcase.tokensNote}</p>
+          ) : (
+            <ComponentTokenTable
+              component={showcase.tokens}
+              caption={`${showcase.name} component tokens`}
+            />
+          )}
+        </AccordionItem>
+        <AccordionItem heading="Accessibility">
+          <Stack>
+            <ul className={styles.notes}>
+              {showcase.a11y.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+            {showcase.keyboard && (
+              <KeyboardTable caption={`${showcase.name} keyboard`} rows={showcase.keyboard} />
+            )}
+          </Stack>
+        </AccordionItem>
+      </Accordion>
     </section>
   );
 }

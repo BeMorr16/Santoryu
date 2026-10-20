@@ -1,0 +1,114 @@
+/* A divided list (refinement R13.10): a line above each item and below the last. */
+.item {
+  border-block-start: var(--component-accordion-border-width) solid
+    var(--component-accordion-border);
+}
+
+.item:last-child {
+  border-block-end: var(--component-accordion-border-width) solid var(--component-accordion-border);
+}
+
+/* The button inherits the heading's look (headingVariant), so the heading sets the font. */
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--component-accordion-trigger-gap);
+  inline-size: 100%;
+  padding: var(--component-accordion-trigger-padding-block)
+    var(--component-accordion-trigger-padding-inline);
+  border: 0;
+  background: none;
+  color: var(--component-accordion-trigger-text);
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+/* The ring sits inside the button, clear of the lines. */
+.trigger:focus-visible {
+  outline: var(--effect-focus-ring-width) solid var(--component-accordion-focus-ring-color);
+  outline-offset: calc(-1 * var(--effect-focus-ring-width));
+}
+
+@media (hover: hover) {
+  .trigger:hover {
+    background-color: var(--component-accordion-trigger-background-hover);
+  }
+}
+
+/* A long heading wraps beside the chevron instead of overflowing (WCAG 1.4.10). */
+.label {
+  min-inline-size: 0;
+  overflow-wrap: break-word;
+}
+
+.chevron {
+  flex: none;
+  transition: rotate var(--component-accordion-transition-duration)
+    var(--component-accordion-transition-easing);
+}
+
+.trigger[aria-expanded="true"] > .chevron {
+  rotate: 180deg;
+}
+
+/* A one-row grid from 0fr to 1fr animates the height in every engine (R13.8). */
+.panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--component-accordion-transition-duration)
+    var(--component-accordion-transition-easing);
+}
+
+.panel[data-open] {
+  grid-template-rows: 1fr;
+}
+
+/* A find-in-page reveal opens at once, before the browser scrolls to the match (R13.7). */
+.panel[data-motion="instant"] {
+  transition: none;
+}
+
+/* `display: grid` would override the UA's hiding of plain `hidden` (pre-hydration, R13.7). */
+.panel[hidden]:not([hidden="until-found"]) {
+  display: none;
+}
+
+/* The UA rule where `until-found` is supported; where it isn't, this keeps the panel hidden. */
+.panel[hidden="until-found"] {
+  content-visibility: hidden;
+}
+
+/* Without content-visibility either, `until-found` falls back to plain `hidden`. */
+@supports not (content-visibility: hidden) {
+  .panel[hidden] {
+    display: none;
+  }
+}
+
+/* A grid item's automatic minimum is its content's size: zero lets the row collapse, and lets
+   wide content (a table) scroll inside its own element instead of widening the page. */
+.clip {
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+/* Clipped only while closed or moving, so open content keeps its focus rings (R13.8). */
+.panel:not([data-open]) > .clip,
+.panel[data-animating] > .clip {
+  overflow: hidden;
+}
+
+.body {
+  padding-inline: var(--component-accordion-panel-padding-inline);
+  padding-block-end: var(--component-accordion-panel-padding-block-end);
+}
+
+/* Lines, chevron (currentColor) and ring take system colors on their own (R13.12). */
+@media (forced-colors: active) {
+  .trigger:hover {
+    background-color: transparent;
+  }
+}

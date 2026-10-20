@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { pages, setAllPanels, storeTheme, themes } from "./support.ts";
+import { openAllAccordions, pages, setAllPanels, storeTheme, themes } from "./support.ts";
 
 const wcagTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
@@ -21,6 +21,8 @@ for (const theme of themes) {
       await storeTheme(page, theme);
       await page.goto(path);
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+      // The folded reference content stays covered (refinement R13.15).
+      if (path === "/lab/components") await openAllAccordions(page);
 
       expect(await violations(page)).toEqual([]);
     });
@@ -41,10 +43,11 @@ test.describe("preview panels", () => {
       await storeTheme(page, pageTheme);
       await page.goto("/lab/components");
 
-      expect(await setAllPanels(page, panelTheme)).toBe(11);
+      expect(await setAllPanels(page, panelTheme)).toBe(12);
       await expect(
         page.locator(`[data-theme="${panelTheme.toLowerCase()}"][role="group"]`),
-      ).toHaveCount(11);
+      ).toHaveCount(12);
+      await openAllAccordions(page);
 
       expect(await violations(page)).toEqual([]);
     });

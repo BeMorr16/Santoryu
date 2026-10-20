@@ -74,3 +74,21 @@ export async function probe(scope: Locator, property: string, value: string) {
     { property, value },
   );
 }
+
+/**
+ * Opens every closed Accordion item on the page (refinement R13.15), so axe and layout checks
+ * cover the folded content, then waits for the panels to settle. An exclusive group keeps only
+ * its last item open.
+ */
+export async function openAllAccordions(page: Page) {
+  const buttons = page.locator(":is(h2, h3, h4, h5, h6) > button[aria-expanded]");
+  const count = await buttons.count();
+  for (let index = 0; index < count; index++) {
+    const button = buttons.nth(index);
+    if ((await button.getAttribute("aria-expanded")) === "false") await button.click();
+  }
+  await page.waitForFunction(() =>
+    document.getAnimations().every((animation) => animation.playState !== "running"),
+  );
+  return count;
+}

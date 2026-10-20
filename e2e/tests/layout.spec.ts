@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { section, tabKey } from "./support.ts";
+import { openAllAccordions, section, tabKey } from "./support.ts";
 
 test.describe("at 320px wide", () => {
   test.use({ viewport: { width: 320, height: 640 } });
@@ -41,6 +41,8 @@ test.describe("at 320px wide", () => {
   test("no page scrolls sideways", async ({ page }) => {
     for (const path of ["/", "/lab", "/lab/tokens", "/lab/components", "/nope"]) {
       await page.goto(path);
+      // The folded reference content counts too (refinement R13.15).
+      if (path === "/lab/components") await openAllAccordions(page);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );

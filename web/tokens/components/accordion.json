@@ -1,0 +1,110 @@
+{
+  "component": {
+    "accordion": {
+      "border": {
+        "$value": "{color.border.subtle}",
+        "$type": "color",
+        "$description": "Lines above each item and below the last (decorative: the button's text and chevron mark each item)."
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Line thickness."
+      },
+      "trigger": {
+        "text": {
+          "$value": "{color.text.default}",
+          "$type": "color",
+          "$description": "Heading button text and chevron.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "color.surface.base",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.raised",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.sunken",
+                "min": "text"
+              },
+              {
+                "against": "component.accordion.trigger.background-hover",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "background-hover": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Heading button background on hover (only where the device can hover), as Button's ghost hover."
+        },
+        "padding-block": {
+          "$value": "{space.stack.sm}",
+          "$type": "dimension",
+          "$description": "Block padding of the heading button."
+        },
+        "padding-inline": {
+          "$value": "{space.inset.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of the heading button."
+        },
+        "gap": {
+          "$value": "{space.inline.md}",
+          "$type": "dimension",
+          "$description": "Space between the heading text and the chevron."
+        }
+      },
+      "focus-ring-color": {
+        "$value": "{color.focus.ring}",
+        "$type": "color",
+        "$description": "Focus indicator, drawn inside the heading button so it stays clear of the lines.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            },
+            {
+              "against": "component.accordion.trigger.background-hover",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "panel": {
+        "padding-inline": {
+          "$value": "{space.inset.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of the panel, aligning its content with the heading text."
+        },
+        "padding-block-end": {
+          "$value": "{space.stack.md}",
+          "$type": "dimension",
+          "$description": "Space between the panel's content and the next line."
+        }
+      },
+      "transition-duration": {
+        "$value": "{motion.duration.base}",
+        "$type": "duration",
+        "$description": "Duration of the panel's height and the chevron's turn (0ms under reduced motion)."
+      },
+      "transition-easing": {
+        "$value": "{motion.easing.standard}",
+        "$type": "cubicBezier",
+        "$description": "Easing of the panel's height and the chevron's turn."
+      }
+    }
+  }
+}

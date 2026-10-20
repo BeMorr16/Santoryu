@@ -1,5 +1,5 @@
-import { expect, test } from "@playwright/test";
-import { tabKey } from "./support.ts";
+import { expect, test, type Page } from "@playwright/test";
+import { openAllAccordions, tabKey } from "./support.ts";
 
 interface Ring {
   label: string;
@@ -7,16 +7,12 @@ interface Ring {
   contrast: number;
 }
 
-test("every control on /lab/components shows a 2px, 3:1 focus ring from the keyboard (R3.8, R16.5)", async ({
-  page,
-  browserName,
-}) => {
-  test.slow();
-  await page.goto("/lab/components");
+/** Tabs on from the focused element until focus leaves the page or comes round again. */
+async function walk(page: Page, browserName: string) {
   const rings: Ring[] = [];
   const seen = new Set<string>();
 
-  for (let step = 0; step < 400; step++) {
+  for (let step = 0; step < 600; step++) {
     await page.keyboard.press(tabKey(browserName));
     const ring = await page.evaluate(() => {
       const focused = document.activeElement;
@@ -62,9 +58,30 @@ test("every control on /lab/components shows a 2px, 3:1 focus ring from the keyb
     rings.push(ring);
   }
 
+  return rings;
+}
+
+const weakRings = (rings: Ring[]) =>
+  rings
+    .filter((ring) => ring.width < 2 || ring.contrast < 3)
+    .map((ring) => `${ring.label}: ${String(ring.width)}px, ${ring.contrast.toFixed(2)}:1`);
+
+test("every control on /lab/components shows a 2px, 3:1 focus ring from the keyboard (R3.8, R16.5)", async ({
+  page,
+  browserName,
+}) => {
+  test.slow();
+  await page.goto("/lab/components");
+  const rings = await walk(page, browserName);
+
   expect(rings.length).toBeGreaterThan(40);
-  const weak = rings.filter((ring) => ring.width < 2 || ring.contrast < 3);
-  expect(
-    weak.map((ring) => `${ring.label}: ${String(ring.width)}px, ${ring.contrast.toFixed(2)}:1`),
-  ).toEqual([]);
+  expect(weakRings(rings)).toEqual([]);
+
+  // The folded reference content too: its tables' scroll regions are Tab stops (refinement R13.14).
+  await openAllAccordions(page);
+  await page.locator("section h3 > button").first().focus();
+  const open = await walk(page, browserName);
+
+  expect(open.filter((ring) => ring.label.startsWith("div")).length).toBeGreaterThanOrEqual(24);
+  expect(weakRings(open)).toEqual([]);
 });

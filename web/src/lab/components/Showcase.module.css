@@ -150,6 +150,13 @@
   --component-badge-padding-inline-md: var(--space-inline-md);
 }
 
+/* The Accordion section's customized example (refinement R13.13); its CSS is shown beside it. */
+.customAccordion {
+  --component-accordion-border: var(--color-border-strong);
+  --component-accordion-trigger-padding-inline: var(--space-inset-md);
+  --component-accordion-panel-padding-inline: var(--space-inset-md);
+}
+
 /* The Typography section's customized example (refinement R12.13); its CSS is shown beside it. */
 .customLabel {
   --component-typography-label-tracking: var(--type-tracking-body);

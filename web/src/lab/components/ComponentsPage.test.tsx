@@ -19,6 +19,13 @@ import { ComponentsPage } from "./ComponentsPage.tsx";
 import { showcases } from "./registry.ts";
 import badgeStyles from "../../components/Badge/Badge.module.css";
 import cardStyles from "../../components/Card/Card.module.css";
+import {
+  accordionKeyboard,
+  customAccordionCss,
+  findCaption,
+  findWord,
+  richHeadingAnnounced,
+} from "./showcases/accordion.tsx";
 import { customBadgeCss } from "./showcases/badge.tsx";
 import { accentCardCss } from "./showcases/card.tsx";
 import { compactMenuCss, menuKeyboard } from "./showcases/menu.tsx";
@@ -27,6 +34,17 @@ import { announced } from "./showcases/visually-hidden.tsx";
 
 /** Each Example's visible title: the label-look paragraph that starts its group (refinement R8.13, R12.12). */
 const exampleTitle = `[role="group"] > p.${typographyStyles.label ?? ""}:first-child`;
+
+/** Each section's folded reference items, in order (refinement R13.14). */
+const referenceItems = ["Props", "Component tokens", "Accessibility"] as const;
+
+/** Opens a section's folded reference items, so their tables are in the accessibility tree. */
+async function openReference(section: HTMLElement) {
+  const user = userEvent.setup();
+  for (const name of referenceItems) {
+    await user.click(within(section).getByRole("button", { name, expanded: false }));
+  }
+}
 
 function renderPage() {
   const Stub = createRoutesStub([
@@ -85,6 +103,11 @@ describe("/lab/components page (R15.1, R15.3)", () => {
           .getAllByRole("heading", { level: 3 })
           .map((h) => h.textContent),
       ).toEqual(["Examples", "Props", "Component tokens", "Accessibility"]);
+      for (const name of referenceItems) {
+        const button = within(section).getByRole("button", { name, expanded: false });
+        expect(button.closest("h3")).toHaveClass(typographyStyles.h3 ?? "");
+      }
+      await openReference(section);
       for (const { part, docs } of showcase.props) {
         const table = within(section).getByRole("table", { name: `${part} props` });
         expect(
@@ -389,6 +412,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       "aria-current",
       "page",
     );
+    await openReference(section);
     const underlineRow = within(section).getByRole("row", { name: /^underline\b/ });
     expect(underlineRow).toHaveTextContent('"always" | "hover"');
     expect(section).toHaveTextContent(
@@ -863,6 +887,130 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     }
   });
 
+  it("shows the Accordion examples, its props, keyboard rows, notes and the customized CSS it applies (refinement R13.13)", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Accordion" });
+    const example = (title: string) => within(section).getByRole("group", { name: title });
+    const buttons = (title: string) =>
+      within(example(title))
+        .getAllByRole("button")
+        .filter((button) => button.hasAttribute("aria-expanded"));
+
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
+    expect(labels).toEqual([
+      "Independent items",
+      "Exclusive",
+      "Controlled",
+      "Rich heading",
+      "Find in page",
+      "Regions",
+      "Heading look",
+      "Customized with component tokens",
+    ]);
+
+    const questions = ["What is this site?", "How is it built?", "Can I reuse the components?"];
+    for (const title of ["Independent items", "Exclusive", "Heading look"]) {
+      expect(buttons(title).map((button) => button.textContent)).toEqual(questions);
+      for (const button of buttons(title)) {
+        expect(button.closest("h4")).not.toBeNull();
+      }
+    }
+    expect(buttons("Independent items").map((b) => b.getAttribute("aria-expanded"))).toEqual([
+      "true",
+      "false",
+      "false",
+    ]);
+    for (const heading of within(example("Heading look")).getAllByRole("heading", { level: 4 })) {
+      expect(heading).toHaveClass(typographyStyles.body ?? "");
+    }
+
+    const [first, second] = buttons("Exclusive");
+    if (!first || !second) throw new Error("Missing exclusive items");
+    await user.click(first);
+    await user.click(second);
+    expect(first).toHaveAttribute("aria-expanded", "false");
+    expect(second).toHaveAttribute("aria-expanded", "true");
+
+    const controlled = example("Controlled");
+    expect(within(controlled).getByText("The item is closed.")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
+    await user.click(within(controlled).getByRole("button", { name: "Open" }));
+    expect(within(controlled).getByRole("button", { name: "Shipping details" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(within(controlled).getByText("The item is open.")).toBeInTheDocument();
+    await user.click(within(controlled).getByRole("button", { name: "Shipping details" }));
+    expect(within(controlled).getByRole("button", { name: "Open" })).toBeInTheDocument();
+
+    const rich = example("Rich heading");
+    const collapsed = richHeadingAnnounced(false);
+    const richButton = within(rich).getByRole("button", { name: collapsed.name });
+    expect(richButton.closest("h4")).not.toBeNull();
+    expect(within(richButton).getByText("Live")).toHaveClass(badgeStyles.success ?? "");
+    expect(rich).toHaveTextContent(`Announced as: “${collapsed.name}, ${collapsed.role}”`);
+    await user.click(richButton);
+    const expanded = richHeadingAnnounced(true);
+    expect(expanded.role).toBe("heading level 4, button, expanded");
+    expect(rich).toHaveTextContent(`Announced as: “${expanded.name}, ${expanded.role}”`);
+
+    const find = example("Find in page");
+    expect(within(find).getByText(findCaption).tagName).toBe("P");
+    expect(findCaption).not.toContain(findWord);
+    const word = section.querySelector("#accordion-find-word");
+    expect(word).toHaveTextContent(findWord);
+    expect(word?.closest("[hidden]")).toHaveAttribute("hidden", "until-found");
+    // The answer appears once on the whole page, so find-in-page's first match is the hidden one.
+    const pageText = document.body.textContent;
+    expect(pageText.toLowerCase().split(findWord).length - 1).toBe(1);
+
+    for (const button of buttons("Regions")) await user.click(button);
+    expect(
+      within(example("Regions"))
+        .getAllByRole("region")
+        .map((r) => r.id),
+    ).toHaveLength(2);
+    expect(within(example("Regions")).getByRole("region", { name: "Delivery" })).toBeVisible();
+
+    const custom = example("Customized with component tokens");
+    expect(custom.querySelector(`.${showcaseStyles.customAccordion ?? ""}`)).not.toBeNull();
+    expect([...custom.querySelectorAll("pre code")].map((code) => code.textContent)).toEqual([
+      customAccordionCss,
+    ]);
+    expect(readFileSync(join(import.meta.dirname, "Showcase.module.css"), "utf8")).toContain(
+      customAccordionCss,
+    );
+
+    const accordion = showcases.find((s) => s.id === "accordion");
+    expect(accordion?.props.map(({ part, docs }) => [part, Object.keys(docs)])).toEqual([
+      ["Accordion", ["headingLevel", "headingVariant", "exclusive", "region"]],
+      ["AccordionItem", ["heading", "open", "defaultOpen", "onOpenChange"]],
+    ]);
+    expect(accordion?.propsNote).toMatch(
+      /heading must not hold links or buttons.+works alone.+exclusive, items opened together on first render stay open.+region only for six or fewer panels/,
+    );
+    expect(accordion?.keyboard).toEqual(accordionKeyboard);
+    expect(accordionKeyboard.map((row) => row.keys)).toEqual([
+      "Tab / Shift+Tab",
+      "Enter / Space",
+      "Arrow keys",
+    ]);
+    for (const note of [
+      /headings stay in the page outline: choose headingLevel/,
+      /announces whether it's expanded/,
+      /out of the Tab order and the accessibility tree, yet find-in-page and links/,
+      /No arrow keys move between headings/,
+      /More than about six regions clutter the landmarks list/,
+      /chevron animate over component.accordion.transition-duration, 0ms under reduced motion/,
+      /In forced colors/,
+    ]) {
+      expect(within(section).getByText(note)).toBeInTheDocument();
+    }
+  });
+
   it("shows the ThemeSwitcher examples, its props, its own keyboard table and a live caption (refinement R10.4, R10.5)", async () => {
     onTestFinished(() => {
       localStorage.clear();
@@ -910,6 +1058,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     expect(docs.align?.default).toBe('"end"');
     expect(docs.side?.default).toBe('"bottom"');
 
+    await openReference(section);
     const keyboard = within(section).getByRole("table", { name: "ThemeSwitcher keyboard" });
     const row = within(keyboard).getByRole("row", { name: /^Enter \/ Space In the menu:/ });
     expect(row).toHaveTextContent(

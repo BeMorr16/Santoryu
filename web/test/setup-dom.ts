@@ -46,3 +46,15 @@ if (!("showPopover" in HTMLElement.prototype)) {
   style.textContent = `[popover]:not([${OPEN}]) { display: none; } [popover][${OPEN}] { display: block !important; }`;
   document.head.append(style);
 }
+
+/**
+ * jsdom has no Web Animations API. Accordion waits on its panel's animations (refinement design
+ * §14.2); with none listed, a panel settles at once, as under reduced motion.
+ */
+if (!("getAnimations" in Element.prototype)) {
+  Object.assign(Element.prototype, {
+    getAnimations(): Animation[] {
+      return [];
+    },
+  });
+}

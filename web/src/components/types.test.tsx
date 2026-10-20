@@ -4,6 +4,8 @@
  */
 import { describe, expectTypeOf, it } from "vitest";
 import {
+  Accordion,
+  AccordionItem,
   Badge,
   Button,
   Card,
@@ -311,6 +313,35 @@ describe("library types", () => {
         <Badge key="e" variant="accent-2" icon="check">
           x
         </Badge>,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
+  it("Accordion items need a heading, and the group has closed levels and looks (refinement R13.1, R13.3, R13.5)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- an item needs a heading (its button's name).
+        <AccordionItem key="a">x</AccordionItem>,
+        // @ts-expect-error -- heading levels are 2–6.
+        <Accordion key="b" headingLevel={1} />,
+        // @ts-expect-error -- heading levels are 2–6.
+        <Accordion key="c" headingLevel={7} />,
+        // @ts-expect-error -- not a Typography variant.
+        <Accordion key="d" headingVariant="h7" />,
+        // @ts-expect-error -- exclusive is a boolean.
+        <Accordion key="e" exclusive="yes" />,
+      ];
+    }
+    function valid() {
+      return [
+        <Accordion key="a" headingLevel={4} headingVariant="body" exclusive region>
+          <AccordionItem heading="x" open onOpenChange={() => undefined}>
+            y
+          </AccordionItem>
+          <AccordionItem heading={<span>x</span>} defaultOpen />
+        </Accordion>,
       ];
     }
     expectTypeOf(invalid).toBeFunction();

@@ -1,4 +1,5 @@
 import type { Showcase } from "./Showcase.ts";
+import { accordionShowcase } from "./showcases/accordion.tsx";
 import { badgeShowcase } from "./showcases/badge.tsx";
 import { buttonShowcase } from "./showcases/button.tsx";
 import { cardShowcase } from "./showcases/card.tsx";
@@ -22,6 +23,7 @@ export const showcases: readonly Showcase[] = [
   gridShowcase,
   cardShowcase,
   badgeShowcase,
+  accordionShowcase,
   menuShowcase,
   themeSwitcherShowcase,
 ];
