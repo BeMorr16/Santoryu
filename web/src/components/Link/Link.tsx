@@ -9,10 +9,12 @@ import { Icon } from "../Icon/Icon.tsx";
 import {
   ButtonContent,
   buttonClassName,
+  iconOnlyName,
   type ButtonLabel,
   type ButtonLookProps,
 } from "../shared/button.tsx";
 import { cx } from "../shared/cx.ts";
+import { TooltipBase } from "../Tooltip/Tooltip.tsx";
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden.tsx";
 import styles from "./Link.module.css";
 
@@ -44,6 +46,7 @@ interface LinkInline {
   size?: never;
   iconStart?: never;
   iconEnd?: never;
+  nameTooltip?: never;
 }
 
 /** Inline-only props would do nothing here (refinement R4.8, R4.9, R11.7). */
@@ -52,6 +55,8 @@ type LinkAsButton = {
   showVisited?: never;
   currentMatch?: never;
   underline?: never;
+  /** Show an icon-only link's name as a tooltip. Default true (refinement R14.12). */
+  nameTooltip?: boolean | undefined;
 } & ButtonLookProps;
 
 export type LinkOwnProps = (LinkInline | LinkAsButton) &
@@ -142,6 +147,7 @@ export function Link({
   size,
   iconStart,
   iconEnd,
+  nameTooltip = true,
   className,
   children,
   "aria-label": ariaLabel,
@@ -196,20 +202,30 @@ export function Link({
     rel: mergeRel(rel, newTab),
     className: classes,
   };
-  if (isRoutable(href)) {
-    return (
-      <RoutedLink
-        {...anchor}
-        href={href}
-        currentMatch={inline ? (currentMatch ?? "exact") : undefined}
-      >
-        {content}
-      </RoutedLink>
-    );
-  }
-  return (
+  const link = isRoutable(href) ? (
+    <RoutedLink
+      {...anchor}
+      href={href}
+      currentMatch={inline ? (currentMatch ?? "exact") : undefined}
+    >
+      {content}
+    </RoutedLink>
+  ) : (
     <a {...withoutRouterOptions(anchor)} href={href}>
       {content}
     </a>
   );
+  // The consumer's name, without the new-tab text (refinement R14.12). Inline links get none.
+  const name =
+    !inline && nameTooltip
+      ? iconOnlyName({
+          iconStart,
+          iconEnd,
+          extraIcon: newTab,
+          children,
+          "aria-label": ariaLabel,
+          "aria-labelledby": ariaLabelledby,
+        })
+      : undefined;
+  return <TooltipBase name={name}>{link}</TooltipBase>;
 }

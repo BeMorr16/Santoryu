@@ -4,6 +4,7 @@ import {
   type ButtonOwnProps,
   type ButtonProps,
 } from "../../../components/Button/Button.tsx";
+import type { ButtonLookProps } from "../../../components/shared/button.tsx";
 import { Stack } from "../../../components/Stack/Stack.tsx";
 import { VisuallyHidden } from "../../../components/VisuallyHidden/VisuallyHidden.tsx";
 import { Announced } from "../Announced.tsx";
@@ -24,7 +25,7 @@ export const buttonLookDocs = {
   size: { type: '"sm" | "md"', default: '"md"', description: "32px or 40px tall." },
   iconStart: { type: "IconName", description: "Decorative icon before the label." },
   iconEnd: { type: "IconName", description: "Decorative icon after the label." },
-} satisfies PropDocs<ButtonOwnProps>;
+} satisfies PropDocs<ButtonLookProps>;
 
 /** Button's own props, plus the native ones it treats differently. */
 export const buttonDocs = {
@@ -43,6 +44,17 @@ export const buttonDocs = {
   "aria-pressed": {
     type: 'boolean | "mixed"',
     description: 'Makes it a toggle button. "mixed" has no look of its own.',
+  },
+  disabledReason: {
+    type: "ReactNode",
+    description:
+      "While disabled: why. It's the button's accessible description, and shows as a tooltip on hover, keyboard focus, and a press or tap.",
+  },
+  nameTooltip: {
+    type: "boolean",
+    default: "true",
+    description:
+      "Icon-only buttons named by aria-label or VisuallyHidden show that name as a tooltip; false turns it off.",
   },
 } satisfies PropDocs<ButtonOwnProps & Pick<ButtonProps, "type" | "disabled" | "aria-pressed">>;
 
@@ -167,8 +179,13 @@ function Examples() {
       </Example>
       <Toggles />
       <Example title="Disabled (still focusable)">
-        {variants.map((variant) => (
-          <Button key={variant} variant={variant} disabled>
+        {variants.map((variant, index) => (
+          <Button
+            key={variant}
+            variant={variant}
+            disabled
+            disabledReason={index === 0 ? "Your last note is still sending" : undefined}
+          >
             Sending…
           </Button>
         ))}
@@ -218,6 +235,8 @@ export const buttonShowcase: Showcase = {
     "Named by its text. Icon-only buttons need an icon plus aria-label or aria-labelledby (a type error otherwise), or a VisuallyHidden label. With no visible text they're square.",
     "aria-pressed makes a toggle on any variant: the label stays the same and the pressed look shows the state. A button whose label changes (“Show grid” ↔ “Hide grid”) is a plain button, without aria-pressed.",
     "disabled sets aria-disabled, not the native attribute: it stays focusable and announced, and blocks clicks, keys and form submission.",
+    "A disabledReason is the disabled button's accessible description, and shows as a tooltip on hover, keyboard focus, and a press or tap (the first Disabled example).",
+    "Icon-only buttons show their name as a tooltip on hover and keyboard focus, for sighted users who don't know the icon. It isn't announced again. Not for buttons named by aria-labelledby, whose name is already on screen.",
     "In forced colors, disabled shows GrayText and pressed shows Highlight, since the forced palette drops their background and border colors.",
     "Target size at least 32px tall; focus ring 2px in component.button.focus-ring-color, 3:1 against the surface.",
   ],

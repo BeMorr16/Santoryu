@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { setSystemTheme } from "../../../test/system-theme.ts";
 import { Icon } from "../Icon/Icon.tsx";
@@ -253,5 +253,65 @@ describe("ThemeSwitcher", () => {
 
     await user.click(screen.getByRole("button", { name: "Theme: Light" }));
     await expectNoAxeViolations(container);
+  });
+});
+
+describe("ThemeSwitcher: name tooltip (refinement R14.13)", () => {
+  /** jsdom has no checkVisibility: report whether the visible "Theme" is displayed. */
+  function labelDisplayed(displayed: boolean) {
+    Object.defineProperty(HTMLElement.prototype, "checkVisibility", {
+      configurable: true,
+      value: () => displayed,
+    });
+    onTestFinished(() => {
+      Reflect.deleteProperty(HTMLElement.prototype, "checkVisibility");
+    });
+  }
+
+  // The tooltip popup is a span; the menu's popup (a div) follows it.
+  const tooltipOf = (trigger: HTMLElement) => {
+    const popup = trigger.nextElementSibling;
+    return popup instanceof HTMLSpanElement && popup.hasAttribute("popover") ? popup : null;
+  };
+
+  it("shows its name while the label is hidden", async () => {
+    const user = userEvent.setup();
+    labelDisplayed(false);
+    setSystemTheme("dark");
+    render(<ThemeSwitcher showLabel={false} />);
+    const trigger = screen.getByRole("button", { name: "Theme: Dark" });
+    const tooltip = tooltipOf(trigger);
+    expect(tooltip).toHaveTextContent("Theme: Dark");
+    expect(tooltip).toHaveAttribute("aria-hidden", "true");
+
+    await user.hover(trigger);
+    await waitFor(() => {
+      expect(tooltip).toBeVisible();
+    });
+  });
+
+  it("doesn't show while the automatic label is displayed", async () => {
+    const user = userEvent.setup();
+    labelDisplayed(true);
+    render(<ThemeSwitcher />);
+    const trigger = screen.getByRole("button", { name: /^Theme/ });
+
+    await user.hover(trigger);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    expect(tooltipOf(trigger)).not.toBeVisible();
+  });
+
+  it("has no tooltip with showLabel or nameTooltip={false}", () => {
+    render(
+      <>
+        <ThemeSwitcher showLabel />
+        <ThemeSwitcher showLabel={false} nameTooltip={false} />
+      </>,
+    );
+    for (const trigger of screen.getAllByRole("button", { name: /^Theme/ })) {
+      expect(tooltipOf(trigger)).toBeNull();
+    }
   });
 });

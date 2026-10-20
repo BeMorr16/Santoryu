@@ -14,7 +14,6 @@ import {
   type MouseEvent,
   type ReactNode,
   type PointerEvent as ReactPointerEvent,
-  type Ref,
 } from "react";
 import { Link as RouterLink } from "react-router";
 import { Button, type ButtonProps } from "../Button/Button.tsx";
@@ -22,9 +21,13 @@ import { Icon } from "../Icon/Icon.tsx";
 import type { IconName } from "../Icon/registry.ts";
 import { isRoutable, mergeRel, newTabText } from "../Link/Link.tsx";
 import { cx } from "../shared/cx.ts";
+import { placePopup, supportsAnchorPositioning } from "../shared/position.ts";
+import { assignRef } from "../shared/ref.ts";
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden.tsx";
 import styles from "./Menu.module.css";
-import { placePopup, type Align, type Side } from "./position.ts";
+
+type Side = "bottom" | "top";
+type Align = "start" | "end";
 
 /*
  * WAI-ARIA menu button (R12, design §9). Items are found by DOM query in the popup, in DOM order,
@@ -68,22 +71,6 @@ function useMenu(part: string): MenuContextValue {
 
 function items(popup: HTMLElement | null): HTMLElement[] {
   return popup ? [...popup.querySelectorAll<HTMLElement>(itemSelector)] : [];
-}
-
-/** CSS anchor positioning with `anchor-scope`, or the JS fallback (decision 0007 G). */
-function supportsAnchorPositioning(): boolean {
-  return (
-    typeof CSS !== "undefined" &&
-    typeof CSS.supports === "function" &&
-    CSS.supports("anchor-name: --a") &&
-    CSS.supports("anchor-scope: --a")
-  );
-}
-
-/** Sets a consumer ref and an internal one to the same node. */
-function assignRef<T>(ref: Ref<T> | undefined, node: T | null) {
-  if (typeof ref === "function") ref(node);
-  else if (ref) ref.current = node;
 }
 
 export interface MenuOwnProps {
@@ -224,7 +211,8 @@ export function Menu({ open: openProp, onOpenChange, className, children, ...res
     const placement = {
       side: (popup.dataset.side ?? "bottom") as Side,
       align: (popup.dataset.align ?? "start") as Align,
-    };
+      direction: getComputedStyle(trigger).direction === "rtl" ? "rtl" : "ltr",
+    } as const;
     popup.style.setProperty("margin", "0");
     const place = () => {
       // Taller than the viewport would be unreachable: cap it, and the popup scrolls (WCAG 1.4.10).

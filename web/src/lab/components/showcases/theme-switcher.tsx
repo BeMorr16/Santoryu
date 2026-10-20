@@ -23,6 +23,11 @@ const props = {
     description:
       'Shows the visible "Theme" label; the accessible name always says the theme in effect.',
   },
+  nameTooltip: {
+    type: "boolean",
+    default: "true",
+    description: 'While "Theme" isn\'t displayed, shows the accessible name as a tooltip.',
+  },
   side: popupDocs.side,
   align: { ...popupDocs.align, default: '"end"' },
 } satisfies PropDocs<ThemeSwitcherOwnProps>;
@@ -86,7 +91,7 @@ export const themeSwitcherShowcase: Showcase = {
     "Without JavaScript it's hidden and the system theme applies.",
     "The chevron shows sighted users that the trigger opens a menu. Screen readers announce a menu button with its state, collapsed or expanded.",
     'A visible "Theme" label is the start of the accessible name, so voice control can use the word on screen.',
-    'Hide the label (showLabel={false}) only where the icons make the purpose clear: with no word on screen, voice control users have to guess the name "Theme".',
+    'Hide the label (showLabel={false}) only where the icons make the purpose clear. Its name ("Theme: Dark") then shows as a tooltip on hover and keyboard focus, but voice control users still have to discover the word "Theme" before they can say it.',
     "Space applies a theme and closes the menu, as Enter does.",
     "The icon and name report the site's theme, even inside a preview panel set to another theme.",
     "The “Announced as” caption gives the trigger's accessible name, role and state. Exact wording varies by screen reader.",

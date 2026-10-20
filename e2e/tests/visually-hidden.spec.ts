@@ -13,9 +13,10 @@ test.describe("VisuallyHidden (refinement R2)", () => {
   test("clips hidden content to a 1×1px box (R2.1)", async ({ page }) => {
     await page.goto("/lab/components#visually-hidden");
 
-    const hidden = section(page, "VisuallyHidden").getByText("Mark as done", {
-      exact: true,
-    });
+    // Visible: the icon button's name tooltip (refinement R14.12) repeats the text, closed.
+    const hidden = section(page, "VisuallyHidden")
+      .getByText("Mark as done", { exact: true })
+      .filter({ visible: true });
     const box = await pageBox(hidden);
     expect([box.width, box.height]).toEqual([1, 1]);
     expect(await hidden.evaluate((element) => getComputedStyle(element).clipPath)).toBe(
@@ -91,7 +92,8 @@ test.describe("VisuallyHidden (refinement R2)", () => {
     await page.goto("/lab/components#visually-hidden");
     const lab = section(page, "VisuallyHidden");
     const hidden = [
-      lab.getByText("Mark as done", { exact: true }),
+      // Not the icon button's closed name tooltip (refinement R14.12), which repeats the text.
+      lab.getByText("Mark as done", { exact: true }).and(lab.locator(":not([popover] *)")),
       lab.getByText("about tokens", { exact: true }),
       lab.getByRole("heading", { name: "Projects", level: 4 }),
       lab.getByText("Search the lab", { exact: true }),

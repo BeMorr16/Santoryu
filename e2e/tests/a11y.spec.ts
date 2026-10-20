@@ -1,6 +1,14 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { openAllAccordions, pages, setAllPanels, storeTheme, themes } from "./support.ts";
+import {
+  example,
+  openAllAccordions,
+  pages,
+  section,
+  setAllPanels,
+  storeTheme,
+  themes,
+} from "./support.ts";
 
 const wcagTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
@@ -43,13 +51,29 @@ test.describe("preview panels", () => {
       await storeTheme(page, pageTheme);
       await page.goto("/lab/components");
 
-      expect(await setAllPanels(page, panelTheme)).toBe(12);
+      expect(await setAllPanels(page, panelTheme)).toBe(13);
       await expect(
         page.locator(`[data-theme="${panelTheme.toLowerCase()}"][role="group"]`),
-      ).toHaveCount(12);
+      ).toHaveCount(13);
       await openAllAccordions(page);
 
       expect(await violations(page)).toEqual([]);
     });
   }
 });
+
+for (const theme of themes) {
+  test(`/lab/components in ${theme} with a tooltip open has no axe violations (refinement R14.15)`, async ({
+    page,
+  }) => {
+    await storeTheme(page, theme);
+    await page.goto("/lab/components");
+    const controlled = example(section(page, "Tooltip"), "Controlled");
+    await controlled.getByRole("button", { name: "Show", exact: true }).click();
+    const popup = controlled.locator("[popover]");
+    // Judged once faded in: axe can't sample a color midway.
+    await expect(popup).toHaveCSS("opacity", "1");
+
+    expect(await violations(page)).toEqual([]);
+  });
+}

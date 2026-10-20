@@ -37,6 +37,27 @@ function isIconOnly({ iconStart, iconEnd, children, extraIcon }: IconOnlyProps):
   );
 }
 
+/**
+ * An icon-only control's name, shown in its name tooltip (refinement R14.12): its `aria-label`, or
+ * else its VisuallyHidden children. None when it shows a label, or is named by `aria-labelledby`
+ * (that name is visible elsewhere).
+ */
+export function iconOnlyName({
+  "aria-label": label,
+  "aria-labelledby": labelledBy,
+  ...props
+}: IconOnlyProps & {
+  "aria-label"?: string | undefined;
+  "aria-labelledby"?: string | undefined;
+}): ReactNode {
+  if (labelledBy !== undefined || !isIconOnly(props)) return undefined;
+  if (label !== undefined) return label;
+  const hidden = Children.toArray(props.children).flatMap((child) =>
+    isValidElement<{ children?: ReactNode }>(child) ? Children.toArray(child.props.children) : [],
+  );
+  return hidden.length > 0 ? hidden : undefined;
+}
+
 /** Classes for Button's look, for any element that should look like a button (R5.5, R12.9). */
 export function buttonClassName({
   variant = "secondary",

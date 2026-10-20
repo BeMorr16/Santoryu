@@ -520,3 +520,55 @@ describe("Link", () => {
     await expectNoAxeViolations(container);
   });
 });
+
+describe("Link: name tooltip (refinement R14.12)", () => {
+  const popupAfter = (link: HTMLElement) => {
+    const popup = link.nextElementSibling;
+    return popup instanceof HTMLElement && popup.hasAttribute("popover") ? popup : null;
+  };
+
+  it("shows an icon-only button-look link's name, without the new-tab text", () => {
+    render(
+      <>
+        <Link
+          href="https://github.com/"
+          appearance="button"
+          iconStart="github"
+          aria-label="GitHub"
+        />
+        <Link href="https://example.com/docs" appearance="button" newTab>
+          <VisuallyHidden>Docs</VisuallyHidden>
+        </Link>
+      </>,
+    );
+
+    const github = screen.getByRole("link", { name: "GitHub" });
+    expect(popupAfter(github)).toHaveTextContent(/^GitHub$/);
+    expect(popupAfter(github)).toHaveAttribute("aria-hidden", "true");
+    const docs = screen.getByRole("link", { name: "Docs, opens in new tab" });
+    expect(popupAfter(docs)?.textContent).toBe("Docs");
+    expect(docs).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("shows none for inline links, labelled button links, or nameTooltip={false}", () => {
+    render(
+      <>
+        <Link href="https://example.com/a">Inline</Link>
+        <Link href="https://example.com/b" appearance="button" iconStart="github">
+          Labelled
+        </Link>
+        <Link
+          href="https://github.com/"
+          appearance="button"
+          iconStart="github"
+          aria-label="GitHub"
+          nameTooltip={false}
+        />
+      </>,
+    );
+
+    for (const name of ["Inline", "Labelled", "GitHub"]) {
+      expect(popupAfter(screen.getByRole("link", { name }))).toBeNull();
+    }
+  });
+});

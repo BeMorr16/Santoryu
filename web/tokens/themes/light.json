@@ -25,6 +25,10 @@
             "color.action.background"
           ]
         }
+      },
+      "inverse": {
+        "$value": "{color.gray.900}",
+        "$description": "Background of inverse bubbles, such as tooltips: the default text color, so the page reads inverted."
       }
     },
     "text": {
@@ -91,6 +95,18 @@
             },
             {
               "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "inverse": {
+        "$value": "{color.sand.50}",
+        "$description": "Text on the inverse surface.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.inverse",
               "min": "text"
             }
           ]

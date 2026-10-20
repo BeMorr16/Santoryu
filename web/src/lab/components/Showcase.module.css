@@ -157,6 +157,12 @@
   --component-accordion-panel-padding-inline: var(--space-inset-md);
 }
 
+/* The Tooltip section's customized example (refinement R14.14); its CSS is shown beside it. */
+.customTooltip {
+  --component-tooltip-background: var(--color-accent-2-fill);
+  --component-tooltip-text: var(--color-accent-2-fill-text);
+}
+
 /* The Typography section's customized example (refinement R12.13); its CSS is shown beside it. */
 .customLabel {
   --component-typography-label-tracking: var(--type-tracking-body);

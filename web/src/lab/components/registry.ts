@@ -9,6 +9,7 @@ import { linkShowcase } from "./showcases/link.tsx";
 import { menuShowcase } from "./showcases/menu.tsx";
 import { stackShowcase } from "./showcases/stack.tsx";
 import { themeSwitcherShowcase } from "./showcases/theme-switcher.tsx";
+import { tooltipShowcase } from "./showcases/tooltip.tsx";
 import { typographyShowcase } from "./showcases/typography.tsx";
 import { visuallyHiddenShowcase } from "./showcases/visually-hidden.tsx";
 
@@ -25,5 +26,6 @@ export const showcases: readonly Showcase[] = [
   badgeShowcase,
   accordionShowcase,
   menuShowcase,
+  tooltipShowcase,
   themeSwitcherShowcase,
 ];

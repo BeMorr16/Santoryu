@@ -1,0 +1,94 @@
+{
+  "component": {
+    "tooltip": {
+      "background": {
+        "$value": "{color.surface.inverse}",
+        "$type": "color",
+        "$description": "Bubble and arrow fill."
+      },
+      "text": {
+        "$value": "{color.text.inverse}",
+        "$type": "color",
+        "$description": "Tooltip text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "component.tooltip.background",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Bubble and arrow outline: transparent, drawn only in forced colors."
+      },
+      "radius": {
+        "$value": "{radius.control}",
+        "$type": "dimension",
+        "$description": "Bubble corner radius."
+      },
+      "padding-block": {
+        "$value": "{space.stack.xs}",
+        "$type": "dimension",
+        "$description": "Block padding of the bubble."
+      },
+      "padding-inline": {
+        "$value": "{space.inset.sm}",
+        "$type": "dimension",
+        "$description": "Inline padding of the bubble."
+      },
+      "max-width": {
+        "$value": "{size.column.md}",
+        "$type": "dimension",
+        "$description": "Widest bubble; the text wraps beyond it (and it's never wider than the viewport less twice the offset)."
+      },
+      "font-family": {
+        "$value": "{type.family.body}",
+        "$type": "fontFamily",
+        "$description": "Tooltip text font."
+      },
+      "font-size": {
+        "$value": "{type.size.small}",
+        "$type": "dimension",
+        "$description": "Tooltip text size."
+      },
+      "font-weight": {
+        "$value": "{type.weight.body}",
+        "$type": "fontWeight",
+        "$description": "Tooltip text weight."
+      },
+      "name-font-weight": {
+        "$value": "{type.weight.strong}",
+        "$type": "fontWeight",
+        "$description": "Weight of the name line above a disabled button's reason."
+      },
+      "line-height": {
+        "$value": "{type.leading.body}",
+        "$type": "number",
+        "$description": "Tooltip line height."
+      },
+      "offset": {
+        "$value": "{space.stack.sm}",
+        "$type": "dimension",
+        "$description": "Gap to the trigger, and from the viewport edge when shifted."
+      },
+      "arrow-size": {
+        "$value": "{space.stack.sm}",
+        "$type": "dimension",
+        "$description": "Side of the arrow's rotated square."
+      },
+      "transition-duration": {
+        "$value": "{motion.duration.fast}",
+        "$type": "duration",
+        "$description": "Duration of the fade (0ms under reduced motion)."
+      },
+      "transition-easing": {
+        "$value": "{motion.easing.enter}",
+        "$type": "cubicBezier",
+        "$description": "Easing of the fade."
+      }
+    }
+  }
+}

@@ -24,6 +24,11 @@ async function durations(page: Page) {
       page.locator(`[id="${(await accordionTrigger(page).getAttribute("aria-controls")) ?? ""}"]`),
     ),
     accordionChevron: await duration(accordionTrigger(page).locator("svg")),
+    tooltip: await duration(
+      section(page, "Tooltip")
+        .getByRole("button", { name: "Save draft" })
+        .locator("xpath=following-sibling::span[@popover][1]"),
+    ),
     menuChevron: await duration(
       section(page, "Menu").getByRole("button", { name: "Project actions" }).locator("svg").last(),
     ),

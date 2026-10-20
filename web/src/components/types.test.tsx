@@ -22,6 +22,7 @@ import {
   MenuTrigger,
   Stack,
   ThemeSwitcher,
+  Tooltip,
   Typography,
   VisuallyHidden,
 } from "./index.ts";
@@ -442,6 +443,65 @@ describe("library types", () => {
     }
     function valid() {
       return <ThemeSwitcher align="start" side="top" showLabel={false} />;
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
+  it("Tooltip takes one element child, required content and closed side and kind unions; nameTooltip only on button-look links (refinement R14.1–R14.3, R14.7, R14.12)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- content is required.
+        <Tooltip key="a">
+          <Button>Save</Button>
+        </Tooltip>,
+        // @ts-expect-error -- exactly one trigger.
+        <Tooltip key="b" content="x">
+          <Button>Save</Button>
+          <Button>Cancel</Button>
+        </Tooltip>,
+        // @ts-expect-error -- the trigger is an element, not text.
+        <Tooltip key="c" content="x">
+          Save
+        </Tooltip>,
+        // @ts-expect-error -- sides are logical: start, not left.
+        <Tooltip key="d" content="x" side="left">
+          <Button>Save</Button>
+        </Tooltip>,
+        // @ts-expect-error -- kind is description or name.
+        <Tooltip key="e" content="x" kind="label">
+          <Button>Save</Button>
+        </Tooltip>,
+        // @ts-expect-error -- inline links never show a name tooltip.
+        <Link key="f" href="/" nameTooltip={false}>
+          x
+        </Link>,
+        // @ts-expect-error -- a boolean.
+        <ThemeSwitcher key="g" nameTooltip="no" />,
+      ];
+    }
+    function valid() {
+      return [
+        <Tooltip key="a" content="Saves without publishing" side="end" className="custom">
+          <Button>Save draft</Button>
+        </Tooltip>,
+        <Button key="b" disabled disabledReason="Add a title first">
+          Publish
+        </Button>,
+        <Button key="c" iconStart="check" aria-label="Mark as done" nameTooltip={false} />,
+        <Link
+          key="d"
+          href="/"
+          appearance="button"
+          iconStart="github"
+          aria-label="GitHub"
+          nameTooltip={false}
+        />,
+        <MenuTrigger key="e" disabledReason="Nothing to export" nameTooltip>
+          Export
+        </MenuTrigger>,
+        <ThemeSwitcher key="f" nameTooltip={false} />,
+      ];
     }
     expectTypeOf(invalid).toBeFunction();
     expectTypeOf(valid).toBeFunction();

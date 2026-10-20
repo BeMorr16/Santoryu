@@ -311,3 +311,145 @@ describe("Button", () => {
     await expectNoAxeViolations(container);
   });
 });
+
+describe("Button: tooltips (refinement R14.11, R14.12)", () => {
+  const popupAfter = (button: HTMLElement) => {
+    const popup = button.nextElementSibling;
+    return popup instanceof HTMLElement && popup.hasAttribute("popover") ? popup : null;
+  };
+
+  it("describes a disabled button by its reason, and adds nothing while enabled", () => {
+    const { rerender } = render(
+      <Button disabled disabledReason="Add a title first">
+        Publish
+      </Button>,
+    );
+    const button = screen.getByRole("button", { name: "Publish" });
+    expect(button).toHaveAccessibleDescription("Add a title first");
+    expect(screen.getByRole("tooltip", { hidden: true })).toHaveTextContent("Add a title first");
+
+    rerender(<Button disabledReason="Add a title first">Publish</Button>);
+    expect(button).toHaveAccessibleDescription("");
+    expect(button).not.toHaveAttribute("aria-describedby");
+    expect(popupAfter(button)).toBeNull();
+  });
+
+  it("shows the reason on a press, and hides it on a press outside", async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <>
+        <Button disabled disabledReason="Add a title first" onClick={onClick}>
+          Publish
+        </Button>
+        <p>Outside</p>
+      </>,
+    );
+    const button = screen.getByRole("button", { name: "Publish" });
+
+    await user.click(button);
+    expect(onClick).not.toHaveBeenCalled();
+    expect(screen.getByRole("tooltip")).toBeVisible();
+    await user.unhover(button);
+    expect(screen.getByRole("tooltip")).toBeVisible();
+
+    await user.click(screen.getByText("Outside"));
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    expect(screen.getByRole("tooltip", { hidden: true })).not.toBeVisible();
+  });
+
+  it("shows the reason on a tap", async () => {
+    const user = userEvent.setup();
+    render(
+      <Button disabled disabledReason="Add a title first">
+        Publish
+      </Button>,
+    );
+
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: "Publish" }),
+    });
+    expect(screen.getByRole("tooltip")).toBeVisible();
+  });
+
+  it("keeps focus on the button when it becomes disabled with a reason", () => {
+    const { rerender } = render(<Button disabledReason="Add a title first">Publish</Button>);
+    const button = screen.getByRole("button", { name: "Publish" });
+    button.focus();
+
+    rerender(
+      <Button disabled disabledReason="Add a title first">
+        Publish
+      </Button>,
+    );
+    expect(screen.getByRole("button", { name: "Publish" })).toBe(button);
+    expect(button).toHaveFocus();
+  });
+
+  it("shows an icon-only button's name from aria-label or VisuallyHidden children", () => {
+    render(
+      <>
+        <Button iconStart="check" aria-label="Mark as done" />
+        <Button iconStart="arrow-right">
+          <VisuallyHidden>Next</VisuallyHidden>
+        </Button>
+      </>,
+    );
+
+    for (const name of ["Mark as done", "Next"]) {
+      const button = screen.getByRole("button", { name });
+      const popup = popupAfter(button);
+      expect(popup).toHaveTextContent(name);
+      expect(popup).toHaveAttribute("aria-hidden", "true");
+      expect(button).not.toHaveAttribute("aria-describedby");
+    }
+  });
+
+  it("shows no name for a labelled button, aria-labelledby, or nameTooltip={false}", () => {
+    render(
+      <>
+        <span id="external">Close panel</span>
+        <Button iconStart="check">Done</Button>
+        <Button iconStart="arrow-right" aria-labelledby="external" />
+        <Button iconStart="check" aria-label="Mark as done" nameTooltip={false} />
+      </>,
+    );
+
+    expect(popupAfter(screen.getByRole("button", { name: "Done" }))).toBeNull();
+    expect(popupAfter(screen.getByRole("button", { name: "Close panel" }))).toBeNull();
+    expect(popupAfter(screen.getByRole("button", { name: "Mark as done" }))).toBeNull();
+  });
+
+  it("uses one popup for an icon-only name and its reason, describing only the reason", () => {
+    render(
+      <Button
+        iconStart="check"
+        aria-label="Mark as done"
+        disabled
+        disabledReason="Nothing to mark"
+      />,
+    );
+
+    const button = screen.getByRole("button", { name: "Mark as done" });
+    const popup = popupAfter(button);
+    expect(popup).toHaveAttribute("role", "tooltip");
+    expect(popup?.textContent).toBe("Mark as doneNothing to mark");
+    expect(button).toHaveAccessibleDescription("Nothing to mark");
+    expect(document.querySelectorAll("[popover]")).toHaveLength(1);
+  });
+
+  it("has no axe violations with a reason shown", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <Button
+        iconStart="check"
+        aria-label="Mark as done"
+        disabled
+        disabledReason="Nothing to mark"
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Mark as done" }));
+    await expectNoAxeViolations(container);
+  });
+});

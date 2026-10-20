@@ -79,16 +79,18 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
 };
 
 // Every semantic token, per site-foundation design §4.3, component-library design §4.1,
-// component-library-refinement design §3.3, §9.3 and §13.3, and palette-expansion design §3.
+// component-library-refinement design §3.3, §9.3, §13.3 and §15.6, and palette-expansion design §3.
 // Adding or renaming one is a one-way door.
 const expectedSemantic = [
   "color.surface.base",
   "color.surface.raised",
   "color.surface.sunken",
   "color.surface.glass",
+  "color.surface.inverse",
   "color.text.default",
   "color.text.muted",
   "color.text.subtle",
+  "color.text.inverse",
   "color.link.default",
   "color.link.hover",
   "color.link.visited",

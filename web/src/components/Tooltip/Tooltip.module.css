@@ -1,0 +1,139 @@
+/*
+ * In the top layer (popover="manual"): never clipped or covered (refinement R14.7). The margin is
+ * the gap to the trigger, and keeps a shifted bubble that far inside the viewport.
+ */
+.tooltip {
+  inset: auto;
+  margin: var(--component-tooltip-offset);
+  max-inline-size: min(
+    var(--component-tooltip-max-width),
+    100vw - 2 * var(--component-tooltip-offset)
+  );
+  padding: var(--component-tooltip-padding-block) var(--component-tooltip-padding-inline);
+  /* Transparent until forced colors draws it (R14.10). */
+  border: var(--component-tooltip-border-width) solid transparent;
+  border-radius: var(--component-tooltip-radius);
+  background-color: var(--component-tooltip-background);
+  color: var(--component-tooltip-text);
+  /* Its own type and alignment, not the trigger's surroundings. */
+  font-family: var(--component-tooltip-font-family);
+  font-size: var(--component-tooltip-font-size);
+  font-weight: var(--component-tooltip-font-weight);
+  line-height: var(--component-tooltip-line-height);
+  text-align: start;
+  overflow: visible;
+  overflow-wrap: break-word;
+  opacity: 1;
+  transition-property: opacity, overlay, display;
+  transition-duration: var(--component-tooltip-transition-duration);
+  transition-timing-function: var(--component-tooltip-transition-easing);
+  transition-behavior: allow-discrete;
+}
+
+/* Fades in and out (0ms under reduced motion, R14.9). */
+@starting-style {
+  .tooltip:popover-open {
+    opacity: 0;
+  }
+}
+
+.tooltip:not(:popover-open) {
+  opacity: 0;
+}
+
+/* Spans, so it stays valid inside a paragraph (design §15.2). */
+.tooltip > span {
+  display: block;
+}
+
+.name {
+  font-weight: var(--component-tooltip-name-font-weight);
+}
+
+/* Centered on the trigger, flipping to the opposite side when it doesn't fit (design §15.4). */
+.tooltip[data-side="top"] {
+  position-area: block-start;
+  justify-self: anchor-center;
+  position-try-fallbacks: flip-block;
+}
+
+.tooltip[data-side="bottom"] {
+  position-area: block-end;
+  justify-self: anchor-center;
+  position-try-fallbacks: flip-block;
+}
+
+.tooltip[data-side="start"] {
+  position-area: inline-start;
+  align-self: anchor-center;
+  position-try-fallbacks: flip-inline;
+}
+
+.tooltip[data-side="end"] {
+  position-area: inline-end;
+  align-self: anchor-center;
+  position-try-fallbacks: flip-inline;
+}
+
+/*
+ * The arrow: a square in the bubble's fill, turned 45deg and centered on the edge facing the
+ * trigger (data-placed, measured and physical, as are these properties), at the trigger's center (--_arrow-offset, from the bubble's
+ * outer edge; the border is subtracted since this is placed in the padding box). Its two outer
+ * edges carry the transparent border that forced colors draws.
+ */
+.tooltip::before {
+  content: "";
+  position: absolute;
+  inline-size: var(--component-tooltip-arrow-size);
+  block-size: var(--component-tooltip-arrow-size);
+  border: 0 solid transparent;
+  background-color: inherit;
+  rotate: 45deg;
+  translate: -50% -50%;
+}
+
+.tooltip[data-placed="top"]::before,
+.tooltip[data-placed="bottom"]::before {
+  left: calc(var(--_arrow-offset, 50%) - var(--component-tooltip-border-width));
+}
+
+.tooltip[data-placed="left"]::before,
+.tooltip[data-placed="right"]::before {
+  top: calc(var(--_arrow-offset, 50%) - var(--component-tooltip-border-width));
+}
+
+/* Above the trigger: the arrow points down. */
+.tooltip[data-placed="top"]::before {
+  top: calc(100% + var(--component-tooltip-border-width));
+  border-right-width: var(--component-tooltip-border-width);
+  border-bottom-width: var(--component-tooltip-border-width);
+}
+
+.tooltip[data-placed="bottom"]::before {
+  top: calc(-1 * var(--component-tooltip-border-width));
+  border-left-width: var(--component-tooltip-border-width);
+  border-top-width: var(--component-tooltip-border-width);
+}
+
+/* Left of the trigger: the arrow points right. */
+.tooltip[data-placed="left"]::before {
+  left: calc(100% + var(--component-tooltip-border-width));
+  border-top-width: var(--component-tooltip-border-width);
+  border-right-width: var(--component-tooltip-border-width);
+}
+
+.tooltip[data-placed="right"]::before {
+  left: calc(-1 * var(--component-tooltip-border-width));
+  border-bottom-width: var(--component-tooltip-border-width);
+  border-left-width: var(--component-tooltip-border-width);
+}
+
+/* The forced palette drops the fill: outline the bubble and its arrow (R14.10). */
+@media (forced-colors: active) {
+  .tooltip,
+  .tooltip::before {
+    border-color: CanvasText;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+}

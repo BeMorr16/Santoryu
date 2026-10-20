@@ -1054,3 +1054,47 @@ describe("Menu: placement (refinement R5.12)", () => {
     expect(screen.getByRole("menu")).toHaveAttribute("data-align", "end");
   });
 });
+
+describe("MenuTrigger: tooltips (refinement R14.11, R14.12)", () => {
+  it("hides an icon-only trigger's name tooltip when its menu opens", async () => {
+    const user = userEvent.setup();
+    render(
+      <Menu>
+        <MenuTrigger iconStart="chevron-down" aria-label="Options" />
+        <MenuPopup>
+          <MenuItem>Download</MenuItem>
+        </MenuPopup>
+      </Menu>,
+    );
+    const trigger = screen.getByRole("button", { name: "Options" });
+    const tooltip = trigger.nextElementSibling;
+    expect(tooltip).toHaveTextContent("Options");
+
+    await user.hover(trigger);
+    await waitFor(() => {
+      expect(tooltip).toBeVisible();
+    });
+    fireEvent.keyDown(trigger, { key: "ArrowDown" });
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await waitFor(() => {
+      expect(tooltip).not.toBeVisible();
+    });
+    expect(screen.getByRole("menu")).toBeVisible();
+  });
+
+  it("takes disabledReason through Button", () => {
+    render(
+      <Menu>
+        <MenuTrigger disabled disabledReason="Nothing to export">
+          Export
+        </MenuTrigger>
+        <MenuPopup>
+          <MenuItem>CSV</MenuItem>
+        </MenuPopup>
+      </Menu>,
+    );
+    expect(screen.getByRole("button", { name: "Export" })).toHaveAccessibleDescription(
+      "Nothing to export",
+    );
+  });
+});

@@ -51,6 +51,12 @@ const props = {
   size: { ...buttonLookDocs.size, description: 'With appearance="button" only.' },
   iconStart: { ...buttonLookDocs.iconStart, description: 'With appearance="button" only.' },
   iconEnd: { ...buttonLookDocs.iconEnd, description: 'With appearance="button" only.' },
+  nameTooltip: {
+    type: "boolean",
+    default: "true",
+    description:
+      'With appearance="button" only. An icon-only link shows its name (without the new-tab text) as a tooltip; false turns it off.',
+  },
   prefetch: routerOption('"intent" | "render" | "none" | "viewport"'),
   replace: routerOption("boolean"),
   state: routerOption("any"),

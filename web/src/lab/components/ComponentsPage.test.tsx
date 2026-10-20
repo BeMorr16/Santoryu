@@ -29,6 +29,7 @@ import {
 import { customBadgeCss } from "./showcases/badge.tsx";
 import { accentCardCss } from "./showcases/card.tsx";
 import { compactMenuCss, menuKeyboard } from "./showcases/menu.tsx";
+import { customTooltipCss, describedButton, tooltipKeyboard } from "./showcases/tooltip.tsx";
 import { customLabelCss, scale, tones } from "./showcases/typography.tsx";
 import { announced } from "./showcases/visually-hidden.tsx";
 
@@ -1053,7 +1054,15 @@ describe("/lab/components page (R15.1, R15.3)", () => {
 
     const showcase = showcases.find((s) => s.id === "theme-switcher");
     const docs = showcase?.props[0]?.docs ?? {};
-    expect(Object.keys(docs)).toEqual(["variant", "size", "showLabel", "side", "align"]);
+    expect(Object.keys(docs)).toEqual([
+      "variant",
+      "size",
+      "showLabel",
+      "nameTooltip",
+      "side",
+      "align",
+    ]);
+    expect(docs.nameTooltip?.default).toBe("true");
     expect(docs.showLabel?.default).toBe("auto: from 30em up");
     expect(docs.align?.default).toBe('"end"');
     expect(docs.side?.default).toBe('"bottom"');
@@ -1075,6 +1084,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       /chevron shows sighted users that the trigger opens a menu\. Screen readers announce a menu button with its state/,
       /visible "Theme" label is the start of the accessible name/,
       /Hide the label \(showLabel=\{false\}\) only where the icons make the purpose clear/,
+      /then shows as a tooltip on hover and keyboard focus, but voice control users still have to discover/,
       /caption gives the trigger's accessible name, role and state\. Exact wording varies/,
       /Space applies a theme and closes the menu/,
       /report the site's theme, even inside a preview panel/,
@@ -1088,6 +1098,142 @@ describe("/lab/components page (R15.1, R15.3)", () => {
 
     expect(
       within(label).getByText("Announced as: “Theme: Dark, menu button, collapsed”"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the Tooltip examples, its props, keyboard rows, notes and the customized CSS it applies (refinement R14.14)", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Tooltip" });
+    const example = (title: string) => within(section).getByRole("group", { name: title });
+    /** The tooltip popup right after a trigger. */
+    const popupAfter = (trigger: HTMLElement) => {
+      const popup = trigger.nextElementSibling;
+      return popup instanceof HTMLSpanElement && popup.hasAttribute("popover") ? popup : null;
+    };
+
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
+    expect(labels).toEqual([
+      "Description",
+      "Icon-only names",
+      "Sides",
+      "Disabled reason",
+      "In running text",
+      "Controlled",
+      "Customized with component tokens",
+    ]);
+
+    const description = example("Description");
+    expect(
+      within(description).getByRole("button", { name: describedButton.label }),
+    ).toHaveAccessibleDescription(describedButton.tooltip);
+    expect(description).toHaveTextContent(
+      `Announced as: “${describedButton.label}, button, ${describedButton.tooltip}”`,
+    );
+
+    const names = example("Icon-only names");
+    for (const name of ["Mark as done", "Next"]) {
+      expect(popupAfter(within(names).getByRole("button", { name }))).toHaveTextContent(name);
+    }
+    expect(popupAfter(within(names).getByRole("button", { name: "Show more" }))).toBeNull();
+    expect(within(names).getByText("No tooltip on the last: nameTooltip={false}.")).toBeVisible();
+
+    const sides = example("Sides");
+    expect(
+      ["Top", "Bottom", "Start", "End"].map((name) =>
+        popupAfter(within(sides).getByRole("button", { name }))?.getAttribute("data-side"),
+      ),
+    ).toEqual(["top", "bottom", "start", "end"]);
+
+    const disabled = example("Disabled reason");
+    const publish = within(disabled).getByRole("button", { name: "Publish" });
+    expect(publish).toHaveAttribute("aria-disabled", "true");
+    expect(publish).toHaveClass(buttonStyles.primary ?? "");
+    expect(publish).toHaveAccessibleDescription("Add a title first");
+    expect(within(disabled).getByText("Press or tap it to see why it's disabled.")).toBeVisible();
+
+    const text = example("In running text");
+    const link = within(text).getByRole("link", { name: "the token gallery" });
+    expect(link).toHaveAttribute("href", "/lab/tokens");
+    expect(link).toHaveAccessibleDescription("Every color, type and space token");
+    expect(link.closest("p")).toContainElement(popupAfter(link));
+
+    const controlled = example("Controlled");
+    const pinned = within(controlled).getByRole("button", { name: "Pinned" });
+    expect(within(controlled).getByText("The tooltip is hidden.")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
+    await user.click(within(controlled).getByRole("button", { name: "Show" }));
+    expect(popupAfter(pinned)).toBeVisible();
+    expect(within(controlled).getByText("The tooltip is shown.")).toBeInTheDocument();
+    await user.keyboard("{Escape}");
+    expect(popupAfter(pinned)).not.toBeVisible();
+    expect(within(controlled).getByRole("button", { name: "Show" })).toBeInTheDocument();
+
+    const custom = example("Customized with component tokens");
+    expect(popupAfter(within(custom).getByRole("button", { name: "Custom" }))).toHaveClass(
+      showcaseStyles.customTooltip ?? "",
+    );
+    expect([...custom.querySelectorAll("pre code")].map((code) => code.textContent)).toEqual([
+      customTooltipCss,
+    ]);
+    expect(readFileSync(join(import.meta.dirname, "Showcase.module.css"), "utf8")).toContain(
+      customTooltipCss,
+    );
+
+    const tooltip = showcases.find((s) => s.id === "tooltip");
+    expect(tooltip?.props.map(({ part, docs }) => [part, Object.keys(docs)])).toEqual([
+      ["Tooltip", ["content", "kind", "side", "open", "defaultOpen", "onOpenChange"]],
+    ]);
+    expect(tooltip?.propsNote).toMatch(
+      /one child is the trigger: a focusable element that takes a ref.+no links, buttons or other interactive content.+kind="name" only when content repeats.+className and other native props go to the tooltip popup/,
+    );
+    expect(tooltip?.keyboard).toEqual(tooltipKeyboard);
+    expect(tooltipKeyboard.map((row) => row.keys)).toEqual(["Tab", "Escape"]);
+    await openReference(section);
+    for (const note of [
+      /role="tooltip" and becomes the trigger's accessible description.+hidden from assistive technology/,
+      /in the page from the start, so the description is there before JavaScript loads/,
+      /300ms hover.+Keyboard focus shows it at once.+focus from a mouse press doesn't/,
+      /stays until dismissed.+never hides on a timer \(WCAG 1\.4\.13\)/,
+      /Touch shows no tooltips, except a disabled Button's reason/,
+      /Never put essential information only in a tooltip/,
+      /fades over component\.tooltip\.transition-duration, 0ms under reduced motion/,
+      /In forced colors, the bubble and its arrow are outlined/,
+    ]) {
+      expect(within(section).getByText(note)).toBeInTheDocument();
+    }
+  });
+
+  it("documents the tooltip props on Button, Link, MenuTrigger and ThemeSwitcher (refinement R14.14)", async () => {
+    renderPage();
+    const docsOf = (id: string, part: string) =>
+      showcases.find((s) => s.id === id)?.props.find((p) => p.part === part)?.docs ?? {};
+
+    expect(Object.keys(docsOf("button", "Button"))).toEqual(
+      expect.arrayContaining(["disabledReason", "nameTooltip"]),
+    );
+    expect(Object.keys(docsOf("menu", "MenuTrigger (same as Button)"))).toEqual(
+      expect.arrayContaining(["disabledReason", "nameTooltip"]),
+    );
+    expect(Object.keys(docsOf("link", "Link"))).toContain("nameTooltip");
+    expect(Object.keys(docsOf("link", "Link"))).not.toContain("disabledReason");
+    expect(Object.keys(docsOf("theme-switcher", "ThemeSwitcher"))).toContain("nameTooltip");
+
+    const button = await screen.findByRole("region", { name: "Button" });
+    const disabled = within(
+      within(button).getByRole("group", { name: "Disabled (still focusable)" }),
+    )
+      .getAllByRole("button")
+      .map((b) => b.getAttribute("aria-describedby") !== null);
+    expect(disabled).toEqual([true, false, false]);
+    await openReference(button);
+    expect(
+      within(button).getByText(/disabledReason is the disabled button's accessible description/),
+    ).toBeInTheDocument();
+    expect(
+      within(button).getByText(/Icon-only buttons show their name as a tooltip/),
     ).toBeInTheDocument();
   });
 

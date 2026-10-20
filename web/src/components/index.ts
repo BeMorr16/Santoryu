@@ -9,5 +9,6 @@ export * from "./Link/index.ts";
 export * from "./Menu/index.ts";
 export * from "./Stack/index.ts";
 export * from "./ThemeSwitcher/index.ts";
+export * from "./Tooltip/index.ts";
 export * from "./Typography/index.ts";
 export * from "./VisuallyHidden/index.ts";
