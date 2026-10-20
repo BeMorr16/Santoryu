@@ -20,6 +20,7 @@ import {
   MenuTrigger,
   Stack,
   ThemeSwitcher,
+  Typography,
   VisuallyHidden,
 } from "./index.ts";
 import type { ButtonLookProps } from "./shared/button.tsx";
@@ -415,15 +416,15 @@ describe("library types", () => {
     expectTypeOf(valid).toBeFunction();
   });
 
-  it('VisuallyHidden: as="a" requires focusable, and `as` is a closed text-element union (refinement R2.5, R2.6)', () => {
+  it('VisuallyHidden: as="a" requires focusable, and `as` is a closed text-element union (refinement R2.5, R2.6, R12.11)', () => {
     function invalid() {
       return [
         // @ts-expect-error -- a hidden link must be focusable.
         <VisuallyHidden key="a" as="a" href="#main" />,
         // @ts-expect-error -- a hidden link must be focusable.
         <VisuallyHidden key="b" as="a" focusable={false} href="#main" />,
-        // @ts-expect-error -- inline technical elements aren't in the union.
-        <VisuallyHidden key="c" as="code" />,
+        // @ts-expect-error -- sectioning elements aren't in the union.
+        <VisuallyHidden key="c" as="section" />,
         // @ts-expect-error -- a Tab stop must be focusable (refinement R2.12).
         <VisuallyHidden key="d" as="h2" tabIndex={0} />,
         // @ts-expect-error -- a Tab stop must be focusable (refinement R2.12).
@@ -441,6 +442,35 @@ describe("library types", () => {
         <VisuallyHidden key="g" as="h2" tabIndex={-1} />,
         <VisuallyHidden key="h" as="div" focusable tabIndex={0} />,
         <VisuallyHidden key="i" focusable={Math.random() > 0.5} />,
+        <VisuallyHidden key="j" as="kbd" />,
+        <VisuallyHidden key="k" as="time" dateTime="2026-10-20" />,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
+  it("Typography: `as` is a closed text-element union, and variant and tone are closed (refinement R12.1, R12.2, R12.5)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- links are Link; a linked heading is a Typography holding a Link.
+        <Typography key="a" as="a" href="/" />,
+        // @ts-expect-error -- buttons are Button.
+        <Typography key="b" as="button" />,
+        // @ts-expect-error -- not a variant.
+        <Typography key="c" variant="h7" />,
+        // @ts-expect-error -- not a tone.
+        <Typography key="d" tone="danger" />,
+        // @ts-expect-error -- dateTime needs as="time".
+        <Typography key="e" dateTime="2026-10-20" />,
+      ];
+    }
+    function valid() {
+      return [
+        <Typography key="a" as="time" dateTime="2026-10-20" />,
+        <Typography key="b" as="label" htmlFor="x" />,
+        <Typography key="c" as="h2" variant="h4" tone="muted" measure />,
+        <Typography key="d" as="abbr" title="Web Content Accessibility Guidelines" />,
       ];
     }
     expectTypeOf(invalid).toBeFunction();

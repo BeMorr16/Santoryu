@@ -152,6 +152,10 @@ describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
         $type: "number",
         tight: { $value: 1.2, $description: "Tight leading." },
       },
+      "line-length": {
+        $type: "number",
+        65: { $value: 65, $description: "65ch." },
+      },
       tracking: {
         $type: "number",
         label: { $value: "{type.letter-spacing.16}", $description: "Label tracking." },
@@ -159,6 +163,10 @@ describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
       leading: {
         $type: "number",
         heading: { $value: "{type.line-height.tight}", $description: "Heading leading." },
+      },
+      measure: {
+        $type: "number",
+        text: { $value: "{type.line-length.65}", $description: "Text measure." },
       },
     },
   };
@@ -273,10 +281,11 @@ describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
     expect(css.match(/--component-button-text:/g)).toHaveLength(1);
   });
 
-  it("emits type.letter-spacing numbers with em, and no other numbers", async () => {
+  it("emits type.letter-spacing numbers with em, type.line-length with ch, and no other numbers", async () => {
     const { css } = await build();
 
     expect(css).toContain("--type-tracking-label: 0.16em;");
+    expect(css).toContain("--type-measure-text: 65ch;");
     expect(css).toContain("--type-leading-heading: 1.2;");
   });
 

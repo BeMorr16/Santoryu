@@ -12,6 +12,7 @@ import linkStyles from "../../components/Link/Link.module.css";
 import buttonStyles from "../../components/shared/button-styles.module.css";
 import layoutStyles from "../../components/shared/layout.module.css";
 import switcherStyles from "../../components/ThemeSwitcher/ThemeSwitcher.module.css";
+import typographyStyles from "../../components/Typography/Typography.module.css";
 import hiddenStyles from "../../components/VisuallyHidden/VisuallyHidden.module.css";
 import showcaseStyles from "./Showcase.module.css";
 import { ComponentsPage } from "./ComponentsPage.tsx";
@@ -21,7 +22,11 @@ import cardStyles from "../../components/Card/Card.module.css";
 import { customBadgeCss } from "./showcases/badge.tsx";
 import { accentCardCss } from "./showcases/card.tsx";
 import { compactMenuCss, menuKeyboard } from "./showcases/menu.tsx";
+import { customLabelCss, scale, tones } from "./showcases/typography.tsx";
 import { announced } from "./showcases/visually-hidden.tsx";
+
+/** Each Example's visible title: the label-look paragraph that starts its group (refinement R8.13, R12.12). */
+const exampleTitle = `[role="group"] > p.${typographyStyles.label ?? ""}:first-child`;
 
 function renderPage() {
   const Stub = createRoutesStub([
@@ -43,6 +48,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     renderPage();
 
     const list = await screen.findByRole("list", { name: "On this page" });
+    expect(screen.getByText("On this page")).toHaveClass(typographyStyles.label ?? "");
     const links = within(list).getAllByRole("link");
     expect(links.map((link) => [link.textContent, link.getAttribute("href")])).toEqual(
       showcases.map((showcase) => [showcase.name, `#${showcase.id}`]),
@@ -126,7 +132,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       const section = await screen.findByRole("region", { name: showcase.name });
       const panel = within(section).getByRole("group", { name: `${showcase.name} examples` });
 
-      const titles = [...panel.querySelectorAll("p.label")];
+      const titles = [...panel.querySelectorAll(exampleTitle)];
       expect(titles.length).toBeGreaterThan(0);
       for (const title of titles) {
         const group = title.parentElement;
@@ -160,13 +166,21 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     renderPage();
     const section = await screen.findByRole("region", { name: "Icon" });
 
-    for (const size of [showcaseStyles.textH2, showcaseStyles.textSmall]) {
-      const icon = section.querySelector(`p.${size ?? ""} > svg`);
+    for (const text of ["Heading-size text, heading-size icon", "Small text, small icon"]) {
+      const icon = within(section).getByText(text).querySelector("svg");
       expect(icon).toHaveClass(iconStyles["size-inherit"] ?? "");
     }
+    expect(within(section).getByText("Heading-size text, heading-size icon")).toHaveClass(
+      typographyStyles.h2 ?? "",
+    );
+    expect(within(section).getByText("Small text, small icon")).toHaveClass(
+      typographyStyles.small ?? "",
+    );
     const link = within(section).getByRole("link", { name: "Design tokens" });
-    const accent = section.querySelector(`span.${showcaseStyles.accentText ?? ""}`);
-    for (const icon of [link.querySelector("svg"), accent?.querySelector("svg")]) {
+    const accent = within(section).getByText("Accent-colored text and icon");
+    expect(accent.tagName).toBe("SPAN");
+    expect(accent).toHaveClass(typographyStyles["tone-accent"] ?? "");
+    for (const icon of [link.querySelector("svg"), accent.querySelector("svg")]) {
       expect(icon).toHaveAttribute("fill", "currentColor");
       expect(icon).toHaveAttribute("aria-hidden", "true");
     }
@@ -196,7 +210,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       "Controlled open",
       "Customized with component tokens",
     ];
-    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
     expect(labels).toEqual(titles);
 
     const github = within(section).getByRole("menuitem", {
@@ -359,7 +373,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       expect(within(current).getByText(caption)).toBeInTheDocument();
     }
 
-    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
     expect(labels.indexOf("Underline on hover")).toBe(labels.indexOf("Current page") + 1);
     const hoverPages = within(example("Underline on hover")).getByRole("list", {
       name: "Lab pages",
@@ -397,6 +411,146 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     expect(within(quiet).getByRole("link", { name: "token reference" })).toBeInTheDocument();
   });
 
+  it("shows the Typography examples, the scale, tones, measure, inline text and the customized CSS it applies (refinement R12.13)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Typography" });
+    const example = (title: string) => within(section).getByRole("group", { name: title });
+
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
+    expect(labels).toEqual([
+      "Type scale",
+      "Level and look are separate",
+      "Look from the element",
+      "Tones",
+      "Measure",
+      "Inline text",
+      "Customized with component tokens",
+    ]);
+
+    const scaleExample = example("Type scale");
+    expect(within(scaleExample).queryAllByRole("heading")).toEqual([]);
+    expect(scale.map(({ variant }) => variant)).toEqual([
+      "display",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "lead",
+      "body",
+      "small",
+      "label",
+      "code",
+    ]);
+    for (const { variant, text } of scale) {
+      const item = within(scaleExample).getByText(text);
+      expect(item.tagName).toBe("P");
+      expect(item).toHaveClass(typographyStyles[variant] ?? "");
+    }
+
+    const separate = example("Level and look are separate");
+    expect(
+      within(separate).getByRole("heading", { level: 4, name: "An h4 with the h2 look" }),
+    ).toHaveClass(typographyStyles.h2 ?? "");
+    expect(
+      within(separate).getByRole("heading", { level: 5, name: "An h5 with the label look" }),
+    ).toHaveClass(typographyStyles.label ?? "");
+
+    const derived = example("Look from the element");
+    expect(
+      within(derived).getByRole("heading", { level: 4, name: "An h4, with the h4 look" }),
+    ).toHaveClass(typographyStyles.h4 ?? "");
+    for (const [text, tag, look] of [
+      ["A code element, with the code look", "CODE", "code"],
+      ["A small element, with the small look", "SMALL", "small"],
+    ] as const) {
+      const item = within(derived).getByText(text);
+      expect(item.tagName).toBe(tag);
+      expect(item).toHaveClass(typographyStyles[look] ?? "");
+    }
+    const strong = within(derived).getByText("strong text");
+    expect(strong.tagName).toBe("STRONG");
+    expect(strong.parentElement).toHaveClass(typographyStyles.lead ?? "");
+    for (const look of ["lead", "body"]) {
+      expect(strong).not.toHaveClass(typographyStyles[look] ?? "");
+    }
+
+    expect(tones.map(({ text }) => text).slice(5)).toEqual([
+      "Success: saved",
+      "Warning: unsaved changes",
+      "Error: the email is missing",
+    ]);
+    for (const { tone, text } of tones) {
+      expect(within(example("Tones")).getByText(text)).toHaveClass(
+        typographyStyles[`tone-${tone}`] ?? "",
+      );
+    }
+
+    const [capped, uncapped] = within(example("Measure")).getAllByText(/measure:/);
+    expect(capped).toHaveClass(typographyStyles.measure ?? "");
+    expect(uncapped).not.toHaveClass(typographyStyles.measure ?? "");
+    expect(capped?.textContent.replace("With measure: ", "")).toBe(
+      uncapped?.textContent.replace("Without measure: ", ""),
+    );
+
+    const inline = example("Inline text");
+    for (const [text, tag] of [
+      ["Tab", "KBD"],
+      ["main", "CODE"],
+      ["WCAG", "ABBR"],
+      ["5 October 2023", "TIME"],
+      ["without loss of information or functionality", "Q"],
+    ] as const) {
+      expect(within(inline).getByText(text).tagName).toBe(tag);
+    }
+    expect(within(inline).getByText("WCAG")).toHaveAttribute(
+      "title",
+      "Web Content Accessibility Guidelines",
+    );
+    expect(within(inline).getByText("5 October 2023")).toHaveAttribute("datetime", "2023-10-05");
+    expect(within(inline).getByText(/Press/)).toHaveTextContent(
+      "Web Content Accessibility Guidelines (WCAG) 2.2 was published on 5 October 2023.",
+    );
+
+    const custom = example("Customized with component tokens");
+    expect(within(custom).getByText("Custom label")).toHaveClass(
+      typographyStyles.label ?? "",
+      showcaseStyles.customLabel ?? "",
+    );
+    expect([...custom.querySelectorAll("pre code")].map((code) => code.textContent)).toEqual([
+      customLabelCss,
+    ]);
+    expect(readFileSync(join(import.meta.dirname, "Showcase.module.css"), "utf8")).toContain(
+      customLabelCss,
+    );
+
+    const typography = showcases.find((s) => s.id === "typography");
+    expect(Object.keys(typography?.props[0]?.docs ?? {})).toEqual([
+      "as",
+      "variant",
+      "tone",
+      "measure",
+    ]);
+    expect(typography?.props[0]?.docs.as?.default).toBe('"p"');
+    expect(typography?.props[0]?.docs.measure?.default).toBe("false");
+    expect(typography?.propsNote).toMatch(
+      /h1–h6 take the variant of the same name; code, kbd and samp take code; small takes small; span, strong, em, mark, s, abbr, cite, q and time take inherit; every other element takes body.+explicit variant wins.+level, and so the role, comes only from as.+inherit and code set no size/,
+    );
+    for (const note of [
+      /level comes from as and the look from variant, so keep the page outline logical/,
+      /wording must state the status on its own/,
+      /On glass, use only the default or muted tone/,
+      /Don't set tone on text inside a Link, or on mark/,
+      /uppercase is CSS only, so write the source text in normal case/,
+      /abbr's title isn't reliably announced.+spell the abbreviation out on first use/,
+      /Sizes are in rem/,
+      /Long words break instead of overflowing in block layout.+min-inline-size: 0/,
+    ]) {
+      expect(within(section).getByText(note)).toBeInTheDocument();
+    }
+  });
+
   it("shows the Stack examples, the labelled lab-pages list and the legend-named fieldset (refinement R6.7)", async () => {
     renderPage();
     const section = await screen.findByRole("region", { name: "Stack" });
@@ -406,7 +560,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       return element;
     };
 
-    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
     expect(labels).toEqual([
       "Vertical (default), gaps none to xl",
       "Horizontal, gaps none to xl",
@@ -453,7 +607,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       return element;
     };
 
-    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
     expect(labels).toEqual([
       "min sm",
       "min md",
@@ -500,7 +654,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     const section = await screen.findByRole("region", { name: "Card" });
     const example = (title: string) => within(section).getByRole("group", { name: title });
 
-    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
     expect(labels).toEqual([
       "Variants",
       "Parts",
@@ -508,6 +662,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       "Footers line up",
       "Subgrid",
       "Any heading level",
+      "Heading look",
       "Customized with component tokens",
     ]);
 
@@ -580,6 +735,15 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       );
     }
 
+    const looks = example("Heading look");
+    for (const [name, look] of [
+      ["Featured project", "h3"],
+      ["Case study", "label"],
+    ] as const) {
+      const heading = within(looks).getByRole("heading", { level: 4, name });
+      expect(heading).toHaveClass(cardStyles.heading ?? "", typographyStyles[look] ?? "");
+    }
+
     const custom = example("Customized with component tokens");
     expect(within(custom).getByRole("article")).toHaveClass(showcaseStyles.accentCard ?? "");
     expect([...custom.querySelectorAll("pre code")].map((code) => code.textContent)).toEqual([
@@ -591,14 +755,15 @@ describe("/lab/components page (R15.1, R15.3)", () => {
 
     const card = showcases.find((s) => s.id === "card");
     expect(Object.keys(card?.props[0]?.docs ?? {})).toEqual(
-      expect.arrayContaining(["variant", "footer", "subgrid"]),
+      expect.arrayContaining(["variant", "footer", "subgrid", "headingVariant"]),
     );
+    expect(card?.props[0]?.docs.headingVariant).toMatchObject({ default: '"h4"' });
     expect(card?.propsNote).toMatch(
       /subgrid works only when the Card is a direct child of a Grid.+horizontal Stack.+varied backdrop.+aria-current goes to its heading link/,
     );
     for (const note of [
       /never marked aria-current automatically/,
-      /choose headingLevel by the page outline/,
+      /look comes from headingVariant and is the same at every level \(except with inherit or code\), so choose headingLevel by the page outline/,
       /can't be selected, because the link's overlay covers it/,
       /hover look shows only where a click follows the link/,
       /Glass turns opaque when reduced transparency is requested/,
@@ -614,7 +779,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     const section = await screen.findByRole("region", { name: "Badge" });
     const example = (title: string) => within(section).getByRole("group", { name: title });
 
-    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
     expect(labels).toEqual([
       "Variants",
       "Sizes",
@@ -654,7 +819,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     ).toEqual(["React", "TypeScript", "AWS"]);
 
     const inline = example("In running text, with inline markup");
-    expect(inline.querySelector("p:not(.label)")).toHaveTextContent(
+    expect(inline.querySelector(`p:not(.${typographyStyles.label ?? ""})`)).toHaveTextContent(
       "This site is Live and Built with Vite.",
     );
     expect(within(inline).getByText("Vite").tagName).toBe("EM");
@@ -685,7 +850,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       '"neutral" | "accent" | "accent-2" | "success" | "warning" | "error"',
     );
     expect(badge?.propsNote).toMatch(
-      /wording must state the status on its own.+as="li".+Icon's registry/,
+      /wording must state the status on its own.+as="li".+Icon's registry.+matches Typography's label look: the same family and tracking tokens/,
     );
     for (const note of [
       /not focusable, no pointer cursor, no hover state/,
@@ -708,7 +873,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     const section = await screen.findByRole("region", { name: "ThemeSwitcher" });
     const example = (title: string) => within(section).getByRole("group", { name: title });
 
-    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
     expect(labels).toEqual([
       "Looks (each changes the whole site, not this panel)",
       "Label (changes the whole site, not this panel)",

@@ -8,6 +8,7 @@ import { linkShowcase } from "./showcases/link.tsx";
 import { menuShowcase } from "./showcases/menu.tsx";
 import { stackShowcase } from "./showcases/stack.tsx";
 import { themeSwitcherShowcase } from "./showcases/theme-switcher.tsx";
+import { typographyShowcase } from "./showcases/typography.tsx";
 import { visuallyHiddenShowcase } from "./showcases/visually-hidden.tsx";
 
 /** Every /lab/components section, in page order. registry.test.ts keeps it in step with the library. */
@@ -16,6 +17,7 @@ export const showcases: readonly Showcase[] = [
   linkShowcase,
   iconShowcase,
   visuallyHiddenShowcase,
+  typographyShowcase,
   stackShowcase,
   gridShowcase,
   cardShowcase,

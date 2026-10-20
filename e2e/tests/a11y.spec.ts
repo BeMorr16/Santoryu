@@ -41,10 +41,10 @@ test.describe("preview panels", () => {
       await storeTheme(page, pageTheme);
       await page.goto("/lab/components");
 
-      expect(await setAllPanels(page, panelTheme)).toBe(10);
+      expect(await setAllPanels(page, panelTheme)).toBe(11);
       await expect(
         page.locator(`[data-theme="${panelTheme.toLowerCase()}"][role="group"]`),
-      ).toHaveCount(10);
+      ).toHaveCount(11);
 
       expect(await violations(page)).toEqual([]);
     });

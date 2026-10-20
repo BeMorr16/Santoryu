@@ -102,15 +102,38 @@ test.describe("Card (refinement R8)", () => {
     expect(Math.abs(wrapping.bodyTop - headingBottom - gap)).toBeLessThanOrEqual(1);
   });
 
-  test("gives the heading the same size at every level (R8.4)", async ({ page }) => {
+  test("gives the heading the h4 look's size at every level (R8.4, R12.9)", async ({ page }) => {
     const scope = example(section(page, "Card"), "Any heading level");
-    const size = await probe(scope, "font-size", "var(--type-size-lead)");
+    const size = await probe(scope, "font-size", "var(--component-typography-h4-font-size)");
 
     const headings = scope.getByRole("heading");
     await expect(headings).toHaveCount(2);
     for (const heading of await headings.all()) {
       await expect(heading).toHaveCSS("font-size", size);
     }
+  });
+
+  test("gives the heading headingVariant's look (R12.9)", async ({ page }) => {
+    const scope = example(section(page, "Card"), "Heading look");
+
+    for (const [name, look] of [
+      ["Featured project", "h3"],
+      ["Case study", "label"],
+    ] as const) {
+      const heading = scope.getByRole("heading", { level: 4, name });
+      await expect(heading).toHaveCSS(
+        "font-size",
+        await probe(scope, "font-size", `var(--component-typography-${look}-font-size)`),
+      );
+      await expect(heading).toHaveCSS(
+        "font-family",
+        await probe(scope, "font-family", `var(--component-typography-${look}-font-family)`),
+      );
+    }
+    await expect(scope.getByRole("heading", { name: "Case study" })).toHaveCSS(
+      "text-transform",
+      "uppercase",
+    );
   });
 
   test("takes each variant's surface from its own tokens (R8.5, R8.6)", async ({ page }) => {

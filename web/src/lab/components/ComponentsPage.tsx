@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { Link } from "../../components/Link/Link.tsx";
+import { Typography } from "../../components/Typography/Typography.tsx";
 import { ComponentTokenTable } from "../ComponentTokenTable.tsx";
 import { KeyboardTable } from "./KeyboardTable.tsx";
 import { PreviewPanel } from "./PreviewPanel.tsx";
@@ -52,9 +53,9 @@ export function ComponentsPage() {
   return (
     <>
       <div>
-        <p className="label" id="on-this-page">
+        <Typography variant="label" id="on-this-page">
           On this page
-        </p>
+        </Typography>
         <ul className={styles.toc} aria-labelledby="on-this-page">
           {showcases.map((showcase) => (
             <li key={showcase.id}>

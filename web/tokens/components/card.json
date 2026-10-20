@@ -70,26 +70,6 @@
           ]
         }
       },
-      "heading-font-family": {
-        "$value": "{type.family.heading}",
-        "$type": "fontFamily",
-        "$description": "Heading font."
-      },
-      "heading-font-size": {
-        "$value": "{type.size.lead}",
-        "$type": "dimension",
-        "$description": "Heading size, the same at every heading level."
-      },
-      "heading-line-height": {
-        "$value": "{type.leading.heading}",
-        "$type": "number",
-        "$description": "Heading line height."
-      },
-      "heading-font-weight": {
-        "$value": "{type.weight.heading}",
-        "$type": "fontWeight",
-        "$description": "Heading weight."
-      },
       "body-color": {
         "$value": "{color.text.muted}",
         "$type": "color",

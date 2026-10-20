@@ -51,23 +51,25 @@ body {
   line-height: var(--type-leading-body);
 }
 
-h1,
-h2,
-h3 {
-  margin: 0;
-}
-
+/* Plain headings; Typography's variant classes win over these (refinement R12.8). */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
+  margin: 0;
   font-family: var(--type-family-heading);
   font-weight: var(--type-weight-heading);
   line-height: var(--type-leading-heading);
-  letter-spacing: var(--type-tracking-display);
+  letter-spacing: var(--type-tracking-body);
   font-variant-ligatures: none;
+}
+
+/* Negative tracking only at large sizes (decision 0006). */
+h1,
+h2 {
+  letter-spacing: var(--type-tracking-display);
 }
 
 h1 {
@@ -80,6 +82,18 @@ h2 {
 
 h3 {
   font-size: var(--type-size-h3);
+}
+
+h4 {
+  font-size: var(--type-size-h4);
+}
+
+h5 {
+  font-size: var(--type-size-h5);
+}
+
+h6 {
+  font-size: var(--type-size-h6);
 }
 
 p {
@@ -103,13 +117,4 @@ a:hover {
 code {
   font-family: var(--type-family-code);
   font-variant-ligatures: normal;
-}
-
-/* Small uppercase mono annotation, e.g. a kicker above a heading. */
-.label {
-  font-family: var(--type-family-label);
-  font-size: var(--type-size-label);
-  letter-spacing: var(--type-tracking-label);
-  text-transform: uppercase;
-  font-variant-ligatures: none;
 }

@@ -16,7 +16,7 @@ const categories = [
 type Category = (typeof categories)[number];
 
 // Second path segment of every token: site-foundation design §4.3, component-library design §4.1,
-// component-library-refinement design §3.3, palette-expansion design §5.
+// component-library-refinement design §3.3 and §13.3, palette-expansion design §5.
 const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
   color: {
     primitive: [
@@ -48,8 +48,15 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
     ],
   },
   type: {
-    primitive: ["font-stack", "font-size", "font-weight", "line-height", "letter-spacing"],
-    semantic: ["family", "size", "weight", "leading", "tracking"],
+    primitive: [
+      "font-stack",
+      "font-size",
+      "font-weight",
+      "line-height",
+      "letter-spacing",
+      "line-length",
+    ],
+    semantic: ["family", "size", "weight", "leading", "tracking", "measure"],
   },
   space: {
     primitive: ["0", "1", "2", "3", "4", "6", "8", "12", "16", "24"],
@@ -72,7 +79,7 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
 };
 
 // Every semantic token, per site-foundation design §4.3, component-library design §4.1,
-// component-library-refinement design §3.3 and §9.3, and palette-expansion design §3.
+// component-library-refinement design §3.3, §9.3 and §13.3, and palette-expansion design §3.
 // Adding or renaming one is a one-way door.
 const expectedSemantic = [
   "color.surface.base",
@@ -118,9 +125,13 @@ const expectedSemantic = [
   "type.size.small",
   "type.size.body",
   "type.size.lead",
+  "type.size.display",
   "type.size.h1",
   "type.size.h2",
   "type.size.h3",
+  "type.size.h4",
+  "type.size.h5",
+  "type.size.h6",
   "type.size.label",
   "type.weight.body",
   "type.weight.strong",
@@ -130,6 +141,7 @@ const expectedSemantic = [
   "type.tracking.display",
   "type.tracking.body",
   "type.tracking.label",
+  "type.measure.text",
   "space.inset.sm",
   "space.inset.md",
   "space.inset.lg",

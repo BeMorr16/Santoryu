@@ -4,6 +4,7 @@ import { createRef } from "react";
 import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { expectHydratesCleanly } from "../../../test/component.tsx";
+import { componentTokens } from "../../tokens/metadata.ts";
 import { Badge } from "./Badge.tsx";
 import styles from "./Badge.module.css";
 
@@ -106,6 +107,21 @@ describe("Badge", () => {
 
     expect(container.querySelector("[style]")).toBeNull();
   });
+
+  it.each([
+    ["font-family", "label.font-family"],
+    ["tracking", "label.tracking"],
+  ])(
+    "keeps its %s token aliased to the same token as Typography's label look (refinement R12.10)",
+    (badge, typography) => {
+      const aliasOf = (name: string) => componentTokens.find((t) => t.name === name)?.aliases;
+
+      expect(aliasOf(`component.badge.${badge}`)).toBeDefined();
+      expect(aliasOf(`component.badge.${badge}`)).toBe(
+        aliasOf(`component.typography.${typography}`),
+      );
+    },
+  );
 
   it("hydrates prerendered markup with no mismatch (R3.6)", () => {
     expectHydratesCleanly(<Badge variant="accent">New</Badge>);

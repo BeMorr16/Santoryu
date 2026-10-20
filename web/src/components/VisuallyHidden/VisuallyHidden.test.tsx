@@ -7,7 +7,7 @@ import { expectHydratesCleanly } from "../../../test/component.tsx";
 import { VisuallyHidden, type VisuallyHiddenElement } from "./VisuallyHidden.tsx";
 import styles from "./VisuallyHidden.module.css";
 
-// Every element in the `as` union (refinement R2.6).
+// Every element in the `as` union (refinement R2.6, R12.11).
 const elements = [
   "span",
   "div",
@@ -25,6 +25,14 @@ const elements = [
   "small",
   "mark",
   "s",
+  "legend",
+  "code",
+  "kbd",
+  "samp",
+  "abbr",
+  "cite",
+  "q",
+  "time",
   "blockquote",
   "figcaption",
   "caption",
@@ -61,6 +69,7 @@ describe("VisuallyHidden", () => {
     dd: (child) => <dl>{child}</dl>,
     figcaption: (child) => <figure>{child}</figure>,
     caption: (child) => <table>{child}</table>,
+    legend: (child) => <fieldset>{child}</fieldset>,
   };
 
   it("tests every element in the `as` union", () => {

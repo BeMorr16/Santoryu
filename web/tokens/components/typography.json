@@ -1,0 +1,529 @@
+{
+  "component": {
+    "typography": {
+      "display": {
+        "font-family": {
+          "$value": "{type.family.heading}",
+          "$type": "fontFamily",
+          "$description": "Display text font."
+        },
+        "font-size": {
+          "$value": "{type.size.display}",
+          "$type": "dimension",
+          "$description": "Display text size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.heading}",
+          "$type": "fontWeight",
+          "$description": "Display text weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.heading}",
+          "$type": "number",
+          "$description": "Display text line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.display}",
+          "$type": "number",
+          "$description": "Display text letter spacing."
+        }
+      },
+      "h1": {
+        "font-family": {
+          "$value": "{type.family.heading}",
+          "$type": "fontFamily",
+          "$description": "Heading 1 look font."
+        },
+        "font-size": {
+          "$value": "{type.size.h1}",
+          "$type": "dimension",
+          "$description": "Heading 1 look size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.heading}",
+          "$type": "fontWeight",
+          "$description": "Heading 1 look weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.heading}",
+          "$type": "number",
+          "$description": "Heading 1 look line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.display}",
+          "$type": "number",
+          "$description": "Heading 1 look letter spacing."
+        }
+      },
+      "h2": {
+        "font-family": {
+          "$value": "{type.family.heading}",
+          "$type": "fontFamily",
+          "$description": "Heading 2 look font."
+        },
+        "font-size": {
+          "$value": "{type.size.h2}",
+          "$type": "dimension",
+          "$description": "Heading 2 look size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.heading}",
+          "$type": "fontWeight",
+          "$description": "Heading 2 look weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.heading}",
+          "$type": "number",
+          "$description": "Heading 2 look line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.display}",
+          "$type": "number",
+          "$description": "Heading 2 look letter spacing."
+        }
+      },
+      "h3": {
+        "font-family": {
+          "$value": "{type.family.heading}",
+          "$type": "fontFamily",
+          "$description": "Heading 3 look font."
+        },
+        "font-size": {
+          "$value": "{type.size.h3}",
+          "$type": "dimension",
+          "$description": "Heading 3 look size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.heading}",
+          "$type": "fontWeight",
+          "$description": "Heading 3 look weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.heading}",
+          "$type": "number",
+          "$description": "Heading 3 look line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.body}",
+          "$type": "number",
+          "$description": "Heading 3 look letter spacing."
+        }
+      },
+      "h4": {
+        "font-family": {
+          "$value": "{type.family.heading}",
+          "$type": "fontFamily",
+          "$description": "Heading 4 look font."
+        },
+        "font-size": {
+          "$value": "{type.size.h4}",
+          "$type": "dimension",
+          "$description": "Heading 4 look size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.heading}",
+          "$type": "fontWeight",
+          "$description": "Heading 4 look weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.heading}",
+          "$type": "number",
+          "$description": "Heading 4 look line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.body}",
+          "$type": "number",
+          "$description": "Heading 4 look letter spacing."
+        }
+      },
+      "h5": {
+        "font-family": {
+          "$value": "{type.family.heading}",
+          "$type": "fontFamily",
+          "$description": "Heading 5 look font."
+        },
+        "font-size": {
+          "$value": "{type.size.h5}",
+          "$type": "dimension",
+          "$description": "Heading 5 look size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.heading}",
+          "$type": "fontWeight",
+          "$description": "Heading 5 look weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.heading}",
+          "$type": "number",
+          "$description": "Heading 5 look line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.body}",
+          "$type": "number",
+          "$description": "Heading 5 look letter spacing."
+        }
+      },
+      "h6": {
+        "font-family": {
+          "$value": "{type.family.heading}",
+          "$type": "fontFamily",
+          "$description": "Heading 6 look font."
+        },
+        "font-size": {
+          "$value": "{type.size.h6}",
+          "$type": "dimension",
+          "$description": "Heading 6 look size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.heading}",
+          "$type": "fontWeight",
+          "$description": "Heading 6 look weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.heading}",
+          "$type": "number",
+          "$description": "Heading 6 look line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.body}",
+          "$type": "number",
+          "$description": "Heading 6 look letter spacing."
+        }
+      },
+      "lead": {
+        "font-family": {
+          "$value": "{type.family.body}",
+          "$type": "fontFamily",
+          "$description": "Lead text font."
+        },
+        "font-size": {
+          "$value": "{type.size.lead}",
+          "$type": "dimension",
+          "$description": "Lead text size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.body}",
+          "$type": "fontWeight",
+          "$description": "Lead text weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.body}",
+          "$type": "number",
+          "$description": "Lead text line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.body}",
+          "$type": "number",
+          "$description": "Lead text letter spacing."
+        }
+      },
+      "body": {
+        "font-family": {
+          "$value": "{type.family.body}",
+          "$type": "fontFamily",
+          "$description": "Body text font."
+        },
+        "font-size": {
+          "$value": "{type.size.body}",
+          "$type": "dimension",
+          "$description": "Body text size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.body}",
+          "$type": "fontWeight",
+          "$description": "Body text weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.body}",
+          "$type": "number",
+          "$description": "Body text line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.body}",
+          "$type": "number",
+          "$description": "Body text letter spacing."
+        }
+      },
+      "small": {
+        "font-family": {
+          "$value": "{type.family.body}",
+          "$type": "fontFamily",
+          "$description": "Small text font."
+        },
+        "font-size": {
+          "$value": "{type.size.small}",
+          "$type": "dimension",
+          "$description": "Small text size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.body}",
+          "$type": "fontWeight",
+          "$description": "Small text weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.body}",
+          "$type": "number",
+          "$description": "Small text line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.body}",
+          "$type": "number",
+          "$description": "Small text letter spacing."
+        }
+      },
+      "label": {
+        "font-family": {
+          "$value": "{type.family.label}",
+          "$type": "fontFamily",
+          "$description": "Label text font."
+        },
+        "font-size": {
+          "$value": "{type.size.label}",
+          "$type": "dimension",
+          "$description": "Label text size."
+        },
+        "font-weight": {
+          "$value": "{type.weight.body}",
+          "$type": "fontWeight",
+          "$description": "Label text weight."
+        },
+        "line-height": {
+          "$value": "{type.leading.body}",
+          "$type": "number",
+          "$description": "Label text line height."
+        },
+        "tracking": {
+          "$value": "{type.tracking.label}",
+          "$type": "number",
+          "$description": "Label text letter spacing."
+        }
+      },
+      "code": {
+        "font-family": {
+          "$value": "{type.family.code}",
+          "$type": "fontFamily",
+          "$description": "Code font. Size, weight and line height come from the surrounding text."
+        }
+      },
+      "tone": {
+        "default": {
+          "color": {
+            "$value": "{color.text.default}",
+            "$type": "color",
+            "$description": "Default text color.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.surface.base",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.glass",
+                  "min": "text"
+                }
+              ]
+            }
+          }
+        },
+        "muted": {
+          "color": {
+            "$value": "{color.text.muted}",
+            "$type": "color",
+            "$description": "Muted text color.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.surface.base",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.glass",
+                  "min": "text"
+                }
+              ]
+            }
+          }
+        },
+        "subtle": {
+          "color": {
+            "$value": "{color.text.subtle}",
+            "$type": "color",
+            "$description": "Subtle text color. Not checked against glass.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.surface.base",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "text"
+                }
+              ]
+            }
+          }
+        },
+        "accent": {
+          "color": {
+            "$value": "{color.accent.text}",
+            "$type": "color",
+            "$description": "Accent text color. Not checked against glass.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.accent.background",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.base",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "text"
+                }
+              ]
+            }
+          }
+        },
+        "accent-2": {
+          "color": {
+            "$value": "{color.accent-2.text}",
+            "$type": "color",
+            "$description": "Second accent (violet) text color. Not checked against glass.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.accent-2.background",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.base",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "text"
+                }
+              ]
+            }
+          }
+        },
+        "success": {
+          "color": {
+            "$value": "{color.success.text}",
+            "$type": "color",
+            "$description": "Success text color. Never the only cue: the wording must state the status (WCAG 1.4.1). Not checked against glass.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.success.background",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.base",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "text"
+                }
+              ]
+            }
+          }
+        },
+        "warning": {
+          "color": {
+            "$value": "{color.warning.text}",
+            "$type": "color",
+            "$description": "Warning text color. Never the only cue: the wording must state the status (WCAG 1.4.1). Not checked against glass.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.warning.background",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.base",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "text"
+                }
+              ]
+            }
+          }
+        },
+        "error": {
+          "color": {
+            "$value": "{color.error.text}",
+            "$type": "color",
+            "$description": "Error text color. Never the only cue: the wording must state the status (WCAG 1.4.1). Not checked against glass.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.error.background",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.base",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "text"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "measure": {
+        "$value": "{type.measure.text}",
+        "$type": "number",
+        "$description": "Maximum line length with `measure`: about 65 characters in the element's own font."
+      }
+    }
+  }
+}

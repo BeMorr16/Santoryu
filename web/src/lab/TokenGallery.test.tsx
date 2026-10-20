@@ -153,7 +153,7 @@ describe("TokenGallery", () => {
   );
 
   it.each(semantic.map((token) => [token.cssVar, token] as const))(
-    "renders the %s preview as a hidden specimen styled by the token, or a dash for motion, layer and breakpoints",
+    "renders the %s preview as a hidden specimen styled by the token, or a dash for motion, layer, breakpoints and the measure",
     (_name, token) => {
       render(<TokenGallery />);
 
@@ -161,7 +161,8 @@ describe("TokenGallery", () => {
       if (
         token.category === "motion" ||
         token.category === "layer" ||
-        token.name.startsWith("size.breakpoint.")
+        token.name.startsWith("size.breakpoint.") ||
+        token.name.startsWith("type.measure.")
       ) {
         expect(preview).toHaveTextContent("—");
         expect(preview).toHaveTextContent("No preview");

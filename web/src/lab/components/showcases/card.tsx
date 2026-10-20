@@ -20,7 +20,13 @@ const props = {
     type: "2 | 3 | 4 | 5 | 6",
     default: "3",
     description:
-      "Fits the card into the page's heading outline. The look is the same at every level.",
+      "Fits the card into the page's heading outline. The look comes from headingVariant.",
+  },
+  headingVariant: {
+    type: '"display" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "lead" | "body" | "small" | "label" | "code" | "inherit"',
+    default: '"h4"',
+    description:
+      'The heading\'s Typography look, the same at every heading level, except "inherit" and "code", which keep the plain heading\'s size for its level.',
   },
   variant: {
     type: '"raised" | "outlined" | "flat" | "glass"',
@@ -56,6 +62,11 @@ const variants = [
 const headingLevels = [
   { level: 4, announced: { name: "Project notes", role: "heading level 4" } },
   { level: 5, announced: { name: "Release notes", role: "heading level 5" } },
+] as const;
+
+const headingLooks = [
+  { variant: "h3", heading: "Featured project", body: "A larger heading, with h3's look." },
+  { variant: "label", heading: "Case study", body: "A kicker-style heading, with the label look." },
 ] as const;
 
 const projects = [
@@ -160,6 +171,15 @@ function Examples() {
           ))}
         </Grid>
       </Example>
+      <Example title="Heading look" layout="column">
+        <Grid min="sm" gap="sm">
+          {headingLooks.map(({ variant, heading, body }) => (
+            <Card key={variant} heading={heading} headingLevel={4} headingVariant={variant}>
+              {body}
+            </Card>
+          ))}
+        </Grid>
+      </Example>
       <Example title="Customized with component tokens" layout="column">
         <Card heading="Accent outline" headingLevel={4} className={styles.accentCard}>
           An accent border and tighter padding, set through Card&apos;s component tokens.
@@ -194,7 +214,7 @@ export const cardShowcase: Showcase = {
     "A link card has one link: its heading, named by the heading text alone (plus “, opens in new tab” with newTab).",
     "The whole surface is clickable for pointers; nested controls keep their own clicks and focus.",
     "A link card is never marked aria-current automatically, even on the page it links to. A caller's aria-current goes to its heading link.",
-    "The heading looks the same at every level, so choose headingLevel by the page outline.",
+    "The heading's look comes from headingVariant and is the same at every level (except with inherit or code), so choose headingLevel by the page outline.",
     "Text inside a link card can't be selected, because the link's overlay covers it.",
     "The hover look shows only where a click follows the link: not over nested controls, and not on touch screens.",
     "Glass turns opaque when reduced transparency is requested.",

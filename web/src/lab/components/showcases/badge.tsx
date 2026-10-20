@@ -98,7 +98,7 @@ export const badgeShowcase: Showcase = {
   Examples,
   props: [{ part: "Badge", docs: props }],
   propsNote:
-    "A status badge's wording must state the status on its own. Inside a list, use as=\"li\". Icon names come from Icon's registry.",
+    "A status badge's wording must state the status on its own. Inside a list, use as=\"li\". Icon names come from Icon's registry. Its type matches Typography's label look: the same family and tracking tokens.",
   tokens: "badge",
   a11y: [
     "Plain text in a span or li: not focusable, no pointer cursor, no hover state.",

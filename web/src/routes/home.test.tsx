@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import linkStyles from "../components/Link/Link.module.css";
+import typographyStyles from "../components/Typography/Typography.module.css";
 import { homeContent } from "../content/home.ts";
 import { siteUrl } from "../site.config.ts";
 import Home, { links, meta } from "./home.tsx";
@@ -23,6 +24,18 @@ describe("home route", () => {
     renderHome();
 
     expect(await screen.findByText(homeContent.intro)).toBeVisible();
+  });
+
+  it("renders the name with the display look and the intro as a muted lead (refinement R12.12)", async () => {
+    renderHome();
+
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveClass(
+      typographyStyles.display ?? "",
+    );
+    expect(screen.getByText(homeContent.intro)).toHaveClass(
+      typographyStyles.lead ?? "",
+      typographyStyles["tone-muted"] ?? "",
+    );
   });
 
   it("links to /lab with the content's descriptive accessible name", async () => {

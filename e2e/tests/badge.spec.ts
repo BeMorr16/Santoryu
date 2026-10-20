@@ -115,7 +115,10 @@ test.describe("Badge (refinement R9)", () => {
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       ),
     ).toBe(0);
-    for (const element of await badges.locator("p.label + div").locator("span, li").all()) {
+    for (const element of await badges
+      .locator('[role="group"] > p:first-child + div')
+      .locator("span, li")
+      .all()) {
       expect(await element.evaluate((node) => node.scrollWidth - node.clientWidth)).toBe(0);
     }
     // Badges that fit move to the next line whole, in a row and in a wrapping Stack.

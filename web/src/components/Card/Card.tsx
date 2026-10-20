@@ -2,6 +2,7 @@ import type { ElementType, ReactNode } from "react";
 import { cx } from "../shared/cx.ts";
 import type { PolymorphicProps } from "../shared/polymorphic.ts";
 import { Link } from "../Link/Link.tsx";
+import { Typography, type TypographyVariant } from "../Typography/Typography.tsx";
 import styles from "./Card.module.css";
 
 export type CardElement = "article" | "section" | "div" | "li";
@@ -15,8 +16,13 @@ type CardLinkProps =
 
 export type CardOwnProps = {
   heading?: ReactNode;
-  /** Fits the card into the page's heading outline; the look is the same at every level (refinement R8.4). */
+  /** Fits the card into the page's heading outline; the look comes from `headingVariant` (refinement R8.4, R12.9). */
   headingLevel?: 2 | 3 | 4 | 5 | 6 | undefined;
+  /**
+   * The heading's look, the same at every level. Default "h4" (refinement R12.9). "inherit" and
+   * "code" set no size, so the plain heading's per-level size shows through.
+   */
+  headingVariant?: TypographyVariant | undefined;
   /** Surface look, from `component.card.<variant>.*`. Default "raised". */
   variant?: CardVariant | undefined;
   /** Bottom part: actions, badges, metadata. Sits at the card's bottom edge (refinement R8.2). */
@@ -34,6 +40,7 @@ export function Card<E extends CardElement = "article">({
   as,
   heading,
   headingLevel = 3,
+  headingVariant = "h4",
   variant = "raised",
   footer,
   subgrid = false,
@@ -46,7 +53,7 @@ export function Card<E extends CardElement = "article">({
 }: CardProps<E>) {
   // Widened so JSX doesn't re-check rest props per element; PolymorphicProps checked them.
   const Element = (as ?? "article") as ElementType;
-  const Heading = `h${String(headingLevel)}` as ElementType;
+  const headingElement = `h${String(headingLevel)}` as `h${typeof headingLevel}`;
   const linked = href !== undefined;
   const parts = [heading !== undefined, hasContent(children), hasContent(footer)].filter(
     Boolean,
@@ -66,7 +73,7 @@ export function Card<E extends CardElement = "article">({
       )}
     >
       {heading !== undefined && (
-        <Heading className={styles.heading}>
+        <Typography as={headingElement} variant={headingVariant} className={styles.heading}>
           {linked ? (
             // false turns off Link's automatic marking: link cards are never marked current (refinement R8.11).
             <Link
@@ -80,7 +87,7 @@ export function Card<E extends CardElement = "article">({
           ) : (
             heading
           )}
-        </Heading>
+        </Typography>
       )}
       {hasContent(children) && <div className={styles.body}>{children}</div>}
       {hasContent(footer) && <div className={styles.footer}>{footer}</div>}

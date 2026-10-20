@@ -8,6 +8,7 @@ import {
 } from "../../../components/Icon/registry.ts";
 import { Link } from "../../../components/Link/Link.tsx";
 import { Stack } from "../../../components/Stack/Stack.tsx";
+import { Typography } from "../../../components/Typography/Typography.tsx";
 import { semanticTokens } from "../../../tokens/metadata.ts";
 import { Example } from "../Example.tsx";
 import type { PropDocs } from "../PropDocs.ts";
@@ -86,20 +87,20 @@ function Examples() {
         />
       </Example>
       <Example title="Inherits text size" layout="column">
-        <p className={styles.textH2}>
+        <Typography variant="h2">
           <Icon name="check" size="inherit" /> Heading-size text, heading-size icon
-        </p>
-        <p className={styles.textSmall}>
+        </Typography>
+        <Typography variant="small">
           <Icon name="check" size="inherit" /> Small text, small icon
-        </p>
+        </Typography>
       </Example>
       <Example title="Takes text color">
         <Link href="/lab/tokens">
           Design tokens <Icon name="arrow-right" />
         </Link>
-        <span className={styles.accentText}>
+        <Typography as="span" tone="accent">
           <Icon name="check" /> Accent-colored text and icon
-        </span>
+        </Typography>
       </Example>
       <Example title="Decorative, inline in running text">
         <p>

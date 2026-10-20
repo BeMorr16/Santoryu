@@ -62,6 +62,18 @@ export const letterSpacingTransform = {
   transform: (token: TransformedToken) => `${String(token.$value as number)}em`,
 } satisfies ValueTransform;
 
+/**
+ * A text measure has to follow each element's own font, so `type.line-length.*` primitives are
+ * numbers and get `ch` here, as letter spacing gets `em` (refinement R12.6).
+ */
+export const lineLengthTransform = {
+  name: "line-length/ch",
+  type: transformTypes.value,
+  filter: (token: TransformedToken) =>
+    token.path[0] === "type" && token.path[1] === "line-length" && typeof token.$value === "number",
+  transform: (token: TransformedToken) => `${String(token.$value as number)}ch`,
+} satisfies ValueTransform;
+
 const aliasPattern = /^\{([^{}]+)\}$/;
 
 function aliasTarget(value: unknown): string | undefined {
@@ -86,7 +98,7 @@ async function runPass(tokensDir: string, overrideFile: string): Promise<Transfo
     ...(await jsonFiles(join(tokensDir, "components"))),
     ...(overrideFile === "light.json" ? [] : [lightTheme]),
   ];
-  const transforms = [durationTransform, letterSpacingTransform];
+  const transforms = [durationTransform, letterSpacingTransform, lineLengthTransform];
   const sd = new StyleDictionary({
     include,
     source: [join(tokensDir, "themes", overrideFile)],

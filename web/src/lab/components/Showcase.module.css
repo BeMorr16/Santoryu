@@ -42,18 +42,6 @@
   gap: var(--space-stack-xs);
 }
 
-.textH2 {
-  font-size: var(--type-size-h2);
-}
-
-.textSmall {
-  font-size: var(--type-size-small);
-}
-
-.accentText {
-  color: var(--color-accent-text);
-}
-
 /*
  * The VisuallyHidden section's "Show hidden content" toggle (refinement R2.10). The repeated class
  * outranks VisuallyHidden's hidden rule (0,3,0), since library CSS has no layers (decision 0008).
@@ -160,4 +148,10 @@
 .customBadge {
   --component-badge-neutral-border: var(--color-border-strong);
   --component-badge-padding-inline-md: var(--space-inline-md);
+}
+
+/* The Typography section's customized example (refinement R12.13); its CSS is shown beside it. */
+.customLabel {
+  --component-typography-label-tracking: var(--type-tracking-body);
+  --component-typography-label-font-family: var(--type-family-body);
 }

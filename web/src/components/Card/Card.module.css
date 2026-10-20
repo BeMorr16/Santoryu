@@ -57,14 +57,9 @@
   }
 }
 
-/* The same look at every heading level (refinement R8.4). */
+/* The look comes from Typography's headingVariant, the same at every level (refinement R12.9). */
 .heading {
-  margin: 0;
   color: var(--component-card-heading-color);
-  font-family: var(--component-card-heading-font-family);
-  font-size: var(--component-card-heading-font-size);
-  font-weight: var(--component-card-heading-font-weight);
-  line-height: var(--component-card-heading-line-height);
 }
 
 /* At the bottom edge when the card is taller than its content (refinement R8.2). */

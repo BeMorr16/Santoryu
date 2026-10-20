@@ -14,7 +14,7 @@ import styles from "../Showcase.module.css";
 
 const props = {
   as: {
-    type: '"span" | "div" | "p" | "a" | "label" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "strong" | "em" | "small" | "mark" | "s" | "blockquote" | "figcaption" | "caption" | "li" | "dt" | "dd"',
+    type: '"span" | "div" | "p" | "a" | "label" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "strong" | "em" | "small" | "mark" | "s" | "legend" | "code" | "kbd" | "samp" | "abbr" | "cite" | "q" | "time" | "blockquote" | "figcaption" | "caption" | "li" | "dt" | "dd"',
     default: '"span"',
     description: "The root element.",
   },

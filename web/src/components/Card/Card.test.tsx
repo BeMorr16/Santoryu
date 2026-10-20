@@ -5,6 +5,7 @@ import { createRoutesStub } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { expectHydratesCleanly } from "../../../test/component.tsx";
+import typography from "../Typography/Typography.module.css";
 import { Card } from "./Card.tsx";
 import styles from "./Card.module.css";
 
@@ -31,6 +32,28 @@ describe("Card", () => {
 
     expect(screen.getByRole("heading", { level, name: "Title" })).toBeInTheDocument();
   });
+
+  it.each([2, 3, 4, 5, 6] as const)(
+    "gives its heading the h4 look at level %s by default (refinement R12.9)",
+    (level) => {
+      render(<Card heading="Title" headingLevel={level} />);
+
+      const heading = screen.getByRole("heading", { level, name: "Title" });
+      expect(heading).toHaveClass(typography.h4 ?? "", styles.heading ?? "");
+      if (level !== 4) expect(heading).not.toHaveClass(typography[`h${String(level)}`] ?? "");
+    },
+  );
+
+  it.each([2, 3, 4, 5, 6] as const)(
+    "gives its heading headingVariant's look at level %s (refinement R12.9)",
+    (level) => {
+      render(<Card heading="Title" headingLevel={level} headingVariant="label" />);
+
+      const heading = screen.getByRole("heading", { level, name: "Title" });
+      expect(heading).toHaveClass(typography.label ?? "");
+      expect(heading).not.toHaveClass(typography.h4 ?? "");
+    },
+  );
 
   it("renders without a heading", () => {
     render(<Card>Just content.</Card>);

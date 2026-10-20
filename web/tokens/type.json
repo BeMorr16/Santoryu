@@ -89,6 +89,13 @@
           "unit": "rem"
         },
         "$description": "Font size 3xl (40px at the default root size)."
+      },
+      "4xl": {
+        "$value": {
+          "value": 3,
+          "unit": "rem"
+        },
+        "$description": "Font size 4xl (48px at the default root size)."
       }
     },
     "font-weight": {
@@ -133,6 +140,14 @@
         "$description": "0.16em."
       }
     },
+    "line-length": {
+      "$type": "number",
+      "$description": "Line lengths in ch, as numbers. The line-length/ch transform appends ch (refinement R12.6).",
+      "65": {
+        "$value": 65,
+        "$description": "65ch."
+      }
+    },
     "family": {
       "$type": "fontFamily",
       "body": {
@@ -166,6 +181,10 @@
         "$value": "{type.font-size.lg}",
         "$description": "Introductory paragraph text."
       },
+      "display": {
+        "$value": "{type.font-size.4xl}",
+        "$description": "Display text, such as a hero name."
+      },
       "h1": {
         "$value": "{type.font-size.3xl}",
         "$description": "Page title (h1)."
@@ -177,6 +196,18 @@
       "h3": {
         "$value": "{type.font-size.xl}",
         "$description": "Subsection heading (h3)."
+      },
+      "h4": {
+        "$value": "{type.font-size.lg}",
+        "$description": "Minor heading (h4)."
+      },
+      "h5": {
+        "$value": "{type.font-size.md}",
+        "$description": "Minor heading (h5)."
+      },
+      "h6": {
+        "$value": "{type.font-size.sm}",
+        "$description": "Minor heading (h6)."
       },
       "label": {
         "$value": "{type.font-size.xs}",
@@ -222,6 +253,13 @@
       "label": {
         "$value": "{type.letter-spacing.16}",
         "$description": "Letter spacing for small uppercase mono labels."
+      }
+    },
+    "measure": {
+      "$type": "number",
+      "text": {
+        "$value": "{type.line-length.65}",
+        "$description": "Readable line length for running text (about 65 characters)."
       }
     }
   }
