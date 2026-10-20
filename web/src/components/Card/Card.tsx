@@ -6,6 +6,8 @@ import styles from "./Card.module.css";
 
 export type CardElement = "article" | "section" | "div" | "li";
 
+export type CardVariant = "raised" | "outlined" | "flat" | "glass";
+
 /** A link card needs a heading: its text is the link's whole accessible name (R10.3). */
 type CardLinkProps =
   | { href?: never; newTab?: never }
@@ -13,43 +15,75 @@ type CardLinkProps =
 
 export type CardOwnProps = {
   heading?: ReactNode;
-  /** Fits the card into the page's heading outline (R10.2). */
+  /** Fits the card into the page's heading outline; the look is the same at every level (refinement R8.4). */
   headingLevel?: 2 | 3 | 4 | 5 | 6 | undefined;
+  /** Surface look, from `component.card.<variant>.*`. Default "raised". */
+  variant?: CardVariant | undefined;
+  /** Bottom part: actions, badges, metadata. Sits at the card's bottom edge (refinement R8.2). */
+  footer?: ReactNode;
+  /** In a Grid, spans one row per part with `subgrid`, so parts line up across the row (refinement R8.3). */
+  subgrid?: boolean | undefined;
 } & CardLinkProps;
 
 export type CardProps<E extends CardElement = "article"> = PolymorphicProps<E, CardOwnProps>;
+
+const hasContent = (node: ReactNode) => node !== undefined && node !== null && node !== false;
 
 /** A surface for grouped content, optionally linking somewhere as a whole (R10). */
 export function Card<E extends CardElement = "article">({
   as,
   heading,
   headingLevel = 3,
+  variant = "raised",
+  footer,
+  subgrid = false,
   href,
   newTab,
   className,
   children,
+  "aria-current": ariaCurrent,
   ...rest
 }: CardProps<E>) {
   // Widened so JSX doesn't re-check rest props per element; PolymorphicProps checked them.
   const Element = (as ?? "article") as ElementType;
   const Heading = `h${String(headingLevel)}` as ElementType;
+  const linked = href !== undefined;
+  const parts = [heading !== undefined, hasContent(children), hasContent(footer)].filter(
+    Boolean,
+  ).length;
   return (
     <Element
       {...rest}
-      className={cx(styles.card, href !== undefined && styles.interactive, className)}
+      // A link card's aria-current belongs to its link (refinement R8.11).
+      aria-current={linked ? undefined : ariaCurrent}
+      className={cx(
+        styles.card,
+        styles[variant],
+        linked && styles.interactive,
+        subgrid && styles.subgrid,
+        subgrid && parts > 0 && styles[`rows-${String(parts)}`],
+        className,
+      )}
     >
       {heading !== undefined && (
         <Heading className={styles.heading}>
-          {href === undefined ? (
-            heading
-          ) : (
-            <Link href={href} newTab={newTab} className={styles.link}>
+          {linked ? (
+            // false turns off Link's automatic marking: link cards are never marked current (refinement R8.11).
+            <Link
+              href={href}
+              newTab={newTab}
+              className={styles.link}
+              aria-current={ariaCurrent ?? false}
+            >
               {heading}
             </Link>
+          ) : (
+            heading
           )}
         </Heading>
       )}
-      {children}
+      {hasContent(children) && <div className={styles.body}>{children}</div>}
+      {hasContent(footer) && <div className={styles.footer}>{footer}</div>}
     </Element>
   );
 }

@@ -53,7 +53,12 @@ test.describe("link cards (R10.3, R10.5)", () => {
   test("a click on the card body follows the card's link", async ({ page }) => {
     await page.goto("/lab/components");
 
-    await section(page, "Card").getByText("Every color, size and motion value").click();
+    // A real click where the text is: the link's overlay, not the body, is what it lands on.
+    const text = section(page, "Card").getByText("Every color, size and motion value");
+    await text.scrollIntoViewIfNeeded();
+    const box = await text.boundingBox();
+    if (box === null) throw new Error("card text is not visible");
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 
     await expect(page).toHaveURL(/\/lab\/tokens$/);
   });

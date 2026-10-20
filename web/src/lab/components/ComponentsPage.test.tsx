@@ -15,6 +15,8 @@ import hiddenStyles from "../../components/VisuallyHidden/VisuallyHidden.module.
 import showcaseStyles from "./Showcase.module.css";
 import { ComponentsPage } from "./ComponentsPage.tsx";
 import { showcases } from "./registry.ts";
+import cardStyles from "../../components/Card/Card.module.css";
+import { accentCardCss } from "./showcases/card.tsx";
 import { compactMenuCss } from "./showcases/menu.tsx";
 import { announced } from "./showcases/visually-hidden.tsx";
 
@@ -110,6 +112,23 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       } else {
         expect(next?.tagName).toBe("P");
         expect(next).toHaveTextContent(showcase.propsNote);
+      }
+    },
+  );
+
+  it.each(showcases.map((s) => [s.name, s] as const))(
+    "names every %s example as a group by its visible title (refinement R8.13)",
+    async (_name, showcase) => {
+      renderPage();
+      const section = await screen.findByRole("region", { name: showcase.name });
+      const panel = within(section).getByRole("group", { name: `${showcase.name} examples` });
+
+      const titles = [...panel.querySelectorAll("p.label")];
+      expect(titles.length).toBeGreaterThan(0);
+      for (const title of titles) {
+        const group = title.parentElement;
+        expect(group).toHaveAttribute("role", "group");
+        expect(group).toHaveAccessibleName(title.textContent);
       }
     },
   );
@@ -447,6 +466,120 @@ describe("/lab/components page (R15.1, R15.3)", () => {
 
     expect(within(section).getByText(/maxColumns is a ceiling, not a count/)).toBeInTheDocument();
     for (const note of [/Grid never reorders items/, /the legend still names the group/]) {
+      expect(within(section).getByText(note)).toBeInTheDocument();
+    }
+  });
+
+  it("shows the Card examples, variants, parts and the customized CSS it applies (refinement R8.14)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Card" });
+    const example = (title: string) => within(section).getByRole("group", { name: title });
+
+    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    expect(labels).toEqual([
+      "Variants",
+      "Parts",
+      "Linked, with a nested control",
+      "Footers line up",
+      "Subgrid",
+      "Any heading level",
+      "Customized with component tokens",
+    ]);
+
+    const variants = within(example("Variants")).getAllByRole("article");
+    expect(variants.map((card) => within(card).getByRole("link").textContent)).toEqual([
+      "Raised",
+      "Outlined",
+      "Flat",
+      "Glass",
+    ]);
+    variants.forEach((card, index) => {
+      const variant = ["raised", "outlined", "flat", "glass"][index] ?? "";
+      expect(card).toHaveClass(cardStyles[variant] ?? "");
+      expect(within(card).getByRole("link")).toHaveAttribute("href", "/lab/tokens");
+      expect(within(card).getByRole("heading", { level: 4 })).toBeInTheDocument();
+    });
+    expect(variants[0]?.closest(`.${showcaseStyles.glassBackdrop ?? ""}`)).not.toBeNull();
+
+    const parts = within(example("Parts")).getByRole("article");
+    expect(within(parts).getByRole("heading", { level: 4, name: "Static hosting" })).toBeVisible();
+    expect(parts).toHaveTextContent("S3 and CloudFront, deployed from GitHub Actions.");
+    expect(parts.lastElementChild).toHaveClass(cardStyles.footer ?? "");
+    const services = within(parts.lastElementChild as HTMLElement).getByRole("list", {
+      name: "Services",
+    });
+    expect(
+      within(services)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent),
+    ).toEqual(["S3", "CloudFront"]);
+
+    const linked = example("Linked, with a nested control");
+    expect(within(linked).getByRole("link", { name: "Design tokens" })).toHaveAttribute(
+      "href",
+      "/lab/tokens",
+    );
+    const github = within(linked).getByRole("link", {
+      name: "Source on GitHub, opens in new tab",
+    });
+    const githubCard = github.closest("article");
+    expect(githubCard?.lastElementChild).toHaveClass(cardStyles.footer ?? "");
+    expect(
+      within(githubCard?.lastElementChild as HTMLElement).getByRole("button", {
+        name: "Star (example)",
+      }),
+    ).toBeInTheDocument();
+
+    for (const [title, subgrid] of [
+      ["Footers line up", false],
+      ["Subgrid", true],
+    ] as const) {
+      const items = within(within(example(title)).getByRole("list")).getAllByRole("listitem");
+      expect(items).toHaveLength(3);
+      for (const item of items) {
+        expect(item.lastElementChild).toHaveClass(cardStyles.footer ?? "");
+        if (subgrid) expect(item).toHaveClass(cardStyles.subgrid ?? "", cardStyles["rows-3"] ?? "");
+        else expect(item).not.toHaveClass(cardStyles.subgrid ?? "");
+      }
+    }
+
+    const levels = example("Any heading level");
+    for (const [level, name] of [
+      [4, "Project notes"],
+      [5, "Release notes"],
+    ] as const) {
+      const heading = within(levels).getByRole("heading", { level, name });
+      expect(heading).toHaveClass(cardStyles.heading ?? "");
+      expect(heading.closest("article")).toHaveTextContent(
+        `Announced as: “${name}, heading level ${String(level)}”`,
+      );
+    }
+
+    const custom = example("Customized with component tokens");
+    expect(within(custom).getByRole("article")).toHaveClass(showcaseStyles.accentCard ?? "");
+    expect([...custom.querySelectorAll("pre code")].map((code) => code.textContent)).toEqual([
+      accentCardCss,
+    ]);
+    expect(readFileSync(join(import.meta.dirname, "Showcase.module.css"), "utf8")).toContain(
+      accentCardCss,
+    );
+
+    const card = showcases.find((s) => s.id === "card");
+    expect(Object.keys(card?.props[0]?.docs ?? {})).toEqual(
+      expect.arrayContaining(["variant", "footer", "subgrid"]),
+    );
+    expect(card?.propsNote).toMatch(
+      /subgrid works only when the Card is a direct child of a Grid.+horizontal Stack.+varied backdrop.+aria-current goes to its heading link/,
+    );
+    for (const note of [
+      /never marked aria-current automatically/,
+      /choose headingLevel by the page outline/,
+      /can't be selected, because the link's overlay covers it/,
+      /hover look shows only where a click follows the link/,
+      /Glass turns opaque when reduced transparency is requested/,
+      /Outlined is transparent, so use it only on surface.base, raised or sunken/,
+      /keep link cards of every variant off action.background/,
+    ]) {
       expect(within(section).getByText(note)).toBeInTheDocument();
     }
   });

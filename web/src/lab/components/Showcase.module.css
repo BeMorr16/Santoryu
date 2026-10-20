@@ -112,3 +112,46 @@
   --component-menu-item-font-size: var(--type-size-small);
   --component-menu-item-checked-indicator: var(--color-accent-2-text);
 }
+
+/*
+ * Behind the Card section's variants (refinement R8.14): only glass's checked backdrops, the
+ * blueprint grid on surface.base (as on body) and a band of action.background. The band stays in
+ * the right half, 60–85% down, so at any column count it misses the transparent outlined card.
+ */
+.glassBackdrop {
+  padding: var(--space-inset-lg);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-base);
+  background-image:
+    linear-gradient(
+      to bottom,
+      transparent 60%,
+      var(--color-action-background) 60% 85%,
+      transparent 85%
+    ),
+    linear-gradient(
+      to right,
+      var(--color-grid-line) var(--effect-border-width),
+      transparent var(--effect-border-width)
+    ),
+    linear-gradient(
+      to bottom,
+      var(--color-grid-line) var(--effect-border-width),
+      transparent var(--effect-border-width)
+    );
+  background-position:
+    right top,
+    0 0,
+    0 0;
+  background-repeat: no-repeat, repeat, repeat;
+  background-size:
+    50% 100%,
+    var(--size-pattern-cell) var(--size-pattern-cell),
+    var(--size-pattern-cell) var(--size-pattern-cell);
+}
+
+/* The Card section's customized example (refinement R8.14); its CSS is shown beside it. */
+.accentCard {
+  --component-card-raised-border: var(--color-accent-border);
+  --component-card-padding: var(--space-inset-md);
+}

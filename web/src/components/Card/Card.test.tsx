@@ -74,6 +74,18 @@ describe("Card", () => {
       expect(await screen.findByRole("heading", { name: "Site project" })).toBeInTheDocument();
     });
 
+    it("follows the link from the keyboard: Tab to the heading link, then Enter", async () => {
+      const user = userEvent.setup();
+      renderInRouter(<Card heading="Personal site" href="/projects/site" />);
+      await screen.findByRole("link");
+
+      await user.tab();
+      expect(screen.getByRole("link", { name: "Personal site" })).toHaveFocus();
+      await user.keyboard("{Enter}");
+
+      expect(await screen.findByRole("heading", { name: "Site project" })).toBeInTheDocument();
+    });
+
     it("keeps a nested button independently focusable and clickable, without navigating", async () => {
       const user = userEvent.setup();
       const onClick = vi.fn();
@@ -96,10 +108,135 @@ describe("Card", () => {
       expect(screen.queryByRole("heading", { name: "Site project" })).toBeNull();
     });
 
+    it("never marks its link as the current page automatically (refinement R8.11)", async () => {
+      renderInRouter(<Card heading="Home" href="/" />);
+
+      const link = await screen.findByRole("link", { name: "Home" });
+      expect(link).not.toHaveAttribute("aria-current", "page");
+      expect(screen.getByRole("article")).not.toHaveAttribute("aria-current");
+    });
+
+    it("puts a caller's aria-current on the link, not the root (refinement R8.11)", async () => {
+      renderInRouter(<Card heading="Personal site" href="/projects/site" aria-current="page" />);
+
+      expect(await screen.findByRole("link", { name: "Personal site" })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
+      expect(screen.getByRole("article")).not.toHaveAttribute("aria-current");
+    });
+
     it("says when the card link opens a new tab", () => {
       render(<Card heading="GitHub profile" href="https://github.com/" newTab />);
 
       expect(screen.getByRole("link")).toHaveAccessibleName("GitHub profile, opens in new tab");
+    });
+  });
+
+  describe("parts (refinement R8.1)", () => {
+    it("renders the heading, body and footer in order, the body and footer as divs", () => {
+      render(
+        <Card heading="Title" footer="Footer text">
+          Body text
+        </Card>,
+      );
+
+      const article = screen.getByRole("article");
+      expect([...article.children].map((child) => [child.tagName, child.textContent])).toEqual([
+        ["H3", "Title"],
+        ["DIV", "Body text"],
+        ["DIV", "Footer text"],
+      ]);
+      expect(article.children[1]).toHaveClass(styles.body ?? "");
+      expect(article.children[2]).toHaveClass(styles.footer ?? "");
+    });
+
+    it("never renders a footer element, so the footer is no contentinfo landmark", () => {
+      const { container } = render(
+        <Card as="div" heading="Title" footer="Footer text">
+          Body
+        </Card>,
+      );
+
+      expect(container.querySelector("footer")).toBeNull();
+      expect(screen.queryByRole("contentinfo")).toBeNull();
+    });
+
+    it.each([undefined, null, false] as const)(
+      "renders no body or footer wrapper for %s",
+      (empty) => {
+        render(
+          <Card heading="Title" footer={empty}>
+            {empty}
+          </Card>,
+        );
+
+        expect(screen.getByRole("article").children).toHaveLength(1);
+      },
+    );
+  });
+
+  describe("variant (refinement R8.5)", () => {
+    it("is raised by default", () => {
+      render(<Card heading="Title" />);
+
+      expect(screen.getByRole("article")).toHaveClass(styles.raised ?? "");
+    });
+
+    it.each(["raised", "outlined", "flat", "glass"] as const)("adds the %s class", (variant) => {
+      render(<Card heading="Title" variant={variant} />);
+
+      const article = screen.getByRole("article");
+      expect(article).toHaveClass(styles[variant] ?? "");
+      const others = ["raised", "outlined", "flat", "glass"].filter((v) => v !== variant);
+      for (const other of others) expect(article).not.toHaveClass(styles[other] ?? "");
+    });
+  });
+
+  describe("subgrid (refinement R8.3)", () => {
+    it("adds no subgrid or row classes by default", () => {
+      render(
+        <Card heading="Title" footer="Footer">
+          Body
+        </Card>,
+      );
+
+      const article = screen.getByRole("article");
+      expect(article).not.toHaveClass(styles.subgrid ?? "");
+      expect(article.className).not.toMatch(/rows-/);
+    });
+
+    it.each([
+      [1, <Card key="1" heading="Title" subgrid />],
+      [
+        2,
+        <Card key="2" heading="Title" subgrid>
+          Body
+        </Card>,
+      ],
+      [
+        2,
+        <Card key="2f" subgrid footer="Footer">
+          Body
+        </Card>,
+      ],
+      [
+        3,
+        <Card key="3" heading="Title" subgrid footer="Footer">
+          Body
+        </Card>,
+      ],
+    ])("spans %s rows for its rendered parts", (rows, card) => {
+      render(card);
+
+      const article = screen.getByRole("article");
+      expect(article).toHaveClass(styles.subgrid ?? "", styles[`rows-${String(rows)}`] ?? "");
+    });
+
+    it("adds no row class when there are no parts", () => {
+      render(<Card subgrid />);
+
+      expect(screen.getByRole("article").className).not.toMatch(/rows-/);
     });
   });
 
@@ -108,6 +245,12 @@ describe("Card", () => {
 
     expect(screen.getByRole("article")).not.toHaveClass(styles.interactive ?? "");
     expect(screen.queryByRole("link")).toBeNull();
+  });
+
+  it("keeps aria-current on the root without href (refinement R8.11)", () => {
+    render(<Card heading="Title" aria-current="true" />);
+
+    expect(screen.getByRole("article")).toHaveAttribute("aria-current", "true");
   });
 
   it("puts ref, rest props and className on the root (R3.2, R3.3)", () => {
@@ -139,9 +282,13 @@ describe("Card", () => {
     const { container } = renderInRouter(
       <>
         <Card heading="Plain">Body</Card>
-        <Card heading="Linked" href="/projects/site">
+        <Card
+          heading="Linked"
+          href="/projects/site"
+          variant="outlined"
+          footer={<button type="button">Copy link</button>}
+        >
           <p>Body</p>
-          <button type="button">Copy link</button>
         </Card>
       </>,
     );

@@ -1,20 +1,10 @@
 {
   "component": {
     "card": {
-      "background": {
-        "$value": "{color.surface.raised}",
-        "$type": "color",
-        "$description": "Card surface."
-      },
-      "border": {
-        "$value": "{color.border.subtle}",
-        "$type": "color",
-        "$description": "Card outline."
-      },
       "border-width": {
         "$value": "{effect.border.width}",
         "$type": "dimension",
-        "$description": "Card outline width."
+        "$description": "Card outline width, in every variant."
       },
       "radius": {
         "$value": "{radius.surface}",
@@ -26,10 +16,10 @@
         "$type": "dimension",
         "$description": "Padding inside the card."
       },
-      "elevation": {
-        "$value": "{effect.elevation.raised}",
-        "$type": "shadow",
-        "$description": "Card shadow."
+      "gap": {
+        "$value": "{space.stack.sm}",
+        "$type": "dimension",
+        "$description": "Space between the heading, body and footer."
       },
       "heading-color": {
         "$value": "{color.text.default}",
@@ -38,11 +28,43 @@
         "$extensions": {
           "personal-site.contrast": [
             {
-              "against": "component.card.background",
+              "against": "component.card.raised.background",
               "min": "text"
             },
             {
-              "against": "component.card.interactive.background-hover",
+              "against": "component.card.flat.background",
+              "min": "text"
+            },
+            {
+              "against": "component.card.raised.background-hover",
+              "min": "text"
+            },
+            {
+              "against": "component.card.outlined.background-hover",
+              "min": "text"
+            },
+            {
+              "against": "component.card.flat.background-hover",
+              "min": "text"
+            },
+            {
+              "against": "component.card.glass.background-opaque",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
               "min": "text"
             }
           ]
@@ -53,43 +75,196 @@
         "$type": "fontFamily",
         "$description": "Heading font."
       },
+      "heading-font-size": {
+        "$value": "{type.size.lead}",
+        "$type": "dimension",
+        "$description": "Heading size, the same at every heading level."
+      },
+      "heading-line-height": {
+        "$value": "{type.leading.heading}",
+        "$type": "number",
+        "$description": "Heading line height."
+      },
+      "heading-font-weight": {
+        "$value": "{type.weight.heading}",
+        "$type": "fontWeight",
+        "$description": "Heading weight."
+      },
       "body-color": {
         "$value": "{color.text.muted}",
         "$type": "color",
-        "$description": "Body text.",
+        "$description": "Body and footer text.",
         "$extensions": {
           "personal-site.contrast": [
             {
-              "against": "component.card.background",
+              "against": "component.card.raised.background",
               "min": "text"
             },
             {
-              "against": "component.card.interactive.background-hover",
+              "against": "component.card.flat.background",
+              "min": "text"
+            },
+            {
+              "against": "component.card.raised.background-hover",
+              "min": "text"
+            },
+            {
+              "against": "component.card.outlined.background-hover",
+              "min": "text"
+            },
+            {
+              "against": "component.card.flat.background-hover",
+              "min": "text"
+            },
+            {
+              "against": "component.card.glass.background-opaque",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
               "min": "text"
             }
           ]
         }
       },
-      "interactive": {
-        "border-hover": {
-          "$value": "{color.border.strong}",
+      "transition-duration": {
+        "$value": "{motion.duration.fast}",
+        "$type": "duration",
+        "$description": "Duration of a link card's hover change (0ms under reduced motion)."
+      },
+      "transition-easing": {
+        "$value": "{motion.easing.standard}",
+        "$type": "cubicBezier",
+        "$description": "Easing of a link card's hover change."
+      },
+      "raised": {
+        "background": {
+          "$value": "{color.surface.raised}",
           "$type": "color",
-          "$description": "Outline of a link card on hover."
+          "$description": "Raised card (the default) surface."
+        },
+        "border": {
+          "$value": "{color.border.subtle}",
+          "$type": "color",
+          "$description": "Raised card (the default) outline."
+        },
+        "elevation": {
+          "$value": "{effect.elevation.raised}",
+          "$type": "shadow",
+          "$description": "Raised card (the default) shadow."
         },
         "background-hover": {
           "$value": "{color.surface.sunken}",
           "$type": "color",
-          "$description": "Surface of a link card on hover."
+          "$description": "Raised card (the default) surface while its link is hovered."
         },
-        "transition-duration": {
-          "$value": "{motion.duration.fast}",
-          "$type": "duration",
-          "$description": "Duration of a link card's hover change (0ms under reduced motion)."
+        "border-hover": {
+          "$value": "{color.border.strong}",
+          "$type": "color",
+          "$description": "Raised card (the default) outline while its link is hovered."
+        }
+      },
+      "outlined": {
+        "background": {
+          "$value": "{color.fill.none}",
+          "$type": "color",
+          "$description": "Outlined card surface."
         },
-        "transition-easing": {
-          "$value": "{motion.easing.standard}",
-          "$type": "cubicBezier",
-          "$description": "Easing of a link card's hover change."
+        "border": {
+          "$value": "{color.border.strong}",
+          "$type": "color",
+          "$description": "Outlined card outline."
+        },
+        "elevation": {
+          "$value": "{effect.elevation.none}",
+          "$type": "shadow",
+          "$description": "Outlined card shadow."
+        },
+        "background-hover": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Outlined card surface while its link is hovered."
+        },
+        "border-hover": {
+          "$value": "{color.border.strong}",
+          "$type": "color",
+          "$description": "Outlined card outline while its link is hovered."
+        }
+      },
+      "flat": {
+        "background": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Flat card surface."
+        },
+        "border": {
+          "$value": "{color.fill.none}",
+          "$type": "color",
+          "$description": "Flat card outline."
+        },
+        "elevation": {
+          "$value": "{effect.elevation.none}",
+          "$type": "shadow",
+          "$description": "Flat card shadow."
+        },
+        "background-hover": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Flat card surface while its link is hovered."
+        },
+        "border-hover": {
+          "$value": "{color.border.strong}",
+          "$type": "color",
+          "$description": "Flat card outline while its link is hovered."
+        }
+      },
+      "glass": {
+        "background": {
+          "$value": "{color.surface.glass}",
+          "$type": "color",
+          "$description": "Glass card surface."
+        },
+        "border": {
+          "$value": "{color.border.subtle}",
+          "$type": "color",
+          "$description": "Glass card outline."
+        },
+        "elevation": {
+          "$value": "{effect.elevation.raised}",
+          "$type": "shadow",
+          "$description": "Glass card shadow."
+        },
+        "background-hover": {
+          "$value": "{color.surface.glass}",
+          "$type": "color",
+          "$description": "Glass card surface while its link is hovered."
+        },
+        "border-hover": {
+          "$value": "{color.border.strong}",
+          "$type": "color",
+          "$description": "Glass card outline while its link is hovered."
+        },
+        "backdrop-blur": {
+          "$value": "{effect.backdrop.glass}",
+          "$type": "dimension",
+          "$description": "Blur behind a glass card."
+        },
+        "background-opaque": {
+          "$value": "{color.surface.raised}",
+          "$type": "color",
+          "$description": "Glass card surface, at rest and on hover, under reduced transparency."
         }
       },
       "focus-ring-color": {

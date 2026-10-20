@@ -253,7 +253,7 @@ describe("library types", () => {
     expectTypeOf(valid).toBeFunction();
   });
 
-  it("Card needs a heading to link, and Badge has closed variants and elements (R10.3, R11)", () => {
+  it("Card needs a heading to link and has closed variants, and Badge has closed variants and elements (R10.3, R11, refinement R8.5)", () => {
     function invalid() {
       return [
         // @ts-expect-error -- a link card needs a heading (its link's accessible name).
@@ -264,6 +264,8 @@ describe("library types", () => {
         <Card key="b" heading="x" newTab />,
         // @ts-expect-error -- heading levels are 2–6.
         <Card key="c" heading="x" headingLevel={1} />,
+        // @ts-expect-error -- not a card variant (refinement R8.5).
+        <Card key="f" heading="x" variant="ghost" />,
         // @ts-expect-error -- not a badge variant.
         <Badge key="d" variant="danger">
           x
@@ -278,6 +280,15 @@ describe("library types", () => {
       return [
         <Card key="a" heading="x" href="/projects" newTab />,
         <Card key="b" as="li" heading="x" />,
+        <Card
+          key="d"
+          heading="T"
+          href="/"
+          variant="glass"
+          footer={<span />}
+          subgrid
+          aria-current="page"
+        />,
         <Badge key="c" as="li" variant="accent" size="sm">
           x
         </Badge>,

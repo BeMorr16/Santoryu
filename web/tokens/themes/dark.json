@@ -16,7 +16,7 @@
       },
       "glass": {
         "$value": "{color.overlay.blue-850-85}",
-        "$description": "Translucent sticky-header background over the page (blurred). Only default and muted text, links, focus rings and controls whose boundary is contrast-checked against glass may sit on it.",
+        "$description": "Translucent background for the sticky header and glass cards, over a varied backdrop (blurred). Only default and muted text, links, focus rings and controls whose boundary is contrast-checked against glass may sit on it.",
         "$extensions": {
           "personal-site.contrast-backdrop": [
             "color.surface.base",
@@ -525,6 +525,10 @@
   "effect": {
     "elevation": {
       "$type": "shadow",
+      "none": {
+        "$value": "{effect.shadow.none}",
+        "$description": "Flat surfaces: no shadow."
+      },
       "raised": {
         "$value": "{effect.shadow.sm-dark}",
         "$description": "Shadow for slightly raised surfaces."

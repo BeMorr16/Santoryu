@@ -2,6 +2,33 @@
   "effect": {
     "shadow": {
       "$type": "shadow",
+      "none": {
+        "$value": {
+          "color": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0,
+            "hex": "#000000"
+          },
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 0,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "unit": "px"
+          },
+          "spread": {
+            "value": 0,
+            "unit": "px"
+          }
+        },
+        "$description": "No shadow."
+      },
       "sm": {
         "$value": {
           "color": {
