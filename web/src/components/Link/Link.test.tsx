@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef, type ReactNode } from "react";
@@ -10,6 +12,8 @@ import buttonStyles from "../shared/button-styles.module.css";
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden.tsx";
 import { Link } from "./Link.tsx";
 import styles from "./Link.module.css";
+
+const css = readFileSync(join(import.meta.dirname, "Link.module.css"), "utf8");
 
 function renderInRouter(ui: ReactNode) {
   const Stub = createRoutesStub([
@@ -387,6 +391,38 @@ describe("Link", () => {
     );
   });
 
+  it('adds the hover-underline class only with underline="hover" (refinement R11.7)', () => {
+    render(
+      <>
+        <Link href="#a" underline="hover">
+          Nav
+        </Link>
+        <Link href="#b" underline="always">
+          Always
+        </Link>
+        <Link href="#c">Default</Link>
+      </>,
+    );
+
+    expect(screen.getByRole("link", { name: "Nav" })).toHaveClass(
+      styles.link ?? "",
+      styles.underlineHover ?? "",
+    );
+    for (const name of ["Always", "Default"]) {
+      expect(screen.getByRole("link", { name })).not.toHaveClass(styles.underlineHover ?? "");
+    }
+  });
+
+  it("underlines a hover-underline link only on hover, where the device hovers, or when current (refinement R11.7)", () => {
+    expect(css).toMatch(/^\.underlineHover \{\s*text-decoration-line: none;/m);
+    expect(css).toMatch(
+      /@media \(hover: hover\) \{\s*\.underlineHover:hover \{\s*text-decoration-line: underline;/,
+    );
+    expect(css).toMatch(
+      /^\.underlineHover\[aria-current\]:not\(\[aria-current="false"\]\) \{\s*text-decoration-line: underline;/m,
+    );
+  });
+
   it("passes aria-current through, as the current-state styling hook (R5.8)", async () => {
     renderInRouter(
       <Link href="/" aria-current="page">
@@ -444,7 +480,7 @@ describe("Link", () => {
     );
   });
 
-  it("has no axe violations, inline, current, new-tab, visited, rel and as buttons (R3.9)", async () => {
+  it("has no axe violations, inline, current, new-tab, visited, hover-underline, rel and as buttons (R3.9)", async () => {
     const { container } = renderInRouter(
       <>
         <p>
@@ -464,6 +500,9 @@ describe("Link", () => {
         </Link>
         <Link href="#visited" showVisited>
           Visited
+        </Link>
+        <Link href="/projects" underline="hover">
+          Hover underline
         </Link>
         <Link href="https://github.com/" rel="me" newTab>
           Profile

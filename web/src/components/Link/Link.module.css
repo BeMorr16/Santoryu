@@ -39,6 +39,21 @@
   font-weight: var(--component-link-font-weight-current);
 }
 
+/* Opt-in, where position marks the links (refinement R11.7, WCAG 1.4.1). */
+.underlineHover {
+  text-decoration-line: none;
+}
+
+@media (hover: hover) {
+  .underlineHover:hover {
+    text-decoration-line: underline;
+  }
+}
+
+.underlineHover[aria-current]:not([aria-current="false"]) {
+  text-decoration-line: underline;
+}
+
 /* Keeps the new-tab icon on the last word's line (refinement R4.2). */
 .newTab {
   white-space: nowrap;

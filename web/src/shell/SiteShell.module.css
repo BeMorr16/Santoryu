@@ -1,3 +1,16 @@
+/*
+ * At least as tall as the viewport, so the footer sits at the bottom of short pages (refinement
+ * R11.10). The one column can shrink below its content's width, so wide content scrolls inside
+ * its own element rather than widening the page.
+ */
+.page {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+}
+
 /* VisuallyHidden reveals it as an overlay; this only places it, below the header's top edge. */
 .skipLink {
   inset-block-start: var(--space-stack-sm);
@@ -10,15 +23,17 @@
   inset-block-start: 0;
   /* Below revealed overlays such as the skip link (layer.overlay). */
   z-index: var(--layer-sticky);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-stack-sm) var(--space-inline-md);
-  align-items: center;
-  justify-content: space-between;
   padding: var(--space-inset-md) var(--space-layout-xs);
   border-block-end: var(--effect-border-width) solid var(--color-border-subtle);
   background-color: var(--color-surface-glass);
   backdrop-filter: blur(var(--effect-backdrop-glass));
+}
+
+/* Short screens get the whole viewport for content (refinement R11.4); size.breakpoint.sm. */
+@media (max-height: 30em) {
+  .header {
+    position: static;
+  }
 }
 
 /* Progressive enhancement: as far as known, only Chromium supports this query (design §4.6). */
@@ -29,46 +44,22 @@
   }
 }
 
+/* Text-colored, also on hover, through Link's component tokens (refinement R11.8). */
 .siteName {
+  --component-link-color: var(--color-text-default);
+  --component-link-color-hover: var(--color-text-default);
+
   padding-block: var(--space-inset-sm);
-  color: var(--color-text-default);
   font-weight: var(--type-weight-heading);
-  text-decoration: none;
-}
-
-.siteName:hover {
-  color: var(--color-text-default);
-  text-decoration: underline;
-}
-
-.navList {
-  display: flex;
-  gap: var(--space-inline-md);
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 .navLink {
   display: inline-block;
   padding: var(--space-inset-sm);
   border-radius: var(--radius-control);
-  text-decoration: none;
-}
-
-.navLink:hover,
-.navLink[aria-current="page"] {
-  text-decoration: underline;
-}
-
-.navLink[aria-current="page"] {
-  font-weight: var(--type-weight-strong);
 }
 
 .main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-stack-lg);
   padding: var(--space-layout-sm) var(--space-layout-xs);
 }
 

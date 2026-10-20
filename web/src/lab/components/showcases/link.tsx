@@ -1,4 +1,5 @@
 import { Link, type LinkOwnProps } from "../../../components/Link/Link.tsx";
+import { Stack } from "../../../components/Stack/Stack.tsx";
 import { Announced } from "../Announced.tsx";
 import { Example } from "../Example.tsx";
 import type { PropDocs } from "../PropDocs.ts";
@@ -40,6 +41,11 @@ const props = {
     default: '"exact"',
     description:
       'Inline only. Routed inline links set aria-current themselves: "page" on an exact match, and with "section", "true" on pages below it. Your own aria-current overrides it. The hash is ignored, so use #id hrefs for in-page links.',
+  },
+  underline: {
+    type: '"always" | "hover"',
+    default: '"always"',
+    description: "Where the underline shows. Inline links only.",
   },
   variant: { ...buttonLookDocs.variant, description: 'With appearance="button" only.' },
   size: { ...buttonLookDocs.size, description: 'With appearance="button" only.' },
@@ -113,6 +119,25 @@ function Examples() {
           </div>
         ))}
       </Example>
+      <Example title="Underline on hover">
+        <Stack as="ul" direction="horizontal" aria-label="Lab pages">
+          <li>
+            <Link href="/lab" underline="hover">
+              Lab
+            </Link>
+          </li>
+          <li>
+            <Link href="/lab/tokens" underline="hover">
+              Tokens
+            </Link>
+          </li>
+          <li>
+            <Link href="/lab/components" underline="hover">
+              Components
+            </Link>
+          </li>
+        </Stack>
+      </Example>
       <Example title="As a button">
         <Link href="/lab" appearance="button" variant="primary" iconEnd="arrow-right">
           Explore the lab
@@ -161,6 +186,7 @@ export const linkShowcase: Showcase = {
     'Routed inline links mark the current page with aria-current="page", and with currentMatch="section", pages below it with "true". Pass aria-current to override, including false. Button-styled links are only marked when you pass it.',
     "The current page is shown by weight as well as color.",
     "Inline links are underlined, so they're told apart from text by more than color. Hover thickens the underline.",
+    'underline="hover" drops the underline at rest. Use it only where the position marks the links (a nav, a site name), since color alone can\'t (WCAG 1.4.1). A current link keeps its underline.',
     "The visited color is opt-in and color-only, so nothing depends on it.",
     "New-tab links end their name with “, opens in new tab”, also when named by aria-label or aria-labelledby, and the icon stays on the line of the last word.",
     "The focus ring uses component.link.focus-ring-color.",

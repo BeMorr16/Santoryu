@@ -58,6 +58,13 @@
       },
       "$description": "Size step 80 (320px at the default root size)."
     },
+    "120": {
+      "$value": {
+        "value": 30.0,
+        "unit": "rem"
+      },
+      "$description": "Size step 120 (480px at the default root size)."
+    },
     "control": {
       "sm": {
         "$value": "{size.8}",
@@ -100,6 +107,12 @@
       "cell": {
         "$value": "{size.6}",
         "$description": "Cell size of the blueprint backdrop grid."
+      }
+    },
+    "breakpoint": {
+      "sm": {
+        "$value": "{size.120}",
+        "$description": "Small viewport (480px at the default root size): narrower or shorter is a small screen. Media queries write it as 30em."
       }
     }
   }

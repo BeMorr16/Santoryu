@@ -339,7 +339,7 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows Link's current-page, visited, new-tab, icon-only and customized examples (refinement R4.11)", async () => {
+  it("shows Link's current-page, underline-on-hover, visited, new-tab, icon-only and customized examples (refinement R4.11, R11.12)", async () => {
     renderPage();
     const section = await screen.findByRole("region", { name: "Link" });
     const example = (title: string) => {
@@ -358,6 +358,28 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       expect(link).toHaveAttribute("aria-current", ariaCurrent);
       expect(within(current).getByText(caption)).toBeInTheDocument();
     }
+
+    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    expect(labels.indexOf("Underline on hover")).toBe(labels.indexOf("Current page") + 1);
+    const hoverPages = within(example("Underline on hover")).getByRole("list", {
+      name: "Lab pages",
+    });
+    const hoverLinks = within(hoverPages).getAllByRole("link");
+    expect(hoverLinks.map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
+      ["Lab", "/lab"],
+      ["Tokens", "/lab/tokens"],
+      ["Components", "/lab/components"],
+    ]);
+    for (const link of hoverLinks) expect(link).toHaveClass(linkStyles.underlineHover ?? "");
+    expect(within(hoverPages).getByRole("link", { name: "Components" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    const underlineRow = within(section).getByRole("row", { name: /^underline\b/ });
+    expect(underlineRow).toHaveTextContent('"always" | "hover"');
+    expect(section).toHaveTextContent(
+      /underline="hover" drops the underline at rest\. Use it only where the position marks the links/,
+    );
 
     for (const link of within(example("Visited (opt-in)")).getAllByRole("link")) {
       expect(link).toHaveClass(linkStyles.showVisited ?? "");

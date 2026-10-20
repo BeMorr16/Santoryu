@@ -23,15 +23,18 @@ const namedColors = new Set(
   whitesmoke yellow yellowgreen`.split(/\s+/),
 );
 
-const allowedCustomProperties = new Set(["--specimen"]);
+// --shell-header-block-size is a runtime measurement set by the shell, not a token (refinement R11.3).
+const allowedCustomProperties = new Set(["--specimen", "--shell-header-block-size"]);
 
 interface TokenSets {
   semantic: ReadonlySet<string>;
   /** Component kebab name → that component's token CSS variables. */
   byComponent: ReadonlyMap<string, ReadonlySet<string>>;
+  /** The `size.breakpoint.*` values, as rem numbers (refinement R11.6). */
+  breakpoints: ReadonlySet<number>;
 }
 
-type Owner = { kind: "component"; component: string } | { kind: "lab" } | { kind: "other" };
+type Owner = { kind: "component"; component: string } | { kind: "app" };
 
 const kebab = (pascal: string) => pascal.replace(/(?<!^)([A-Z])/g, "-$1").toLowerCase();
 
@@ -47,13 +50,70 @@ function ownerOf(file: string): Owner {
   if (shared?.[1]) return { kind: "component", component: shared[1] };
   const own = /^src\/components\/([A-Z][A-Za-z]*)\//.exec(file);
   if (own?.[1]) return { kind: "component", component: kebab(own[1]) };
-  if (file.startsWith("src/lab/")) return { kind: "lab" };
-  return { kind: "other" };
+  return { kind: "app" };
 }
 
 /**
- * Reports raw color literals, custom properties a file may not reference, and component-token
- * overrides outside src/lab/ (site-foundation R5.7, component-library R2.5).
+ * The parenthesized groups of a media prelude, each with its nested groups blanked out, so a
+ * feature is read on its own. Function arguments (`calc(…)`) stay part of their feature.
+ */
+function mediaGroups(prelude: string): { offset: number; body: string }[] {
+  const groups: { start: number; end: number }[] = [];
+  const open: number[] = [];
+  for (let index = 0; index < prelude.length; index++) {
+    if (prelude[index] === "(") open.push(index);
+    const start = prelude[index] === ")" ? open.pop() : undefined;
+    if (start !== undefined) groups.push({ start, end: index });
+  }
+  const contains = (outer: { start: number; end: number }, inner: { start: number }) =>
+    inner.start > outer.start && inner.start < outer.end;
+  const functions = groups.filter(({ start }) => /[\w-]$/.test(prelude.slice(0, start)));
+  const inFunction = (group: { start: number }) =>
+    functions.some((fn) => fn === group || contains(fn, group));
+  return groups
+    .filter((group) => !inFunction(group))
+    .map((group) => {
+      let body = prelude.slice(group.start + 1, group.end);
+      for (const inner of groups) {
+        if (!contains(group, inner) || inFunction(inner)) continue;
+        const from = inner.start - group.start - 1;
+        const to = inner.end - group.start;
+        body = body.slice(0, from) + " ".repeat(to - from) + body.slice(to);
+      }
+      return { offset: group.start + 1, body };
+    });
+}
+
+/**
+ * Media-query widths and heights that aren't a `size.breakpoint` token, in `em` or `rem`
+ * (refinement R11.6). Covers min-/max-/device- features, range syntax (`width >= 30em`) and
+ * lengths inside functions such as calc().
+ */
+function breakpointProblems(text: string, breakpoints: ReadonlySet<number>) {
+  const problems: { index: number; message: string }[] = [];
+  for (const media of text.matchAll(/@media\b([^{]*)\{/g)) {
+    const preludeStart = media.index + "@media".length;
+    for (const { offset, body } of mediaGroups(media[1] ?? "")) {
+      if (!/(?<![\w-])(?:min-|max-)?(?:device-)?(?:width|height)(?![\w-])/.test(body)) continue;
+      for (const length of body.matchAll(/(?<![\w.-])(\d*\.?\d+)([a-z]+)/gi)) {
+        const [value, number = "", unit = ""] = length;
+        const onToken = /^r?em$/i.test(unit) && breakpoints.has(Number(number));
+        if (!onToken) {
+          problems.push({
+            index: preludeStart + offset + length.index,
+            message: `${value} is not a size.breakpoint token`,
+          });
+        }
+      }
+    }
+  }
+  return problems;
+}
+
+/**
+ * Reports raw color literals, custom properties a file may not reference, overrides of unknown
+ * component tokens (site-foundation R5.7, component-library R2.5, refinement R11.9), and
+ * media-query breakpoints that aren't tokens (refinement R11.6).
  * Returns one `file:line: message` string per problem.
  */
 function scanCss(source: string, file: string, tokens: TokenSets): string[] {
@@ -83,12 +143,13 @@ function scanCss(source: string, file: string, tokens: TokenSets): string[] {
     const [, property = "", separator = "", value = ""] = declaration;
     const start = declaration.index + property.length + separator.length;
 
-    if (property.startsWith("--component-") && owner.kind !== "component") {
-      if (owner.kind !== "lab") {
-        report(declaration.index, `${property} may only be overridden in src/lab/`);
-      } else if (!knownComponentToken(property)) {
-        report(declaration.index, `${property} is not a component token`);
-      }
+    // App code may override component tokens; the var() check below keeps values semantic.
+    if (
+      property.startsWith("--component-") &&
+      owner.kind === "app" &&
+      !knownComponentToken(property)
+    ) {
+      report(declaration.index, `${property} is not a component token`);
     }
 
     for (const ref of value.matchAll(/var\(\s*(--[\w-]+)/g)) {
@@ -112,8 +173,13 @@ function scanCss(source: string, file: string, tokens: TokenSets): string[] {
       }
     }
   }
-  return problems;
+  for (const { index, message } of breakpointProblems(text, tokens.breakpoints)) {
+    report(index, message);
+  }
+  return problems.sort((a, b) => lineOf(a) - lineOf(b));
 }
+
+const lineOf = (problem: string) => Number(/:(\d+): /.exec(problem)?.[1]);
 
 /** Component tokens never referenced by their component's CSS (R2.7, second half). */
 function unusedComponentTokens(files: { file: string; source: string }[], tokens: TokenSets) {
@@ -145,6 +211,11 @@ function groupByComponent(
 const realTokens: TokenSets = {
   semantic: new Set(semanticTokens.map((t) => t.cssVar)),
   byComponent: groupByComponent(componentTokens),
+  breakpoints: new Set(
+    semanticTokens
+      .filter((t) => t.name.startsWith("size.breakpoint."))
+      .map((t) => ("all" in t.values ? Number.parseFloat(t.values.all.css) : Number.NaN)),
+  ),
 };
 
 const fixtureTokens: TokenSets = {
@@ -154,6 +225,7 @@ const fixtureTokens: TokenSets = {
     { component: "button", cssVar: "--component-button-gap" },
     { component: "menu", cssVar: "--component-menu-popup-radius" },
   ]),
+  breakpoints: new Set([30]),
 };
 
 describe("scanCss self-test", () => {
@@ -257,24 +329,56 @@ describe("scanCss self-test", () => {
     ]);
   });
 
-  it("allows --component-* outside components only as a known override target in src/lab/", () => {
+  it("allows --component-* outside components only as a known override target", () => {
     const fixture = [
       ".a {",
       "  --component-button-radius: var(--radius-pill);",
       "  --component-button-nope: var(--radius-pill);",
       "  border-radius: var(--component-button-radius);",
+      "  --component-menu-popup-radius: var(--size-120);",
       "}",
       "",
     ].join("\n");
 
-    expect(scanCss(fixture, "src/lab/components/Custom.module.css", fixtureTokens)).toEqual([
-      "src/lab/components/Custom.module.css:3: --component-button-nope is not a component token",
-      "src/lab/components/Custom.module.css:4: --component-button-radius is not a semantic token",
+    for (const file of ["src/lab/components/Custom.module.css", "src/shell/SiteShell.module.css"]) {
+      expect(scanCss(fixture, file, fixtureTokens)).toEqual([
+        `${file}:3: --component-button-nope is not a component token`,
+        `${file}:4: --component-button-radius is not a semantic token`,
+        `${file}:5: --size-120 is not a semantic token`,
+      ]);
+    }
+  });
+
+  it("allows --shell-header-block-size outside components only", () => {
+    const fixture = ".a { padding: var(--shell-header-block-size); }\n";
+
+    expect(scanCss(fixture, "src/styles/global.css", fixtureTokens)).toEqual([]);
+    expect(scanCss(fixture, "src/components/Menu/Menu.module.css", fixtureTokens)).toEqual([
+      "src/components/Menu/Menu.module.css:1: --shell-header-block-size is not a semantic token, a menu component token or a private --_* property",
     ]);
-    expect(scanCss(fixture, "src/shell/SiteShell.module.css", fixtureTokens)).toEqual([
-      "src/shell/SiteShell.module.css:2: --component-button-radius may only be overridden in src/lab/",
-      "src/shell/SiteShell.module.css:3: --component-button-nope may only be overridden in src/lab/",
-      "src/shell/SiteShell.module.css:4: --component-button-radius is not a semantic token",
+  });
+
+  it("reports media-query widths and heights that aren't size.breakpoint tokens", () => {
+    const fixture = [
+      "@media (min-width: 40em) {}",
+      "@media (30em <= height < 40rem) {}",
+      "@media (max-height: 480px) {}",
+      "@media (min-width: 30em) and (max-height: 30rem) {}",
+      "@media (hover: hover) and (prefers-reduced-motion: reduce) and (forced-colors: active) {}",
+      ".a { inline-size: 40em; }",
+      "@media (min-width: calc(40em + 1px)) {}",
+      "@media (max-device-width: 600px) {}",
+      "@media ((width >= 30em) and (min-resolution: 2dppx)) {}",
+      "",
+    ].join("\n");
+
+    expect(scanCss(fixture, "src/x.module.css", fixtureTokens)).toEqual([
+      "src/x.module.css:1: 40em is not a size.breakpoint token",
+      "src/x.module.css:2: 40rem is not a size.breakpoint token",
+      "src/x.module.css:3: 480px is not a size.breakpoint token",
+      "src/x.module.css:7: 40em is not a size.breakpoint token",
+      "src/x.module.css:7: 1px is not a size.breakpoint token",
+      "src/x.module.css:8: 600px is not a size.breakpoint token",
     ]);
   });
 

@@ -30,7 +30,7 @@
 }
 
 /* An automatic label: icon-only on narrow screens, "Theme" from 30em up (refinement R10.2). */
-/* The breakpoint is hard-coded: media queries can't read custom properties (refinement R11). */
+/* size.breakpoint.sm (refinement R11.5): media queries can't read custom properties. */
 .auto {
   display: none;
 }

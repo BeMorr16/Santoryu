@@ -56,8 +56,8 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
     semantic: ["inset", "stack", "inline", "layout"],
   },
   size: {
-    primitive: ["4", "5", "6", "8", "10", "48", "64", "80"],
-    semantic: ["control", "icon", "column", "pattern"],
+    primitive: ["4", "5", "6", "8", "10", "48", "64", "80", "120"],
+    semantic: ["control", "icon", "column", "pattern", "breakpoint"],
   },
   radius: {
     primitive: ["0", "2", "4", "8", "16", "full"],
@@ -156,6 +156,7 @@ const expectedSemantic = [
   "size.column.md",
   "size.column.lg",
   "size.pattern.cell",
+  "size.breakpoint.sm",
   "radius.control",
   "radius.surface",
   "radius.pill",

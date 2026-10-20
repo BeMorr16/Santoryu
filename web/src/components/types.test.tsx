@@ -165,7 +165,7 @@ describe("library types", () => {
     expectTypeOf(valid).toBeFunction();
   });
 
-  it("Link always has a name, and takes rel, router options and current matching (refinement R4.1, R4.6–R4.9)", () => {
+  it("Link always has a name, and takes rel, router options, current matching and underline (refinement R4.1, R4.6–R4.9, R11.7)", () => {
     function invalid() {
       return [
         // @ts-expect-error -- an inline link needs text.
@@ -188,6 +188,14 @@ describe("library types", () => {
         <Link key="f" href="/" currentMatch="prefix">
           x
         </Link>,
+        // @ts-expect-error -- underline is for inline links.
+        <Link key="h" href="/" appearance="button" underline="hover">
+          x
+        </Link>,
+        // @ts-expect-error -- not an underline mode.
+        <Link key="i" href="/" underline="none">
+          x
+        </Link>,
       ];
     }
     function valid(variant: ButtonLookProps["variant"]) {
@@ -208,6 +216,9 @@ describe("library types", () => {
           Lab
         </Link>,
         <Link key="e" href="/lab" aria-current={false}>
+          Lab
+        </Link>,
+        <Link key="f" href="/lab" underline="hover">
           Lab
         </Link>,
       ];

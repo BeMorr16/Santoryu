@@ -1,8 +1,10 @@
 import { StrictMode } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Meta, Outlet, createRoutesStub } from "react-router";
+import { Link, Meta, Outlet, createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
+import { resize } from "../../test/resize-observer.ts";
+import stackStyles from "../components/Stack/Stack.module.css";
 import { SiteShell } from "./SiteShell.tsx";
 
 function renderAt(path: string, { strict = false } = {}) {
@@ -20,7 +22,12 @@ function renderAt(path: string, { strict = false } = {}) {
       children: [
         {
           index: true,
-          Component: () => <h1>Home page</h1>,
+          Component: () => (
+            <>
+              <h1>Home page</h1>
+              <Link to="/plain">Plain page</Link>
+            </>
+          ),
           meta: () => [{ title: "Home title" }],
         },
         {
@@ -30,6 +37,7 @@ function renderAt(path: string, { strict = false } = {}) {
         },
         { path: "lab/tokens", Component: () => <h1>Tokens page</h1> },
         { path: "lab/components", Component: () => <h1>Components page</h1> },
+        { path: "plain", Component: () => <p>No heading here</p> },
       ],
     },
   ]);
@@ -63,6 +71,48 @@ describe("SiteShell", () => {
 
     const banner = screen.getByRole("banner");
     expect(within(banner).getByRole("link", { name: "Ben" })).toHaveAttribute("href", "/");
+  });
+
+  it("never marks the site name as current, while Home marks the home page (refinement R11.8)", () => {
+    renderAt("/");
+
+    const banner = screen.getByRole("banner");
+    expect(within(banner).getByRole("link", { name: "Ben" })).toHaveAttribute(
+      "aria-current",
+      "false",
+    );
+    expect(within(banner).getByRole("link", { name: "Home" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
+  it("lays out the header and the nav list as horizontal Stacks (refinement R11.8)", () => {
+    renderAt("/");
+
+    const horizontal = [
+      stackStyles.stack ?? "",
+      stackStyles.horizontal ?? "",
+      stackStyles.wrap ?? "",
+    ];
+    expect(screen.getByRole("banner")).toHaveClass(...horizontal);
+    const nav = screen.getByRole("navigation", { name: "Primary" });
+    expect(within(nav).getByRole("list")).toHaveClass(...horizontal);
+    expect(screen.getByRole("main")).toHaveClass(
+      stackStyles.stack ?? "",
+      stackStyles.vertical ?? "",
+    );
+  });
+
+  it("sets the measured header height on the root, and removes it on unmount (refinement R11.3)", () => {
+    const { unmount } = renderAt("/");
+    const root = document.documentElement;
+
+    resize(screen.getByRole("banner"), 120);
+    expect(root.style.getPropertyValue("--shell-header-block-size")).toBe("120px");
+
+    unmount();
+    expect(root.style.getPropertyValue("--shell-header-block-size")).toBe("");
   });
 
   it.each([false, true])("does not move focus on initial render (StrictMode: %s)", (strict) => {
@@ -124,7 +174,7 @@ describe("SiteShell", () => {
     },
   );
 
-  it("navigates client-side to Lab, updating content and title, and focuses main", async () => {
+  it("navigates client-side to Lab, updating content and title, and focuses its h1 (refinement R11.1)", async () => {
     const user = userEvent.setup();
     renderAt("/");
     const main = screen.getByRole("main");
@@ -132,14 +182,16 @@ describe("SiteShell", () => {
 
     await user.click(screen.getByRole("link", { name: "Lab" }));
 
-    expect(await screen.findByRole("heading", { level: 1, name: "Lab page" })).toBeVisible();
+    const heading = await screen.findByRole("heading", { level: 1, name: "Lab page" });
+    expect(heading).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Home page" })).not.toBeInTheDocument();
     expect(screen.getByRole("main")).toBe(main);
-    expect(main).toHaveFocus();
+    expect(heading).toHaveFocus();
+    expect(heading).toHaveAttribute("tabindex", "-1");
     expect(document.title).toBe("Lab title");
   });
 
-  it("focuses main after keyboard navigation from the nav", async () => {
+  it("focuses the new page's h1 after keyboard navigation from the nav (refinement R11.1)", async () => {
     const user = userEvent.setup();
     renderAt("/");
     const lab = screen.getByRole("link", { name: "Lab" });
@@ -147,7 +199,18 @@ describe("SiteShell", () => {
     lab.focus();
     await user.keyboard("{Enter}");
 
-    expect(await screen.findByRole("heading", { level: 1, name: "Lab page" })).toBeVisible();
+    const heading = await screen.findByRole("heading", { level: 1, name: "Lab page" });
+    expect(heading).toHaveFocus();
+    expect(heading).toHaveAttribute("tabindex", "-1");
+  });
+
+  it("focuses main when the new page has no h1 (refinement R11.1)", async () => {
+    const user = userEvent.setup();
+    renderAt("/");
+
+    await user.click(await screen.findByRole("link", { name: "Plain page" }));
+
+    expect(await screen.findByText("No heading here")).toBeVisible();
     expect(screen.getByRole("main")).toHaveFocus();
   });
 
