@@ -386,6 +386,24 @@ describe("library types", () => {
     expectTypeOf(valid).toBeFunction();
   });
 
+  it("ThemeSwitcher: Menu's closed placement unions and a boolean showLabel (refinement R10.1, R10.2)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- align is start or end.
+        <ThemeSwitcher key="a" align="center" />,
+        // @ts-expect-error -- side is bottom or top.
+        <ThemeSwitcher key="b" side="left" />,
+        // @ts-expect-error -- showLabel is a boolean; unset means automatic.
+        <ThemeSwitcher key="c" showLabel="yes" />,
+      ];
+    }
+    function valid() {
+      return <ThemeSwitcher align="start" side="top" showLabel={false} />;
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
   it('VisuallyHidden: as="a" requires focusable, and `as` is a closed text-element union (refinement R2.5, R2.6)', () => {
     function invalid() {
       return [

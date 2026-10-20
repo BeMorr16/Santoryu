@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,7 +8,8 @@ import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { setSystemTheme } from "../../../test/system-theme.ts";
 import { Icon } from "../Icon/Icon.tsx";
 import type { IconName } from "../Icon/registry.ts";
-import { ThemeSwitcher } from "./ThemeSwitcher.tsx";
+import buttonStyles from "../shared/button-styles.module.css";
+import { ThemeSwitcher, themeSwitcherName } from "./ThemeSwitcher.tsx";
 import styles from "./ThemeSwitcher.module.css";
 
 const root = document.documentElement;
@@ -155,7 +156,73 @@ describe("ThemeSwitcher", () => {
   it("forwards variant and size to its trigger", () => {
     render(<ThemeSwitcher variant="secondary" size="md" />);
 
-    expect(screen.getByRole("button", { name: /^Theme/ }).className).toMatch(/secondary/);
+    const trigger = screen.getByRole("button", { name: /^Theme/ });
+    expect(trigger).toHaveClass(buttonStyles.secondary ?? "", buttonStyles.md ?? "");
+    expect(trigger).not.toHaveClass(buttonStyles.sm ?? "");
+  });
+
+  it("opens below, lined up with the trigger's end edge, by default (refinement R10.1)", () => {
+    render(<ThemeSwitcher />);
+
+    const popup = screen.getByRole("menu", { hidden: true });
+    expect(popup).toHaveAttribute("data-side", "bottom");
+    expect(popup).toHaveAttribute("data-align", "end");
+  });
+
+  it("forwards side and align to its popup (refinement R10.1)", () => {
+    render(<ThemeSwitcher side="top" align="start" />);
+
+    const popup = screen.getByRole("menu", { hidden: true });
+    expect(popup).toHaveAttribute("data-side", "top");
+    expect(popup).toHaveAttribute("data-align", "start");
+  });
+
+  it.each([
+    ["unset", undefined, styles.auto],
+    ["true", true, undefined],
+  ] as const)(
+    "with showLabel %s, renders the visible label, keeping the name (refinement R10.2)",
+    (_, showLabel, className) => {
+      render(<ThemeSwitcher showLabel={showLabel} />);
+
+      const trigger = screen.getByRole("button", { name: "Theme: Light" });
+      const label = within(trigger).getByText("Theme", { exact: true });
+      expect(label).toHaveAttribute("aria-hidden", "true");
+      if (className) expect(label).toHaveClass(className);
+      else expect(label).not.toHaveAttribute("class");
+    },
+  );
+
+  it("with showLabel false, renders no visible label, keeping the name (refinement R10.2)", () => {
+    render(<ThemeSwitcher showLabel={false} />);
+
+    const trigger = screen.getByRole("button", { name: "Theme: Light" });
+    expect(within(trigger).queryByText("Theme", { exact: true })).toBeNull();
+  });
+
+  it.each([undefined, false] as const)(
+    "ends its trigger with a chevron, so it isn't square, with showLabel %s (refinement R10.3)",
+    (showLabel) => {
+      render(<ThemeSwitcher showLabel={showLabel} />);
+
+      const trigger = screen.getByRole("button", { name: /^Theme/ });
+      const svgs = trigger.querySelectorAll("svg");
+      expect(svgs).toHaveLength(3);
+      expect(svgs[2]?.innerHTML).toBe(glyphOf("chevron-down"));
+      expect(svgs[2]).toHaveAttribute("aria-hidden", "true");
+      expect(trigger).not.toHaveClass(buttonStyles.iconOnly ?? "");
+    },
+  );
+
+  it("names the trigger by the theme in effect, or just Theme before it's known (R13.2, R13.8)", () => {
+    expect(themeSwitcherName(null)).toBe("Theme");
+    expect(themeSwitcherName("light")).toBe("Theme: Light");
+    expect(themeSwitcherName("dark")).toBe("Theme: Dark");
+  });
+
+  it("hides an automatic label below 30em and shows it from there up (refinement R10.2)", () => {
+    expect(css).toMatch(/^\.auto \{\s*display: none;/m);
+    expect(css).toMatch(/@media \(min-width: 30em\) \{\s*\.auto \{\s*display: inline;/);
   });
 
   it("hydrates with no mismatch, then names the theme in effect (R3.6, R13.8)", () => {

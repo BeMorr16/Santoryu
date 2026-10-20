@@ -1,5 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-import { chooseInMenu, storeTheme } from "./support.ts";
+import { expect, test, type Locator, type Page } from "@playwright/test";
+import { chooseInMenu, example, section, storeTheme } from "./support.ts";
 
 // surface.base per theme (decision 0006): sand.50 and blue.850.
 const pageBackground = { light: "rgb(251, 248, 242)", dark: "rgb(18, 62, 94)" };
@@ -43,14 +43,158 @@ test.describe("first paint with no choice (R13.2)", () => {
       await page.goto("/", { waitUntil: "domcontentloaded" });
 
       const icons = page.getByRole("banner").locator("button svg");
-      await expect(icons).toHaveCount(2);
+      await expect(icons).toHaveCount(3);
       const visible = await icons.evaluateAll((svgs) =>
         svgs.map((svg) => getComputedStyle(svg).display !== "none"),
       );
-      // Light icon first, then dark (ThemeSwitcher.tsx).
-      expect(visible).toEqual(shown === "Sun" ? [true, false] : [false, true]);
+      // Light icon first, then dark, then the chevron, shown in both schemes (ThemeSwitcher.tsx).
+      expect(visible).toEqual(shown === "Sun" ? [true, false, true] : [false, true, true]);
     });
   }
+});
+
+/** The open popup's and its trigger's boxes, and whether the popup is inside the viewport. */
+async function openPopup(page: Page, trigger: Locator) {
+  await trigger.click();
+  const popup = page.locator(`[id="${(await trigger.getAttribute("aria-controls")) ?? ""}"]`);
+  await expect(popup).toBeVisible();
+  const box = await popup.evaluate((element) => {
+    const { left, right, top, bottom } = element.getBoundingClientRect();
+    return {
+      left,
+      right,
+      top,
+      bottom,
+      inViewport:
+        left >= 0 &&
+        top >= 0 &&
+        right <= document.documentElement.clientWidth &&
+        bottom <= document.documentElement.clientHeight,
+    };
+  });
+  const triggerBox = await trigger.evaluate((element) => {
+    const { left, right, bottom } = element.getBoundingClientRect();
+    return { left, right, bottom };
+  });
+  return { element: popup, popup: box, trigger: triggerBox };
+}
+
+/** The visible "Theme" label inside a switcher's trigger. */
+const visibleLabel = (trigger: Locator) => trigger.getByText("Theme", { exact: true });
+
+test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
+  test.beforeEach(async ({ page }) => {
+    // The popup fades and slides in; under reduced motion that takes 0ms.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+  });
+
+  test("the header popup lines up with the trigger's end edge, below it, on a wide window", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto("/");
+
+    const { element, popup, trigger } = await openPopup(page, switcher(page));
+
+    // At the end edge a start-aligned popup would flip to the same place, so check the request too.
+    await expect(element).toHaveAttribute("data-align", "end");
+    expect(Math.abs(popup.right - trigger.right)).toBeLessThanOrEqual(1);
+    expect(popup.top).toBeGreaterThanOrEqual(trigger.bottom);
+    expect(popup.inViewport).toBe(true);
+  });
+
+  test("the header popup stays inside a 320px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto("/");
+
+    const { popup } = await openPopup(page, switcher(page));
+
+    expect(popup.inViewport).toBe(true);
+  });
+
+  test("a start-aligned switcher at the row's start lines up with its start edge in the lab", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto("/lab/components#theme-switcher");
+    const triggers = example(
+      section(page, "ThemeSwitcher"),
+      "Placement (changes the whole site, not this panel)",
+    ).getByRole("button", { name: /^Theme: / });
+
+    const start = await openPopup(page, triggers.first());
+    await page.keyboard.press("Escape");
+    const end = await openPopup(page, triggers.last());
+
+    expect(Math.abs(start.popup.left - start.trigger.left)).toBeLessThanOrEqual(1);
+    expect(Math.abs(end.popup.right - end.trigger.right)).toBeLessThanOrEqual(1);
+  });
+
+  test("the header label shows from 30em up, and the name stays the same", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto("/");
+    await expect(visibleLabel(switcher(page))).toBeHidden();
+    await expect(switcher(page)).toHaveAccessibleName(/^Theme: (Light|Dark)$/);
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+
+    await expect(visibleLabel(switcher(page))).toBeVisible();
+    await expect(switcher(page)).toHaveAccessibleName(/^Theme: (Light|Dark)$/);
+  });
+
+  test("showLabel overrides the breakpoint either way in the lab", async ({ page }) => {
+    await page.goto("/lab/components#theme-switcher");
+    const triggers = example(
+      section(page, "ThemeSwitcher"),
+      "Label (changes the whole site, not this panel)",
+    ).getByRole("button", { name: /^Theme: / });
+    await expect(triggers).toHaveCount(3);
+    const [auto, always, never] = [triggers.nth(0), triggers.nth(1), triggers.nth(2)];
+
+    await page.setViewportSize({ width: 320, height: 640 });
+    await expect(visibleLabel(auto)).toBeHidden();
+    await expect(visibleLabel(always)).toBeVisible();
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await expect(visibleLabel(auto)).toBeVisible();
+    await expect(visibleLabel(never)).toHaveCount(0);
+    for (const trigger of [auto, always, never]) {
+      await expect(trigger).toHaveAccessibleName(/^Theme: (Light|Dark)$/);
+    }
+  });
+
+  test("Space on a theme applies it, closes the menu and returns focus to the trigger (refinement R10.4)", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    const trigger = switcher(page);
+    const popup = page.locator(`[id="${(await trigger.getAttribute("aria-controls")) ?? ""}"]`);
+    await trigger.click();
+    await expect(popup.getByRole("menuitemradio", { name: "Light" })).toBeFocused();
+
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Space");
+
+    await expect(popup).toBeHidden();
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await expect(trigger).toBeFocused();
+    await expect(trigger).toHaveAccessibleName("Theme: Dark");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  });
+
+  test("the header chevron flips while the menu is open", async ({ page }) => {
+    await page.goto("/");
+    const chevron = switcher(page).locator("svg").last();
+    await expect(chevron).toBeVisible();
+    await expect(chevron).toHaveCSS("rotate", "none");
+
+    await switcher(page).click();
+    await expect(chevron).toHaveCSS("rotate", "180deg");
+
+    await page.keyboard.press("Escape");
+    await expect(chevron).toHaveCSS("rotate", "none");
+  });
 });
 
 test.describe("preference across pages (R13.3, R16.4)", () => {

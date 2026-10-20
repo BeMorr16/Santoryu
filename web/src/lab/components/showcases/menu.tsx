@@ -45,7 +45,7 @@ const menuDocs = {
   },
 } satisfies PropDocs<MenuOwnProps>;
 
-const popupDocs = {
+export const popupDocs = {
   side: {
     type: '"bottom" | "top"',
     default: '"bottom"',

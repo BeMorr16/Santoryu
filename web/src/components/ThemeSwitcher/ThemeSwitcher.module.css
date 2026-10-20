@@ -29,13 +29,14 @@
   display: inline;
 }
 
-/* Icon-only on narrow screens; the visible word "Theme" joins the icon from 30em up. */
-.label {
+/* An automatic label: icon-only on narrow screens, "Theme" from 30em up (refinement R10.2). */
+/* The breakpoint is hard-coded: media queries can't read custom properties (refinement R11). */
+.auto {
   display: none;
 }
 
 @media (min-width: 30em) {
-  .label {
+  .auto {
     display: inline;
   }
 }

@@ -1,7 +1,14 @@
 import type { ComponentPropsWithRef } from "react";
 import { Icon } from "../Icon/Icon.tsx";
 import type { IconName } from "../Icon/registry.ts";
-import { Menu, MenuPopup, MenuRadioGroup, MenuRadioItem, MenuTrigger } from "../Menu/Menu.tsx";
+import {
+  Menu,
+  MenuPopup,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuTrigger,
+  type MenuPopupOwnProps,
+} from "../Menu/Menu.tsx";
 import type { ButtonLookProps } from "../shared/button.tsx";
 import { cx } from "../shared/cx.ts";
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden.tsx";
@@ -12,7 +19,16 @@ import styles from "./ThemeSwitcher.module.css";
 const labels: Record<ThemePreference, string> = { light: "Light", dark: "Dark" };
 const icons: Record<ThemePreference, IconName> = { light: "sun", dark: "moon" };
 
-export type ThemeSwitcherOwnProps = Pick<ButtonLookProps, "variant" | "size">;
+export interface ThemeSwitcherOwnProps
+  extends Pick<ButtonLookProps, "variant" | "size">, MenuPopupOwnProps {
+  /** Unset: the visible "Theme" shows from 30em up. true: always; false: never (refinement R10.2). */
+  showLabel?: boolean | undefined;
+}
+
+/** The trigger's accessible name: the theme in effect, once it's known after hydration (R13.2). */
+export function themeSwitcherName(theme: ThemePreference | null): string {
+  return theme === null ? "Theme" : `Theme: ${labels[theme]}`;
+}
 
 export type ThemeSwitcherProps = ThemeSwitcherOwnProps &
   Omit<ComponentPropsWithRef<"div">, "children">;
@@ -24,23 +40,30 @@ export type ThemeSwitcherProps = ThemeSwitcherOwnProps &
 export function ThemeSwitcher({
   variant = "ghost",
   size = "sm",
+  showLabel,
+  side,
+  align = "end",
   className,
   ...rest
 }: ThemeSwitcherProps) {
   const theme = useEffectiveTheme();
   return (
     <Menu {...rest} className={cx(styles.switcher, className)}>
-      <MenuTrigger variant={variant} size={size}>
+      {/* The chevron shows it opens a menu, so the trigger is never square (refinement R10.3). */}
+      <MenuTrigger variant={variant} size={size} iconEnd="chevron-down">
         {/* CSS shows the icon for the theme in effect, so it's right from the first paint. */}
         <Icon name="sun" className={styles.lightIcon} />
         <Icon name="moon" className={styles.darkIcon} />
-        <span className={styles.label} aria-hidden="true">
-          Theme
-        </span>
-        {/* The name says the theme in effect (R13.2), once it's known after hydration. */}
-        <VisuallyHidden>{theme === null ? "Theme" : `Theme: ${labels[theme]}`}</VisuallyHidden>
+        {/* A visible label is the start of the accessible name (WCAG 2.5.3). */}
+        {showLabel !== false && (
+          <span className={showLabel === undefined ? styles.auto : undefined} aria-hidden="true">
+            Theme
+          </span>
+        )}
+        <VisuallyHidden>{themeSwitcherName(theme)}</VisuallyHidden>
       </MenuTrigger>
-      <MenuPopup>
+      {/* Opens toward the inside of the header's end edge by default (refinement R10.1). */}
+      <MenuPopup side={side} align={align}>
         <MenuRadioGroup label="Theme" value={theme ?? undefined} onValueChange={writePreference}>
           {themePreferences.map((option) => (
             // Closes on Space too, unlike other radio items (owner, refinement R5 review).
