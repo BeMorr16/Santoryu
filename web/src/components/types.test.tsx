@@ -253,7 +253,7 @@ describe("library types", () => {
     expectTypeOf(valid).toBeFunction();
   });
 
-  it("Card needs a heading to link and has closed variants, and Badge has closed variants and elements (R10.3, R11, refinement R8.5)", () => {
+  it("Card needs a heading to link and has closed variants, and Badge has closed variants, elements and icons (R10.3, R11, refinement R8.5, R9.6, R9.9)", () => {
     function invalid() {
       return [
         // @ts-expect-error -- a link card needs a heading (its link's accessible name).
@@ -274,6 +274,10 @@ describe("library types", () => {
         <Badge key="e" as="button">
           x
         </Badge>,
+        // @ts-expect-error -- not an icon in the registry (refinement R9.9).
+        <Badge key="g" icon="nope">
+          x
+        </Badge>,
       ];
     }
     function valid() {
@@ -290,6 +294,9 @@ describe("library types", () => {
           aria-current="page"
         />,
         <Badge key="c" as="li" variant="accent" size="sm">
+          x
+        </Badge>,
+        <Badge key="e" variant="accent-2" icon="check">
           x
         </Badge>,
       ];

@@ -155,3 +155,9 @@
   --component-card-raised-border: var(--color-accent-border);
   --component-card-padding: var(--space-inset-md);
 }
+
+/* The Badge section's customized example (refinement R9.10); its CSS is shown beside it. */
+.customBadge {
+  --component-badge-neutral-border: var(--color-border-strong);
+  --component-badge-padding-inline-md: var(--space-inline-md);
+}

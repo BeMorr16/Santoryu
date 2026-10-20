@@ -1,19 +1,32 @@
 /* Non-interactive: no pointer cursor, no hover state (R11.3). */
+/*
+ * An inline block, not flex, so spaces around inline children are kept and icons align by Icon's
+ * own vertical-align (refinement R9.2). It wraps rather than overflowing (refinement R9.3).
+ */
 .badge {
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
+  max-inline-size: 100%;
   padding-inline: var(--_padding-inline);
   border: var(--component-badge-border-width) solid var(--_border);
-  border-radius: var(--component-badge-radius);
+  /* A pill on one line; once wrapped, corners stay one line's round so no letter is cut (refinement R9.4). */
+  border-radius: min(
+    var(--component-badge-radius),
+    calc(0.5lh + var(--component-badge-border-width))
+  );
   background-color: var(--_background);
   color: var(--_text);
   font-family: var(--component-badge-font-family);
   font-size: var(--_font-size);
+  font-weight: var(--component-badge-font-weight);
   letter-spacing: var(--component-badge-tracking);
-  line-height: var(--type-leading-body);
+  line-height: var(--component-badge-line-height);
   text-transform: uppercase;
-  white-space: nowrap;
+  overflow-wrap: break-word;
   font-variant-ligatures: none;
+}
+
+.icon {
+  margin-inline-end: var(--component-badge-gap);
 }
 
 .neutral {
@@ -26,6 +39,30 @@
   --_background: var(--component-badge-accent-background);
   --_text: var(--component-badge-accent-text);
   --_border: var(--component-badge-accent-border);
+}
+
+.accent-2 {
+  --_background: var(--component-badge-accent-2-background);
+  --_text: var(--component-badge-accent-2-text);
+  --_border: var(--component-badge-accent-2-border);
+}
+
+.success {
+  --_background: var(--component-badge-success-background);
+  --_text: var(--component-badge-success-text);
+  --_border: var(--component-badge-success-border);
+}
+
+.warning {
+  --_background: var(--component-badge-warning-background);
+  --_text: var(--component-badge-warning-text);
+  --_border: var(--component-badge-warning-border);
+}
+
+.error {
+  --_background: var(--component-badge-error-background);
+  --_text: var(--component-badge-error-text);
+  --_border: var(--component-badge-error-border);
 }
 
 .sm {

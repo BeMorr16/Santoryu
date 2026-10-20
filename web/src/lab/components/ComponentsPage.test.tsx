@@ -15,7 +15,9 @@ import hiddenStyles from "../../components/VisuallyHidden/VisuallyHidden.module.
 import showcaseStyles from "./Showcase.module.css";
 import { ComponentsPage } from "./ComponentsPage.tsx";
 import { showcases } from "./registry.ts";
+import badgeStyles from "../../components/Badge/Badge.module.css";
 import cardStyles from "../../components/Card/Card.module.css";
+import { customBadgeCss } from "./showcases/badge.tsx";
 import { accentCardCss } from "./showcases/card.tsx";
 import { compactMenuCss } from "./showcases/menu.tsx";
 import { announced } from "./showcases/visually-hidden.tsx";
@@ -579,6 +581,95 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       /Glass turns opaque when reduced transparency is requested/,
       /Outlined is transparent, so use it only on surface.base, raised or sunken/,
       /keep link cards of every variant off action.background/,
+    ]) {
+      expect(within(section).getByText(note)).toBeInTheDocument();
+    }
+  });
+
+  it("shows the Badge examples, variants, icons and the customized CSS it applies (refinement R9.10)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Badge" });
+    const example = (title: string) => within(section).getByRole("group", { name: title });
+
+    const labels = [...section.querySelectorAll("p.label")].map((label) => label.textContent);
+    expect(labels).toEqual([
+      "Variants",
+      "Sizes",
+      "With an icon",
+      "A tech stack, as a list",
+      "In running text, with inline markup",
+      "Wraps instead of overflowing",
+      "Customized with component tokens",
+    ]);
+
+    for (const [variant, text] of [
+      ["neutral", "Neutral"],
+      ["accent", "Accent"],
+      ["accent-2", "Accent 2"],
+      ["success", "Live"],
+      ["warning", "Beta"],
+      ["error", "Deprecated"],
+    ] as const) {
+      expect(within(example("Variants")).getByText(text)).toHaveClass(badgeStyles[variant] ?? "");
+    }
+    expect(within(example("Sizes")).getByText("Small")).toHaveClass(badgeStyles.sm ?? "");
+    expect(within(example("Sizes")).getByText("Medium")).toHaveClass(badgeStyles.md ?? "");
+
+    for (const text of ["Live", "Open source"]) {
+      const icon = within(example("With an icon")).getByText(text).querySelector("svg");
+      expect(icon).toHaveAttribute("aria-hidden", "true");
+      expect(icon).toHaveClass(badgeStyles.icon ?? "");
+    }
+
+    const stack = within(example("A tech stack, as a list")).getByRole("list", {
+      name: "Tech stack",
+    });
+    expect(
+      within(stack)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent),
+    ).toEqual(["React", "TypeScript", "AWS"]);
+
+    const inline = example("In running text, with inline markup");
+    expect(inline.querySelector("p:not(.label)")).toHaveTextContent(
+      "This site is Live and Built with Vite.",
+    );
+    expect(within(inline).getByText("Vite").tagName).toBe("EM");
+
+    const wraps = within(example("Wraps instead of overflowing")).getByText(
+      "Infrastructure as code",
+    );
+    expect(wraps.parentElement).toHaveClass(showcaseStyles.narrow ?? "");
+    expect(
+      within(example("Wraps instead of overflowing")).getByText("Internationalization")
+        .parentElement,
+    ).toHaveClass(showcaseStyles.narrow ?? "");
+
+    const custom = example("Customized with component tokens");
+    expect(within(custom).getByText("Custom")).toHaveClass(showcaseStyles.customBadge ?? "");
+    expect([...custom.querySelectorAll("pre code")].map((code) => code.textContent)).toEqual([
+      customBadgeCss,
+    ]);
+    expect(readFileSync(join(import.meta.dirname, "Showcase.module.css"), "utf8")).toContain(
+      customBadgeCss,
+    );
+
+    const badge = showcases.find((s) => s.id === "badge");
+    expect(Object.keys(badge?.props[0]?.docs ?? {})).toEqual(
+      expect.arrayContaining(["variant", "icon"]),
+    );
+    expect(badge?.props[0]?.docs.variant?.type).toBe(
+      '"neutral" | "accent" | "accent-2" | "success" | "warning" | "error"',
+    );
+    expect(badge?.propsNote).toMatch(
+      /wording must state the status on its own.+as="li".+Icon's registry/,
+    );
+    for (const note of [
+      /not focusable, no pointer cursor, no hover state/,
+      /success, warning and error carry meaning, so the wording must state the status/,
+      /icon is decorative and hidden from screen readers/,
+      /uppercase is CSS only, so write the source text in normal case/,
+      /Badges wrap rather than overflow/,
     ]) {
       expect(within(section).getByText(note)).toBeInTheDocument();
     }

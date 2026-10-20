@@ -29,10 +29,38 @@ describe("Badge", () => {
     );
   });
 
-  it.each(["neutral", "accent"] as const)("applies the %s variant (R11.2)", (variant) => {
-    render(<Badge variant={variant}>React</Badge>);
+  it.each(["neutral", "accent", "accent-2", "success", "warning", "error"] as const)(
+    "applies the %s variant (R11.2, refinement R9.6)",
+    (variant) => {
+      render(<Badge variant={variant}>React</Badge>);
 
-    expect(screen.getByText("React")).toHaveClass(styles[variant] ?? "");
+      expect(screen.getByText("React")).toHaveClass(styles[variant] ?? "");
+    },
+  );
+
+  it("renders a decorative icon before the text when icon is set (refinement R9.9)", () => {
+    render(
+      <h2>
+        <Badge variant="success" icon="check">
+          Live
+        </Badge>
+      </h2>,
+    );
+
+    expect(screen.getByRole("heading", { name: "Live" })).toBeInTheDocument();
+    const badge = screen.getByText("Live");
+    const icon = badge.firstElementChild;
+    expect(icon?.tagName.toLowerCase()).toBe("svg");
+    expect(icon).toHaveAttribute("aria-hidden", "true");
+    expect(icon).toHaveClass(styles.icon ?? "");
+    expect(badge.lastChild).toHaveProperty("nodeValue", "Live");
+    expect(badge.textContent).toBe("Live");
+  });
+
+  it("renders no icon without icon (refinement R9.9)", () => {
+    render(<Badge variant="success">Live</Badge>);
+
+    expect(screen.getByText("Live").querySelector("svg")).toBeNull();
   });
 
   it.each(["sm", "md"] as const)("applies the %s size (R11.2)", (size) => {
@@ -83,13 +111,18 @@ describe("Badge", () => {
     expectHydratesCleanly(<Badge variant="accent">New</Badge>);
   });
 
-  it("has no axe violations in every variant and size, inline and in a list (R3.9)", async () => {
+  it("has no axe violations in every variant and size, with an icon, inline and in a list (R3.9)", async () => {
     const { container } = render(
       <div>
         <p>
           <Badge>Neutral</Badge>{" "}
           <Badge variant="accent" size="sm">
             Accent
+          </Badge>{" "}
+          <Badge variant="accent-2">Accent 2</Badge> <Badge variant="success">Live</Badge>{" "}
+          <Badge variant="warning">Beta</Badge> <Badge variant="error">Deprecated</Badge>{" "}
+          <Badge variant="success" icon="check">
+            Live
           </Badge>
         </p>
         <ul aria-label="Stack">
