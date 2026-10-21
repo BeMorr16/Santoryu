@@ -4,6 +4,7 @@ import { createRef, useState, type ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
+import { Button } from "../Button/Button.tsx";
 import { Tooltip, type TooltipProps } from "./Tooltip.tsx";
 import styles from "./Tooltip.module.css";
 
@@ -245,6 +246,32 @@ describe("Tooltip: showing (refinement R14.5)", () => {
     expect(popupOf(two)).toBeVisible();
   });
 
+  it("doesn't skip the hover delay for a tooltip shown by focus or `open`", async () => {
+    const user = setup();
+    render(
+      <>
+        <Tooltip content="First tip">
+          <button type="button">One</button>
+        </Tooltip>
+        <Tooltip content="Second tip">
+          <button type="button">Two</button>
+        </Tooltip>
+        <Tooltip content="Pinned tip" open>
+          <button type="button">Pinned</button>
+        </Tooltip>
+      </>,
+    );
+    const one = screen.getByRole("button", { name: "One" });
+    const two = screen.getByRole("button", { name: "Two" });
+
+    await user.tab();
+    expect(popupOf(one)).toBeVisible();
+    await user.hover(two);
+    expect(popupOf(two)).not.toBeVisible();
+    advance(300);
+    expect(popupOf(two)).toBeVisible();
+  });
+
   it("waits again once the row has cooled down", async () => {
     const user = setup();
     render(
@@ -333,6 +360,20 @@ describe("Tooltip: hiding (refinement R14.6)", () => {
     expect(popup).toBeVisible();
     advance(1);
     expect(popup).not.toBeVisible();
+  });
+
+  it("stays shown by keyboard focus while the mouse passes over and off the trigger (WCAG 1.4.13)", async () => {
+    const user = setup();
+    render(<Fixture />);
+
+    await user.tab();
+    await user.tab();
+    const trigger = screen.getByRole("button", { name: "Save draft" });
+    expect(popupOf(trigger)).toBeVisible();
+    await user.hover(trigger);
+    await user.unhover(trigger);
+    advance(300);
+    expect(popupOf(trigger)).toBeVisible();
   });
 
   it("never hides on a timer", async () => {
@@ -497,6 +538,126 @@ describe("Tooltip: open state (refinement R14.4)", () => {
     const popup = popupOf(screen.getByRole("button", { name: "Save draft" }));
     expect(popup).toHaveAttribute("data-side", "start");
     expect(popup).toHaveAttribute("data-placed", "left");
+  });
+});
+
+describe("Tooltip: around a library trigger (refinement R14.16)", () => {
+  it("shows its own bubble instead of an icon-only Button's name tooltip", async () => {
+    const user = setup();
+    render(
+      <Tooltip content="Copies the link to share">
+        <Button iconStart="copy" aria-label="Copy link" />
+      </Tooltip>,
+    );
+    const button = screen.getByRole("button", { name: "Copy link" });
+
+    expect(button).toHaveAccessibleDescription("Copies the link to share");
+    const popups = document.querySelectorAll("[popover]");
+    expect(popups).toHaveLength(1);
+    await user.hover(button);
+    advance(300);
+    expect(popups[0]).toBeVisible();
+    expect(popups[0]).toHaveTextContent(/^Copies the link to share$/);
+  });
+
+  it("gives the bubble to a disabled Button's reason, and takes it back once enabled", async () => {
+    const user = setup();
+    const { rerender } = render(
+      <Tooltip content="Publishes the post">
+        <Button disabled disabledReason="Add a title first">
+          Publish
+        </Button>
+      </Tooltip>,
+    );
+    const button = screen.getByRole("button", { name: "Publish" });
+    const outer = () => document.querySelectorAll("[popover]")[1] as HTMLElement;
+    const reason = () => document.querySelectorAll("[popover]")[0] as HTMLElement;
+
+    expect(button).toHaveAccessibleDescription("Publishes the post Add a title first");
+    await user.hover(button);
+    advance(300);
+    expect(reason()).toBeVisible();
+    expect(reason()).toHaveTextContent("Add a title first");
+    expect(outer()).not.toBeVisible();
+    await user.unhover(button);
+    advance(150);
+
+    rerender(
+      <Tooltip content="Publishes the post">
+        <Button>Publish</Button>
+      </Tooltip>,
+    );
+    const only = document.querySelector("[popover]") as HTMLElement;
+    expect(only).toHaveTextContent("Publishes the post");
+    await user.hover(button);
+    advance(300);
+    expect(only).toBeVisible();
+  });
+});
+
+describe("Tooltip: focus back from its own popup (refinement R14.5)", () => {
+  it("doesn't show when focus returns from the element the trigger controls", async () => {
+    const user = setup();
+    render(
+      <>
+        <button type="button">Before</button>
+        <Tooltip content="Opens the panel">
+          <button type="button" aria-controls="panel">
+            Panel
+          </button>
+        </Tooltip>
+        <div id="panel">
+          <button type="button">Inside</button>
+        </div>
+      </>,
+    );
+    const trigger = screen.getByRole("button", { name: "Panel" });
+    const inside = screen.getByRole("button", { name: "Inside" });
+
+    act(() => {
+      inside.focus();
+    });
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(trigger).toHaveFocus();
+    expect(popupOf(trigger)).not.toBeVisible();
+
+    // Coming from anywhere else, it shows as usual.
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    await user.tab();
+    expect(trigger).toHaveFocus();
+    expect(popupOf(trigger)).toBeVisible();
+  });
+});
+
+describe("Tooltip: anchors", () => {
+  it("removes only its own anchor name, so a tooltip around a library trigger keeps its anchor", () => {
+    vi.stubGlobal("CSS", { supports: () => true });
+    const { rerender } = render(
+      <Tooltip content="Publishes the post">
+        <Button disabled disabledReason="Add a title first">
+          Publish
+        </Button>
+      </Tooltip>,
+    );
+    const button = screen.getByRole("button", { name: "Publish" });
+    const names = () =>
+      button.style
+        .getPropertyValue("anchor-name")
+        .split(",")
+        .map((name) => name.trim())
+        .filter((name) => name !== "");
+    expect(names()).toHaveLength(2);
+
+    rerender(
+      <Tooltip content="Publishes the post">
+        <Button>Publish</Button>
+      </Tooltip>,
+    );
+    expect(names()).toHaveLength(1);
+    const outer = button.parentElement?.querySelector("[popover]");
+    expect((outer as HTMLElement | null)?.style.getPropertyValue("position-anchor")).toBe(
+      names()[0],
+    );
   });
 });
 

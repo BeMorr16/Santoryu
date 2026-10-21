@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef, type SubmitEvent } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -356,6 +356,71 @@ describe("Button: tooltips (refinement R14.11, R14.12)", () => {
     await user.click(screen.getByText("Outside"));
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
     expect(screen.getByRole("tooltip", { hidden: true })).not.toBeVisible();
+  });
+
+  it("shows the reason on Enter and Space, and hides a pressed reason on Escape and on blur", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <Button disabled disabledReason="Add a title first">
+          Publish
+        </Button>
+        <button type="button">Next</button>
+      </>,
+    );
+    const button = screen.getByRole("button", { name: "Publish" });
+    act(() => {
+      button.focus();
+    });
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("tooltip")).toBeVisible();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    expect(button).toHaveFocus();
+
+    await user.keyboard(" ");
+    expect(screen.getByRole("tooltip")).toBeVisible();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("doesn't bring a pressed reason back on its own when the Button is disabled again", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <Button disabled disabledReason="Add a title first">
+        Publish
+      </Button>,
+    );
+    const button = screen.getByRole("button", { name: "Publish" });
+    await user.click(button);
+    expect(screen.getByRole("tooltip")).toBeVisible();
+
+    rerender(<Button>Publish</Button>);
+    act(() => {
+      button.blur();
+    });
+    rerender(
+      <Button disabled disabledReason="Add a title first">
+        Publish
+      </Button>,
+    );
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("shows no popup for an empty reason", () => {
+    render(
+      <Button disabled disabledReason="">
+        Publish
+      </Button>,
+    );
+    const button = screen.getByRole("button", { name: "Publish" });
+
+    expect(popupAfter(button)).toBeNull();
+    expect(button).not.toHaveAttribute("aria-describedby");
   });
 
   it("shows the reason on a tap", async () => {

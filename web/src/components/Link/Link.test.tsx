@@ -527,6 +527,18 @@ describe("Link: name tooltip (refinement R14.12)", () => {
     return popup instanceof HTMLElement && popup.hasAttribute("popover") ? popup : null;
   };
 
+  it("shows an aria-label'd new-tab link's own label, without the new-tab text", () => {
+    render(
+      <Link href="https://example.com/docs" appearance="button" aria-label="Docs" newTab>
+        <VisuallyHidden>Documentation</VisuallyHidden>
+      </Link>,
+    );
+
+    const link = screen.getByRole("link", { name: "Docs, opens in new tab" });
+    expect(link).toHaveAttribute("aria-label", "Docs, opens in new tab");
+    expect(popupAfter(link)?.textContent).toBe("Docs");
+  });
+
   it("shows an icon-only button-look link's name, without the new-tab text", () => {
     render(
       <>

@@ -56,7 +56,7 @@ const props = {
     type: "boolean",
     default: "true",
     description:
-      'With appearance="button" only. An icon-only link shows its name (without the new-tab text) as a tooltip; false turns it off.',
+      'With appearance="button" only. An icon-only link shows its name (without the new-tab text) as a tooltip; false turns it off. None for a link named by aria-labelledby, whose name is already on screen.',
   },
   prefetch: routerOption('"intent" | "render" | "none" | "viewport"'),
   replace: routerOption("boolean"),

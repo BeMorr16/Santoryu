@@ -128,7 +128,7 @@ function Examples() {
             <Button>Pinned</Button>
           </Tooltip>
         </div>
-        <p aria-live="polite">The tooltip is {open ? "shown" : "hidden"}.</p>
+        <p>The tooltip is {open ? "shown" : "hidden"}.</p>
       </Example>
       <Example title="Customized with component tokens" layout="column">
         <div>
@@ -159,8 +159,9 @@ export const tooltipShowcase: Showcase = {
   a11y: [
     'A "description" tooltip has role="tooltip" and becomes the trigger\'s accessible description. A "name" tooltip repeats the trigger\'s name for sighted users, hidden from assistive technology so the name isn\'t announced twice.',
     "Its text is in the page from the start, so the description is there before JavaScript loads and without hovering.",
-    "It shows after a 300ms hover, and at once while moving along a row of controls. Keyboard focus shows it at once, since a keyboard user has nothing else to wait for; focus from a mouse press doesn't.",
+    "It shows after a 300ms hover, and at once while moving along a row of controls. Keyboard focus shows it at once, since a keyboard user has nothing else to wait for; focus from a mouse press doesn't, and neither does focus coming back from the trigger's own menu.",
     "It stays until dismissed: Escape, moving the pointer off both the trigger and the tooltip, moving focus away, or pressing the trigger. The pointer can move onto it, and it never hides on a timer (WCAG 1.4.13).",
+    "Around a library control, one bubble shows: the control's disabledReason while it's disabled, and this content otherwise. An icon-only control's name tooltip steps aside; its name is still its accessible name, and both descriptions are announced.",
     "Touch shows no tooltips, except a disabled Button's reason, which a tap shows and a tap elsewhere hides.",
     "Never put essential information only in a tooltip: many visitors never see it.",
     "It fades over component.tooltip.transition-duration, 0ms under reduced motion.",

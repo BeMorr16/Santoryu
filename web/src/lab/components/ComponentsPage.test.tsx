@@ -1596,10 +1596,8 @@ describe("/lab/components page (R15.1, R15.3)", () => {
 
     const controlled = example("Controlled");
     const pinned = within(controlled).getByRole("button", { name: "Pinned" });
-    expect(within(controlled).getByText("The tooltip is hidden.")).toHaveAttribute(
-      "aria-live",
-      "polite",
-    );
+    // A plain readout: announcing it would talk over the trigger on every focus (Tooltip review).
+    expect(within(controlled).getByText("The tooltip is hidden.")).not.toHaveAttribute("aria-live");
     await user.click(within(controlled).getByRole("button", { name: "Show" }));
     expect(popupAfter(pinned)).toBeVisible();
     expect(within(controlled).getByText("The tooltip is shown.")).toBeInTheDocument();
@@ -1633,6 +1631,8 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       /in the page from the start, so the description is there before JavaScript loads/,
       /300ms hover.+Keyboard focus shows it at once.+focus from a mouse press doesn't/,
       /stays until dismissed.+never hides on a timer \(WCAG 1\.4\.13\)/,
+      /focus coming back from the trigger's own menu/,
+      /Around a library control, one bubble shows: the control's disabledReason while it's disabled/,
       /Touch shows no tooltips, except a disabled Button's reason/,
       /Never put essential information only in a tooltip/,
       /fades over component\.tooltip\.transition-duration, 0ms under reduced motion/,

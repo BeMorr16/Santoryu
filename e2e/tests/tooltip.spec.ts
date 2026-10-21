@@ -175,6 +175,28 @@ test.describe("Tooltip (refinement R14)", () => {
     expect(Math.abs((await arrowCenter(popup)) - (t.left + t.right) / 2)).toBeLessThanOrEqual(1);
   });
 
+  test("opens below a trigger that's already at the viewport's top edge, with the arrow toward it (R14.7, R14.8)", async ({
+    page,
+  }) => {
+    const save = trigger(page, "Description", "Save draft");
+    const popup = popupOf(save);
+    await scrollTo(save, 2);
+    // A key first, so the script focus that follows is keyboard focus; no scroll moves the trigger.
+    await page.keyboard.press("Shift");
+    await save.evaluate((element: HTMLElement) => {
+      element.focus({ preventScroll: true });
+    });
+    await expect(save).toBeFocused();
+
+    await expect.poll(() => popup.getAttribute("data-placed")).toBe("bottom");
+    const t = await rectOf(save);
+    const p = await rectOf(popup);
+    // Still at the edge: no room above for the popup.
+    expect(t.top).toBeLessThan(p.bottom - p.top + offset);
+    expect(p.top - t.bottom).toBeCloseTo(offset, 0);
+    expect(Math.abs((await arrowCenter(popup)) - (t.left + t.right) / 2)).toBeLessThanOrEqual(1);
+  });
+
   for (const theme of themes) {
     test(`draws the inverse bubble in ${theme} (R14.9)`, async ({ page, browserName }) => {
       await storeTheme(page, theme);
@@ -288,6 +310,13 @@ test.describe("Tooltip at 320px wide (refinement R14.7, R14.9, R14.13)", () => {
     await page.keyboard.press("Enter");
     await expect(switcher).toHaveAttribute("aria-expanded", "true");
     await expectOpen(popup, false);
+
+    // Escape closes the menu and returns focus, and the name doesn't come back: one Escape clears all.
+    await page.keyboard.press("Escape");
+    await expect(switcher).toHaveAttribute("aria-expanded", "false");
+    await expect(switcher).toBeFocused();
+    await page.waitForTimeout(400);
+    expect(await isOpen(popup)).toBe(false);
   });
 });
 

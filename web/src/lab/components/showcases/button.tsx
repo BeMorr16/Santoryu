@@ -230,7 +230,8 @@ export const buttonShowcase: Showcase = {
   keyboard: [
     {
       keys: "Enter / Space",
-      action: "Activates the button, or flips a toggle (never while disabled).",
+      action:
+        "Activates the button, or flips a toggle. While disabled it does neither, and shows the disabledReason if there is one.",
     },
     { keys: "Tab", action: "Moves focus to it, including when disabled." },
   ],

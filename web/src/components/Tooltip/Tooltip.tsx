@@ -1,5 +1,7 @@
 import {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useLayoutEffect,
@@ -37,11 +39,20 @@ const showDelay = 300;
 const hideDelay = 150;
 
 /** The open tooltip, and when the last one hid: one shows at a time, and a warm row shows at once. */
-const active: { owner: object | null; hide: () => void; hiddenAt: number } = {
+const active: { owner: object | null; hide: () => void; hiddenAt: number; byHover: boolean } = {
   owner: null,
   hide: () => undefined,
   hiddenAt: Number.NEGATIVE_INFINITY,
+  // Only a tooltip a hover showed warms the row; one shown by focus or `open` doesn't (R14.5).
+  byHover: false,
 };
+
+/**
+ * Set by a `<Tooltip>` for the library trigger inside it, so one bubble shows (refinement R14.16):
+ * the trigger's name tooltip steps aside, and its own description (a disabledReason) claims the
+ * bubble while it has one.
+ */
+const WrapperContext = createContext<{ claim: () => () => void } | null>(null);
 
 export type TooltipSide = "top" | "bottom" | "start" | "end";
 
@@ -83,6 +94,8 @@ export type TooltipProps = TooltipOwnProps & {
 } & PopupProps;
 
 type TooltipBaseProps = Omit<TooltipOwnProps, "content" | "kind"> & {
+  /** Set by Tooltip: a library trigger inside shows one bubble with it (refinement R14.16). */
+  wrapper?: boolean | undefined;
   /** Shown first, never announced (it repeats the trigger's name). */
   name?: ReactNode;
   /** Announced through aria-describedby. */
@@ -94,7 +107,9 @@ type TooltipBaseProps = Omit<TooltipOwnProps, "content" | "kind"> & {
   children: ReactElement<TriggerProps>;
 } & PopupProps;
 
-const hasContent = (node: ReactNode) => node !== undefined && node !== null && node !== false;
+// An empty string is no content either, so `disabledReason=""` shows no empty bubble.
+const hasContent = (node: ReactNode) =>
+  node !== undefined && node !== null && node !== false && node !== "";
 
 /** The side the popup is drawn on before it's measured (design §15.4): physical, as in ltr. */
 const requestedSide: Record<TooltipSide, PlacedSide> = {
@@ -121,6 +136,7 @@ export function TooltipBase({
   className,
   onPointerEnter: onPopupPointerEnter,
   onPointerLeave: onPopupPointerLeave,
+  wrapper = false,
   ref,
   children,
   ...rest
@@ -128,11 +144,21 @@ export function TooltipBase({
   const id = useId();
   const descriptionId = `${id}description`;
   const anchorName = `--tooltip-${id.replace(/[^\w-]/g, "")}`;
-  const hasName = hasContent(name);
+  const outer = useContext(WrapperContext);
+  // Inside a Tooltip, that Tooltip's bubble replaces this trigger's name tooltip (refinement R14.16).
+  const hasName = outer === null && hasContent(name);
   const hasDescription = hasContent(description);
   const hasPopup = hasName || hasDescription;
 
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
+  // With nothing to show, an open request is dropped, so the popup can't come back on its own
+  // when the content returns (a Button disabled again with its reason). Adjusted while rendering,
+  // as React recommends for state that follows a prop.
+  const [hadPopup, setHadPopup] = useState(hasPopup);
+  if (hasPopup !== hadPopup) {
+    setHadPopup(hasPopup);
+    if (!hasPopup) setUncontrolledOpen(false);
+  }
   const open = hasPopup && (openProp ?? uncontrolledOpen);
 
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -141,6 +167,8 @@ export function TooltipBase({
   const hideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const pointerOn = useRef(false);
   const pressed = useRef(false);
+  const shownByHover = useRef(false);
+  const claims = useRef(0);
   const owner = useRef({});
   // The latest render's values, so the callbacks below stay stable: an inline onOpenChange
   // mustn't re-run the effects that show the popover (that would restart its fade).
@@ -167,7 +195,10 @@ export function TooltipBase({
   const request = useCallback((next: boolean) => {
     clearTimeout(showTimer.current);
     clearTimeout(hideTimer.current);
-    if (!next) pressed.current = false;
+    if (!next) {
+      pressed.current = false;
+      shownByHover.current = false;
+    }
     if (next === requested.current) return;
     requested.current = next;
     if (!latest.current.controlled) setUncontrolledOpen(next);
@@ -175,8 +206,9 @@ export function TooltipBase({
   }, []);
 
   const show = useCallback(() => {
-    // An open menu or panel takes over (R14.5).
+    // An open menu or panel takes over (R14.5), and so does the trigger's own reason (R14.16).
     if (triggerRef.current?.getAttribute("aria-expanded") === "true") return;
+    if (claims.current > 0) return;
     if (latest.current.shouldShow?.() === false) return;
     request(true);
   }, [request]);
@@ -184,6 +216,24 @@ export function TooltipBase({
   const hide = useCallback(() => {
     request(false);
   }, [request]);
+
+  // What a wrapped library trigger gets: its own description takes the bubble while it has one.
+  const wrapperValue = useMemo(
+    () => ({
+      claim: () => {
+        claims.current += 1;
+        request(false);
+        return () => {
+          claims.current -= 1;
+        };
+      },
+    }),
+    [request],
+  );
+  useLayoutEffect(() => {
+    if (outer === null || !hasDescription) return;
+    return outer.claim();
+  }, [outer, hasDescription]);
 
   // A unique anchor name, appended to any the trigger already has (MenuTrigger's), set through
   // the CSSOM so the CSP stays strict (design §15.4).
@@ -198,10 +248,25 @@ export function TooltipBase({
     );
     popup.style.setProperty("position-anchor", anchorName);
     return () => {
-      trigger.style.removeProperty("anchor-name");
+      // Only this tooltip's name goes, so a nested tooltip or MenuTrigger keeps its anchor.
+      const names = trigger.style
+        .getPropertyValue("anchor-name")
+        .split(",")
+        .map((name) => name.trim())
+        .filter((name) => name !== "" && name !== anchorName);
+      if (names.length === 0) trigger.style.removeProperty("anchor-name");
+      else trigger.style.setProperty("anchor-name", names.join(", "));
       popup.style.removeProperty("position-anchor");
     };
   }, [hasPopup, anchorName]);
+
+  // The rest of that reset: no pending timer or press outlives the popup.
+  useLayoutEffect(() => {
+    if (hasPopup) return;
+    clearTimeout(showTimer.current);
+    clearTimeout(hideTimer.current);
+    pressed.current = false;
+  }, [hasPopup]);
 
   // Applies `open` to the popover, one tooltip at a time.
   useLayoutEffect(() => {
@@ -211,6 +276,7 @@ export function TooltipBase({
     if (active.owner !== null && active.owner !== self) active.hide();
     active.owner = self;
     active.hide = hide;
+    active.byHover = shownByHover.current;
     popup.showPopover();
     return () => {
       if (active.owner === self) {
@@ -345,9 +411,15 @@ export function TooltipBase({
       clearTimeout(hideTimer.current);
       if (requested.current) return;
       clearTimeout(showTimer.current);
+      const showFromHover = () => {
+        shownByHover.current = true;
+        show();
+      };
       // Moving along a row of controls doesn't wait at each one (R14.5).
-      if (active.owner !== null || Date.now() - active.hiddenAt < showDelay) show();
-      else showTimer.current = setTimeout(show, showDelay);
+      const warm =
+        (active.owner !== null && active.byHover) || Date.now() - active.hiddenAt < showDelay;
+      if (warm) showFromHover();
+      else showTimer.current = setTimeout(showFromHover, showDelay);
     },
     [show],
   );
@@ -357,7 +429,9 @@ export function TooltipBase({
       if (event.pointerType === "touch") return;
       pointerOn.current = false;
       clearTimeout(showTimer.current);
+      // Keyboard focus still shows it, so only blur or Escape hides it then (WCAG 1.4.13).
       if (pressed.current || !requested.current) return;
+      if (triggerRef.current?.matches(":focus-visible") === true) return;
       clearTimeout(hideTimer.current);
       hideTimer.current = setTimeout(hide, hideDelay);
     },
@@ -389,7 +463,18 @@ export function TooltipBase({
       // Keyboard focus shows it at once; focus from a mouse press doesn't (R14.5).
       onFocus: (event: FocusEvent<HTMLElement>) => {
         latest.current.child.onFocus?.(event);
-        if (event.currentTarget.matches(":focus-visible")) show();
+        if (!event.currentTarget.matches(":focus-visible")) return;
+        // Focus back from the trigger's own menu or panel doesn't show it (refinement R14.5).
+        const from = event.relatedTarget;
+        const controls = event.currentTarget.getAttribute("aria-controls")?.split(/\s+/) ?? [];
+        if (
+          from instanceof Node &&
+          controls.some((controlled) => document.getElementById(controlled)?.contains(from))
+        ) {
+          return;
+        }
+        shownByHover.current = false;
+        show();
       },
       onBlur: (event: FocusEvent<HTMLElement>) => {
         latest.current.child.onBlur?.(event);
@@ -399,6 +484,7 @@ export function TooltipBase({
       onClick: (event: MouseEvent<HTMLElement>) => {
         latest.current.child.onClick?.(event);
         if (!latest.current.showOnPress) return;
+        shownByHover.current = false;
         show();
         pressed.current = true;
       },
@@ -407,12 +493,14 @@ export function TooltipBase({
   );
 
   // The same two slots either way, so the trigger is never remounted.
+  // A Tooltip passes its own claim down; a library trigger's TooltipBase passes on what it got.
+  const context = wrapper ? wrapperValue : outer;
   if (!hasPopup) {
     return (
-      <>
+      <WrapperContext value={context}>
         {children}
         {null}
-      </>
+      </WrapperContext>
     );
   }
 
@@ -421,7 +509,7 @@ export function TooltipBase({
   const describedBy = children.props["aria-describedby"];
 
   return (
-    <>
+    <WrapperContext value={context}>
       <Trigger
         // A null key would become the key "null", and remount the trigger.
         key={children.key ?? undefined}
@@ -462,7 +550,7 @@ export function TooltipBase({
           </span>
         )}
       </span>
-    </>
+    </WrapperContext>
   );
 }
 
@@ -472,7 +560,11 @@ export function TooltipBase({
  */
 export function Tooltip({ content, kind = "description", children, ...rest }: TooltipProps) {
   return (
-    <TooltipBase {...rest} {...(kind === "name" ? { name: content } : { description: content })}>
+    <TooltipBase
+      {...rest}
+      wrapper
+      {...(kind === "name" ? { name: content } : { description: content })}
+    >
       {children}
     </TooltipBase>
   );
