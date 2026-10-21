@@ -11,6 +11,7 @@ import {
   Button,
   Card,
   CodeBlock,
+  Figure,
   Grid,
   Icon,
   Link,
@@ -699,6 +700,57 @@ describe("library types", () => {
         <Separator key="a" />,
         <Separator key="b" orientation="vertical" decorative variant="strong" thickness="thick" />,
         <Separator key="c" ref={ref} id="x" className="y" aria-label="End of section" />,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
+  it("Figure needs exactly one of alt or decorative, a non-empty literal alt, width and height, and no children (refinement R18.1–R18.3)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- an empty alt is a decision: use decorative.
+        <Figure key="a" src="/a.jpg" width={4} height={3} alt="" />,
+        // @ts-expect-error -- neither alt nor decorative.
+        <Figure key="b" src="/a.jpg" width={4} height={3} />,
+        // @ts-expect-error -- both alt and decorative.
+        <Figure key="c" src="/a.jpg" width={4} height={3} alt="An owl" decorative />,
+        // @ts-expect-error -- decorative is only ever true; pass alt instead.
+        <Figure key="d" src="/a.jpg" width={4} height={3} decorative={false} />,
+        // @ts-expect-error -- width reserves the box before the image loads.
+        <Figure key="e" src="/a.jpg" height={3} alt="An owl" />,
+        // @ts-expect-error -- height reserves the box before the image loads.
+        <Figure key="f" src="/a.jpg" width={4} alt="An owl" />,
+        // @ts-expect-error -- width is a number of pixels.
+        <Figure key="g" src="/a.jpg" width="4" height={3} alt="An owl" />,
+        // @ts-expect-error -- a Figure holds one image.
+        <Figure key="h" src="/a.jpg" width={4} height={3} alt="An owl">
+          x
+        </Figure>,
+        // @ts-expect-error -- src is required.
+        <Figure key="i" width={4} height={3} alt="An owl" />,
+      ];
+    }
+    function valid(alt: string) {
+      const ref = createRef<HTMLElement>();
+      return [
+        <Figure key="a" src="/a.jpg" width={4} height={3} alt="An owl" />,
+        <Figure key="b" src="/a.jpg" width={4} height={3} alt={alt} caption="Dusk" />,
+        <Figure key="c" src="/a.jpg" width={4} height={3} decorative caption={<em>Dusk</em>} />,
+        <Figure
+          key="d"
+          ref={ref}
+          src="/a.jpg"
+          srcSet="/a.jpg 4w"
+          sizes="100vw"
+          width={4}
+          height={3}
+          alt="An owl"
+          loading="eager"
+          fetchPriority="high"
+          id="x"
+          className="y"
+        />,
       ];
     }
     expectTypeOf(invalid).toBeFunction();

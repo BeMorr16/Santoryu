@@ -37,4 +37,6 @@ function previewLikeStaticHost(): Plugin {
 
 export default defineConfig({
   plugins: [reactRouter(), previewLikeStaticHost()],
+  // The CSP (img-src 'self', font-src 'self') blocks data: URIs, so never inline an asset (refinement R18.8).
+  build: { assetsInlineLimit: 0 },
 });

@@ -3,6 +3,7 @@ export * from "./Accordion/index.ts";
 export * from "./Badge/index.ts";
 export * from "./Button/index.ts";
 export * from "./Card/index.ts";
+export * from "./Figure/index.ts";
 export * from "./CodeBlock/index.ts";
 export * from "./Grid/index.ts";
 export * from "./Icon/index.ts";

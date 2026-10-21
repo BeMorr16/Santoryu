@@ -18,8 +18,8 @@ const kindByGroup: Record<string, string> = {
   "effect.underline.offset": "underlineOffset",
 };
 
-/** Groups with no preview, checked before the category: a 480px breakpoint bar or a 65ch measure bar would only widen the table. */
-const noSpecimen = new Set(["size.breakpoint", "type.measure"]);
+/** Groups with no preview, checked before the category: a 480px breakpoint bar, an 80dvh image-cap bar or a 65ch measure bar would only widen the table. */
+const noSpecimen = new Set(["size.breakpoint", "size.viewport", "type.measure"]);
 
 const kindByCategory: Partial<Record<TokenMeta["category"], string>> = {
   color: "swatch",
@@ -46,7 +46,7 @@ function specimenKind(token: TokenMeta): string | undefined {
   return kindByGroup[name] ?? kindByGroup[group] ?? kindByCategory[token.category];
 }
 
-/** A decorative preview styled with the token's own custom property. Motion, layer, breakpoints and the measure have none (R7.6, refinement R11.5, R12.14). */
+/** A decorative preview styled with the token's own custom property. Motion, layer, breakpoints, the viewport caps and the measure have none (R7.6, refinement R11.5, R12.14, R18.7). */
 export function Specimen({ token }: { token: TokenMeta }) {
   const kind = specimenKind(token);
   if (kind === undefined) {

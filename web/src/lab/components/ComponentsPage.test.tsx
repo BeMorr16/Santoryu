@@ -19,6 +19,7 @@ import { ComponentsPage } from "./ComponentsPage.tsx";
 import { showcases } from "./registry.ts";
 import badgeStyles from "../../components/Badge/Badge.module.css";
 import cardStyles from "../../components/Card/Card.module.css";
+import figureStyles from "../../components/Figure/Figure.module.css";
 import codeBlockStyles from "../../components/CodeBlock/CodeBlock.module.css";
 import separatorStyles from "../../components/Separator/Separator.module.css";
 import tableStyles from "../../components/Table/Table.module.css";
@@ -40,6 +41,8 @@ import {
 } from "./showcases/code-block.tsx";
 import { quietLinksCss } from "./showcases/link.tsx";
 import { byline, customSeparatorCss } from "./showcases/separator.tsx";
+import { missingImageSrc } from "./showcases/figure-photos.ts";
+import { customFigureCss, elk, falls } from "./showcases/figure.tsx";
 import {
   buildSizes,
   customTableCss,
@@ -879,10 +882,10 @@ describe("/lab/components page (R15.1, R15.3)", () => {
     expect(separator?.props[0]?.docs.orientation?.description).toMatch(
       /goes in a vertical flow \(block flow or a vertical Stack\).+Vertical goes in a horizontal flow \(a horizontal Stack\)/,
     );
-    // After Table and before Stack (refinement R17.8).
+    // After Table (refinement R17.8); Figure now sits between it and Stack (refinement R18.10).
     const ids = showcases.map((s) => s.id);
     const at = ids.indexOf("separator");
-    expect(ids.slice(at - 1, at + 2)).toEqual(["table", "separator", "stack"]);
+    expect(ids.slice(at - 1, at + 2)).toEqual(["table", "separator", "figure"]);
     expect(separator?.propsNote).toMatch(
       /There are no children.+role, aria-orientation and aria-hidden come from decorative and orientation, and there's no tabIndex.+className and native props reach the hr or, when decorative, the div.+no margin, so the parent's gap spaces it.+Neither the hr nor the decorative div can sit inside a p, heading, button or label; use a Stack div.+A ul or ol holds only li/,
     );
@@ -896,6 +899,114 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       /subtle lines aren't contrast-checked.+strong is checked to 3:1 against every surface/,
       /In forced colors the line takes a system color, so both variants look the same/,
       /In a wrapping row, a line can start with a vertical separator/,
+    ]) {
+      expect(within(section).getByText(note)).toBeInTheDocument();
+    }
+  });
+
+  it("shows the Figure examples, its props, notes and the customized CSS it applies (refinement R18.10)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Figure" });
+    const example = (title: string) => within(section).getByRole("group", { name: title });
+    const figureIn = (element: HTMLElement) => element.querySelector("figure");
+
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
+    expect(labels).toEqual([
+      "Informative with a caption",
+      "Tall image",
+      "Failed to load",
+      "Decorative",
+      "Customized with component tokens",
+    ]);
+
+    const informative = example("Informative with a caption");
+    const elkImage = within(informative).getByRole("img", { name: elk.alt });
+    expect(elkImage).toHaveAttribute("srcset", elk.srcSet);
+    expect(elkImage).toHaveAttribute("sizes", elk.sizes);
+    expect(elkImage).toHaveAttribute("width", String(elk.width));
+    expect(elkImage).toHaveAttribute("height", String(elk.height));
+    expect(elk.srcSet.split(", ")).toHaveLength(3);
+    expect(figureIn(informative)?.querySelector("figcaption")).toHaveTextContent(elk.caption);
+    expect(informative).toHaveTextContent(/The figure is named by its caption/);
+
+    const tall = example("Tall image");
+    const fallsImage = within(tall).getByRole("img", { name: falls.alt });
+    expect(fallsImage).toHaveAttribute("srcset", falls.srcSet);
+    expect(falls.height).toBeGreaterThan(falls.width);
+    expect(figureIn(tall)?.querySelector("figcaption")).toHaveTextContent(falls.caption);
+    expect(tall).toHaveTextContent(/Capped at 80% of the window's height/);
+
+    const failed = example("Failed to load");
+    const missing = within(failed).getByRole("img", { name: elk.alt });
+    expect(missing).toHaveAttribute("src", missingImageSrc);
+    expect(missing).not.toHaveAttribute("srcset");
+    expect(figureIn(failed)?.querySelector("figcaption")).toHaveTextContent(
+      "This file is missing.",
+    );
+    expect(failed).toHaveTextContent(
+      /screen readers still read its alt text, and browsers show it where it fits/,
+    );
+
+    const decorative = example("Decorative");
+    expect(within(decorative).queryByRole("img")).toBeNull();
+    expect(figureIn(decorative)?.querySelector("img")).toHaveAttribute("alt", "");
+    expect(figureIn(decorative)?.querySelector("figcaption")).toBeNull();
+    expect(figureIn(decorative)).toHaveAttribute("role", "none");
+    expect(within(decorative).queryByRole("figure")).toBeNull();
+    expect(figureIn(decorative)?.previousElementSibling?.tagName).toBe("P");
+    expect(decorative).toHaveTextContent(
+      /so the image is decorative: it has alt="", and screen readers skip it/,
+    );
+
+    const custom = example("Customized with component tokens");
+    expect(figureIn(custom)).toHaveClass(
+      showcaseStyles.customFigure ?? "",
+      figureStyles.figure ?? "",
+    );
+    expect(custom.querySelector("pre code")?.textContent).toBe(customFigureCss);
+    expect(readFileSync(join(import.meta.dirname, "Showcase.module.css"), "utf8")).toContain(
+      customFigureCss,
+    );
+
+    const figure = showcases.find((s) => s.id === "figure");
+    expect(figure?.props.map(({ part, docs }) => [part, Object.keys(docs)])).toEqual([
+      [
+        "Figure",
+        [
+          "alt",
+          "decorative",
+          "caption",
+          "src",
+          "srcSet",
+          "sizes",
+          "width",
+          "height",
+          "loading",
+          "decoding",
+          "fetchPriority",
+          "crossOrigin",
+          "referrerPolicy",
+        ],
+      ],
+    ]);
+    // After Separator and before Stack (refinement R18.10).
+    const ids = showcases.map((s) => s.id);
+    const at = ids.indexOf("figure");
+    expect(ids.slice(at - 1, at + 2)).toEqual(["separator", "figure", "stack"]);
+    expect(figure?.propsNote).toMatch(
+      /There are no children.+exactly one of alt or decorative, and a literal alt="" is a type error.+width and height are required and are the image's intrinsic pixel size.+className, other native props and ref reach the figure.+no margin, so the parent's gap spaces it/,
+    );
+    expect(figure?.keyboard).toBeUndefined();
+    await openReference(section);
+    expect(within(section).queryByRole("table", { name: "Figure keyboard" })).toBeNull();
+    for (const note of [
+      /Alt text says what the image shows or does.+don't repeat the caption/,
+      /Use decorative where nearby text already says everything the image shows.+with no caption the figure itself is hidden \(role="none"\)/,
+      /A caption names the figure/,
+      /A chart, diagram or screenshot with detail needs a full description/,
+      /If an image fails to load, screen readers still read its alt text/,
+      /Tall images are capped at 80% of the window's height/,
+      /loading="eager" and fetchPriority="high"/,
     ]) {
       expect(within(section).getByText(note)).toBeInTheDocument();
     }

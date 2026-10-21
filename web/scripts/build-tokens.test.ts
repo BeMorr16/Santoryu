@@ -281,11 +281,25 @@ describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
     expect(css.match(/--component-button-text:/g)).toHaveLength(1);
   });
 
-  it("emits type.letter-spacing numbers with em, type.line-length with ch, and no other numbers", async () => {
-    const { css } = await build();
+  it("emits type.letter-spacing numbers with em, type.line-length with ch, size.viewport-height with dvh, and no other numbers", async () => {
+    const { css } = await build({
+      "size.json": {
+        size: {
+          "viewport-height": {
+            $type: "number",
+            80: { $value: 80, $description: "80dvh." },
+          },
+          viewport: {
+            $type: "number",
+            image: { $value: "{size.viewport-height.80}", $description: "Image cap." },
+          },
+        },
+      },
+    });
 
     expect(css).toContain("--type-tracking-label: 0.16em;");
     expect(css).toContain("--type-measure-text: 65ch;");
+    expect(css).toContain("--size-viewport-image: 80dvh;");
     expect(css).toContain("--type-leading-heading: 1.2;");
   });
 

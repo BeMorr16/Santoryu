@@ -109,6 +109,21 @@
         "$description": "Cell size of the blueprint backdrop grid."
       }
     },
+    "viewport-height": {
+      "$type": "number",
+      "$description": "Heights as a share of the dynamic viewport, as numbers. The viewport-height/dvh transform appends dvh (refinement R18.7).",
+      "80": {
+        "$value": 80,
+        "$description": "80dvh."
+      }
+    },
+    "viewport": {
+      "$type": "number",
+      "image": {
+        "$value": "{size.viewport-height.80}",
+        "$description": "Tallest a content image gets: 80% of the dynamic viewport height, so it's seen whole."
+      }
+    },
     "breakpoint": {
       "sm": {
         "$value": "{size.120}",

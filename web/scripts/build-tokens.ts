@@ -74,6 +74,20 @@ export const lineLengthTransform = {
   transform: (token: TransformedToken) => `${String(token.$value as number)}ch`,
 } satisfies ValueTransform;
 
+/**
+ * An image cap has to follow the dynamic viewport, which DTCG dimensions (px/rem) can't say, so
+ * `size.viewport-height.*` primitives are numbers and get `dvh` here (refinement R18.7).
+ */
+export const viewportHeightTransform = {
+  name: "viewport-height/dvh",
+  type: transformTypes.value,
+  filter: (token: TransformedToken) =>
+    token.path[0] === "size" &&
+    token.path[1] === "viewport-height" &&
+    typeof token.$value === "number",
+  transform: (token: TransformedToken) => `${String(token.$value as number)}dvh`,
+} satisfies ValueTransform;
+
 const aliasPattern = /^\{([^{}]+)\}$/;
 
 function aliasTarget(value: unknown): string | undefined {
@@ -98,7 +112,12 @@ async function runPass(tokensDir: string, overrideFile: string): Promise<Transfo
     ...(await jsonFiles(join(tokensDir, "components"))),
     ...(overrideFile === "light.json" ? [] : [lightTheme]),
   ];
-  const transforms = [durationTransform, letterSpacingTransform, lineLengthTransform];
+  const transforms = [
+    durationTransform,
+    letterSpacingTransform,
+    lineLengthTransform,
+    viewportHeightTransform,
+  ];
   const sd = new StyleDictionary({
     include,
     source: [join(tokensDir, "themes", overrideFile)],

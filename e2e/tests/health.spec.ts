@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { buildCsp } from "infra/src/security-headers.ts";
+import { missingImageSrc } from "../../web/src/lab/components/showcases/figure-photos.ts";
 import { readManifest } from "../build.ts";
 
 const manifest = readManifest();
@@ -17,9 +18,13 @@ async function watch(page: Page) {
   const problems: string[] = [];
   page.on("console", (message) => {
     if (message.type() !== "error") return;
-    // Browsers log the not-found page's own 404 status; that's the intended response.
-    const ownStatus = message.location().url === page.url() && /status of 404/.test(message.text());
-    if (!ownStatus) problems.push(`console.error: ${message.text()} (${message.location().url})`);
+    // Browsers log the not-found page's own 404 status, and the Figure section's deliberately
+    // missing image (refinement R18.10); those are the intended responses.
+    const notFound = /status of 404/.test(message.text());
+    const { url } = message.location();
+    const intended =
+      notFound && (url === page.url() || (url !== "" && new URL(url).pathname === missingImageSrc));
+    if (!intended) problems.push(`console.error: ${message.text()} (${url})`);
   });
   page.on("pageerror", (error) => problems.push(`pageerror: ${error.message}`));
   await page.addInitScript(() => {

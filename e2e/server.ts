@@ -51,6 +51,11 @@ const contentTypes: Record<string, string> = {
   ".woff2": "font/woff2",
   ".json": "application/json",
   ".svg": "image/svg+xml",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".avif": "image/avif",
 };
 
 function edgeRequest(req: IncomingMessage): EdgeRequest {
