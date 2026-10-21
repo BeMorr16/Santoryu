@@ -26,6 +26,9 @@ for (const theme of themes) {
     test(`${path} in ${theme} has no axe violations, contrast included (R16.2)`, async ({
       page,
     }) => {
+      // Every component and its reference content, contrast included: about 28s in WebKit alone,
+      // so the default 30s fails whenever the machine is busy.
+      if (path === "/lab/components") test.setTimeout(60_000);
       await storeTheme(page, theme);
       await page.goto(path);
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
@@ -48,13 +51,15 @@ test.describe("preview panels", () => {
     test(`/lab/components with every panel set to ${panelTheme} in a ${pageTheme} page has no axe violations (R16.3)`, async ({
       page,
     }) => {
+      // The whole page with contrast, as above.
+      test.setTimeout(60_000);
       await storeTheme(page, pageTheme);
       await page.goto("/lab/components");
 
-      expect(await setAllPanels(page, panelTheme)).toBe(13);
+      expect(await setAllPanels(page, panelTheme)).toBe(14);
       await expect(
         page.locator(`[data-theme="${panelTheme.toLowerCase()}"][role="group"]`),
-      ).toHaveCount(13);
+      ).toHaveCount(14);
       await openAllAccordions(page);
 
       expect(await violations(page)).toEqual([]);

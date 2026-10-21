@@ -7,11 +7,13 @@ import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut";
 import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
 import { CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
+import { CopyIcon } from "@phosphor-icons/react/dist/ssr/Copy";
 import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr/EnvelopeSimple";
 import { GithubLogoIcon } from "@phosphor-icons/react/dist/ssr/GithubLogo";
 import { LinkedinLogoIcon } from "@phosphor-icons/react/dist/ssr/LinkedinLogo";
 import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
 import { SunIcon } from "@phosphor-icons/react/dist/ssr/Sun";
+import { WarningIcon } from "@phosphor-icons/react/dist/ssr/Warning";
 
 export const icons = {
   sun: SunIcon,
@@ -20,9 +22,11 @@ export const icons = {
   "arrow-right": ArrowRightIcon,
   "chevron-down": CaretDownIcon,
   check: CheckIcon,
+  copy: CopyIcon,
   linkedin: LinkedinLogoIcon,
   github: GithubLogoIcon,
   mail: EnvelopeSimpleIcon,
+  warning: WarningIcon,
 } as const;
 
 /** Our normalized weights → the family's weights. */

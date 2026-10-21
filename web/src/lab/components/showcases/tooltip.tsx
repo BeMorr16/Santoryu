@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "../../../components/Button/Button.tsx";
+import { CodeBlock } from "../../../components/CodeBlock/CodeBlock.tsx";
 import { Link } from "../../../components/Link/Link.tsx";
 import {
   Tooltip,
@@ -135,9 +136,9 @@ function Examples() {
             <Button>Custom</Button>
           </Tooltip>
         </div>
-        <pre className={styles.code}>
-          <code>{customTooltipCss}</code>
-        </pre>
+        <CodeBlock label="CSS" language="css">
+          {customTooltipCss}
+        </CodeBlock>
       </Example>
     </>
   );

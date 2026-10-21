@@ -3,6 +3,7 @@ import { accordionShowcase } from "./showcases/accordion.tsx";
 import { badgeShowcase } from "./showcases/badge.tsx";
 import { buttonShowcase } from "./showcases/button.tsx";
 import { cardShowcase } from "./showcases/card.tsx";
+import { codeBlockShowcase } from "./showcases/code-block.tsx";
 import { gridShowcase } from "./showcases/grid.tsx";
 import { iconShowcase } from "./showcases/icon.tsx";
 import { linkShowcase } from "./showcases/link.tsx";
@@ -20,6 +21,7 @@ export const showcases: readonly Showcase[] = [
   iconShowcase,
   visuallyHiddenShowcase,
   typographyShowcase,
+  codeBlockShowcase,
   stackShowcase,
   gridShowcase,
   cardShowcase,

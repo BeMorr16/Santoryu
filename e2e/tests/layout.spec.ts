@@ -29,13 +29,25 @@ test.describe("at 320px wide", () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
-  test("the code sample wraps instead of scrolling sideways", async ({ page }) => {
+  test("the code sample scrolls inside its block, as a Tab stop, instead of the page scrolling sideways (refinement R15.4, R15.5)", async ({
+    page,
+  }) => {
     await page.goto("/lab/components");
+    // Measured, not prerendered: at a wide window the CodeBlock section's Basic block fits and
+    // drops its Tab stop, and narrowing again brings the Button sample's back.
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await expect(section(page, "CodeBlock").locator("pre").first()).not.toHaveAttribute("tabindex");
+    await page.setViewportSize({ width: 320, height: 640 });
 
     const code = section(page, "Button").locator("pre");
     expect(
       await code.evaluate((element) => element.scrollWidth - element.clientWidth),
-    ).toBeLessThanOrEqual(0);
+    ).toBeGreaterThan(0);
+    await expect(code).toHaveAttribute("tabindex", "0");
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
   });
 
   test("no page scrolls sideways", async ({ page }) => {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CodeBlock } from "../../../components/CodeBlock/CodeBlock.tsx";
 import {
   Menu,
   MenuCheckboxItem,
@@ -309,9 +310,9 @@ function Examples() {
             <MenuCheckboxItem>Show whitespace</MenuCheckboxItem>
           </MenuPopup>
         </Menu>
-        <pre className={styles.code}>
-          <code>{compactMenuCss}</code>
-        </pre>
+        <CodeBlock label="CSS" language="css">
+          {compactMenuCss}
+        </CodeBlock>
       </Example>
     </>
   );

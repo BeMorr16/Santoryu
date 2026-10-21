@@ -1,6 +1,7 @@
 import { Badge } from "../../../components/Badge/Badge.tsx";
 import { Button } from "../../../components/Button/Button.tsx";
 import { Card, type CardOwnProps, type CardProps } from "../../../components/Card/Card.tsx";
+import { CodeBlock } from "../../../components/CodeBlock/CodeBlock.tsx";
 import { Grid } from "../../../components/Grid/Grid.tsx";
 import { Stack } from "../../../components/Stack/Stack.tsx";
 import { Announced } from "../Announced.tsx";
@@ -184,9 +185,9 @@ function Examples() {
         <Card heading="Accent outline" headingLevel={4} className={styles.accentCard}>
           An accent border and tighter padding, set through Card&apos;s component tokens.
         </Card>
-        <pre className={styles.code}>
-          <code>{accentCardCss}</code>
-        </pre>
+        <CodeBlock label="CSS" language="css">
+          {accentCardCss}
+        </CodeBlock>
       </Example>
     </>
   );

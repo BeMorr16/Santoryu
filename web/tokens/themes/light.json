@@ -29,6 +29,10 @@
       "inverse": {
         "$value": "{color.gray.900}",
         "$description": "Background of inverse bubbles, such as tooltips: the default text color, so the page reads inverted."
+      },
+      "code": {
+        "$value": "{color.gray.50}",
+        "$description": "Background of code samples (CodeBlock): a cool grey in light, near-black in dark, set apart from the other surfaces."
       }
     },
     "text": {
@@ -51,6 +55,10 @@
             },
             {
               "against": "color.surface.glass",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.code",
               "min": "text"
             }
           ]
@@ -76,6 +84,10 @@
             {
               "against": "color.surface.glass",
               "min": "text"
+            },
+            {
+              "against": "color.surface.code",
+              "min": "text"
             }
           ]
         }
@@ -95,6 +107,10 @@
             },
             {
               "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.code",
               "min": "text"
             }
           ]
@@ -350,6 +366,10 @@
             {
               "against": "color.surface.sunken",
               "min": "text"
+            },
+            {
+              "against": "color.surface.code",
+              "min": "text"
             }
           ]
         }
@@ -525,6 +545,10 @@
             },
             {
               "against": "color.surface.glass",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.code",
               "min": "non-text"
             }
           ]

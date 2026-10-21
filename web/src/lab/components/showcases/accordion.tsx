@@ -7,6 +7,7 @@ import {
 } from "../../../components/Accordion/Accordion.tsx";
 import { Badge } from "../../../components/Badge/Badge.tsx";
 import { Button } from "../../../components/Button/Button.tsx";
+import { CodeBlock } from "../../../components/CodeBlock/CodeBlock.tsx";
 import { Announced } from "../Announced.tsx";
 import { Example } from "../Example.tsx";
 import type { KeyboardRow } from "../KeyboardTable.tsx";
@@ -186,9 +187,9 @@ function Examples() {
             <p>A strong line and wider padding.</p>
           </AccordionItem>
         </Accordion>
-        <pre className={styles.code}>
-          <code>{customAccordionCss}</code>
-        </pre>
+        <CodeBlock label="CSS" language="css">
+          {customAccordionCss}
+        </CodeBlock>
       </Example>
     </>
   );

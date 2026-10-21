@@ -9,6 +9,7 @@ import {
   Badge,
   Button,
   Card,
+  CodeBlock,
   Grid,
   Icon,
   Link,
@@ -443,6 +444,45 @@ describe("library types", () => {
     }
     function valid() {
       return <ThemeSwitcher align="start" side="top" showLabel={false} />;
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
+  it("CodeBlock needs a label and plain-text children, and its flags are booleans (refinement R15.1, R15.2, R15.4, R15.6)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- a block needs a label (its name while it overflows).
+        <CodeBlock key="a">x</CodeBlock>,
+        // @ts-expect-error -- a block needs its code.
+        <CodeBlock key="b" label="CSS" />,
+        // @ts-expect-error -- the code is plain text, not elements.
+        <CodeBlock key="c" label="CSS">
+          <span>x</span>
+        </CodeBlock>,
+        // @ts-expect-error -- wrap is a boolean.
+        <CodeBlock key="d" label="CSS" wrap="yes">
+          x
+        </CodeBlock>,
+        // @ts-expect-error -- copy is a boolean.
+        <CodeBlock key="e" label="CSS" copy="no">
+          x
+        </CodeBlock>,
+        // @ts-expect-error -- lineNumbers is a boolean.
+        <CodeBlock key="f" label="CSS" lineNumbers="yes">
+          x
+        </CodeBlock>,
+      ];
+    }
+    function valid() {
+      return [
+        <CodeBlock key="a" label="CSS" language="css" wrap copy={false} lineNumbers={false} id="x">
+          {`.a {}`}
+        </CodeBlock>,
+        <CodeBlock key="b" label={<span>accordion.css</span>}>
+          x
+        </CodeBlock>,
+      ];
     }
     expectTypeOf(invalid).toBeFunction();
     expectTypeOf(valid).toBeFunction();

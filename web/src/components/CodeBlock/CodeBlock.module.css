@@ -1,0 +1,113 @@
+.root {
+  /* As a flex or grid item, never wider than its track (min-content would be the longest line). */
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  border: var(--component-code-block-border-width) solid var(--component-code-block-border);
+  border-radius: var(--component-code-block-radius);
+  background-color: var(--component-code-block-background);
+  color: var(--component-code-block-text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--component-code-block-header-gap);
+  padding: var(--component-code-block-header-padding-block)
+    var(--component-code-block-header-padding-inline);
+  border-block-end: var(--component-code-block-border-width) solid
+    var(--component-code-block-border);
+}
+
+.label {
+  min-inline-size: 0;
+  color: var(--component-code-block-label-color);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--component-code-block-header-gap);
+}
+
+.failure {
+  color: var(--component-code-block-failure-color);
+}
+
+/* Long lines scroll inside the block, so the page never scrolls sideways (refinement R15.4). */
+.pre {
+  margin: 0;
+  padding: var(--component-code-block-padding);
+  overflow-x: auto;
+  font-family: var(--component-code-block-font-family);
+  font-size: var(--component-code-block-font-size);
+  line-height: var(--component-code-block-line-height);
+  white-space: pre;
+}
+
+/* Inside the box, so it never overlaps the border or the header line (refinement R15.7). */
+.pre:focus-visible {
+  outline-color: var(--component-code-block-focus-ring-color);
+  outline-offset: calc(-1 * var(--effect-focus-ring-width));
+}
+
+/* As wide as its longest line, so a ResizeObserver sees that width change (refinement R15.5). */
+.code {
+  display: block;
+  inline-size: max-content;
+  min-inline-size: 100%;
+  font: inherit;
+  font-variant-ligatures: normal;
+}
+
+.wrap {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.wrap .code {
+  inline-size: auto;
+}
+
+/*
+ * Line numbers (refinement R15.12): a two-column grid, each line's number in the first column and
+ * its text in the second, so a wrapped line keeps one number on its first row. The pre's start
+ * padding moves into the gutter, so the sticky numbers cover the code scrolling under them.
+ */
+.numbered {
+  padding-inline-start: 0;
+}
+
+.numbered > .code {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  counter-reset: line;
+}
+
+.numbered .line {
+  display: contents;
+}
+
+/*
+ * Generated content is never copied, and the empty alternative text keeps it unannounced. The
+ * counter steps on the pseudo-element: a display: contents line has no box, so browsers don't
+ * count it.
+ */
+.numbered .line::before {
+  counter-increment: line;
+  content: counter(line);
+  content: counter(line) / "";
+  grid-column: 1;
+  position: sticky;
+  inset-inline-start: 0;
+  padding-inline: var(--component-code-block-padding) var(--component-code-block-line-number-gap);
+  background-color: var(--component-code-block-background);
+  color: var(--component-code-block-line-number-color);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  user-select: none;
+}
+
+.numbered .text {
+  grid-column: 2;
+}

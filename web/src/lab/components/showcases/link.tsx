@@ -1,3 +1,4 @@
+import { CodeBlock } from "../../../components/CodeBlock/CodeBlock.tsx";
 import { Link, type LinkOwnProps } from "../../../components/Link/Link.tsx";
 import { Stack } from "../../../components/Stack/Stack.tsx";
 import { Announced } from "../Announced.tsx";
@@ -65,6 +66,12 @@ const props = {
   reloadDocument: routerOption("boolean"),
   discover: routerOption('"render" | "none"'),
 } satisfies PropDocs<LinkOwnProps>;
+
+/** The customized example's CSS, shown under it and applied by `.quietLinks`. */
+export const quietLinksCss = `.quietLinks {
+  --component-link-color: var(--color-text-default);
+  --component-link-color-hover: var(--color-link-hover);
+}`;
 
 /** Automatic and overridden aria-current, as rendered on /lab/components (refinement R4.8). */
 const currentExamples = [
@@ -166,12 +173,9 @@ function Examples() {
           Quiet links, like this <Link href="/lab/tokens">token reference</Link>, keep the underline
           but take the text color.
         </p>
-        <pre className={styles.code}>
-          <code>{`.quietLinks {
-  --component-link-color: var(--color-text-default);
-  --component-link-color-hover: var(--color-link-hover);
-}`}</code>
-        </pre>
+        <CodeBlock label="CSS" language="css">
+          {quietLinksCss}
+        </CodeBlock>
       </Example>
     </>
   );

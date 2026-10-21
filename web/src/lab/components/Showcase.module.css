@@ -84,17 +84,6 @@
   --component-link-color-hover: var(--color-link-hover);
 }
 
-/* Wraps rather than scrolling sideways, so nothing is out of keyboard reach (WCAG 2.1.1, 1.4.10). */
-.code {
-  margin: 0;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-  padding: var(--space-inset-sm);
-  border-radius: var(--radius-control);
-  background-color: var(--color-surface-raised);
-  font-size: var(--type-size-small);
-}
-
 /* The Menu section's customized example (refinement R5.13); its CSS is shown beside it. */
 .compactMenu {
   --component-menu-item-font-size: var(--type-size-small);
@@ -161,6 +150,12 @@
 .customTooltip {
   --component-tooltip-background: var(--color-accent-2-fill);
   --component-tooltip-text: var(--color-accent-2-fill-text);
+}
+
+/* The CodeBlock section's customized example (refinement R15.10); its CSS is shown in that block. */
+.customCodeBlock {
+  --component-code-block-border: var(--color-accent-border);
+  --component-code-block-label-color: var(--color-accent-text);
 }
 
 /* The Typography section's customized example (refinement R12.13); its CSS is shown beside it. */

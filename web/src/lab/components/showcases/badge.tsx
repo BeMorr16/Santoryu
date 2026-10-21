@@ -1,4 +1,5 @@
 import { Badge, type BadgeOwnProps, type BadgeProps } from "../../../components/Badge/Badge.tsx";
+import { CodeBlock } from "../../../components/CodeBlock/CodeBlock.tsx";
 import { Stack } from "../../../components/Stack/Stack.tsx";
 import { Example } from "../Example.tsx";
 import type { PropDocs } from "../PropDocs.ts";
@@ -82,9 +83,9 @@ function Examples() {
         <div>
           <Badge className={styles.customBadge}>Custom</Badge>
         </div>
-        <pre className={styles.code}>
-          <code>{customBadgeCss}</code>
-        </pre>
+        <CodeBlock label="CSS" language="css">
+          {customBadgeCss}
+        </CodeBlock>
       </Example>
     </>
   );

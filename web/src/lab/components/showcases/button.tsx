@@ -4,6 +4,7 @@ import {
   type ButtonOwnProps,
   type ButtonProps,
 } from "../../../components/Button/Button.tsx";
+import { CodeBlock } from "../../../components/CodeBlock/CodeBlock.tsx";
 import type { ButtonLookProps } from "../../../components/shared/button.tsx";
 import { Stack } from "../../../components/Stack/Stack.tsx";
 import { VisuallyHidden } from "../../../components/VisuallyHidden/VisuallyHidden.tsx";
@@ -57,6 +58,13 @@ export const buttonDocs = {
       "Icon-only buttons named by aria-label or VisuallyHidden show that name as a tooltip; false turns it off.",
   },
 } satisfies PropDocs<ButtonOwnProps & Pick<ButtonProps, "type" | "disabled" | "aria-pressed">>;
+
+/** The customized example's CSS, shown under it and applied by `.brandCta`. */
+export const brandCtaCss = `.brandCta {
+  --component-button-primary-background: var(--color-accent-text);
+  --component-button-primary-border: var(--color-accent-text);
+  --component-button-primary-background-hover: var(--color-link-hover);
+}`;
 
 /** Icon-only buttons, captioned with their size and how they're named (refinement R3.11). */
 const iconOnly: readonly { caption: string; button: ReactNode }[] = [
@@ -203,13 +211,9 @@ function Examples() {
             See the projects
           </Button>
         </div>
-        <pre className={styles.code}>
-          <code>{`.brandCta {
-  --component-button-primary-background: var(--color-accent-text);
-  --component-button-primary-border: var(--color-accent-text);
-  --component-button-primary-background-hover: var(--color-link-hover);
-}`}</code>
-        </pre>
+        <CodeBlock label="CSS" language="css">
+          {brandCtaCss}
+        </CodeBlock>
       </Example>
     </>
   );

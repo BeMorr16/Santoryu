@@ -1,3 +1,4 @@
+import { CodeBlock } from "../../../components/CodeBlock/CodeBlock.tsx";
 import {
   Typography,
   type TypographyOwnProps,
@@ -124,9 +125,9 @@ function Examples() {
         <Typography variant="label" className={styles.customLabel}>
           Custom label
         </Typography>
-        <pre className={styles.code}>
-          <code>{customLabelCss}</code>
-        </pre>
+        <CodeBlock label="CSS" language="css">
+          {customLabelCss}
+        </CodeBlock>
       </Example>
     </>
   );

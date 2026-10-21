@@ -16,12 +16,14 @@ describe("Icon", () => {
       "arrow-right",
       "check",
       "chevron-down",
+      "copy",
       "external-link",
       "github",
       "linkedin",
       "mail",
       "moon",
       "sun",
+      "warning",
     ]);
   });
 

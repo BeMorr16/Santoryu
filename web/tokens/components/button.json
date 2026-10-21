@@ -93,6 +93,10 @@
             {
               "against": "color.surface.glass",
               "min": "non-text"
+            },
+            {
+              "against": "color.surface.code",
+              "min": "non-text"
             }
           ]
         }
@@ -345,6 +349,10 @@
               },
               {
                 "against": "component.button.ghost.background-active",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.code",
                 "min": "text"
               }
             ]
