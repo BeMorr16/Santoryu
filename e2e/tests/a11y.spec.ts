@@ -56,10 +56,10 @@ test.describe("preview panels", () => {
       await storeTheme(page, pageTheme);
       await page.goto("/lab/components");
 
-      expect(await setAllPanels(page, panelTheme)).toBe(15);
+      expect(await setAllPanels(page, panelTheme)).toBe(16);
       await expect(
         page.locator(`[data-theme="${panelTheme.toLowerCase()}"][role="group"]`),
-      ).toHaveCount(15);
+      ).toHaveCount(16);
       await openAllAccordions(page);
 
       expect(await violations(page)).toEqual([]);

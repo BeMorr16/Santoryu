@@ -20,6 +20,7 @@ import { showcases } from "./registry.ts";
 import badgeStyles from "../../components/Badge/Badge.module.css";
 import cardStyles from "../../components/Card/Card.module.css";
 import codeBlockStyles from "../../components/CodeBlock/CodeBlock.module.css";
+import separatorStyles from "../../components/Separator/Separator.module.css";
 import tableStyles from "../../components/Table/Table.module.css";
 import {
   accordionKeyboard,
@@ -38,6 +39,7 @@ import {
   longLines,
 } from "./showcases/code-block.tsx";
 import { quietLinksCss } from "./showcases/link.tsx";
+import { byline, customSeparatorCss } from "./showcases/separator.tsx";
 import {
   buildSizes,
   customTableCss,
@@ -791,6 +793,109 @@ describe("/lab/components page (R15.1, R15.3)", () => {
       /a group, not a region, so a page of tables doesn't fill the landmarks list/,
       /stripes, border and lines are decorative.+In forced colors the stripes go, and each body row gets a line instead/,
       /Use a table for tabular data, never for layout/,
+    ]) {
+      expect(within(section).getByText(note)).toBeInTheDocument();
+    }
+  });
+
+  it("shows the Separator examples, its props, notes and the customized CSS it applies (refinement R17.8)", async () => {
+    renderPage();
+    const section = await screen.findByRole("region", { name: "Separator" });
+    const example = (title: string) => within(section).getByRole("group", { name: title });
+    const decorativeIn = (element: HTMLElement) =>
+      [...element.querySelectorAll(`.${separatorStyles.separator ?? ""}`)].filter(
+        (separator) => separator.tagName === "DIV",
+      );
+
+    const labels = [...section.querySelectorAll(exampleTitle)].map((label) => label.textContent);
+    expect(labels).toEqual([
+      "Horizontal",
+      "Vertical",
+      "Variants",
+      "Thickness",
+      "Customized with component tokens",
+    ]);
+
+    const horizontal = example("Horizontal");
+    const rule = within(horizontal).getByRole("separator");
+    expect(rule.tagName).toBe("HR");
+    expect(rule).not.toHaveAttribute("aria-orientation");
+    // Spaced by its Stack's gap, between two paragraphs (refinement R17.4).
+    expect(rule.parentElement).toHaveClass(layoutStyles["row-gap-md"] ?? "");
+    expect(rule.previousElementSibling?.tagName).toBe("P");
+    expect(rule.nextElementSibling?.tagName).toBe("P");
+    expect(horizontal).toHaveTextContent(
+      /It has the separator role, so screen readers can announce the break/,
+    );
+
+    const vertical = example("Vertical");
+    expect(within(vertical).queryByRole("separator", { hidden: true })).toBeNull();
+    const lines = decorativeIn(vertical);
+    expect(lines).toHaveLength(byline.items.length);
+    for (const line of lines) {
+      expect(line).toHaveAttribute("aria-hidden", "true");
+      expect(line).toHaveClass(separatorStyles.vertical ?? "");
+    }
+    const row = lines[0]?.parentElement;
+    expect([...(row?.children ?? [])].map((child) => child.textContent)).toEqual([
+      byline.date,
+      "",
+      byline.items[0],
+      "",
+      byline.items[1],
+    ]);
+    expect(within(vertical).getByText(byline.date)).toHaveAttribute("datetime", byline.dateTime);
+    expect(vertical).toHaveTextContent(
+      /hidden from assistive technology. These only divide items in a row/,
+    );
+
+    const variants = decorativeIn(example("Variants"));
+    expect(variants.map((line) => line.previousElementSibling?.textContent)).toEqual([
+      "Subtle (default)",
+      "Strong",
+    ]);
+    expect(variants[0]).toHaveClass(separatorStyles.subtle ?? "");
+    expect(variants[1]).toHaveClass(separatorStyles.strong ?? "");
+
+    const thicknesses = decorativeIn(example("Thickness"));
+    expect(thicknesses.map((line) => line.previousElementSibling?.textContent)).toEqual([
+      "Thin (default)",
+      "Thick",
+    ]);
+    expect(thicknesses[0]).toHaveClass(separatorStyles.thin ?? "");
+    expect(thicknesses[1]).toHaveClass(separatorStyles.thick ?? "");
+
+    const custom = example("Customized with component tokens");
+    expect(within(custom).getByRole("separator")).toHaveClass(showcaseStyles.customSeparator ?? "");
+    expect(custom.querySelector("pre code")?.textContent).toBe(customSeparatorCss);
+    expect(readFileSync(join(import.meta.dirname, "Showcase.module.css"), "utf8")).toContain(
+      customSeparatorCss,
+    );
+
+    const separator = showcases.find((s) => s.id === "separator");
+    expect(separator?.props.map(({ part, docs }) => [part, Object.keys(docs)])).toEqual([
+      ["Separator", ["orientation", "decorative", "variant", "thickness"]],
+    ]);
+    expect(separator?.props[0]?.docs.orientation?.description).toMatch(
+      /goes in a vertical flow \(block flow or a vertical Stack\).+Vertical goes in a horizontal flow \(a horizontal Stack\)/,
+    );
+    // After Table and before Stack (refinement R17.8).
+    const ids = showcases.map((s) => s.id);
+    const at = ids.indexOf("separator");
+    expect(ids.slice(at - 1, at + 2)).toEqual(["table", "separator", "stack"]);
+    expect(separator?.propsNote).toMatch(
+      /There are no children.+role, aria-orientation and aria-hidden come from decorative and orientation, and there's no tabIndex.+className and native props reach the hr or, when decorative, the div.+no margin, so the parent's gap spaces it.+Neither the hr nor the decorative div can sit inside a p, heading, button or label; use a Stack div.+A ul or ol holds only li/,
+    );
+    expect(separator?.keyboard).toBeUndefined();
+    await openReference(section);
+    expect(within(section).queryByRole("table", { name: "Separator keyboard" })).toBeNull();
+    for (const note of [
+      /Semantic by default.+Make it decorative where headings, lists or landmarks already mark the break/,
+      /Never focusable: a focusable separator is a splitter/,
+      /A semantic vertical separator has aria-orientation="vertical"/,
+      /subtle lines aren't contrast-checked.+strong is checked to 3:1 against every surface/,
+      /In forced colors the line takes a system color, so both variants look the same/,
+      /In a wrapping row, a line can start with a vertical separator/,
     ]) {
       expect(within(section).getByText(note)).toBeInTheDocument();
     }

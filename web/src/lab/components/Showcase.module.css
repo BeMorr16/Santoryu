@@ -169,6 +169,11 @@
   --component-table-border: var(--color-accent-border);
 }
 
+/* The Separator section's customized example (refinement R17.8); its CSS is shown in a CodeBlock. */
+.customSeparator {
+  --component-separator-subtle-color: var(--color-accent-border);
+}
+
 /* The Typography section's customized example (refinement R12.13); its CSS is shown beside it. */
 .customLabel {
   --component-typography-label-tracking: var(--type-tracking-body);

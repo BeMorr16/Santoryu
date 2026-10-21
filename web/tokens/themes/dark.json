@@ -508,6 +508,10 @@
         "$value": "{color.blue.700}",
         "$description": "Decorative dividers only. Not contrast-checked; never the only boundary of a control."
       },
+      "default": {
+        "$value": "{color.blue.600}",
+        "$description": "Decorative lines that must read on every surface, such as a Separator's subtle line: firmer than subtle, about 1.5–2:1. Not contrast-checked; never the only boundary of a control."
+      },
       "strong": {
         "$value": "{color.gray.400}",
         "$description": "Boundaries of UI components (3:1).",

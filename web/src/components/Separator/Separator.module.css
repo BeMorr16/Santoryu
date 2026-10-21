@@ -1,0 +1,35 @@
+/* No margin: the parent's gap spaces it (refinement R17.4). A border, so forced colors keep it (R17.7). */
+.separator {
+  flex: none;
+  align-self: stretch;
+  margin: 0;
+  border: 0 solid;
+}
+
+.horizontal {
+  block-size: 0;
+  border-block-start-width: var(--_thickness);
+}
+
+/* Fills its flex or grid line; one line tall in block flow (refinement R17.4). */
+.vertical {
+  inline-size: 0;
+  min-block-size: 1lh;
+  border-inline-start-width: var(--_thickness);
+}
+
+.subtle {
+  border-color: var(--component-separator-subtle-color);
+}
+
+.strong {
+  border-color: var(--component-separator-strong-color);
+}
+
+.thin {
+  --_thickness: var(--component-separator-thickness-thin);
+}
+
+.thick {
+  --_thickness: var(--component-separator-thickness-thick);
+}

@@ -46,7 +46,7 @@
           "alpha": 1,
           "hex": "#adbac8"
         },
-        "$description": "Blue-tinted neutral 300. Dark-theme subtle text."
+        "$description": "Blue-tinted neutral 300. Dark-theme subtle text; light-theme default borders."
       },
       "400": {
         "$value": {
@@ -183,7 +183,7 @@
           "alpha": 1,
           "hex": "#1c618c"
         },
-        "$description": "Blueprint blue 600 (brand blue #1C618C)."
+        "$description": "Blueprint blue 600 (brand blue #1C618C). Dark-theme default borders."
       },
       "700": {
         "$value": {

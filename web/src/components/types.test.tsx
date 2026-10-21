@@ -2,6 +2,7 @@
  * Type-level tests (component-library design §12.1). Each `@ts-expect-error` line is an
  * assertion: `typecheck` fails if the error it expects disappears. The functions are never called.
  */
+import { createRef } from "react";
 import { describe, expectTypeOf, it } from "vitest";
 import {
   Accordion,
@@ -21,6 +22,7 @@ import {
   MenuRadioItem,
   MenuSeparator,
   MenuTrigger,
+  Separator,
   Stack,
   Table,
   TableBody,
@@ -662,6 +664,41 @@ describe("library types", () => {
           </TableBody>
           <TableFoot />
         </Table>,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
+  it("Separator takes no children, role, tabIndex, aria-orientation or aria-hidden, and only valid unions (refinement R17.1–R17.3, R17.5)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- a separator's children are never read.
+        <Separator key="a">x</Separator>,
+        // @ts-expect-error -- decorative sets the role.
+        <Separator key="b" role="presentation" />,
+        // @ts-expect-error -- orientation sets aria-orientation.
+        <Separator key="c" aria-orientation="vertical" />,
+        // @ts-expect-error -- decorative sets aria-hidden.
+        <Separator key="g" aria-hidden />,
+        // @ts-expect-error -- a focusable separator is a splitter.
+        <Separator key="h" tabIndex={0} />,
+        // @ts-expect-error -- not an orientation.
+        <Separator key="d" orientation="diagonal" />,
+        // @ts-expect-error -- not a variant (accent is a token restyle).
+        <Separator key="e" variant="accent" />,
+        // @ts-expect-error -- decorative is a boolean.
+        <Separator key="f" decorative="yes" />,
+        // @ts-expect-error -- not a thickness (two steps, from tokens).
+        <Separator key="i" thickness="medium" />,
+      ];
+    }
+    function valid() {
+      const ref = createRef<HTMLElement>();
+      return [
+        <Separator key="a" />,
+        <Separator key="b" orientation="vertical" decorative variant="strong" thickness="thick" />,
+        <Separator key="c" ref={ref} id="x" className="y" aria-label="End of section" />,
       ];
     }
     expectTypeOf(invalid).toBeFunction();

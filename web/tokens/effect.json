@@ -195,6 +195,10 @@
       "width": {
         "$value": "{effect.line.1}",
         "$description": "Border width of controls and surfaces, and of the backdrop grid lines."
+      },
+      "width-thick": {
+        "$value": "{effect.line.2}",
+        "$description": "Width of a thick rule, such as a Separator's thick variant."
       }
     },
     "underline": {

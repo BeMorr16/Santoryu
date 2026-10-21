@@ -8,6 +8,7 @@ import { gridShowcase } from "./showcases/grid.tsx";
 import { iconShowcase } from "./showcases/icon.tsx";
 import { linkShowcase } from "./showcases/link.tsx";
 import { menuShowcase } from "./showcases/menu.tsx";
+import { separatorShowcase } from "./showcases/separator.tsx";
 import { stackShowcase } from "./showcases/stack.tsx";
 import { tableShowcase } from "./showcases/table.tsx";
 import { themeSwitcherShowcase } from "./showcases/theme-switcher.tsx";
@@ -24,6 +25,7 @@ export const showcases: readonly Showcase[] = [
   typographyShowcase,
   codeBlockShowcase,
   tableShowcase,
+  separatorShowcase,
   stackShowcase,
   gridShowcase,
   cardShowcase,

@@ -1,0 +1,48 @@
+{
+  "component": {
+    "separator": {
+      "thickness": {
+        "thin": {
+          "$value": "{effect.border.width}",
+          "$type": "dimension",
+          "$description": "Line thickness of the thin (default) variant."
+        },
+        "thick": {
+          "$value": "{effect.border.width-thick}",
+          "$type": "dimension",
+          "$description": "Line thickness of the thick variant."
+        }
+      },
+      "subtle": {
+        "color": {
+          "$value": "{color.border.default}",
+          "$type": "color",
+          "$description": "Line color of the subtle (default) variant (decorative: nothing depends on seeing it)."
+        }
+      },
+      "strong": {
+        "color": {
+          "$value": "{color.border.strong}",
+          "$type": "color",
+          "$description": "Line color of the strong variant, for a line that is the only thing showing a grouping (3:1).",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "color.surface.base",
+                "min": "non-text"
+              },
+              {
+                "against": "color.surface.raised",
+                "min": "non-text"
+              },
+              {
+                "against": "color.surface.sunken",
+                "min": "non-text"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
