@@ -22,6 +22,13 @@ import {
   MenuSeparator,
   MenuTrigger,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableFoot,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
   ThemeSwitcher,
   Tooltip,
   Typography,
@@ -602,6 +609,59 @@ describe("library types", () => {
         <Typography key="b" as="label" htmlFor="x" />,
         <Typography key="c" as="h2" variant="h4" tone="muted" measure />,
         <Typography key="d" as="abbr" title="Web Content Accessibility Guidelines" />,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+    expectTypeOf(valid).toBeFunction();
+  });
+
+  it("Table needs a caption and children, and its cells take only valid align and scope values (refinement R16.1–R16.5)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- a table needs a caption (its name, and its scroll box's).
+        <Table key="a">
+          <TableBody />
+        </Table>,
+        // @ts-expect-error -- a table needs its sections.
+        <Table key="b" caption="x" />,
+        // @ts-expect-error -- a header cell needs content.
+        <TableHeaderCell key="c" />,
+        // @ts-expect-error -- a cell needs content.
+        <TableCell key="d" />,
+        // @ts-expect-error -- not an alignment (logical values only).
+        <TableCell key="e" align="left">
+          x
+        </TableCell>,
+        // @ts-expect-error -- not a scope.
+        <TableHeaderCell key="f" scope="sideways">
+          x
+        </TableHeaderCell>,
+        // @ts-expect-error -- hideCaption is a boolean.
+        <Table key="g" caption="x" hideCaption="yes">
+          <TableBody />
+        </Table>,
+      ];
+    }
+    function valid() {
+      return [
+        <Table key="a" caption={<span>Sizes</span>} hideCaption id="x" className="y">
+          <TableHead>
+            <TableRow>
+              <TableHeaderCell scope="colgroup" colSpan={2} align="center">
+                x
+              </TableHeaderCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableHeaderCell>x</TableHeaderCell>
+              <TableCell align="end" colSpan={1}>
+                1
+              </TableCell>
+            </TableRow>
+          </TableBody>
+          <TableFoot />
+        </Table>,
       ];
     }
     expectTypeOf(invalid).toBeFunction();

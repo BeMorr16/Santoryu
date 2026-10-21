@@ -1,5 +1,11 @@
-import { useId } from "react";
-import tableStyles from "../TokenTable.module.css";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+} from "../../components/Table/Table.tsx";
 
 export interface KeyboardRow {
   keys: string;
@@ -13,30 +19,24 @@ export function KeyboardTable({
   caption: string;
   rows: readonly KeyboardRow[];
 }) {
-  const captionId = useId();
   return (
-    <div className={tableStyles.scroll} role="region" aria-labelledby={captionId} tabIndex={0}>
-      <table className={tableStyles.table}>
-        <caption className={tableStyles.caption} id={captionId}>
-          {caption}
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Key</th>
-            <th scope="col">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.keys}>
-              <th scope="row">
-                <kbd>{row.keys}</kbd>
-              </th>
-              <td>{row.action}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table caption={caption}>
+      <TableHead>
+        <TableRow>
+          <TableHeaderCell>Key</TableHeaderCell>
+          <TableHeaderCell>Action</TableHeaderCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {rows.map((row) => (
+          <TableRow key={row.keys}>
+            <TableHeaderCell>
+              <kbd>{row.keys}</kbd>
+            </TableHeaderCell>
+            <TableCell>{row.action}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }

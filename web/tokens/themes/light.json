@@ -60,6 +60,10 @@
             {
               "against": "color.surface.code",
               "min": "text"
+            },
+            {
+              "against": "color.accent.background",
+              "min": "text"
             }
           ]
         }

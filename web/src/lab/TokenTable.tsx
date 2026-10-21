@@ -1,7 +1,14 @@
-import { useId } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+} from "../components/Table/Table.tsx";
 import type { SemanticTokenMeta, TokenValue } from "../tokens/types.ts";
 import { Specimen } from "./Specimen.tsx";
-import styles from "./TokenTable.module.css";
+import styles from "./TableContent.module.css";
 
 function Value({ value, reduced }: { value: TokenValue; reduced?: TokenValue | undefined }) {
   return (
@@ -17,6 +24,7 @@ function Value({ value, reduced }: { value: TokenValue; reduced?: TokenValue | u
   );
 }
 
+/** One category's semantic tokens. Only used under /lab/tokens' h2s, so the caption is hidden. */
 export function TokenTable({
   caption,
   tokens,
@@ -25,57 +33,51 @@ export function TokenTable({
   tokens: readonly SemanticTokenMeta[];
 }) {
   const themed = tokens.some((token) => token.themed);
-  const captionId = useId();
   return (
-    <div className={styles.scroll} role="region" aria-labelledby={captionId} tabIndex={0}>
-      <table className={styles.table}>
-        <caption className={styles.caption} id={captionId}>
-          {caption}
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Token</th>
-            <th scope="col">Description</th>
-            {themed ? (
+    <Table caption={caption} hideCaption>
+      <TableHead>
+        <TableRow>
+          <TableHeaderCell>Token</TableHeaderCell>
+          <TableHeaderCell>Description</TableHeaderCell>
+          {themed ? (
+            <>
+              <TableHeaderCell>Light</TableHeaderCell>
+              <TableHeaderCell>Dark</TableHeaderCell>
+            </>
+          ) : (
+            <TableHeaderCell>Value</TableHeaderCell>
+          )}
+          <TableHeaderCell>Preview</TableHeaderCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {tokens.map((token) => (
+          <TableRow key={token.name}>
+            <TableHeaderCell>
+              <code className={styles.name}>{token.cssVar}</code>
+            </TableHeaderCell>
+            <TableCell>{token.description}</TableCell>
+            {token.themed ? (
               <>
-                <th scope="col">Light</th>
-                <th scope="col">Dark</th>
+                <TableCell>
+                  <Value value={token.values.light} />
+                </TableCell>
+                <TableCell>
+                  <Value value={token.values.dark} />
+                </TableCell>
               </>
             ) : (
-              <th scope="col">Value</th>
+              <TableCell colSpan={themed ? 2 : 1}>
+                {themed && <span className={styles.ref}>Both themes</span>}
+                <Value value={token.values.all} reduced={token.values.reduced} />
+              </TableCell>
             )}
-            <th scope="col">Preview</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tokens.map((token) => (
-            <tr key={token.name}>
-              <th scope="row">
-                <code className={styles.name}>{token.cssVar}</code>
-              </th>
-              <td>{token.description}</td>
-              {token.themed ? (
-                <>
-                  <td>
-                    <Value value={token.values.light} />
-                  </td>
-                  <td>
-                    <Value value={token.values.dark} />
-                  </td>
-                </>
-              ) : (
-                <td colSpan={themed ? 2 : 1}>
-                  {themed && <span className={styles.ref}>Both themes</span>}
-                  <Value value={token.values.all} reduced={token.values.reduced} />
-                </td>
-              )}
-              <td>
-                <Specimen token={token} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            <TableCell>
+              <Specimen token={token} />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }

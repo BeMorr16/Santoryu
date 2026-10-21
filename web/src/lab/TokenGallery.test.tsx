@@ -1,6 +1,8 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { resize } from "../../test/resize-observer.ts";
+import hiddenStyles from "../components/VisuallyHidden/VisuallyHidden.module.css";
 import { componentTokensOf, semanticTokens as semantic } from "../tokens/metadata.ts";
 import { tokenCategories, type SemanticTokenMeta } from "../tokens/types.ts";
 import { TokenGallery, tokenizedComponents } from "./TokenGallery.tsx";
@@ -21,6 +23,25 @@ const tokensIn = (category: string): readonly SemanticTokenMeta[] =>
 
 function tableFor(category: keyof typeof labels) {
   return screen.getByRole("table", { name: `${labels[category]} tokens` });
+}
+
+/** A table's scroll box: the Table root around it. */
+function scrollBoxOf(table: HTMLElement) {
+  const root = table.parentElement;
+  if (!root) throw new Error("No scroll box");
+  return root;
+}
+
+/** Gives a scroll box a layout (jsdom has none) and reports a resize to its observer. */
+function setOverflow(root: HTMLElement, overflowing: boolean) {
+  Object.defineProperty(root, "clientWidth", { configurable: true, value: 300 });
+  Object.defineProperty(root, "scrollWidth", {
+    configurable: true,
+    value: overflowing ? 600 : 300,
+  });
+  act(() => {
+    resize(root, 100);
+  });
 }
 
 function rowFor(token: SemanticTokenMeta) {
@@ -89,23 +110,41 @@ describe("TokenGallery", () => {
   });
 
   it.each(tokenCategories)(
-    "wraps the %s table in a scroll region named by its caption",
+    "wraps the %s table in a scroll box that's a group named by its caption only while it overflows (refinement R16.6)",
     (category) => {
       render(<TokenGallery />);
+      const root = scrollBoxOf(tableFor(category));
 
-      const region = screen.getByRole("region", { name: `${labels[category]} tokens` });
-      expect(region).toContainElement(tableFor(category));
-      expect(region).toHaveAttribute("tabindex", "0");
+      setOverflow(root, true);
+      expect(screen.getByRole("group", { name: `${labels[category]} tokens` })).toBe(root);
+      expect(root).toHaveAttribute("tabindex", "0");
+
+      setOverflow(root, false);
+      expect(root).not.toHaveAttribute("tabindex");
+      expect(root).not.toHaveAttribute("role");
     },
   );
 
-  it("lets keyboard users reach each scroll region with Tab", async () => {
+  it("hides every caption, since the heading right above names each table (refinement R16.11)", () => {
+    render(<TokenGallery />);
+
+    const captions = [...document.querySelectorAll("caption")];
+    expect(captions).toHaveLength(tokenCategories.length + tokenizedComponents.length);
+    for (const caption of captions) expect(caption).toHaveClass(hiddenStyles.root ?? "");
+  });
+
+  it("lets keyboard users reach an overflowing table with Tab, skipping the ones that fit", async () => {
     const user = userEvent.setup();
     render(<TokenGallery />);
+    const roots = screen.getAllByRole("table").map(scrollBoxOf);
+    for (const root of roots) setOverflow(root, false);
+    const type = scrollBoxOf(tableFor("type"));
+    setOverflow(type, true);
 
     await user.tab();
 
-    expect(screen.getByRole("region", { name: "Color tokens" })).toHaveFocus();
+    expect(screen.getByRole("group", { name: "Type tokens" })).toHaveFocus();
+    expect(screen.getAllByRole("group")).toEqual([type]);
   });
 
   it.each(tokenCategories)("gives the %s table a caption and column headers", (category) => {

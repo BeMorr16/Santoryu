@@ -158,6 +158,17 @@
   --component-code-block-label-color: var(--color-accent-text);
 }
 
+/* The Table section's Wide example (refinement R16.10): unwrapped cells, so it's wider than the panel. */
+.wideTable td {
+  white-space: nowrap;
+}
+
+/* The Table section's customized example (refinement R16.10); its CSS is shown beside it. */
+.customTable {
+  --component-table-header-background: var(--color-accent-background);
+  --component-table-border: var(--color-accent-border);
+}
+
 /* The Typography section's customized example (refinement R12.13); its CSS is shown beside it. */
 .customLabel {
   --component-typography-label-tracking: var(--type-tracking-body);

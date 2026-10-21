@@ -13,7 +13,7 @@ export interface Showcase {
   /** One sentence. */
   purpose: string;
   Examples: ComponentType;
-  /** One props table per exported part. */
+  /** One props table per part with own props; propsNote covers the rest. */
   props: readonly { part: string; docs: Readonly<Record<string, PropDoc>> }[];
   /** What else reaches the root element, beyond the native props, when it needs saying. */
   propsNote?: string;

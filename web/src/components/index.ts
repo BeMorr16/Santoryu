@@ -9,6 +9,7 @@ export * from "./Icon/index.ts";
 export * from "./Link/index.ts";
 export * from "./Menu/index.ts";
 export * from "./Stack/index.ts";
+export * from "./Table/index.ts";
 export * from "./ThemeSwitcher/index.ts";
 export * from "./Tooltip/index.ts";
 export * from "./Typography/index.ts";

@@ -1,0 +1,124 @@
+/*
+ * Wide tables scroll here, not the page (refinement R16.6). As a flex or grid item, never wider
+ * than its track. Positioned, so a hidden caption clips here instead of widening the page.
+ */
+.root {
+  position: relative;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+
+/* The global ring and offset, around the caption and the panel (refinement R16.7). */
+.root:focus-visible {
+  outline-color: var(--component-table-focus-ring-color);
+}
+
+/* Separate borders, so the panel can have a radius; the border box excludes the caption. */
+.table {
+  inline-size: 100%;
+  border: var(--component-table-border-width) solid var(--component-table-border);
+  border-radius: var(--component-table-radius);
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: var(--component-table-background);
+  color: var(--component-table-text);
+}
+
+/* As a child, so it outranks Typography's margin reset wherever the bundles put its CSS. */
+.table > .caption {
+  margin-block-end: var(--component-table-caption-gap);
+  color: var(--component-table-caption-color);
+  text-align: start;
+}
+
+/* Child combinators throughout, so a table nested in a cell keeps its own look (refinement R16.7). */
+.table > * > tr > * {
+  padding: var(--component-table-cell-padding-block) var(--component-table-cell-padding-inline);
+  text-align: start;
+  vertical-align: top;
+}
+
+.table > thead > tr > * {
+  background-color: var(--component-table-header-background);
+  font-weight: var(--component-table-header-font-weight);
+}
+
+/* On the next section's first row, not the head's last: a head cell with rowSpan isn't in that row. */
+.table > thead + :is(tbody, tfoot) > tr:first-child > * {
+  border-block-start: var(--component-table-border-width) solid var(--component-table-border);
+}
+
+.table > :is(tbody, tfoot) > tr > th {
+  font-weight: var(--component-table-row-header-font-weight);
+}
+
+/* Zebra stripes, counted in each body (refinement R16.7). */
+.table > tbody > tr:nth-child(even) > * {
+  background-color: var(--component-table-stripe-background);
+}
+
+.table > tfoot > tr > * {
+  background-color: var(--component-table-header-background);
+}
+
+.table > tfoot > tr:first-child > * {
+  border-block-start: var(--component-table-border-width) solid var(--component-table-border);
+}
+
+/*
+ * The corner cells' outer corners follow the panel's inner curve, so no fill passes its rounded
+ * border. The first section has no section before it and the last none after it, which skips the
+ * caption and any colgroup. A rowSpan cell reaching a bottom corner from an earlier row isn't
+ * rounded.
+ */
+.table
+  > :is(thead, tbody, tfoot):not(:is(thead, tbody, tfoot) ~ *)
+  > tr:first-child
+  > :first-child {
+  border-start-start-radius: calc(
+    var(--component-table-radius) - var(--component-table-border-width)
+  );
+}
+
+.table > :is(thead, tbody, tfoot):not(:is(thead, tbody, tfoot) ~ *) > tr:first-child > :last-child {
+  border-start-end-radius: calc(
+    var(--component-table-radius) - var(--component-table-border-width)
+  );
+}
+
+.table
+  > :is(thead, tbody, tfoot):not(:has(~ :is(thead, tbody, tfoot)))
+  > tr:last-child
+  > :first-child {
+  border-end-start-radius: calc(
+    var(--component-table-radius) - var(--component-table-border-width)
+  );
+}
+
+.table
+  > :is(thead, tbody, tfoot):not(:has(~ :is(thead, tbody, tfoot)))
+  > tr:last-child
+  > :last-child {
+  border-end-end-radius: calc(var(--component-table-radius) - var(--component-table-border-width));
+}
+
+/* As specific as the cell rule above, and after it, so align wins (refinement R16.5). */
+.table > * > tr > .alignCenter {
+  text-align: center;
+}
+
+.table > * > tr > .alignEnd {
+  text-align: end;
+}
+
+/* Forced colors drop the stripes, so rows get lines instead, between bodies too (refinement R16.9). */
+@media (forced-colors: active) {
+  .table > tbody > tr:not(:last-child) > * {
+    border-block-end: var(--component-table-border-width) solid var(--component-table-border);
+  }
+
+  .table > tbody + tbody > tr:first-child > * {
+    border-block-start: var(--component-table-border-width) solid var(--component-table-border);
+  }
+}

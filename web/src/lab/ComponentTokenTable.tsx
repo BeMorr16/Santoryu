@@ -1,8 +1,15 @@
-import { useId } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+} from "../components/Table/Table.tsx";
 import { componentTokensOf } from "../tokens/metadata.ts";
 import type { TokenValue } from "../tokens/types.ts";
 import { Specimen } from "./Specimen.tsx";
-import styles from "./TokenTable.module.css";
+import styles from "./TableContent.module.css";
 
 function Value({ value }: { value: TokenValue }) {
   return (
@@ -17,55 +24,52 @@ function Value({ value }: { value: TokenValue }) {
 export function ComponentTokenTable({
   component,
   caption,
+  hideCaption = false,
 }: {
   component: string;
   caption: string;
+  /** Under a heading that already names it, as on /lab/tokens (refinement R16.11). */
+  hideCaption?: boolean;
 }) {
   const tokens = componentTokensOf(component);
-  const captionId = useId();
   return (
-    <div className={styles.scroll} role="region" aria-labelledby={captionId} tabIndex={0}>
-      <table className={styles.table}>
-        <caption className={styles.caption} id={captionId}>
-          {caption}
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Token</th>
-            <th scope="col">Aliases</th>
-            <th scope="col">Light</th>
-            <th scope="col">Dark</th>
-            <th scope="col">Preview</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tokens.map((token) => (
-            <tr key={token.name}>
-              <th scope="row">
-                <code className={styles.name}>{token.cssVar}</code>
-                <span className={styles.ref}>{token.description}</span>
-              </th>
-              <td>
-                <code className={styles.value}>{token.aliases}</code>
-              </td>
-              <td>
-                <Value value={token.values.light} />
-                {token.values.reduced && (
-                  <span className={styles.ref}>
-                    Reduced motion: <code>{token.values.reduced.css}</code>
-                  </span>
-                )}
-              </td>
-              <td>
-                <Value value={token.values.dark} />
-              </td>
-              <td>
-                <Specimen token={token} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table caption={caption} hideCaption={hideCaption}>
+      <TableHead>
+        <TableRow>
+          <TableHeaderCell>Token</TableHeaderCell>
+          <TableHeaderCell>Aliases</TableHeaderCell>
+          <TableHeaderCell>Light</TableHeaderCell>
+          <TableHeaderCell>Dark</TableHeaderCell>
+          <TableHeaderCell>Preview</TableHeaderCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {tokens.map((token) => (
+          <TableRow key={token.name}>
+            <TableHeaderCell>
+              <code className={styles.name}>{token.cssVar}</code>
+              <span className={styles.ref}>{token.description}</span>
+            </TableHeaderCell>
+            <TableCell>
+              <code className={styles.value}>{token.aliases}</code>
+            </TableCell>
+            <TableCell>
+              <Value value={token.values.light} />
+              {token.values.reduced && (
+                <span className={styles.ref}>
+                  Reduced motion: <code>{token.values.reduced.css}</code>
+                </span>
+              )}
+            </TableCell>
+            <TableCell>
+              <Value value={token.values.dark} />
+            </TableCell>
+            <TableCell>
+              <Specimen token={token} />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }

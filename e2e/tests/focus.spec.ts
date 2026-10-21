@@ -77,11 +77,27 @@ test("every control on /lab/components shows a 2px, 3:1 focus ring from the keyb
   expect(rings.length).toBeGreaterThan(40);
   expect(weakRings(rings)).toEqual([]);
 
-  // The folded reference content too: its tables' scroll regions are Tab stops (refinement R13.14).
+  // The folded reference content too (refinement R13.14). A table's root is a Tab stop exactly
+  // while it overflows (refinement R16.6).
   await openAllAccordions(page);
+  const scrollers = await page.evaluate(() =>
+    [...document.querySelectorAll("table")].map((table) => {
+      const root = table.parentElement;
+      return {
+        name: table.querySelector("caption")?.textContent ?? "",
+        overflows: root !== null && root.scrollWidth > root.clientWidth,
+        tabStop: root?.getAttribute("tabindex") === "0",
+      };
+    }),
+  );
+  expect(scrollers.filter((scroller) => scroller.overflows !== scroller.tabStop)).toEqual([]);
+  const overflowing = scrollers.filter((scroller) => scroller.overflows).length;
+  expect(overflowing).toBeGreaterThan(0);
   await page.locator("section h3 > button").first().focus();
   const open = await walk(page, browserName);
 
-  expect(open.filter((ring) => ring.label.startsWith("div")).length).toBeGreaterThanOrEqual(24);
+  expect(open.filter((ring) => ring.label.startsWith("div")).length).toBeGreaterThanOrEqual(
+    overflowing,
+  );
   expect(weakRings(open)).toEqual([]);
 });

@@ -10,6 +10,7 @@ import { flushSync } from "react-dom";
 import { Button } from "../Button/Button.tsx";
 import type { IconName } from "../Icon/registry.ts";
 import { cx } from "../shared/cx.ts";
+import { useOverflowFocus } from "../shared/overflow.ts";
 import { Typography } from "../Typography/Typography.tsx";
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden.tsx";
 import styles from "./CodeBlock.module.css";
@@ -66,31 +67,11 @@ export function CodeBlock({
   const labelId = useId();
   const preRef = useRef<HTMLPreElement>(null);
   const codeRef = useRef<HTMLElement>(null);
-  // Prerendered as focusable, so the block is reachable before it can be measured (R15.5).
-  const [measured, setMeasured] = useState(!wrap);
-  const focusable = !wrap && measured;
+  // The pre follows its container; the code (max-content wide) follows its longest line through
+  // text zoom, the web font loading and new children (R15.5).
+  const focusable = useOverflowFocus(preRef, codeRef, !wrap);
   const [status, setStatus] = useState<keyof typeof messages>("idle");
   const resetTimer = useRef<number>(undefined);
-
-  // The pre follows its container; the code (max-content wide) follows its longest line through
-  // text zoom, the web font loading and new children.
-  useEffect(() => {
-    const pre = preRef.current;
-    const codeElement = codeRef.current;
-    if (wrap || !pre || !codeElement) return;
-    // A focused block keeps its Tab stop until blur, so focus never drops to the body.
-    const measure = () => {
-      setMeasured(pre.scrollWidth > pre.clientWidth || document.activeElement === pre);
-    };
-    const observer = new ResizeObserver(measure);
-    observer.observe(pre);
-    observer.observe(codeElement);
-    pre.addEventListener("blur", measure);
-    return () => {
-      observer.disconnect();
-      pre.removeEventListener("blur", measure);
-    };
-  }, [wrap, code]);
 
   useEffect(
     () => () => {

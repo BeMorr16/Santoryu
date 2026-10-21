@@ -9,6 +9,7 @@ import { iconShowcase } from "./showcases/icon.tsx";
 import { linkShowcase } from "./showcases/link.tsx";
 import { menuShowcase } from "./showcases/menu.tsx";
 import { stackShowcase } from "./showcases/stack.tsx";
+import { tableShowcase } from "./showcases/table.tsx";
 import { themeSwitcherShowcase } from "./showcases/theme-switcher.tsx";
 import { tooltipShowcase } from "./showcases/tooltip.tsx";
 import { typographyShowcase } from "./showcases/typography.tsx";
@@ -22,6 +23,7 @@ export const showcases: readonly Showcase[] = [
   visuallyHiddenShowcase,
   typographyShowcase,
   codeBlockShowcase,
+  tableShowcase,
   stackShowcase,
   gridShowcase,
   cardShowcase,

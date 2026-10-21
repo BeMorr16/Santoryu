@@ -90,6 +90,8 @@ test.describe("Accordion (refinement R13)", () => {
     page,
     browserName,
   }) => {
+    // Narrow, so the props table overflows and is a Tab stop inside the open panel (refinement R16.6).
+    await page.setViewportSize({ width: 320, height: 640 });
     const reference = accordion(page);
     const props = reference.getByRole("button", { name: "Props", exact: true });
     const tokens = reference.getByRole("button", { name: "Component tokens", exact: true });
@@ -358,7 +360,7 @@ test.describe("Accordion on a touch screen (refinement R13.10)", () => {
 test.describe("Accordion at 320px wide (refinement R13.8)", () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
-  test("lets a wide table in an open panel scroll inside its region, not the page", async ({
+  test("lets a wide table in an open panel scroll inside its box, not the page", async ({
     page,
   }) => {
     await page.goto("/lab/components#button");
@@ -369,10 +371,11 @@ test.describe("Accordion at 320px wide (refinement R13.8)", () => {
     await button.click();
     await settled(page);
 
-    const region = section(page, "Button").getByRole("region", {
+    // The Table root scrolls; while it overflows it's a group named by the caption (refinement R16.6).
+    const scroller = section(page, "Button").getByRole("group", {
       name: "Button component tokens",
     });
-    const sizes = await region.evaluate((element) => ({
+    const sizes = await scroller.evaluate((element) => ({
       right: element.getBoundingClientRect().right,
       scrolls: element.scrollWidth > element.clientWidth,
       page: document.documentElement.scrollWidth - document.documentElement.clientWidth,

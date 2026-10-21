@@ -56,7 +56,11 @@ function ComponentTokens({ component }: { component: string }) {
       <h3 id={headingId}>
         <code>{component}</code>
       </h3>
-      <ComponentTokenTable component={component} caption={`${component} component tokens`} />
+      <ComponentTokenTable
+        component={component}
+        caption={`${component} component tokens`}
+        hideCaption
+      />
     </section>
   );
 }
