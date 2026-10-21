@@ -1,5 +1,6 @@
 // The component library's public API (R3.1): every component and its props type.
 export * from "./Accordion/index.ts";
+export * from "./BackToTop/index.ts";
 export * from "./Badge/index.ts";
 export * from "./Button/index.ts";
 export * from "./Card/index.ts";

@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, useState } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Link, Meta, Outlet, createRoutesStub } from "react-router";
@@ -6,6 +6,25 @@ import { describe, expect, it } from "vitest";
 import { resize } from "../../test/resize-observer.ts";
 import stackStyles from "../components/Stack/Stack.module.css";
 import { SiteShell } from "./SiteShell.tsx";
+
+/** A stateful aside, so a test can tell a remount (state reset) from a re-render. */
+function TestAside() {
+  const [open, setOpen] = useState(false);
+  return (
+    <nav aria-label="Aside">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        Toggle
+      </button>
+      <Link to="/with-aside/other">Other page</Link>
+    </nav>
+  );
+}
 
 function renderAt(path: string, { strict = false } = {}) {
   const Stub = createRoutesStub([
@@ -31,13 +50,28 @@ function renderAt(path: string, { strict = false } = {}) {
           meta: () => [{ title: "Home title" }],
         },
         {
-          path: "lab",
-          Component: () => <h1>Lab page</h1>,
-          meta: () => [{ title: "Lab title" }],
+          path: "design-system",
+          Component: () => <h1>Design System page</h1>,
+          meta: () => [{ title: "Design System title" }],
         },
-        { path: "lab/tokens", Component: () => <h1>Tokens page</h1> },
-        { path: "lab/components", Component: () => <h1>Components page</h1> },
+        { path: "design-system/tokens", Component: () => <h1>Tokens page</h1> },
+        { path: "design-system/components", Component: () => <h1>Components page</h1> },
         { path: "plain", Component: () => <p>No heading here</p> },
+        {
+          path: "with-aside",
+          handle: { Aside: TestAside },
+          Component: () => <h1>Aside page</h1>,
+        },
+        {
+          path: "no-back-to-top",
+          handle: { backToTop: false },
+          Component: () => <h1>No Back to top</h1>,
+        },
+        {
+          path: "with-aside/other",
+          handle: { Aside: TestAside },
+          Component: () => <h1>Other aside page</h1>,
+        },
       ],
     },
   ]);
@@ -67,7 +101,7 @@ describe("SiteShell", () => {
   });
 
   it("puts the site name link to / in the header", () => {
-    renderAt("/lab");
+    renderAt("/design-system");
 
     const banner = screen.getByRole("banner");
     expect(within(banner).getByRole("link", { name: "Ben" })).toHaveAttribute("href", "/");
@@ -140,17 +174,20 @@ describe("SiteShell", () => {
     expect(screen.getByRole("main")).toHaveFocus();
   });
 
-  it("links Home and Lab in the primary nav", () => {
+  it("links Home and Design System in the primary nav (R1.6)", () => {
     renderAt("/");
 
     const nav = screen.getByRole("navigation", { name: "Primary" });
     expect(within(nav).getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
-    expect(within(nav).getByRole("link", { name: "Lab" })).toHaveAttribute("href", "/lab");
+    expect(within(nav).getByRole("link", { name: "Design System" })).toHaveAttribute(
+      "href",
+      "/design-system",
+    );
   });
 
   it.each([
-    ["/", "Home", "Lab"],
-    ["/lab", "Lab", "Home"],
+    ["/", "Home", "Design System"],
+    ["/design-system", "Design System", "Home"],
   ])("on %s marks only %s as the current page", (path, current, other) => {
     renderAt(path);
 
@@ -162,44 +199,46 @@ describe("SiteShell", () => {
     expect(within(nav).getByRole("link", { name: other })).not.toHaveAttribute("aria-current");
   });
 
-  it.each(["/lab/tokens", "/lab/components"])(
-    "on %s marks no primary nav link as current (R14.5)",
+  it.each(["/design-system/tokens", "/design-system/components"])(
+    "on %s marks Design System as current with aria-current=true, and not Home (R1.6)",
     async (path) => {
       renderAt(path);
 
       const nav = await screen.findByRole("navigation", { name: "Primary" });
-      for (const link of within(nav).getAllByRole("link")) {
-        expect(link).not.toHaveAttribute("aria-current");
-      }
+      expect(within(nav).getByRole("link", { name: "Design System" })).toHaveAttribute(
+        "aria-current",
+        "true",
+      );
+      expect(within(nav).getByRole("link", { name: "Home" })).not.toHaveAttribute("aria-current");
     },
   );
 
-  it("navigates client-side to Lab, updating content and title, and focuses its h1 (refinement R11.1)", async () => {
+  it("navigates client-side to Design System, updating content and title, and focuses its h1 (refinement R11.1)", async () => {
     const user = userEvent.setup();
     renderAt("/");
     const main = screen.getByRole("main");
     expect(await screen.findByRole("heading", { level: 1, name: "Home page" })).toBeVisible();
 
-    await user.click(screen.getByRole("link", { name: "Lab" }));
+    await user.click(screen.getByRole("link", { name: "Design System" }));
 
-    const heading = await screen.findByRole("heading", { level: 1, name: "Lab page" });
+    const heading = await screen.findByRole("heading", { level: 1, name: "Design System page" });
     expect(heading).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Home page" })).not.toBeInTheDocument();
     expect(screen.getByRole("main")).toBe(main);
     expect(heading).toHaveFocus();
     expect(heading).toHaveAttribute("tabindex", "-1");
-    expect(document.title).toBe("Lab title");
+    expect(document.title).toBe("Design System title");
   });
 
   it("focuses the new page's h1 after keyboard navigation from the nav (refinement R11.1)", async () => {
     const user = userEvent.setup();
     renderAt("/");
-    const lab = screen.getByRole("link", { name: "Lab" });
+    const designSystem = screen.getByRole("link", { name: "Design System" });
 
-    lab.focus();
+    designSystem.focus();
     await user.keyboard("{Enter}");
 
-    const heading = await screen.findByRole("heading", { level: 1, name: "Lab page" });
+    const heading = await screen.findByRole("heading", { level: 1, name: "Design System page" });
     expect(heading).toHaveFocus();
     expect(heading).toHaveAttribute("tabindex", "-1");
   });
@@ -216,11 +255,63 @@ describe("SiteShell", () => {
 
   it("leaves focus on the link when activating the current page's link", async () => {
     const user = userEvent.setup();
-    renderAt("/lab");
-    const lab = await screen.findByRole("link", { name: "Lab" });
+    renderAt("/design-system");
+    const designSystem = await screen.findByRole("link", { name: "Design System" });
 
-    await user.click(lab);
+    await user.click(designSystem);
 
-    expect(lab).toHaveFocus();
+    expect(designSystem).toHaveFocus();
+  });
+
+  it("renders no aside when the route's handle has none", () => {
+    renderAt("/");
+
+    expect(screen.queryByRole("navigation", { name: "Aside" })).not.toBeInTheDocument();
+  });
+
+  it("renders the route handle's aside outside main and before it (ds-components R2.1)", async () => {
+    renderAt("/with-aside");
+
+    const aside = await screen.findByRole("navigation", { name: "Aside" });
+    const main = screen.getByRole("main");
+    expect(main).not.toContainElement(aside);
+    expect(aside.compareDocumentPosition(main)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(screen.getByRole("banner").compareDocumentPosition(aside)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  it("remounts the aside after a navigation, resetting its state (ds-components R2.5)", async () => {
+    const user = userEvent.setup();
+    renderAt("/with-aside");
+    const toggle = await screen.findByRole("button", { name: "Toggle" });
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(screen.getByRole("link", { name: "Other page" }));
+
+    expect(await screen.findByRole("heading", { name: "Other aside page" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Toggle" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+
+  it("renders one Back to top button after the footer by default (ds-components R5.2)", async () => {
+    renderAt("/");
+
+    const backToTop = await screen.findByRole("button", { name: "Back to top", hidden: true });
+    expect(screen.getAllByRole("button", { name: "Back to top", hidden: true })).toHaveLength(1);
+    expect(screen.getByRole("contentinfo").compareDocumentPosition(backToTop)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  it("leaves Back to top out on a route whose handle turns it off (ds-components R5.8)", async () => {
+    renderAt("/no-back-to-top");
+
+    expect(await screen.findByRole("heading", { name: "No Back to top" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Back to top", hidden: true })).toBeNull();
   });
 });

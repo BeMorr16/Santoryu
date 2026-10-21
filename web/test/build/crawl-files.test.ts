@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
 import { beforeAll, describe, expect, it } from "vitest";
+import { componentPages, componentPath } from "../../src/design-system/components/pages.ts";
 import { siteUrl } from "../../src/site.config.ts";
 
 const clientDir = fileURLToPath(new URL("../../build/client/", import.meta.url));
@@ -50,16 +51,25 @@ describe("sitemap.xml", () => {
     }
   });
 
-  it("lists the lab sub-pages (R14.2)", () => {
+  it("lists the design system sub-pages (R14.2)", () => {
     const locs = [...sitemap().getElementsByTagNameNS(sitemapNamespace, "loc")].map(
       (loc) => loc.textContent,
     );
     expect(locs).toEqual(
       expect.arrayContaining([
-        `${siteUrl}/lab`,
-        `${siteUrl}/lab/tokens`,
-        `${siteUrl}/lab/components`,
+        `${siteUrl}/design-system`,
+        `${siteUrl}/design-system/tokens`,
+        `${siteUrl}/design-system/components`,
       ]),
+    );
+  });
+
+  it("lists every component page (ds-components R1.1, R6.2)", () => {
+    const locs = [...sitemap().getElementsByTagNameNS(sitemapNamespace, "loc")].map(
+      (loc) => loc.textContent,
+    );
+    expect(locs).toEqual(
+      expect.arrayContaining(componentPages.map(({ id }) => `${siteUrl}${componentPath(id)}`)),
     );
   });
 

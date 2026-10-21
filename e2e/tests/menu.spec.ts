@@ -1,16 +1,20 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { section, storeTheme, tabKey, themes } from "./support.ts";
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
+import { main, storeTheme, tabKey, themes } from "./support.ts";
 
+/** A trigger in the Menu page's examples panel, past its main example (ds-components R4.6). */
 const menuTrigger = (page: Page, name: string) =>
-  section(page, "Menu").getByRole("button", { name, exact: true });
+  page
+    .getByRole("group", { name: "Menu examples", exact: true })
+    .getByRole("button", { name, exact: true });
 const actions = (page: Page) => menuTrigger(page, "Project actions");
 
 async function popupOf(page: Page, trigger: Locator) {
   return page.locator(`[id="${(await trigger.getAttribute("aria-controls")) ?? ""}"]`);
 }
 
-/** The live line after a menu in its lab example. */
+/** The live line after a menu in its showcase example. */
 const liveLine = (trigger: Locator) => trigger.locator("xpath=../following-sibling::p[1]");
 
 const item = (menu: Locator, name: string) =>
@@ -43,7 +47,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
   test("opens on Enter at the first item, moves, wraps, types ahead, and activates", async ({
     page,
   }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
     const trigger = actions(page);
     const menu = await popupOf(page, trigger);
 
@@ -72,7 +76,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
   });
 
   test("opens with ArrowDown on the first item and ArrowUp on the last", async ({ page }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
     const trigger = actions(page);
     const menu = await popupOf(page, trigger);
 
@@ -88,7 +92,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
   test("runs an action with Space, closes, and doesn't reopen on the key release", async ({
     page,
   }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
     const trigger = actions(page);
     const menu = await popupOf(page, trigger);
 
@@ -106,7 +110,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
   test("opens on the checked radio item, checks with Space and stays open, and closes on Enter (refinement R5.9)", async ({
     page,
   }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
     const trigger = menuTrigger(page, "Sort by");
     const menu = await popupOf(page, trigger);
 
@@ -131,7 +135,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
   test("toggles a checkbox item with Space and stays open, and closes on Enter (refinement R5.9)", async ({
     page,
   }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
     const trigger = menuTrigger(page, "View");
     const menu = await popupOf(page, trigger);
 
@@ -151,7 +155,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
   });
 
   test("never activates a disabled item, and stays open", async ({ page }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
     const trigger = actions(page);
     const menu = await popupOf(page, trigger);
 
@@ -165,7 +169,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
   });
 
   test("closes on Escape with focus back on the trigger", async ({ page }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
     const trigger = actions(page);
     const menu = await popupOf(page, trigger);
 
@@ -177,7 +181,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
   });
 
   test("closes on Tab and lets focus move on", async ({ page, browserName }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
     const trigger = actions(page);
     const menu = await popupOf(page, trigger);
 
@@ -191,12 +195,12 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
   });
 
   test("closes on an outside click without moving focus to the trigger", async ({ page }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
     const trigger = actions(page);
     const menu = await popupOf(page, trigger);
 
     await trigger.click();
-    await section(page, "Menu").getByRole("heading", { name: "Menu", exact: true }).click();
+    await main(page).getByRole("heading", { level: 1, name: "Menu", exact: true }).click();
 
     await expect(menu).toBeHidden();
     await expect(trigger).not.toBeFocused();
@@ -205,7 +209,7 @@ test.describe("Menu keyboard behavior with real focus (R12.3–R12.6, R16.5)", (
 
 test.describe("Menu look and pointer behavior (refinement R5)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
   });
 
   test("keeps its own item type inside larger text (R5.2)", async ({ page }) => {
@@ -255,7 +259,7 @@ test.describe("Menu look and pointer behavior (refinement R5)", () => {
     await trigger.click();
     await expect(trigger).toHaveCSS("background-color", active);
     await expect(chevron).toHaveCSS("rotate", "180deg");
-    await section(page, "Menu").getByRole("heading", { name: "Menu", exact: true }).hover();
+    await main(page).getByRole("heading", { level: 1, name: "Menu", exact: true }).hover();
     await expect(trigger).toHaveCSS("background-color", active);
 
     await page.keyboard.press("Escape");
@@ -345,7 +349,7 @@ for (const theme of themes) {
     page,
   }) => {
     await storeTheme(page, theme);
-    await page.goto("/lab/components");
+    await page.goto(componentPath("menu"));
 
     for (const name of ["View", "Contact"]) {
       const trigger = menuTrigger(page, name);
@@ -425,13 +429,13 @@ for (const mode of ["anchor", "fallback"] as const) {
                 : supports(condition, value);
         });
       }
-      await page.goto("/lab/components");
+      await page.goto(componentPath("menu"));
     });
 
     test("puts each of two menus under its own trigger", async ({ page }) => {
       for (const trigger of [
         actions(page),
-        section(page, "Button").getByRole("button", { name: /\(Button preview\)$/ }),
+        main(page).getByRole("button", { name: /\(Menu examples preview\)$/ }),
       ]) {
         await trigger.scrollIntoViewIfNeeded();
         const result = await placement(page, trigger);

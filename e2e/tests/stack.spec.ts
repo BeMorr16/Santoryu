@@ -1,15 +1,16 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test } from "@playwright/test";
-import { example, probe, section } from "./support.ts";
+import { example, main, probe } from "./support.ts";
 
 test.describe("Stack (refinement R6)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#stack");
+    await page.goto(componentPath("stack"));
   });
 
   test("wraps a horizontal Stack with no wrap prop, without overflowing (R6.1)", async ({
     page,
   }) => {
-    const list = example(section(page, "Stack"), "Wrapping by default").getByRole("list");
+    const list = example(main(page), "Wrapping by default").getByRole("list");
 
     const tops = await list
       .getByRole("listitem")
@@ -23,7 +24,7 @@ test.describe("Stack (refinement R6)", () => {
   test("takes rowGap from space.stack.* and the column gap from gap's space.inline.* (R6.2, R6.3)", async ({
     page,
   }) => {
-    const list = example(section(page, "Stack"), "Row and column gaps").getByRole("list");
+    const list = example(main(page), "Row and column gaps").getByRole("list");
 
     await expect(list).toHaveCSS("row-gap", await probe(list, "row-gap", "var(--space-stack-xs)"));
     await expect(list).toHaveCSS(
@@ -35,7 +36,7 @@ test.describe("Stack (refinement R6)", () => {
   test("gives a vertical Stack both gaps, so wrapped columns are spaced too (R6.3)", async ({
     page,
   }) => {
-    const stretched = example(section(page, "Stack"), "Vertical alignment")
+    const stretched = example(main(page), "Vertical alignment")
       .getByRole("button", { name: "Stretched (default)" })
       .locator("xpath=..");
 
@@ -53,7 +54,7 @@ test.describe("Stack (refinement R6)", () => {
   test("spaces a fieldset's legend from the first option by the row gap (R6.4)", async ({
     page,
   }) => {
-    const group = example(section(page, "Stack"), "Semantics").getByRole("group", {
+    const group = example(main(page), "Semantics").getByRole("group", {
       name: "Contact preference",
     });
     const expected = Number.parseFloat(
@@ -79,7 +80,7 @@ test.describe("Stack (refinement R6)", () => {
   });
 
   test("lets a class on the legend override its padding (R6.4)", async ({ page }) => {
-    const legend = example(section(page, "Stack"), "Semantics").locator("legend");
+    const legend = example(main(page), "Semantics").locator("legend");
 
     await legend.evaluate((element) => {
       const sheet = new CSSStyleSheet();

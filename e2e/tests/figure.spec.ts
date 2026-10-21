@@ -1,12 +1,14 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import {
   elkPhoto as elk,
   fallsPhoto as falls,
   missingImageSrc,
-} from "../../web/src/lab/components/showcases/figure-photos.ts";
-import { example, probe, section, storeTheme, themes, tokenColor } from "./support.ts";
+} from "../../web/src/design-system/components/showcases/figure-photos.ts";
+import { example, probe, storeTheme, themes, tokenColor } from "./support.ts";
 
-const figures = (page: Page) => section(page, "Figure");
+/** The Figure page's examples panel: past the main example, which shows the elk photo too. */
+const figures = (page: Page) => page.getByRole("group", { name: "Figure examples", exact: true });
 
 /** Scrolls a lazy image into view and waits until the browser has finished with it, loaded or not. */
 async function settle(image: Locator) {
@@ -22,7 +24,7 @@ const box = (locator: Locator) =>
 
 test.describe("Figure (refinement R18)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#figure");
+    await page.goto(componentPath("figure"));
   });
 
   for (const theme of themes) {
@@ -198,7 +200,7 @@ test.describe("Figure before its image loads (refinement R18.3)", () => {
       await route.continue();
     });
     // The held images are in view at #figure, and images in view hold back the load event.
-    await page.goto("/lab/components#figure", { waitUntil: "domcontentloaded" });
+    await page.goto(componentPath("figure"), { waitUntil: "domcontentloaded" });
     const figure = example(figures(page), "Informative with a caption").locator("figure");
     const image = figure.getByRole("img", { name: elk.alt });
     await image.scrollIntoViewIfNeeded();

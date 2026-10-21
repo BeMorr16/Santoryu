@@ -1,38 +1,43 @@
-import { expect, test, type Page } from "@playwright/test";
-import { section } from "./support.ts";
+import { expect, test, type Locator, type Page } from "@playwright/test";
+import { componentPage } from "./support.ts";
 
-const accordionTrigger = (page: Page) =>
-  section(page, "Accordion").getByRole("button", { name: "What is this site?" }).first();
+/** A component page's examples panel (ds-components R4.6), past its main example. */
+const examples = (page: Page, name: string) =>
+  page.getByRole("group", { name: `${name} examples`, exact: true });
 
 async function durations(page: Page) {
-  await page.goto("/lab/components");
-  const duration = (locator: ReturnType<Page["locator"]>) =>
+  const duration = (locator: Locator) =>
     locator.evaluate((element) => getComputedStyle(element).transitionDuration);
-  return {
-    button: await duration(
-      section(page, "Button").getByRole("button", { name: "Primary", exact: true }),
-    ),
-    card: await duration(
-      section(page, "Card").getByRole("article").filter({ hasText: "Design tokens" }),
-    ),
-    menu: await duration(
-      page.locator(
-        `[id="${(await section(page, "Menu").getByRole("button", { name: "Project actions" }).getAttribute("aria-controls")) ?? ""}"]`,
-      ),
-    ),
-    accordionPanel: await duration(
-      page.locator(`[id="${(await accordionTrigger(page).getAttribute("aria-controls")) ?? ""}"]`),
-    ),
-    accordionChevron: await duration(accordionTrigger(page).locator("svg")),
-    tooltip: await duration(
-      section(page, "Tooltip")
-        .getByRole("button", { name: "Save draft" })
-        .locator("xpath=following-sibling::span[@popover][1]"),
-    ),
-    menuChevron: await duration(
-      section(page, "Menu").getByRole("button", { name: "Project actions" }).locator("svg").last(),
-    ),
-  };
+
+  await componentPage(page, "button");
+  const button = await duration(
+    examples(page, "Button").getByRole("button", { name: "Primary", exact: true }),
+  );
+  await componentPage(page, "card");
+  const card = await duration(
+    examples(page, "Card").getByRole("article").filter({ hasText: "Design tokens" }),
+  );
+  await componentPage(page, "menu");
+  const trigger = examples(page, "Menu").getByRole("button", { name: "Project actions" });
+  const menu = await duration(
+    page.locator(`[id="${(await trigger.getAttribute("aria-controls")) ?? ""}"]`),
+  );
+  const menuChevron = await duration(trigger.locator("svg").last());
+  await componentPage(page, "accordion");
+  const accordionTrigger = examples(page, "Accordion")
+    .getByRole("button", { name: "What is this site?" })
+    .first();
+  const accordionPanel = await duration(
+    page.locator(`[id="${(await accordionTrigger.getAttribute("aria-controls")) ?? ""}"]`),
+  );
+  const accordionChevron = await duration(accordionTrigger.locator("svg"));
+  await componentPage(page, "tooltip");
+  const tooltip = await duration(
+    examples(page, "Tooltip")
+      .getByRole("button", { name: "Save draft" })
+      .locator("xpath=following-sibling::span[@popover][1]"),
+  );
+  return { button, card, menu, accordionPanel, accordionChevron, tooltip, menuChevron };
 }
 
 test("component transitions run at their token durations by default", async ({ page }) => {

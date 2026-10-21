@@ -38,7 +38,7 @@ describe("images in the build output", () => {
     }
   });
 
-  it("refinement R18.10: emits every width of the lab's sample photos as files in assets/", () => {
+  it("refinement R18.10: emits every width of the design system's sample photos as files in assets/", () => {
     const photos = assets()
       .filter((file) => file.endsWith(".jpg"))
       .map((file) => file.replace(/-[\w-]{8}\.jpg$/, ".jpg"))

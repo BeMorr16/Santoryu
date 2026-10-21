@@ -1,5 +1,6 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { example, probe, section, tabKey } from "./support.ts";
+import { example, main, probe, tabKey } from "./support.ts";
 
 /** A card's parts: its heading and the divs that follow it (body, then footer). */
 const parts = (card: Locator) =>
@@ -23,11 +24,11 @@ const gapProbe = async (scope: Locator) =>
 
 test.describe("Card (refinement R8)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#card");
+    await page.goto(componentPath("card"));
   });
 
   test("spaces its parts by the gap token (R8.1)", async ({ page }) => {
-    const card = example(section(page, "Card"), "Parts").getByRole("article");
+    const card = example(main(page), "Parts").getByRole("article");
     const gap = Number.parseFloat(await probe(card, "padding-block-end", "var(--space-stack-sm)"));
 
     const [heading, body, footer] = await parts(card);
@@ -39,7 +40,7 @@ test.describe("Card (refinement R8)", () => {
   test("puts footers at the card's bottom edge, so they line up across a row (R8.2)", async ({
     page,
   }) => {
-    const cards = example(section(page, "Card"), "Footers line up").getByRole("listitem");
+    const cards = example(main(page), "Footers line up").getByRole("listitem");
     await expect(cards).toHaveCount(3);
 
     const bottoms: number[] = [];
@@ -62,7 +63,7 @@ test.describe("Card (refinement R8)", () => {
   test("lines up headings, bodies and footers across a row with subgrid (R8.3)", async ({
     page,
   }) => {
-    const list = example(section(page, "Card"), "Subgrid").getByRole("list");
+    const list = example(main(page), "Subgrid").getByRole("list");
     const cards = list.getByRole("listitem");
     await expect(cards).toHaveCount(3);
     const gap = await gapProbe(list);
@@ -103,7 +104,7 @@ test.describe("Card (refinement R8)", () => {
   });
 
   test("gives the heading the h4 look's size at every level (R8.4, R12.9)", async ({ page }) => {
-    const scope = example(section(page, "Card"), "Any heading level");
+    const scope = example(main(page), "Any heading level");
     const size = await probe(scope, "font-size", "var(--component-typography-h4-font-size)");
 
     const headings = scope.getByRole("heading");
@@ -114,7 +115,7 @@ test.describe("Card (refinement R8)", () => {
   });
 
   test("gives the heading headingVariant's look (R12.9)", async ({ page }) => {
-    const scope = example(section(page, "Card"), "Heading look");
+    const scope = example(main(page), "Heading look");
 
     for (const [name, look] of [
       ["Featured project", "h3"],
@@ -137,7 +138,7 @@ test.describe("Card (refinement R8)", () => {
   });
 
   test("takes each variant's surface from its own tokens (R8.5, R8.6)", async ({ page }) => {
-    const scope = example(section(page, "Card"), "Variants");
+    const scope = example(main(page), "Variants");
 
     for (const variant of ["raised", "outlined", "flat", "glass"]) {
       const card = scope.getByRole("article").filter({
@@ -172,7 +173,7 @@ test.describe("Card (refinement R8)", () => {
   }) => {
     // No transition, so the at-rest check can't pass by reading the start of one.
     await page.emulateMedia({ reducedMotion: "reduce" });
-    const scope = example(section(page, "Card"), "Linked, with a nested control");
+    const scope = example(main(page), "Linked, with a nested control");
     const linked = scope.getByRole("article").filter({ hasText: "Design tokens" });
     const nested = scope.getByRole("article").filter({ hasText: "Source on GitHub" });
     const hover = await probe(
@@ -194,7 +195,7 @@ test.describe("Card (refinement R8)", () => {
   test("keeps the heading link in the heading's look, even when current and hovered (R8.10)", async ({
     page,
   }) => {
-    const card = example(section(page, "Card"), "Linked, with a nested control")
+    const card = example(main(page), "Linked, with a nested control")
       .getByRole("article")
       .filter({ hasText: "Design tokens" });
     const heading = card.getByRole("heading");
@@ -221,7 +222,7 @@ test.describe("Card (refinement R8)", () => {
     page,
     browserName,
   }) => {
-    const card = example(section(page, "Card"), "Linked, with a nested control")
+    const card = example(main(page), "Linked, with a nested control")
       .getByRole("article")
       .filter({ hasText: "Design tokens" });
     const link = card.getByRole("link", { name: "Design tokens" });
@@ -237,10 +238,9 @@ test.describe("Card (refinement R8)", () => {
   });
 
   test("stacks nested controls above the overlay with layer.raised (R8.12)", async ({ page }) => {
-    const button = example(section(page, "Card"), "Linked, with a nested control").getByRole(
-      "button",
-      { name: "Star (example)" },
-    );
+    const button = example(main(page), "Linked, with a nested control").getByRole("button", {
+      name: "Star (example)",
+    });
     const layer = await page.evaluate(() =>
       getComputedStyle(document.documentElement).getPropertyValue("--layer-raised").trim(),
     );

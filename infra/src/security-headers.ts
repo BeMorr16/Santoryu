@@ -13,7 +13,7 @@ export const SECURITY_HEADERS = {
   "permissions-policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
 } as const;
 
-/** Directives after script-src. `style-src-attr` is for the /lab specimens' style attributes and Figure's `--_ratio` (refinement R18.5). */
+/** Directives after script-src. `style-src-attr` is for the /design-system specimens' style attributes and Figure's `--_ratio` (refinement R18.5). */
 const AFTER_SCRIPT_SRC = [
   "style-src 'self'",
   "style-src-attr 'unsafe-inline'",

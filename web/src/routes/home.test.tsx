@@ -38,17 +38,17 @@ describe("home route", () => {
     );
   });
 
-  it("links to /lab with the content's descriptive accessible name", async () => {
+  it("links to /design-system with the content's descriptive accessible name", async () => {
     renderHome();
 
-    const link = await screen.findByRole("link", { name: homeContent.labLinkText });
-    expect(link).toHaveAttribute("href", "/lab");
+    const link = await screen.findByRole("link", { name: homeContent.designSystemLinkText });
+    expect(link).toHaveAttribute("href", "/design-system");
   });
 
-  it("uses the library Link for the lab link (refinement R4.10)", async () => {
+  it("uses the library Link for the design system link (refinement R4.10)", async () => {
     renderHome();
 
-    expect(await screen.findByRole("link", { name: homeContent.labLinkText })).toHaveClass(
+    expect(await screen.findByRole("link", { name: homeContent.designSystemLinkText })).toHaveClass(
       linkStyles.link ?? "",
     );
   });

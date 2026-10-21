@@ -227,14 +227,20 @@ describe("library types", () => {
         <Link key="c" href="https://github.com/" rel="me" newTab showVisited>
           GitHub
         </Link>,
-        <Link key="d" href="/lab" prefetch="intent" state={{ from: "home" }} currentMatch="section">
-          Lab
+        <Link
+          key="d"
+          href="/design-system"
+          prefetch="intent"
+          state={{ from: "home" }}
+          currentMatch="section"
+        >
+          Design System
         </Link>,
-        <Link key="e" href="/lab" aria-current={false}>
-          Lab
+        <Link key="e" href="/design-system" aria-current={false}>
+          Design System
         </Link>,
-        <Link key="f" href="/lab" underline="hover">
-          Lab
+        <Link key="f" href="/design-system" underline="hover">
+          Design System
         </Link>,
       ];
     }

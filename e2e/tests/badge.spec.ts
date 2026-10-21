@@ -1,5 +1,6 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator } from "@playwright/test";
-import { example, probe, section } from "./support.ts";
+import { example, main, probe } from "./support.ts";
 
 /** Width, its container's width, overflow and the number of lines its text runs over. */
 const fit = (element: Locator) =>
@@ -34,13 +35,13 @@ const px = async (scope: Locator, value: string) =>
 
 test.describe("Badge (refinement R9)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#badge");
+    await page.goto(componentPath("badge"));
   });
 
   test("takes its line height and weight from its own tokens, even inside strong and a heading (R9.1)", async ({
     page,
   }) => {
-    const scope = example(section(page, "Badge"), "In running text, with inline markup");
+    const scope = example(main(page), "In running text, with inline markup");
     const live = badge(scope, "Live");
     const lineHeight = await probe(live, "line-height", "var(--component-badge-line-height)");
     const fontWeight = await probe(live, "font-weight", "var(--component-badge-font-weight)");
@@ -62,7 +63,7 @@ test.describe("Badge (refinement R9)", () => {
   });
 
   test("keeps the spaces around inline children (R9.2)", async ({ page }) => {
-    const built = example(section(page, "Badge"), "In running text, with inline markup").getByText(
+    const built = example(main(page), "In running text, with inline markup").getByText(
       "Built with",
     );
     await expect(built).toHaveCSS("display", "inline-block");
@@ -88,14 +89,11 @@ test.describe("Badge (refinement R9)", () => {
 
   test("wraps inside a narrow container instead of overflowing (R9.3)", async ({ page }) => {
     const long = badge(
-      example(section(page, "Badge"), "Wraps instead of overflowing"),
+      example(main(page), "Wraps instead of overflowing"),
       "Infrastructure as code",
     );
 
-    const word = badge(
-      example(section(page, "Badge"), "Wraps instead of overflowing"),
-      "Internationalization",
-    );
+    const word = badge(example(main(page), "Wraps instead of overflowing"), "Internationalization");
 
     for (const element of [long, word]) {
       const { width, container, overflow, lines } = await fit(element);
@@ -107,7 +105,7 @@ test.describe("Badge (refinement R9)", () => {
 
   test("causes no horizontal scroll at 320px (R9.3)", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
-    const badges = section(page, "Badge");
+    const badges = main(page);
     await badges.scrollIntoViewIfNeeded();
 
     expect(
@@ -116,7 +114,7 @@ test.describe("Badge (refinement R9)", () => {
       ),
     ).toBe(0);
     for (const element of await badges
-      .locator('[role="group"] > p:first-child + div')
+      .locator('[role="group"] > h3:first-child + div')
       .locator("span, li")
       .all()) {
       expect(await element.evaluate((node) => node.scrollWidth - node.clientWidth)).toBe(0);
@@ -130,7 +128,7 @@ test.describe("Badge (refinement R9)", () => {
   });
 
   test("is a pill with room at its ends, at both sizes (R9.4, R9.5)", async ({ page }) => {
-    const sizes = example(section(page, "Badge"), "Sizes");
+    const sizes = example(main(page), "Sizes");
     const padding = await probe(sizes, "padding-inline-start", "var(--space-inline-sm)");
 
     for (const text of ["Small", "Medium"]) {
@@ -145,7 +143,7 @@ test.describe("Badge (refinement R9)", () => {
   test("keeps a wrapped badge's corners one line round, so no letter is cut (R9.4)", async ({
     page,
   }) => {
-    const wraps = example(section(page, "Badge"), "Wraps instead of overflowing");
+    const wraps = example(main(page), "Wraps instead of overflowing");
 
     for (const text of ["Infrastructure as code", "Internationalization"]) {
       const { radius, height, lineHeight, border } = await corners(badge(wraps, text));
@@ -155,7 +153,7 @@ test.describe("Badge (refinement R9)", () => {
   });
 
   test("takes each variant's colors from its own tokens (R9.6)", async ({ page }) => {
-    const variants = example(section(page, "Badge"), "Variants");
+    const variants = example(main(page), "Variants");
 
     for (const [variant, text] of [
       ["neutral", "Neutral"],
@@ -180,7 +178,7 @@ test.describe("Badge (refinement R9)", () => {
   });
 
   test("spaces the icon from the text by the gap token (R9.9)", async ({ page }) => {
-    const icons = example(section(page, "Badge"), "With an icon");
+    const icons = example(main(page), "With an icon");
     const gap = await px(icons, "var(--space-inline-xs)");
     expect(gap).toBeGreaterThan(0);
 

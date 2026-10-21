@@ -216,12 +216,18 @@ describe("Link", () => {
   });
 
   it.each([
-    ["an exact match", "/lab/tokens", "/lab/tokens", undefined, "page"],
-    ["a trailing slash", "/lab/tokens/", "/lab/tokens", undefined, "page"],
-    ["a different case", "/Lab/Tokens", "/lab/tokens", undefined, "page"],
-    ["a query and hash", "/lab/tokens", "/lab/tokens?view=all#color", undefined, "page"],
-    ["a child page with section", "/lab/tokens", "/lab", "section", "true"],
-    ["the same page with section", "/lab", "/lab", "section", "page"],
+    ["an exact match", "/design-system/tokens", "/design-system/tokens", undefined, "page"],
+    ["a trailing slash", "/design-system/tokens/", "/design-system/tokens", undefined, "page"],
+    ["a different case", "/Design-System/Tokens", "/design-system/tokens", undefined, "page"],
+    [
+      "a query and hash",
+      "/design-system/tokens",
+      "/design-system/tokens?view=all#color",
+      undefined,
+      "page",
+    ],
+    ["a child page with section", "/design-system/tokens", "/design-system", "section", "true"],
+    ["the same page with section", "/design-system", "/design-system", "section", "page"],
   ] as const)("marks %s as current (refinement R4.8)", async (_kind, at, href, match, expected) => {
     renderAt(
       at,
@@ -237,9 +243,9 @@ describe("Link", () => {
   });
 
   it.each([
-    ["a child page without section", "/lab/tokens", "/lab", undefined],
-    ["a child page of / with section", "/lab", "/", "section"],
-    ["a sibling sharing a prefix", "/labs", "/lab", "section"],
+    ["a child page without section", "/design-system/tokens", "/design-system", undefined],
+    ["a child page of / with section", "/design-system", "/", "section"],
+    ["a sibling sharing a prefix", "/design-systems", "/design-system", "section"],
   ] as const)("doesn't mark %s (refinement R4.8)", async (_kind, at, href, match) => {
     renderAt(
       at,
@@ -253,10 +259,10 @@ describe("Link", () => {
 
   it("never marks a plain link (refinement R4.8)", async () => {
     renderAt(
-      "/lab",
+      "/design-system",
       <>
-        <Link href="#lab">Hash</Link>
-        <Link href="https://example.com/lab">Absolute</Link>
+        <Link href="#design-system">Hash</Link>
+        <Link href="https://example.com/design-system">Absolute</Link>
       </>,
     );
 
@@ -272,13 +278,13 @@ describe("Link", () => {
     "lets the caller's aria-current=%s win (refinement R4.8)",
     async (value, expected) => {
       renderAt(
-        "/lab",
-        <Link href="/lab" aria-current={value}>
-          Lab
+        "/design-system",
+        <Link href="/design-system" aria-current={value}>
+          Design System
         </Link>,
       );
 
-      expect(await screen.findByRole("link", { name: "Lab" })).toHaveAttribute(
+      expect(await screen.findByRole("link", { name: "Design System" })).toHaveAttribute(
         "aria-current",
         expected,
       );
@@ -287,18 +293,20 @@ describe("Link", () => {
 
   it("doesn't mark a button-styled link by itself, but keeps the caller's aria-current (refinement R4.8)", async () => {
     renderAt(
-      "/lab",
+      "/design-system",
       <>
-        <Link href="/lab" appearance="button">
-          Lab
+        <Link href="/design-system" appearance="button">
+          Design System
         </Link>
-        <Link href="/lab" appearance="button" aria-current="page">
+        <Link href="/design-system" appearance="button" aria-current="page">
           Marked
         </Link>
       </>,
     );
 
-    expect(await screen.findByRole("link", { name: "Lab" })).not.toHaveAttribute("aria-current");
+    expect(await screen.findByRole("link", { name: "Design System" })).not.toHaveAttribute(
+      "aria-current",
+    );
     expect(screen.getByRole("link", { name: "Marked" })).toHaveAttribute("aria-current", "page");
   });
 
@@ -342,13 +350,13 @@ describe("Link", () => {
   it("follows a routed link by keyboard, moving the mark (R5.2, refinement R4.8)", async () => {
     const user = userEvent.setup();
     renderAt(
-      "/lab",
+      "/design-system",
       <>
-        <Link href="/lab">Lab</Link>
-        <Link href="/lab/tokens">Tokens</Link>
+        <Link href="/design-system">Design System</Link>
+        <Link href="/design-system/tokens">Tokens</Link>
       </>,
     );
-    await screen.findByRole("link", { name: "Lab" });
+    await screen.findByRole("link", { name: "Design System" });
 
     await user.tab();
     await user.tab();
@@ -356,23 +364,23 @@ describe("Link", () => {
     await user.keyboard("{Enter}");
 
     expect(screen.getByRole("link", { name: "Tokens" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Lab" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "Design System" })).not.toHaveAttribute("aria-current");
   });
 
   it("moves the mark after client-side navigation (refinement R4.8)", async () => {
     const user = userEvent.setup();
     renderAt(
-      "/lab",
+      "/design-system",
       <>
-        <Link href="/lab">Lab</Link>
-        <Link href="/lab/tokens">Tokens</Link>
+        <Link href="/design-system">Design System</Link>
+        <Link href="/design-system/tokens">Tokens</Link>
       </>,
     );
 
     await user.click(await screen.findByRole("link", { name: "Tokens" }));
 
     expect(screen.getByRole("link", { name: "Tokens" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Lab" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "Design System" })).not.toHaveAttribute("aria-current");
   });
 
   it("adds the visited class only with showVisited (refinement R4.9)", () => {
@@ -471,10 +479,10 @@ describe("Link", () => {
 
   it("hydrates a current routed link with no mismatch (R3.6, refinement R4.8)", () => {
     expectHydratesCleanly(
-      <MemoryRouter initialEntries={["/lab/tokens"]}>
-        <Link href="/lab/tokens">Tokens</Link>
-        <Link href="/lab" currentMatch="section">
-          Lab
+      <MemoryRouter initialEntries={["/design-system/tokens"]}>
+        <Link href="/design-system/tokens">Tokens</Link>
+        <Link href="/design-system" currentMatch="section">
+          Design System
         </Link>
       </MemoryRouter>,
     );

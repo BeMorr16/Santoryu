@@ -3,8 +3,10 @@
  * this file. Per-icon SSR imports keep the bundle to these icons (R6.6) and need no React context.
  */
 import type { IconWeight as PhosphorWeight } from "@phosphor-icons/react";
+import { ArrowLeftIcon } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut";
+import { ArrowUpIcon } from "@phosphor-icons/react/dist/ssr/ArrowUp";
 import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
 import { CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
 import { CopyIcon } from "@phosphor-icons/react/dist/ssr/Copy";
@@ -19,7 +21,9 @@ export const icons = {
   sun: SunIcon,
   moon: MoonIcon,
   "external-link": ArrowSquareOutIcon,
+  "arrow-left": ArrowLeftIcon,
   "arrow-right": ArrowRightIcon,
+  "arrow-up": ArrowUpIcon,
   "chevron-down": CaretDownIcon,
   check: CheckIcon,
   copy: CopyIcon,

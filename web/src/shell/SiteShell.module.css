@@ -59,6 +59,25 @@
   border-radius: var(--radius-control);
 }
 
+/* The middle row: main alone, or a route's aside (ds-components design §4) above it, then beside it. */
+.body {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.withAside {
+  grid-template-rows: auto 1fr;
+}
+
+/* size.breakpoint.md: the aside becomes a column at the inline start. */
+@media (min-width: 48em) {
+  .withAside {
+    grid-template-rows: 1fr;
+    grid-template-columns: var(--size-column-sm) minmax(0, 1fr);
+  }
+}
+
 .main {
   padding: var(--space-layout-sm) var(--space-layout-xs);
 }

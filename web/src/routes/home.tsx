@@ -22,7 +22,7 @@ export default function Home() {
         {homeContent.intro}
       </Typography>
       <p>
-        <Link href="/lab">{homeContent.labLinkText}</Link>
+        <Link href="/design-system">{homeContent.designSystemLinkText}</Link>
       </p>
     </>
   );

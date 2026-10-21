@@ -44,9 +44,9 @@ describe("webfonts in the build output", () => {
 
   it.each([
     "index.html",
-    "lab/index.html",
-    "lab/tokens/index.html",
-    "lab/components/index.html",
+    "design-system/index.html",
+    "design-system/tokens/index.html",
+    "design-system/components/index.html",
     "404.html",
   ])("R1.6: %s preloads Inter and Space Grotesk from files in the build", (page) => {
     expect(pages()).toContain(page);

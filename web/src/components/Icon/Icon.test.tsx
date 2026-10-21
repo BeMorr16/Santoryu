@@ -13,7 +13,9 @@ const names = Object.keys(icons) as IconName[];
 describe("Icon", () => {
   it("names its icons by shape (refinement R1.3)", () => {
     expect(names.toSorted()).toEqual([
+      "arrow-left",
       "arrow-right",
+      "arrow-up",
       "check",
       "chevron-down",
       "copy",

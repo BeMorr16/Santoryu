@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { buildCsp } from "infra/src/security-headers.ts";
-import { missingImageSrc } from "../../web/src/lab/components/showcases/figure-photos.ts";
+import { missingImageSrc } from "../../web/src/design-system/components/showcases/figure-photos.ts";
 import { readManifest } from "../build.ts";
+import { pages } from "./support.ts";
 
 const manifest = readManifest();
-const pages = ["/", "/lab", "/lab/tokens", "/lab/components", "/nope"];
 
 declare global {
   interface Window {
@@ -76,11 +76,55 @@ for (const path of pages) {
 }
 
 test.describe("routing matches production", () => {
-  test("redirects /lab/ to the canonical path with a 301", async ({ request }) => {
+  test("redirects /design-system/ to the canonical path with a 301", async ({ request }) => {
+    const response = await request.get("/design-system/", { maxRedirects: 0 });
+
+    expect(response.status()).toBe(301);
+    expect(response.headers().location).toBe("https://127.0.0.1:4173/design-system");
+  });
+
+  // The old section's URLs simply stop existing: no redirects (ds-components R1.2), and an unknown
+  // component id gets the not-found page too (R4.10).
+  for (const path of [
+    "/lab",
+    "/lab/tokens",
+    "/lab/components",
+    "/lab/components/button",
+    "/design-system/components/nope",
+  ]) {
+    test(`serves ${path} as a 404 with the not-found page`, async ({ request }) => {
+      const response = await request.get(path, { maxRedirects: 0 });
+
+      expect(response.status()).toBe(404);
+      expect(await response.text()).toContain("Page not found");
+    });
+  }
+
+  test("redirects /lab/ to /lab like any trailing slash, which is then a 404 (R1.2)", async ({
+    request,
+  }) => {
     const response = await request.get("/lab/", { maxRedirects: 0 });
 
     expect(response.status()).toBe(301);
     expect(response.headers().location).toBe("https://127.0.0.1:4173/lab");
+  });
+
+  test("shows the not-found page on a client-side visit to an unknown component page (R4.10)", async ({
+    page,
+  }) => {
+    await page.goto("/design-system/components/button");
+    await expect(page.getByRole("heading", { level: 1, name: "Button" })).toBeVisible();
+    // A history entry plus popstate makes the router navigate in place, as a client-side visit does.
+    await page.evaluate(() => {
+      (window as Window & { samePage?: boolean }).samePage = true;
+      history.pushState(null, "", "/design-system/components/nope");
+      dispatchEvent(new PopStateEvent("popstate"));
+    });
+
+    await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
+    expect(await page.evaluate(() => (window as Window & { samePage?: boolean }).samePage)).toBe(
+      true,
+    );
   });
 
   test("serves an unknown path as a 404 with the not-found page", async ({ request }) => {

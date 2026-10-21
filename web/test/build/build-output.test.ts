@@ -17,25 +17,26 @@ const pages = [
     bodyText: homeContent.intro,
   },
   {
-    file: "lab/index.html",
-    title: "Lab · Ben",
-    canonical: `${siteUrl}/lab`,
-    h1: "Lab",
+    file: "design-system/index.html",
+    title: "Design System · Ben",
+    canonical: `${siteUrl}/design-system`,
+    h1: "Design System",
     bodyText: "Components",
   },
   {
-    file: "lab/tokens/index.html",
-    title: "Tokens · Lab · Ben",
-    canonical: `${siteUrl}/lab/tokens`,
+    file: "design-system/tokens/index.html",
+    title: "Tokens · Design System · Ben",
+    canonical: `${siteUrl}/design-system/tokens`,
     h1: "Tokens",
     bodyText: "--component-button-primary-background",
   },
   {
-    file: "lab/components/index.html",
-    title: "Components · Lab · Ben",
-    canonical: `${siteUrl}/lab/components`,
+    file: "design-system/components/index.html",
+    title: "Components · Design System · Ben",
+    canonical: `${siteUrl}/design-system/components`,
     h1: "Components",
-    bodyText: "Back to Lab",
+    bodyText: "Principles",
+    docs: true,
   },
   {
     file: "404.html",
@@ -68,11 +69,15 @@ beforeAll(() => {
 describe("build output files", () => {
   it("emits each route as <route>/index.html and the not-found page as a root 404.html (R14.2)", () => {
     expect(existsSync(`${clientDir}index.html`)).toBe(true);
-    expect(existsSync(`${clientDir}lab/index.html`)).toBe(true);
-    expect(existsSync(`${clientDir}lab/tokens/index.html`)).toBe(true);
-    expect(existsSync(`${clientDir}lab/components/index.html`)).toBe(true);
+    expect(existsSync(`${clientDir}design-system/index.html`)).toBe(true);
+    expect(existsSync(`${clientDir}design-system/tokens/index.html`)).toBe(true);
+    expect(existsSync(`${clientDir}design-system/components/index.html`)).toBe(true);
     expect(existsSync(`${clientDir}404.html`)).toBe(true);
     expect(existsSync(`${clientDir}404`)).toBe(false);
+  });
+
+  it("emits nothing under lab/ (ds-components R1.2)", () => {
+    expect(existsSync(`${clientDir}lab`)).toBe(false);
   });
 
   it("does not emit __spa-fallback.html", () => {
@@ -138,9 +143,9 @@ describe.each(pages)("$file", (page) => {
     expect(body().getByRole("main").textContent).toContain(page.bodyText);
   });
 
-  it("has exactly one banner, Primary navigation, main and contentinfo landmark", () => {
+  it("has exactly one banner, Primary navigation, main and contentinfo landmark (and on docs pages, a Components navigation)", () => {
     expect(body().getAllByRole("banner")).toHaveLength(1);
-    expect(body().getAllByRole("navigation")).toHaveLength(1);
+    expect(body().getAllByRole("navigation")).toHaveLength("docs" in page ? 2 : 1);
     expect(body().getByRole("navigation", { name: "Primary" })).toBeTruthy();
     expect(body().getAllByRole("main")).toHaveLength(1);
     expect(body().getAllByRole("contentinfo")).toHaveLength(1);

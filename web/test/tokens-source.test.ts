@@ -63,7 +63,7 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
     semantic: ["inset", "stack", "inline", "layout"],
   },
   size: {
-    primitive: ["4", "5", "6", "8", "10", "48", "64", "80", "120", "viewport-height"],
+    primitive: ["4", "5", "6", "8", "10", "48", "64", "80", "120", "192", "320", "viewport-height"],
     semantic: ["control", "icon", "column", "pattern", "breakpoint", "viewport"],
   },
   radius: {
@@ -79,7 +79,8 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
 };
 
 // Every semantic token, per site-foundation design §4.3, component-library design §4.1,
-// component-library-refinement design §3.3, §9.3, §13.3, §15.6 and §16.5, and palette-expansion design §3.
+// component-library-refinement design §3.3, §9.3, §13.3, §15.6 and §16.5, palette-expansion design §3,
+// and ds-components design §10.
 // Adding or renaming one is a one-way door.
 const expectedSemantic = [
   "color.surface.base",
@@ -173,6 +174,8 @@ const expectedSemantic = [
   "size.column.lg",
   "size.pattern.cell",
   "size.breakpoint.sm",
+  "size.breakpoint.md",
+  "size.breakpoint.lg",
   "size.viewport.image",
   "radius.control",
   "radius.surface",

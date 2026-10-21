@@ -126,7 +126,7 @@ describe("Separator", () => {
         <Stack direction="horizontal" gap="sm" align="center">
           <span>Home</span>
           <Separator orientation="vertical" />
-          <span>Lab</span>
+          <span>Design System</span>
         </Stack>
         <Stack direction="horizontal" gap="sm" align="center">
           <span>21 Oct 2026</span>

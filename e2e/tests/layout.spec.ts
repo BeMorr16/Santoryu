@@ -1,13 +1,14 @@
 import { expect, test } from "@playwright/test";
-import { openAllAccordions, section, tabKey } from "./support.ts";
+import { componentsPath } from "../../web/src/design-system/components/pages.ts";
+import { componentPage, openAllAccordions, pages, tabKey } from "./support.ts";
 
 test.describe("at 320px wide", () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
   test("Grid shows one column with no horizontal overflow (R9.2)", async ({ page }) => {
-    await page.goto("/lab/components");
-
-    const examples = section(page, "Grid").getByRole("group", { name: "Grid examples" });
+    const examples = (await componentPage(page, "grid")).getByRole("group", {
+      name: "Grid examples",
+    });
     const grids = [
       ...(await examples.getByRole("list").all()),
       examples.getByRole("group", { name: "Projects to show" }),
@@ -32,14 +33,18 @@ test.describe("at 320px wide", () => {
   test("the code sample scrolls inside its block, as a Tab stop, instead of the page scrolling sideways (refinement R15.4, R15.5)", async ({
     page,
   }) => {
-    await page.goto("/lab/components");
-    // Measured, not prerendered: at a wide window the CodeBlock section's Basic block fits and
+    // Measured, not prerendered: at a wide window the CodeBlock page's Basic block fits and
     // drops its Tab stop, and narrowing again brings the Button sample's back.
     await page.setViewportSize({ width: 1280, height: 720 });
-    await expect(section(page, "CodeBlock").locator("pre").first()).not.toHaveAttribute("tabindex");
+    const codeBlocks = await componentPage(page, "code-block");
+    await expect(
+      codeBlocks.getByRole("group", { name: "CodeBlock examples" }).locator("pre").first(),
+    ).not.toHaveAttribute("tabindex");
     await page.setViewportSize({ width: 320, height: 640 });
 
-    const code = section(page, "Button").locator("pre");
+    const code = (await componentPage(page, "button"))
+      .getByRole("group", { name: "Button examples" })
+      .locator("pre");
     expect(
       await code.evaluate((element) => element.scrollWidth - element.clientWidth),
     ).toBeGreaterThan(0);
@@ -51,10 +56,12 @@ test.describe("at 320px wide", () => {
   });
 
   test("no page scrolls sideways", async ({ page }) => {
-    for (const path of ["/", "/lab", "/lab/tokens", "/lab/components", "/nope"]) {
+    // Every docs page too (ds-components R2.7): about two dozen loads.
+    test.slow();
+    for (const path of pages) {
       await page.goto(path);
-      // The folded reference content counts too (refinement R13.15).
-      if (path === "/lab/components") await openAllAccordions(page);
+      // Folded content counts too (refinement R13.15).
+      if (path.startsWith(componentsPath)) await openAllAccordions(page);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );
@@ -65,24 +72,27 @@ test.describe("at 320px wide", () => {
 
 test.describe("link cards (R10.3, R10.5)", () => {
   test("a click on the card body follows the card's link", async ({ page }) => {
-    await page.goto("/lab/components");
+    const examples = (await componentPage(page, "card")).getByRole("group", {
+      name: "Card examples",
+    });
 
     // A real click where the text is: the link's overlay, not the body, is what it lands on.
-    const text = section(page, "Card").getByText("Every color, size and motion value");
+    const text = examples.getByText("Every color, size and motion value");
     await text.scrollIntoViewIfNeeded();
     const box = await text.boundingBox();
     if (box === null) throw new Error("card text is not visible");
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 
-    await expect(page).toHaveURL(/\/lab\/tokens$/);
+    await expect(page).toHaveURL(/\/design-system\/tokens$/);
   });
 
   test("a nested control sits above the overlay, gets its own click and its own focus", async ({
     page,
     browserName,
   }) => {
-    await page.goto("/lab/components");
-    const card = section(page, "Card");
+    const card = (await componentPage(page, "card")).getByRole("group", {
+      name: "Card examples",
+    });
     const button = card.getByRole("button", { name: "Star (example)" });
 
     await button.scrollIntoViewIfNeeded();
@@ -93,7 +103,7 @@ test.describe("link cards (R10.3, R10.5)", () => {
     });
     expect(hit).toBe(true);
     await button.click();
-    await expect(page).toHaveURL(/\/lab\/components$/);
+    await expect(page).toHaveURL(/\/design-system\/components\/card$/);
     await card.getByRole("link", { name: /^Source on GitHub/ }).focus();
     await page.keyboard.press(tabKey(browserName));
     await expect(button).toBeFocused();

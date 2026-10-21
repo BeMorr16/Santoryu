@@ -1,0 +1,39 @@
+/*
+ * Shown and hidden with opacity, a small slide and visibility. Visibility is visible while either
+ * end is, so it switches at once on show and at the end on hide, and a hidden button is out of the
+ * tab order and the accessibility tree. An element has one transition list, so this one repeats
+ * Button's hover color timing (motion.duration.instant, easing.standard) beside its own.
+ */
+.backToTop {
+  transition-property: background-color, border-color, color, opacity, translate, visibility;
+  transition-duration:
+    var(--motion-duration-instant), var(--motion-duration-instant), var(--motion-duration-instant),
+    var(--component-back-to-top-duration), var(--component-back-to-top-duration),
+    var(--component-back-to-top-duration);
+  transition-timing-function: var(--motion-easing-standard);
+}
+
+.backToTop:not([data-visible]) {
+  visibility: hidden;
+  opacity: 0;
+  translate: 0 var(--component-back-to-top-shift);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backToTop:not([data-visible]) {
+    translate: none;
+  }
+}
+
+.corner {
+  position: fixed;
+  inset-block-end: var(--component-back-to-top-offset);
+  inset-inline-end: var(--component-back-to-top-offset);
+  z-index: var(--component-back-to-top-layer);
+  box-shadow: var(--component-back-to-top-shadow);
+}
+
+/* Keeps focused content clear of the visible corner button (WCAG 2.4.11, ds-components R5.6). */
+:global(html):has(.corner[data-visible]) {
+  scroll-padding-block-end: calc(var(--size-control-md) + 2 * var(--component-back-to-top-offset));
+}

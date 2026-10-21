@@ -1,0 +1,214 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+}
+
+.example {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-stack-sm) var(--space-inline-md);
+  align-items: center;
+}
+
+/* Outlined boxes so layout examples show their gaps. */
+.box {
+  padding: var(--space-inset-sm) var(--space-inset-md);
+  border: var(--effect-border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-raised);
+}
+
+.frame {
+  border: var(--effect-border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-control);
+}
+
+.narrow {
+  max-inline-size: var(--size-column-sm);
+}
+
+/* A captioned icon in a Stack of tiles (refinement R1.7). */
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-stack-xs);
+}
+
+/*
+ * The VisuallyHidden examples' "Show hidden content" toggle (refinement R2.10): while it's pressed,
+ * each .revealable shows in place. The selector outranks VisuallyHidden's hidden rule (0,3,0),
+ * since library CSS has no layers (decision 0008).
+ */
+:has(.revealToggle[aria-pressed="true"]) .revealable.revealable {
+  position: static;
+  overflow: visible;
+  clip-path: none;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  white-space: normal;
+}
+
+/* Outlined unless focused, so a revealed skip link keeps its focus ring (WCAG 2.4.7). */
+:has(.revealToggle[aria-pressed="true"]) .revealable.revealable:not(:focus-visible) {
+  outline: var(--effect-border-width) dashed var(--color-border-strong);
+}
+
+.notes {
+  margin: 0;
+  padding-inline-start: var(--space-inline-lg);
+}
+
+.toc {
+  margin: 0;
+  padding-inline-start: var(--space-inline-lg);
+  columns: var(--size-column-sm) 3;
+}
+
+/* The documented styling API (design §4.3): override a component token on a wrapper. */
+.brandCta {
+  --component-button-primary-background: var(--color-accent-text);
+  --component-button-primary-border: var(--color-accent-text);
+  --component-button-primary-background-hover: var(--color-link-hover);
+}
+
+.quietLinks {
+  --component-link-color: var(--color-text-default);
+  --component-link-color-hover: var(--color-link-hover);
+}
+
+/* The Menu section's customized example (refinement R5.13); its CSS is shown beside it. */
+.compactMenu {
+  --component-menu-item-font-size: var(--type-size-small);
+  --component-menu-item-checked-indicator: var(--color-accent-2-text);
+}
+
+/*
+ * Behind the Card section's variants (refinement R8.14): only glass's checked backdrops, the
+ * blueprint grid on surface.base (as on body) and a band of action.background. The band stays in
+ * the right half, 60–85% down, so at any column count it misses the transparent outlined card.
+ */
+.glassBackdrop {
+  padding: var(--space-inset-lg);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-base);
+  background-image:
+    linear-gradient(
+      to bottom,
+      transparent 60%,
+      var(--color-action-background) 60% 85%,
+      transparent 85%
+    ),
+    linear-gradient(
+      to right,
+      var(--color-grid-line) var(--effect-border-width),
+      transparent var(--effect-border-width)
+    ),
+    linear-gradient(
+      to bottom,
+      var(--color-grid-line) var(--effect-border-width),
+      transparent var(--effect-border-width)
+    );
+  background-position:
+    right top,
+    0 0,
+    0 0;
+  background-repeat: no-repeat, repeat, repeat;
+  background-size:
+    50% 100%,
+    var(--size-pattern-cell) var(--size-pattern-cell),
+    var(--size-pattern-cell) var(--size-pattern-cell);
+}
+
+/* The Card section's customized example (refinement R8.14); its CSS is shown beside it. */
+.accentCard {
+  --component-card-raised-border: var(--color-accent-border);
+  --component-card-padding: var(--space-inset-md);
+}
+
+/* The Badge section's customized example (refinement R9.10); its CSS is shown beside it. */
+.customBadge {
+  --component-badge-neutral-border: var(--color-border-strong);
+  --component-badge-padding-inline-md: var(--space-inline-md);
+}
+
+/* The Accordion section's customized example (refinement R13.13); its CSS is shown beside it. */
+.customAccordion {
+  --component-accordion-border: var(--color-border-strong);
+  --component-accordion-trigger-padding-inline: var(--space-inset-md);
+  --component-accordion-panel-padding-inline: var(--space-inset-md);
+}
+
+/* The Tooltip section's customized example (refinement R14.14); its CSS is shown beside it. */
+.customTooltip {
+  --component-tooltip-background: var(--color-accent-2-fill);
+  --component-tooltip-text: var(--color-accent-2-fill-text);
+}
+
+/* The CodeBlock section's customized example (refinement R15.10); its CSS is shown in that block. */
+.customCodeBlock {
+  --component-code-block-border: var(--color-accent-border);
+  --component-code-block-label-color: var(--color-accent-text);
+}
+
+/* The Table section's Wide example (refinement R16.10): unwrapped cells, so it's wider than the panel. */
+.wideTable td {
+  white-space: nowrap;
+}
+
+/* The Table section's customized example (refinement R16.10); its CSS is shown beside it. */
+.customTable {
+  --component-table-header-background: var(--color-accent-background);
+  --component-table-border: var(--color-accent-border);
+}
+
+/* The Separator section's customized example (refinement R17.8); its CSS is shown in a CodeBlock. */
+.customSeparator {
+  --component-separator-subtle-color: var(--color-accent-border);
+}
+
+/* The Figure section's customized example (refinement R18.10); its CSS is shown in a CodeBlock. */
+.customFigure {
+  --component-figure-image-max-block-size: var(--size-column-md);
+  --component-figure-caption-gap: var(--space-stack-sm);
+}
+
+/* The Typography section's customized example (refinement R12.13); its CSS is shown beside it. */
+.customLabel {
+  --component-typography-label-tracking: var(--type-tracking-body);
+  --component-typography-label-font-family: var(--type-family-body);
+}
+
+/*
+ * The BackToTop section's customized example: containing layout makes the frame the containing
+ * block of the fixed corner placement, so the button sits in the frame's corner.
+ */
+.cornerFrame {
+  contain: layout;
+  min-block-size: var(--size-column-sm);
+  border: var(--effect-border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-control);
+}
+
+/*
+ * The framed button is fixed to its frame, not the viewport, so it never covers focused content.
+ * The page keeps BackToTop's block-end scroll padding only while the site's own button (the one
+ * outside main) shows.
+ */
+:global(html):has(.cornerFrame [data-visible]):not(:has([data-visible]:not(main *))) {
+  scroll-padding-block-end: 0;
+}
+
+/* The BackToTop section's customized example; its CSS is shown in a CodeBlock. */
+.customBackToTop {
+  --component-back-to-top-offset: var(--space-layout-sm);
+  --component-back-to-top-shadow: var(--effect-elevation-raised);
+}

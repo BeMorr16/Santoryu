@@ -1,7 +1,8 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Page } from "@playwright/test";
-import { example, probe, section, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
+import { example, main, probe, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
 
-const separators = (page: Page) => section(page, "Separator");
+const separators = (page: Page) => main(page);
 
 /** The decorative separators (empty hidden divs) of an example in the Separator section. */
 const decorativeIn = (page: Page, title: string) =>
@@ -9,7 +10,7 @@ const decorativeIn = (page: Page, title: string) =>
 
 test.describe("Separator (refinement R17)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#separator");
+    await page.goto(componentPath("separator"));
   });
 
   for (const theme of themes) {
@@ -122,7 +123,7 @@ test.describe("Separator (refinement R17)", () => {
   });
 
   test("Tab never stops on a separator (R17.2)", async ({ page, browserName }) => {
-    await page.getByRole("button", { name: /\(Separator preview\)$/ }).focus();
+    await page.getByRole("button", { name: /\(Separator examples preview\)$/ }).focus();
     const stops: string[] = [];
     for (let index = 0; index < 8; index++) {
       await page.keyboard.press(tabKey(browserName));

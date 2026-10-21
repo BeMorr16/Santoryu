@@ -1,3 +1,4 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Page } from "@playwright/test";
 import { tabKey, tokenColor } from "./support.ts";
 
@@ -13,19 +14,19 @@ test("focuses the new page's h1 after navigation, with a ring after the keyboard
 }) => {
   await page.goto("/");
 
-  await nav(page).getByRole("link", { name: "Lab" }).focus();
+  await nav(page).getByRole("link", { name: "Design System" }).focus();
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/lab$/);
-  const lab = page.getByRole("main").getByRole("heading", { level: 1 });
-  await expect(lab).toBeFocused();
-  expect(await lab.evaluate((element) => element.matches(":focus-visible"))).toBe(true);
-  await expect(lab).toHaveCSS("outline-style", "solid");
-  await expect(lab).toHaveCSS("outline-width", "2px");
-  await expect(lab).toBeInViewport();
+  await expect(page).toHaveURL(/\/design-system$/);
+  const heading = page.getByRole("main").getByRole("heading", { level: 1 });
+  await expect(heading).toBeFocused();
+  expect(await heading.evaluate((element) => element.matches(":focus-visible"))).toBe(true);
+  await expect(heading).toHaveCSS("outline-style", "solid");
+  await expect(heading).toHaveCSS("outline-width", "2px");
+  await expect(heading).toBeInViewport();
   const headerBottom = await page
     .getByRole("banner")
     .evaluate((element) => element.getBoundingClientRect().bottom);
-  expect((await lab.boundingBox())?.y).toBeGreaterThanOrEqual(headerBottom);
+  expect((await heading.boundingBox())?.y).toBeGreaterThanOrEqual(headerBottom);
 
   await nav(page).getByRole("link", { name: "Home" }).click();
   await expect(page).toHaveURL(/\/$/);
@@ -40,7 +41,7 @@ test.describe("with the header wrapped at 200% text, 320px wide (refinement R11.
     browserName,
   }) => {
     test.slow();
-    await page.goto("/lab/components");
+    await page.goto(componentPath("button"));
     // Through the CSSOM, which the CSP allows.
     await page.evaluate(() => {
       document.documentElement.style.fontSize = "200%";
@@ -73,7 +74,7 @@ test.describe("with the header wrapped at 200% text, 320px wide (refinement R11.
           clear: fits
             ? top >= headerBottom - 0.5
             : bottom > headerBottom && top < window.innerHeight,
-          inLink: focused.closest("#link") !== null,
+          atEnd: focused.closest('[aria-label="Previous and next"]') !== null,
         };
       });
     const covered: string[] = [];
@@ -82,7 +83,7 @@ test.describe("with the header wrapped at 200% text, 320px wide (refinement R11.
       await page.keyboard.press(tabKey(browserName));
       const result = await check();
       if (result === null) continue;
-      if (result.inLink) break;
+      if (result.atEnd) break;
       if (!result.clear) covered.push(`forward: ${result.label}`);
     }
     expect(steps).toBeLessThan(300);
@@ -100,7 +101,7 @@ test.describe("at 320×256, as at 400% zoom (refinement R11.4)", () => {
   test.use({ viewport: { width: 320, height: 256 } });
 
   test("puts the header in the page flow, with no scroll padding", async ({ page }) => {
-    await page.goto("/lab");
+    await page.goto("/design-system");
 
     await expect(page.getByRole("banner")).toHaveCSS("position", "static");
     expect(await rootStyle(page, "scroll-padding-top")).toBe("0px");
@@ -111,7 +112,7 @@ test.describe("at 320×640", () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
   test("keeps the header sticky (refinement R11.4)", async ({ page }) => {
-    await page.goto("/lab");
+    await page.goto("/design-system");
 
     await expect(page.getByRole("banner")).toHaveCSS("position", "sticky");
   });
@@ -134,7 +135,7 @@ test("moves focus into main from the skip link, clear of the header (R3.3)", asy
   page,
   browserName,
 }) => {
-  await page.goto("/lab");
+  await page.goto("/design-system");
 
   await page.keyboard.press(tabKey(browserName));
   await expect(page.getByRole("link", { name: "Skip to main content" })).toBeFocused();
@@ -152,7 +153,7 @@ test("moves focus into main from the skip link, clear of the header (R3.3)", asy
 test("keeps the site name text-colored, underlined only on hover (refinement R11.8)", async ({
   page,
 }) => {
-  await page.goto("/lab");
+  await page.goto("/design-system");
   const name = page.getByRole("banner").getByRole("link", { name: "Ben" });
   const text = tokenColor("color.text.default", "light");
 
@@ -167,13 +168,47 @@ test("underlines the nav's links on hover, and the current one always (refinemen
   page,
 }) => {
   await page.goto("/");
-  const lab = nav(page).getByRole("link", { name: "Lab" });
+  const designSystem = nav(page).getByRole("link", { name: "Design System" });
 
-  await expect(lab).toHaveCSS("text-decoration-line", "none");
-  await lab.hover();
-  await expect(lab).toHaveCSS("text-decoration-line", "underline");
+  await expect(designSystem).toHaveCSS("text-decoration-line", "none");
+  await designSystem.hover();
+  await expect(designSystem).toHaveCSS("text-decoration-line", "underline");
   await expect(nav(page).getByRole("link", { name: "Home" })).toHaveCSS(
     "text-decoration-line",
     "underline",
   );
+});
+
+test.describe("the nav's Design System link (ds-components R1.6)", () => {
+  for (const [path, current] of [
+    ["/design-system", "page"],
+    ["/design-system/tokens", "true"],
+    ["/design-system/components", "true"],
+    ["/design-system/components/button", "true"],
+  ] as const) {
+    test(`is aria-current="${current}" on ${path}, with Link's current look, and Home is not marked`, async ({
+      page,
+    }) => {
+      await page.goto(path);
+      const designSystem = nav(page).getByRole("link", { name: "Design System" });
+
+      await expect(designSystem).toHaveAttribute("aria-current", current);
+      await expect(designSystem).toHaveCSS("text-decoration-line", "underline");
+      await expect(nav(page).getByRole("link", { name: "Home" })).not.toHaveAttribute(
+        "aria-current",
+      );
+    });
+  }
+
+  test("is not marked on the home page, where Home is", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(nav(page).getByRole("link", { name: "Design System" })).not.toHaveAttribute(
+      "aria-current",
+    );
+    await expect(nav(page).getByRole("link", { name: "Home" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
 });

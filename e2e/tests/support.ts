@@ -1,7 +1,21 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+import {
+  componentPages,
+  componentPath,
+  componentsPath,
+  type ComponentPageId,
+} from "../../web/src/design-system/components/pages.ts";
 import { tokens } from "../../web/src/generated/tokens.ts";
 
-export const pages = ["/", "/lab", "/lab/tokens", "/lab/components", "/nope"];
+/** Every page, docs pages from the side menu's list (ds-components R7.3), and a missing one. */
+export const pages = [
+  "/",
+  "/design-system",
+  "/design-system/tokens",
+  componentsPath,
+  ...componentPages.map(({ id }) => componentPath(id)),
+  "/nope",
+];
 export const themes = ["light", "dark"] as const;
 export type Theme = (typeof themes)[number];
 
@@ -12,7 +26,7 @@ export async function storeTheme(page: Page, theme: Theme) {
   }, theme);
 }
 
-/** Sets every /lab/components preview panel's theme through its own menu. */
+/** Sets every preview panel's theme on the page through its own menu. */
 export async function setAllPanels(page: Page, theme: "Light" | "Dark" | "Site") {
   const triggers = page.getByRole("button", { name: /\(.+ preview\)$/ });
   const count = await triggers.count();
@@ -41,9 +55,14 @@ export function tokenColor(name: string, theme: Theme): string {
   return `rgb(${String(r)}, ${String(g)}, ${String(b)})`;
 }
 
-/** A section of /lab/components, by its component name. */
-export const section = (page: Page, name: string) =>
-  page.getByRole("region", { name, exact: true });
+/** Goes to a component's page (at an optional #fragment) and returns its main. */
+export async function componentPage(page: Page, id: ComponentPageId, hash = "") {
+  await page.goto(`${componentPath(id)}${hash}`);
+  return page.getByRole("main");
+}
+
+/** The page's main, where a component page's examples are. */
+export const main = (page: Page) => page.getByRole("main");
 
 /** The preview-theme trigger of a component's panel. */
 export const panelTrigger = (page: Page, name: string) =>
@@ -56,9 +75,9 @@ export const panelTrigger = (page: Page, name: string) =>
 export const tabKey = (browserName: string, shift = false) =>
   `${browserName === "webkit" ? "Alt+" : ""}${shift ? "Shift+" : ""}Tab`;
 
-/** An example in a /lab/components section, by its title. */
+/** An example on a component page (or in any scope): the group its h3 title names (R4.6). */
 export const example = (scope: Locator, title: string) =>
-  scope.getByText(title, { exact: true }).locator("xpath=..");
+  scope.getByRole("group", { name: title, exact: true });
 
 /** What `property: value` computes to inside `scope`, read from a probe element set through CSSOM. */
 export async function probe(scope: Locator, property: string, value: string) {

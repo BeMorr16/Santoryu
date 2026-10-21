@@ -1,7 +1,7 @@
 /**
  * The visitor's theme (R13.3–R13.7, R13.11): the one module the switcher and the pre-paint script
  * agree on. Until the visitor chooses Light or Dark, the page follows the OS color scheme
- * (decision 0007 F, amended 2026-10-18). lab-studio extends `ThemePreference` and this store.
+ * (decision 0007 F, amended 2026-10-18). theme-creator extends `ThemePreference` and this store.
  */
 export const themePreferences = ["light", "dark"] as const;
 

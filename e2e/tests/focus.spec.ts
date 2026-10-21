@@ -1,4 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import {
+  componentPages,
+  componentPath,
+  componentsPath,
+} from "../../web/src/design-system/components/pages.ts";
 import { openAllAccordions, tabKey } from "./support.ts";
 
 interface Ring {
@@ -66,36 +71,44 @@ const weakRings = (rings: Ring[]) =>
     .filter((ring) => ring.width < 2 || ring.contrast < 3)
     .map((ring) => `${ring.label}: ${String(ring.width)}px, ${ring.contrast.toFixed(2)}:1`);
 
-test("every control on /lab/components shows a 2px, 3:1 focus ring from the keyboard (R3.8, R16.5)", async ({
+test("every control on the docs pages shows a 2px, 3:1 focus ring from the keyboard (R3.8, R16.5)", async ({
   page,
   browserName,
 }) => {
-  test.slow();
-  await page.goto("/lab/components");
-  const rings = await walk(page, browserName);
+  // Every docs page in turn (ds-components R7.3), so the counts below cover the whole library.
+  test.setTimeout(300_000);
+  const rings: Ring[] = [];
+  const open: Ring[] = [];
+  let overflowing = 0;
+  for (const path of [componentsPath, ...componentPages.map(({ id }) => componentPath(id))]) {
+    await page.goto(path);
+    rings.push(...(await walk(page, browserName)));
+
+    // Folded content too (refinement R13.14). A table's root is a Tab stop exactly while it
+    // overflows (refinement R16.6).
+    await openAllAccordions(page);
+    const scrollers = await page.evaluate(() =>
+      [...document.querySelectorAll("table")].map((table) => {
+        const root = table.parentElement;
+        return {
+          name: table.querySelector("caption")?.textContent ?? "",
+          overflows: root !== null && root.scrollWidth > root.clientWidth,
+          tabStop: root?.getAttribute("tabindex") === "0",
+        };
+      }),
+    );
+    expect(
+      scrollers.filter((scroller) => scroller.overflows !== scroller.tabStop),
+      path,
+    ).toEqual([]);
+    overflowing += scrollers.filter((scroller) => scroller.overflows).length;
+    await page.getByRole("main").focus();
+    open.push(...(await walk(page, browserName)));
+  }
 
   expect(rings.length).toBeGreaterThan(40);
   expect(weakRings(rings)).toEqual([]);
-
-  // The folded reference content too (refinement R13.14). A table's root is a Tab stop exactly
-  // while it overflows (refinement R16.6).
-  await openAllAccordions(page);
-  const scrollers = await page.evaluate(() =>
-    [...document.querySelectorAll("table")].map((table) => {
-      const root = table.parentElement;
-      return {
-        name: table.querySelector("caption")?.textContent ?? "",
-        overflows: root !== null && root.scrollWidth > root.clientWidth,
-        tabStop: root?.getAttribute("tabindex") === "0",
-      };
-    }),
-  );
-  expect(scrollers.filter((scroller) => scroller.overflows !== scroller.tabStop)).toEqual([]);
-  const overflowing = scrollers.filter((scroller) => scroller.overflows).length;
   expect(overflowing).toBeGreaterThan(0);
-  await page.locator("section h3 > button").first().focus();
-  const open = await walk(page, browserName);
-
   expect(open.filter((ring) => ring.label.startsWith("div")).length).toBeGreaterThanOrEqual(
     overflowing,
   );

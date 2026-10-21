@@ -1,5 +1,6 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator } from "@playwright/test";
-import { section, tabKey } from "./support.ts";
+import { main, tabKey } from "./support.ts";
 
 /** An example in a section, by its title. */
 const example = (scope: Locator, title: string) =>
@@ -53,13 +54,11 @@ const widths = Array.from({ length: 51 }, (_, index) => 120 + index * 4);
 
 test.describe("Link (refinement R4)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#link");
+    await page.goto(componentPath("link"));
   });
 
   test("keeps the new-tab icon on the last word's line at every width (R4.2)", async ({ page }) => {
-    const paragraph = example(section(page, "Link"), "New tab").getByText(
-      /The code for this site is on/,
-    );
+    const paragraph = example(main(page), "New tab").getByText(/The code for this site is on/);
 
     expect(await iconOnLastWordLine(paragraph, widths)).toEqual(widths.map(() => true));
 
@@ -75,7 +74,7 @@ test.describe("Link (refinement R4)", () => {
 
   test("renders nothing after the new-tab icon (R4.2)", async ({ page }) => {
     // The link inside the sentence: the standalone one is blockified by the column layout.
-    const link = example(section(page, "Link"), "New tab")
+    const link = example(main(page), "New tab")
       .getByText(/The code for this site is on/)
       .getByRole("link", { name: newTabName("GitHub") });
 
@@ -90,7 +89,7 @@ test.describe("Link (refinement R4)", () => {
   });
 
   test("spaces a button-styled new-tab icon with Button's gap alone (R4.3)", async ({ page }) => {
-    const link = example(section(page, "Link"), "As a button").getByRole("link", {
+    const link = example(main(page), "As a button").getByRole("link", {
       name: newTabName("LinkedIn"),
     });
 
@@ -111,7 +110,7 @@ test.describe("Link (refinement R4)", () => {
   });
 
   test("thickens the underline and changes color on hover (R4.4)", async ({ page }) => {
-    const inline = example(section(page, "Link"), "Inline, in running text");
+    const inline = example(main(page), "Inline, in running text");
     const link = inline.getByRole("link", { name: "design tokens" });
 
     await expect(link).toHaveCSS("text-decoration-thickness", "1px");
@@ -125,7 +124,7 @@ test.describe("Link (refinement R4)", () => {
   });
 
   test("transitions only its color, with its own duration and easing (R4.4)", async ({ page }) => {
-    const inline = example(section(page, "Link"), "Inline, in running text");
+    const inline = example(main(page), "Inline, in running text");
     const link = inline.getByRole("link", { name: "design tokens" });
     const expected = await inline.evaluate((element) => {
       const probe = document.createElement("span");
@@ -149,7 +148,7 @@ test.describe("Link (refinement R4)", () => {
     page,
     browserName,
   }) => {
-    const inline = example(section(page, "Link"), "Inline, in running text");
+    const inline = example(main(page), "Inline, in running text");
     const link = inline.getByRole("link", { name: "design tokens" });
     // Back and forward by keyboard, so the link has focus from the keyboard and :focus-visible matches.
     await link.focus();
@@ -165,12 +164,15 @@ test.describe("Link (refinement R4)", () => {
   });
 
   test("marks the current page after client-side navigation (R4.8)", async ({ page }) => {
-    await page.goto("/lab");
-    await page.getByRole("main").getByRole("link", { name: "Components", exact: true }).click();
-    await expect(page).toHaveURL(/\/lab\/components$/);
+    await page.goto(componentPath("button"));
+    await page
+      .getByRole("navigation", { name: "Components" })
+      .getByRole("link", { name: "Link", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/design-system\/components\/link$/);
 
-    const current = example(section(page, "Link"), "Current page");
-    await expect(current.getByRole("link", { name: "Components" })).toHaveAttribute(
+    const current = example(main(page), "Current page");
+    await expect(current.getByRole("link", { name: "This page", exact: true })).toHaveAttribute(
       "aria-current",
       "page",
     );
@@ -185,7 +187,7 @@ test.describe("Link in Chromium's accessibility tree (refinement R4.2)", () => {
   test.skip(({ browserName }) => browserName !== "chromium", "Reads the tree through CDP.");
 
   test("names a new-tab link with its text and “, opens in new tab”", async ({ page }) => {
-    await page.goto("/lab/components#link");
+    await page.goto(componentPath("link"));
     const cdp = await page.context().newCDPSession(page);
     const { nodes } = (await cdp.send("Accessibility.getFullAXTree")) as {
       nodes: { role?: { value: string }; name?: { value: string } }[];
@@ -204,10 +206,10 @@ test.describe("Link before hydration (refinement R4.8)", () => {
   test.use({ javaScriptEnabled: false });
 
   test("prerenders aria-current on the current page", async ({ page }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("link"));
 
-    const current = example(section(page, "Link"), "Current page");
-    await expect(current.getByRole("link", { name: "Components" })).toHaveAttribute(
+    const current = example(main(page), "Current page");
+    await expect(current.getByRole("link", { name: "This page", exact: true })).toHaveAttribute(
       "aria-current",
       "page",
     );
@@ -223,9 +225,9 @@ test.describe("Link on a touch screen (refinement R4.4)", () => {
   test.use({ hasTouch: true, isMobile: true });
 
   test("leaves no hover look behind after a tap", async ({ page }) => {
-    await page.goto("/lab/components#link");
+    await page.goto(componentPath("link"));
     expect(await page.evaluate(() => matchMedia("(hover: hover)").matches)).toBe(false);
-    const inline = example(section(page, "Link"), "Inline, in running text");
+    const inline = example(main(page), "Inline, in running text");
     const link = inline.getByRole("link", { name: "design tokens" });
     // Stays on the page, so the tapped link can be inspected.
     await link.evaluate((element) => {

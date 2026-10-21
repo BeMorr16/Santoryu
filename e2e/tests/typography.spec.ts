@@ -1,5 +1,6 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator } from "@playwright/test";
-import { example, probe, section } from "./support.ts";
+import { example, main, probe } from "./support.ts";
 
 /** What each Type scale item's text says, by variant (refinement R12.13). */
 const scale = {
@@ -46,11 +47,11 @@ const lines = (element: Locator) =>
 
 test.describe("Typography (refinement R12)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#typography");
+    await page.goto(componentPath("typography"));
   });
 
   test("gives each variant in the scale its five tokens' look (R12.4)", async ({ page }) => {
-    const scope = example(section(page, "Typography"), "Type scale");
+    const scope = example(main(page), "Type scale");
 
     for (const [variant, text] of Object.entries(scale)) {
       const item = scope.getByText(text, { exact: true });
@@ -69,10 +70,9 @@ test.describe("Typography (refinement R12)", () => {
   });
 
   test("gives code the code font at its parent's size (R12.4)", async ({ page }) => {
-    const code = example(section(page, "Typography"), "Type scale").getByText(
-      "Code, inherits size",
-      { exact: true },
-    );
+    const code = example(main(page), "Type scale").getByText("Code, inherits size", {
+      exact: true,
+    });
 
     await expect(code).toHaveCSS(
       "font-family",
@@ -86,10 +86,9 @@ test.describe("Typography (refinement R12)", () => {
   });
 
   test("lets an inline element inherit its paragraph's size (R12.3)", async ({ page }) => {
-    const strong = example(section(page, "Typography"), "Look from the element").getByText(
-      "strong text",
-      { exact: true },
-    );
+    const strong = example(main(page), "Look from the element").getByText("strong text", {
+      exact: true,
+    });
 
     const sizes = await strong.evaluate((node) => ({
       own: getComputedStyle(node).fontSize,
@@ -103,7 +102,7 @@ test.describe("Typography (refinement R12)", () => {
   });
 
   test("takes each tone's color from its own token (R12.5)", async ({ page }) => {
-    const scope = example(section(page, "Typography"), "Tones");
+    const scope = example(main(page), "Tones");
 
     for (const [tone, text] of Object.entries(tones)) {
       const item = scope.getByText(text, { exact: true });
@@ -117,7 +116,7 @@ test.describe("Typography (refinement R12)", () => {
   test("caps a measured paragraph at 65ch in its own font, and leaves the other alone (R12.6)", async ({
     page,
   }) => {
-    const scope = example(section(page, "Typography"), "Measure");
+    const scope = example(main(page), "Measure");
     const capped = scope.getByText(/^With measure:/);
     const uncapped = scope.getByText(/^Without measure:/);
 
@@ -182,7 +181,7 @@ test.describe("Typography (refinement R12)", () => {
     test("causes no horizontal scroll, and the display line breaks instead of overflowing (WCAG 1.4.10)", async ({
       page,
     }) => {
-      const typography = section(page, "Typography");
+      const typography = main(page);
       await typography.scrollIntoViewIfNeeded();
 
       expect(
@@ -196,7 +195,7 @@ test.describe("Typography (refinement R12)", () => {
     });
 
     test("breaks a long unbroken word instead of overflowing (R12.4)", async ({ page }) => {
-      const scale = example(section(page, "Typography"), "Type scale");
+      const scale = example(main(page), "Type scale");
       await scale.scrollIntoViewIfNeeded();
 
       // A copy of the body item, so it has Typography's classes, holding one word wider than the panel.

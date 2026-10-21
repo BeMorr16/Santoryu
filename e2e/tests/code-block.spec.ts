@@ -1,7 +1,19 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { example, probe, section, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
+import { example, main, probe, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
 
-const codeBlocks = (page: Page) => section(page, "CodeBlock");
+const codeBlocks = (page: Page) => main(page);
+
+/** The registry's check icon, as the Tooltip page's "Mark as done" button shows it; back on CodeBlock's page after. */
+async function checkIconSvg(page: Page) {
+  await page.goto(componentPath("tooltip"));
+  const svg = await main(page)
+    .getByRole("button", { name: "Mark as done" })
+    .locator("svg")
+    .innerHTML();
+  await page.goto(componentPath("code-block"));
+  return svg;
+}
 
 /** The blocks of an example in the CodeBlock section, by the example's title. */
 const blocksIn = (page: Page, title: string) =>
@@ -15,7 +27,7 @@ const overflows = (element: Locator) =>
 
 test.describe("CodeBlock (refinement R15)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#code-block");
+    await page.goto(componentPath("code-block"));
   });
 
   test("long lines scroll inside the block, never the page, at 320px (R15.4)", async ({ page }) => {
@@ -100,6 +112,7 @@ test.describe("CodeBlock (refinement R15)", () => {
     context,
     browserName,
   }) => {
+    const checkIcon = await checkIconSvg(page);
     if (browserName === "chromium") {
       await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     }
@@ -108,11 +121,6 @@ test.describe("CodeBlock (refinement R15)", () => {
     const status = block.getByRole("status");
     const icon = () => button.locator("svg").innerHTML();
     const copyIcon = await icon();
-    // The Tooltip section's "Mark as done" button shows the registry's check icon.
-    const checkIcon = await section(page, "Tooltip")
-      .getByRole("button", { name: "Mark as done" })
-      .locator("svg")
-      .innerHTML();
     await expect(status).toBeEmpty();
 
     await button.click();
@@ -131,6 +139,7 @@ test.describe("CodeBlock (refinement R15)", () => {
   test("a refused copy shows and says Couldn't copy with a warning icon, then resets (R15.6)", async ({
     page,
   }) => {
+    const checkIcon = await checkIconSvg(page);
     // The clipboard is the system boundary: make it refuse.
     await page.evaluate(() => {
       navigator.clipboard.writeText = () =>
@@ -140,10 +149,6 @@ test.describe("CodeBlock (refinement R15)", () => {
     const button = block.getByRole("button", { name: "Copy code" });
     const icon = () => button.locator("svg").innerHTML();
     const copyIcon = await icon();
-    const checkIcon = await section(page, "Tooltip")
-      .getByRole("button", { name: "Mark as done" })
-      .locator("svg")
-      .innerHTML();
 
     await button.click();
 
@@ -162,6 +167,8 @@ test.describe("CodeBlock (refinement R15)", () => {
   }) => {
     const typescript = blocksIn(page, "Long lines").nth(1);
     const pre = preOf(typescript);
+    // The clips are viewport coordinates, so the block must be on screen.
+    await pre.scrollIntoViewIfNeeded();
     const numbers = await pre.evaluate((node) =>
       [...node.querySelectorAll("code > span")].map(
         (line) => getComputedStyle(line, "::before").content,

@@ -1,0 +1,31 @@
+{
+  "component": {
+    "back-to-top": {
+      "offset": {
+        "$value": "{space.layout.xs}",
+        "$type": "dimension",
+        "$description": "Distance of the corner button from the viewport's block-end and inline-end edges."
+      },
+      "shift": {
+        "$value": "{space.stack.sm}",
+        "$type": "dimension",
+        "$description": "How far it slides in when it appears (none under reduced motion)."
+      },
+      "shadow": {
+        "$value": "{effect.elevation.overlay}",
+        "$type": "shadow",
+        "$description": "Shadow of the corner button, so it reads above the page. The inline placement has none."
+      },
+      "layer": {
+        "$value": "{layer.sticky}",
+        "$type": "number",
+        "$description": "Stacking order of the corner button: the same level as the sticky header."
+      },
+      "duration": {
+        "$value": "{motion.duration.base}",
+        "$type": "duration",
+        "$description": "Duration of showing and hiding (0ms under reduced motion)."
+      }
+    }
+  }
+}

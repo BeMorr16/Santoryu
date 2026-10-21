@@ -1,5 +1,6 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator } from "@playwright/test";
-import { example, probe, section } from "./support.ts";
+import { example, main, probe } from "./support.ts";
 
 /** The widths of a Grid's tracks that hold space; auto-fit's collapsed tracks compute to 0px. */
 const tracks = (grid: Locator) =>
@@ -12,13 +13,13 @@ const tracks = (grid: Locator) =>
 
 test.describe("Grid (refinement R7)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#grid");
+    await page.goto(componentPath("grid"));
   });
 
   test("takes rowGap from space.stack.* and columnGap from space.inline.* (R7.1)", async ({
     page,
   }) => {
-    const list = example(section(page, "Grid"), "Row and column gaps").getByRole("list");
+    const list = example(main(page), "Row and column gaps").getByRole("list");
 
     await expect(list).toHaveCSS("row-gap", await probe(list, "row-gap", "var(--space-stack-xs)"));
     await expect(list).toHaveCSS(
@@ -28,7 +29,7 @@ test.describe("Grid (refinement R7)", () => {
   });
 
   test("stretches a short row's items to fill it by default (R7.2)", async ({ page }) => {
-    const list = example(section(page, "Grid"), "Few items, stretched (default)").getByRole("list");
+    const list = example(main(page), "Few items, stretched (default)").getByRole("list");
 
     const { filled, width } = await list.evaluate((element) => {
       const items = [...element.children].map((item) => item.getBoundingClientRect().width);
@@ -42,14 +43,17 @@ test.describe("Grid (refinement R7)", () => {
   });
 
   test("keeps a short row's empty columns with stretch={false} (R7.2)", async ({ page }) => {
-    const list = example(section(page, "Grid"), "Few items, stretch={false}").getByRole("list");
+    // Wide enough that the content column, between the side menu and the On this page rail, holds
+    // more than two md columns.
+    await page.setViewportSize({ width: 1600, height: 900 });
+    const list = example(main(page), "Few items, stretch={false}").getByRole("list");
 
     await expect(list.getByRole("listitem")).toHaveCount(2);
     expect((await tracks(list)).length).toBeGreaterThan(2);
   });
 
   test("shows at most two columns, none narrower than min (R7.3)", async ({ page }) => {
-    const list = example(section(page, "Grid"), "At most two columns").getByRole("list");
+    const list = example(main(page), "At most two columns").getByRole("list");
     const min = Number.parseFloat(await probe(list, "inline-size", "var(--size-column-sm)"));
     const gap = Number.parseFloat(await list.evaluate((e) => getComputedStyle(e).columnGap));
 
@@ -64,7 +68,7 @@ test.describe("Grid (refinement R7)", () => {
   test("shows one column with no overflow in a container narrower than min (R9.2)", async ({
     page,
   }) => {
-    const list = example(section(page, "Grid"), "Narrow container").getByRole("list");
+    const list = example(main(page), "Narrow container").getByRole("list");
 
     expect(await tracks(list)).toHaveLength(1);
     const overflow = await list.evaluate((element) => element.scrollWidth - element.clientWidth);
@@ -74,7 +78,7 @@ test.describe("Grid (refinement R7)", () => {
   test("spaces a fieldset's legend from the first option by the row gap (refinement R6.4)", async ({
     page,
   }) => {
-    const group = example(section(page, "Grid"), "Semantics").getByRole("group", {
+    const group = example(main(page), "Semantics").getByRole("group", {
       name: "Projects to show",
     });
     const expected = Number.parseFloat(

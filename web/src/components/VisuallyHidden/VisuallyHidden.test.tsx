@@ -96,7 +96,7 @@ describe("VisuallyHidden", () => {
     render(
       <>
         <VisuallyHidden as="label" htmlFor="search">
-          Search the lab
+          Search the design system
         </VisuallyHidden>
         <input id="search" type="search" />
         <table>
@@ -110,7 +110,7 @@ describe("VisuallyHidden", () => {
       </>,
     );
 
-    expect(screen.getByRole("searchbox", { name: "Search the lab" })).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Search the design system" })).toBeInTheDocument();
     expect(screen.getByRole("table", { name: "Token values" })).toBeInTheDocument();
   });
 

@@ -1,7 +1,8 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { example, probe, section, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
+import { example, main, probe, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
 
-const tables = (page: Page) => section(page, "Table");
+const tables = (page: Page) => main(page);
 
 /** The Table root (the scroll box) of an example in the Table section, by the example's title. */
 const rootIn = (page: Page, title: string) =>
@@ -22,7 +23,7 @@ const rowStyle = (row: Locator, property: string) =>
 
 test.describe("Table (refinement R16)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#table");
+    await page.goto(componentPath("table"));
   });
 
   test("a wide table scrolls inside its box, never the page, at 320px (R16.6)", async ({
@@ -61,7 +62,7 @@ test.describe("Table (refinement R16)", () => {
     expect(await group.evaluate((node) => node.firstElementChild?.tagName)).toBe("TABLE");
 
     // From the panel's theme menu, Tab skips the Basic table (it fits) and reaches this one.
-    const trigger = page.getByRole("button", { name: /\(Table preview\)$/ });
+    const trigger = page.getByRole("button", { name: /\(Table examples preview\)$/ });
     await trigger.focus();
     await page.keyboard.press(tabKey(browserName));
     await expect(group).toBeFocused();
@@ -72,8 +73,7 @@ test.describe("Table (refinement R16)", () => {
   test("a table gains its Tab stop when the window narrows and drops it when it widens (R16.6)", async ({
     page,
   }) => {
-    // The section's own props table: it fits a wide window and overflows at 320px.
-    await tables(page).getByRole("button", { name: "Props", exact: true }).click();
+    // The page's own props table: it fits a wide window and overflows at 320px.
     const props = tables(page).getByRole("table", { name: "Table props", exact: true });
     await expect(props).toBeVisible();
     const root = props.locator("xpath=..");
@@ -245,7 +245,7 @@ test.describe("Table (refinement R16)", () => {
     const wide = rootIn(page, "Wide");
     // Once the Basic table has lost its prerendered Tab stop, Tab skips it.
     await expect(rootIn(page, "Basic")).not.toHaveAttribute("tabindex");
-    await page.getByRole("button", { name: /\(Table preview\)$/ }).focus();
+    await page.getByRole("button", { name: /\(Table examples preview\)$/ }).focus();
     await page.keyboard.press(tabKey(browserName));
     await expect(wide).toBeFocused();
 

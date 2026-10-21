@@ -340,7 +340,10 @@ describe("scanCss self-test", () => {
       "",
     ].join("\n");
 
-    for (const file of ["src/lab/components/Custom.module.css", "src/shell/SiteShell.module.css"]) {
+    for (const file of [
+      "src/design-system/components/Custom.module.css",
+      "src/shell/SiteShell.module.css",
+    ]) {
       expect(scanCss(fixture, file, fixtureTokens)).toEqual([
         `${file}:3: --component-button-nope is not a component token`,
         `${file}:4: --component-button-radius is not a semantic token`,
@@ -388,7 +391,10 @@ describe("scanCss self-test", () => {
         file: "src/components/shared/button-styles.module.css",
         source: ".a { border-radius: var(--component-button-radius); }",
       },
-      { file: "src/lab/x.module.css", source: ".a { gap: var(--component-button-gap); }" },
+      {
+        file: "src/design-system/x.module.css",
+        source: ".a { gap: var(--component-button-gap); }",
+      },
     ];
 
     expect(unusedComponentTokens(files, fixtureTokens)).toEqual([
@@ -406,6 +412,10 @@ describe("web/src CSS", () => {
 
   it("finds the CSS files to scan", () => {
     expect(files.map(({ file }) => file)).toContain("src/styles/global.css");
+  });
+
+  it("checks media queries against the sm, md and lg breakpoints, in em (ds-components design §10)", () => {
+    expect([...realTokens.breakpoints].sort((a, b) => a - b)).toEqual([30, 48, 80]);
   });
 
   it("uses only the tokens each file may use, and no raw colors", () => {

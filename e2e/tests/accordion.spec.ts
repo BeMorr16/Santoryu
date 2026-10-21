@@ -1,7 +1,8 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { example, probe, section, tabKey } from "./support.ts";
+import { example, main, probe, tabKey } from "./support.ts";
 
-const accordion = (page: Page) => section(page, "Accordion");
+const accordion = (page: Page) => main(page);
 
 /** An item's heading button, by its text, in an example of the Accordion section. */
 const trigger = (page: Page, title: string, name: string) =>
@@ -47,7 +48,7 @@ async function pressAndSampleMidway(button: Locator, panel: Locator) {
 
 test.describe("Accordion (refinement R13)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#accordion");
+    await page.goto(componentPath("accordion"));
   });
 
   test("Tab reaches the buttons, Enter and Space toggle, and arrow keys scroll the page (R13.6)", async ({
@@ -90,11 +91,10 @@ test.describe("Accordion (refinement R13)", () => {
     page,
     browserName,
   }) => {
-    // Narrow, so the props table overflows and is a Tab stop inside the open panel (refinement R16.6).
-    await page.setViewportSize({ width: 320, height: 640 });
-    const reference = accordion(page);
-    const props = reference.getByRole("button", { name: "Props", exact: true });
-    const tokens = reference.getByRole("button", { name: "Component tokens", exact: true });
+    // The reference sections are expanded now (ds-components R4.7), so this uses the Exclusive
+    // example: its second item's panel holds a link.
+    const props = trigger(page, "Exclusive", "How is it built?");
+    const tokens = trigger(page, "Exclusive", "Can I reuse the components?");
     const panel = await panelOf(page, props);
 
     await props.focus();
@@ -324,19 +324,15 @@ test.describe("Accordion (refinement R13)", () => {
     await expect(second).not.toHaveCSS("outline-width", "0px");
   });
 
-  test("folds every section's Props, Component tokens and Accessibility, closed on load (R13.14)", async ({
+  // ds-components R4.7 replaces refinement R13.14: the reference content is expanded h2 sections.
+  test("shows Props, Component tokens and Accessibility as expanded sections, with nothing folded (ds-components R4.7)", async ({
     page,
   }) => {
-    const sections = page.locator("main section[id]");
-    const count = await sections.count();
-    expect(count).toBeGreaterThan(0);
-    for (let index = 0; index < count; index++) {
-      const buttons = sections.nth(index).locator("h3 > button");
-      await expect(buttons).toHaveText(["Props", "Component tokens", "Accessibility"]);
-      for (const button of await buttons.all()) {
-        await expect(button).toHaveAttribute("aria-expanded", "false");
-        await expect(await panelOf(page, button)).toHaveAttribute("hidden", "until-found");
-      }
+    const headings = page.locator("main section > h2");
+    await expect(headings).toHaveText(["Examples", "Props", "Component tokens", "Accessibility"]);
+    for (const name of ["Props", "Component tokens", "Accessibility"]) {
+      await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);
+      await expect(page.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
     }
   });
 });
@@ -346,7 +342,7 @@ test.describe("Accordion on a touch screen (refinement R13.10)", () => {
   test.use({ hasTouch: true, isMobile: true });
 
   test("shows no hover background after a tap", async ({ page }) => {
-    await page.goto("/lab/components#accordion");
+    await page.goto(componentPath("accordion"));
     expect(await page.evaluate(() => matchMedia("(hover: hover)").matches)).toBe(false);
     const button = trigger(page, "Exclusive", "What is this site?");
 
@@ -360,19 +356,15 @@ test.describe("Accordion on a touch screen (refinement R13.10)", () => {
 test.describe("Accordion at 320px wide (refinement R13.8)", () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
+  // The reference sections that held this table are expanded h2 sections now (ds-components R4.7),
+  // so this checks the same wide table there.
   test("lets a wide table in an open panel scroll inside its box, not the page", async ({
     page,
   }) => {
-    await page.goto("/lab/components#button");
-    const button = section(page, "Button").getByRole("button", {
-      name: "Component tokens",
-      exact: true,
-    });
-    await button.click();
-    await settled(page);
+    await page.goto(componentPath("button"));
 
     // The Table root scrolls; while it overflows it's a group named by the caption (refinement R16.6).
-    const scroller = section(page, "Button").getByRole("group", {
+    const scroller = main(page).getByRole("group", {
       name: "Button component tokens",
     });
     const sizes = await scroller.evaluate((element) => ({
@@ -396,7 +388,7 @@ test("doesn't animate an item open on the first render (R13.8)", async ({ page }
       }
     });
   });
-  await page.goto("/lab/components#accordion");
+  await page.goto(componentPath("accordion"));
   const button = trigger(page, "Independent items", "What is this site?");
   await expect(button).toHaveAttribute("aria-expanded", "true");
   await expect(

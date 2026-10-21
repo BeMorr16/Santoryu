@@ -1,13 +1,18 @@
 import { expect, test } from "@playwright/test";
-import { chooseInMenu, panelTrigger, section, storeTheme, tokenColor } from "./support.ts";
+import { chooseInMenu, componentPage, panelTrigger, storeTheme, tokenColor } from "./support.ts";
 
 test("a panel set to Light inside a dark page restyles only itself (R15.6, R15.7)", async ({
   page,
 }) => {
   await storeTheme(page, "dark");
-  await page.goto("/lab/components");
-  const insidePanel = section(page, "Button").getByRole("button", { name: "Primary", exact: true });
-  const outsidePanel = section(page, "Link").getByRole("link", { name: "Explore the lab" });
+  const main = await componentPage(page, "button");
+  const insidePanel = main
+    .getByRole("group", { name: "Button examples" })
+    .getByRole("button", { name: "Primary", exact: true });
+  // The main example's own panel, which keeps the page's theme (ds-components R4.4).
+  const outsidePanel = main
+    .getByRole("group", { name: "Button example", exact: true })
+    .getByRole("button", { name: "Save changes" });
   const colors = (locator: typeof insidePanel) =>
     locator.evaluate((element) => {
       const style = getComputedStyle(element);
@@ -18,11 +23,12 @@ test("a panel set to Light inside a dark page restyles only itself (R15.6, R15.7
     tokenColor("color.action.background", "dark"),
     tokenColor("color.action.text", "dark"),
   ]);
-  await chooseInMenu(page, panelTrigger(page, "Button"), "Light");
+  await chooseInMenu(page, panelTrigger(page, "Button examples"), "Light");
 
-  await expect(
-    section(page, "Button").getByRole("group", { name: "Button examples" }),
-  ).toHaveAttribute("data-theme", "light");
+  await expect(main.getByRole("group", { name: "Button examples" })).toHaveAttribute(
+    "data-theme",
+    "light",
+  );
   // Polled: the button's color transition is still running right after the switch.
   await expect
     .poll(() => colors(insidePanel))

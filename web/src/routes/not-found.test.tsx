@@ -35,7 +35,7 @@ describe("not-found route", () => {
   });
 
   it("renders for unknown nested paths", async () => {
-    renderAt("/lab/nope/deeper");
+    renderAt("/design-system/nope/deeper");
 
     expect(await screen.findByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
   });

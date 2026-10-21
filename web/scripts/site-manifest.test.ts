@@ -46,14 +46,14 @@ describe("buildSiteManifest", () => {
 
   beforeEach(async () => {
     clientDir = await mkdtemp(join(tmpdir(), "site-manifest-"));
-    await mkdir(join(clientDir, "lab"));
+    await mkdir(join(clientDir, "design-system"));
     await mkdir(join(clientDir, "assets"));
     await writeFile(
       join(clientDir, "index.html"),
       page("<script>a</script>", "<script>b</script>"),
     );
     await writeFile(
-      join(clientDir, "lab", "index.html"),
+      join(clientDir, "design-system", "index.html"),
       page("<script>b</script>", "<script>c</script>"),
     );
     await writeFile(join(clientDir, "404.html"), page("<script>a</script>"));
@@ -71,8 +71,8 @@ describe("buildSiteManifest", () => {
 
     expect(manifest.files).toEqual([
       "/404.html",
+      "/design-system/index.html",
       "/index.html",
-      "/lab/index.html",
       "/robots.txt",
       "/sitemap.xml",
     ]);

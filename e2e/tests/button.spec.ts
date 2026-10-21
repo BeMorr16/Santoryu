@@ -1,5 +1,6 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator } from "@playwright/test";
-import { section } from "./support.ts";
+import { main } from "./support.ts";
 
 /** An example in the Button section, by its title. */
 const example = (button: Locator, title: string) =>
@@ -38,11 +39,11 @@ async function size(locator: Locator) {
 
 test.describe("Button (refinement R3)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components#button");
+    await page.goto(componentPath("button"));
   });
 
   test("renders icon-only buttons square: 32×32 at sm, 40×40 at md (R3.5)", async ({ page }) => {
-    const tiles = example(section(page, "Button"), "Icon-only").getByRole("listitem");
+    const tiles = example(main(page), "Icon-only").getByRole("listitem");
 
     await expect(tiles).toHaveCount(4);
     for (const tile of await tiles.all()) {
@@ -56,7 +57,7 @@ test.describe("Button (refinement R3)", () => {
   test("keeps single-line buttons at their height token, and pads and centers a wrapped label (R3.9)", async ({
     page,
   }) => {
-    const button = section(page, "Button");
+    const button = main(page);
     for (const variant of await example(button, "Variants").getByRole("button").all()) {
       expect((await size(variant)).height).toBe(40);
     }
@@ -85,7 +86,7 @@ test.describe("Button (refinement R3)", () => {
   test("styles pressed toggles from their variant's pressed tokens (R3.1, palette-expansion R3.1)", async ({
     page,
   }) => {
-    const toggles = example(section(page, "Button"), "Toggles");
+    const toggles = example(main(page), "Toggles");
     const grid = toggles.getByRole("button", { name: "Show grid" });
     const wrap = toggles.getByRole("button", { name: "Wrap lines" });
     const notify = toggles.getByRole("button", { name: "Notify me" });
@@ -118,7 +119,7 @@ test.describe("Button (refinement R3)", () => {
   });
 
   test("uses the variant's background-active token while pressing (R3.3)", async ({ page }) => {
-    const secondary = example(section(page, "Button"), "Variants").getByRole("button", {
+    const secondary = example(main(page), "Variants").getByRole("button", {
       name: "Secondary",
     });
     // background-active starts equal to hover, so a distinct value proves :active, not :hover.
@@ -137,7 +138,7 @@ test.describe("Button (refinement R3)", () => {
   test("uses pressed.background-hover while pressing a pressed toggle (R3.3, palette-expansion R3.2)", async ({
     page,
   }) => {
-    const toggles = example(section(page, "Button"), "Toggles");
+    const toggles = example(main(page), "Toggles");
     for (const [name, variant] of [
       ["Show grid", "secondary"],
       ["Notify me", "primary"],
@@ -163,7 +164,7 @@ test.describe("Button (refinement R3)", () => {
   test("shows the disabled look on a disabled pressed toggle (palette-expansion R3.4)", async ({
     page,
   }) => {
-    const toggles = example(section(page, "Button"), "Toggles");
+    const toggles = example(main(page), "Toggles");
     const token = (part: string) => `var(--component-button-disabled-${part})`;
     for (const name of ["Show grid", "Notify me"]) {
       const toggle = toggles.getByRole("button", { name });
@@ -190,7 +191,7 @@ test.describe("Button (refinement R3)", () => {
   }) => {
     test.skip(browserName !== "chromium", "WebKit doesn't emulate forced colors.");
     await page.emulateMedia({ forcedColors: "active" });
-    const button = section(page, "Button");
+    const button = main(page);
 
     const disabled = example(button, "Disabled (still focusable)").getByRole("button").first();
     const grayText = await probe(button, "color", "GrayText", true);
@@ -220,9 +221,9 @@ test.describe("Button on a touch screen (refinement R3.4)", () => {
   test.use({ hasTouch: true, isMobile: true });
 
   test("leaves no hover color behind after a tap", async ({ page }) => {
-    await page.goto("/lab/components#button");
+    await page.goto(componentPath("button"));
     expect(await page.evaluate(() => matchMedia("(hover: hover)").matches)).toBe(false);
-    const variants = example(section(page, "Button"), "Variants");
+    const variants = example(main(page), "Variants");
     const secondary = variants.getByRole("button", { name: "Secondary" });
 
     await secondary.tap();

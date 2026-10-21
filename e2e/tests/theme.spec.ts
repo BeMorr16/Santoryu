@@ -1,5 +1,6 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { chooseInMenu, example, section, storeTheme } from "./support.ts";
+import { chooseInMenu, example, main, storeTheme } from "./support.ts";
 
 // surface.base per theme (decision 0006): sand.50 and blue.850.
 const pageBackground = { light: "rgb(251, 248, 242)", dark: "rgb(18, 62, 94)" };
@@ -112,13 +113,13 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
     expect(popup.inViewport).toBe(true);
   });
 
-  test("a start-aligned switcher at the row's start lines up with its start edge in the lab", async ({
+  test("a start-aligned switcher at the row's start lines up with its start edge in the showcase", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto("/lab/components#theme-switcher");
+    await page.goto(componentPath("theme-switcher"));
     const triggers = example(
-      section(page, "ThemeSwitcher"),
+      main(page),
       "Placement (changes the whole site, not this panel)",
     ).getByRole("button", { name: /^Theme: / });
 
@@ -142,10 +143,10 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
     await expect(switcher(page)).toHaveAccessibleName(/^Theme: (Light|Dark)$/);
   });
 
-  test("showLabel overrides the breakpoint either way in the lab", async ({ page }) => {
-    await page.goto("/lab/components#theme-switcher");
+  test("showLabel overrides the breakpoint either way in the showcase", async ({ page }) => {
+    await page.goto(componentPath("theme-switcher"));
     const triggers = example(
-      section(page, "ThemeSwitcher"),
+      main(page),
       "Label (changes the whole site, not this panel)",
     ).getByRole("button", { name: /^Theme: / });
     await expect(triggers).toHaveCount(3);
@@ -209,9 +210,9 @@ test.describe("preference across pages (R13.3, R16.4)", () => {
     await expect(switcher(page)).toHaveAccessibleName("Theme: Dark");
     await page
       .getByRole("navigation", { name: "Primary" })
-      .getByRole("link", { name: "Lab" })
+      .getByRole("link", { name: "Design System" })
       .click();
-    await expect(page).toHaveURL(/\/lab$/);
+    await expect(page).toHaveURL(/\/design-system$/);
 
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     expect(await background(page)).toBe(pageBackground.dark);
@@ -247,7 +248,7 @@ test.describe("preference across pages (R13.3, R16.4)", () => {
     const first = await context.newPage();
     const second = await context.newPage();
     await first.goto("/");
-    await second.goto("/lab");
+    await second.goto("/design-system");
 
     await chooseInMenu(first, switcher(first), "Dark");
 

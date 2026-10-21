@@ -1,7 +1,8 @@
+import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { example, section, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
+import { example, main, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
 
-const tooltipSection = (page: Page) => section(page, "Tooltip");
+const tooltipSection = (page: Page) => main(page);
 
 /** A button in one of the Tooltip section's examples. */
 const trigger = (page: Page, title: string, name: string) =>
@@ -53,7 +54,7 @@ const offset = 8; // component.tooltip.offset: space.stack.sm
 
 test.describe("Tooltip (refinement R14)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("tooltip"));
   });
 
   test("shows after a hover delay, stays while the pointer moves onto it, and hides after leaving (R14.5, R14.6)", async ({
@@ -110,8 +111,9 @@ test.describe("Tooltip (refinement R14)", () => {
     await expect.poll(async () => Math.abs((await rectOf(save)).top - y)).toBeLessThan(1);
     await expect.poll(() => popup.getAttribute("data-placed")).toBe("top");
 
+    // The popup follows its anchor a frame after the scroll.
+    await expect.poll(async () => (await rectOf(popup)).top).toBeLessThan(header.bottom);
     const box = await rectOf(popup);
-    expect(box.top).toBeLessThan(header.bottom);
     const hit = await page.evaluate(
       ({ x, y }) => document.elementFromPoint(x, y)?.closest("[popover]")?.id ?? null,
       { x: (box.left + box.right) / 2, y: (box.top + box.bottom) / 2 },
@@ -200,7 +202,7 @@ test.describe("Tooltip (refinement R14)", () => {
   for (const theme of themes) {
     test(`draws the inverse bubble in ${theme} (R14.9)`, async ({ page, browserName }) => {
       await storeTheme(page, theme);
-      await page.goto("/lab/components");
+      await page.goto(componentPath("tooltip"));
       const save = trigger(page, "Description", "Save draft");
       await keyboardFocus(page, browserName, save);
 
@@ -253,7 +255,7 @@ test.describe("Tooltip at 320px wide (refinement R14.7, R14.9, R14.13)", () => {
     page,
     browserName,
   }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("tooltip"));
     const top = trigger(page, "Sides", "Top");
     const popup = popupOf(top);
     await top.evaluate((element) => {
@@ -269,7 +271,7 @@ test.describe("Tooltip at 320px wide (refinement R14.7, R14.9, R14.13)", () => {
   });
 
   test("wraps a long tooltip inside the viewport", async ({ page, browserName }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("tooltip"));
     const link = example(tooltipSection(page), "In running text").getByRole("link", {
       name: "the token gallery",
     });
@@ -278,7 +280,7 @@ test.describe("Tooltip at 320px wide (refinement R14.7, R14.9, R14.13)", () => {
       element.scrollIntoView({ block: "center" });
     });
     await keyboardFocus(page, browserName, link);
-    // A longer text than any lab example, set once hydrated (it shows), for this layout check only.
+    // A longer text than any showcase example, set once hydrated (it shows), for this layout check only.
     const long =
       "Every color, type, space, size, radius, motion and effect token, with its value in each theme";
     await popup.evaluate((element, long) => {
@@ -337,7 +339,7 @@ test.describe("Tooltip on touch (refinement R14.11)", () => {
   test("a tap shows only a disabled Button's reason, and a tap elsewhere hides it", async ({
     page,
   }) => {
-    await page.goto("/lab/components");
+    await page.goto(componentPath("tooltip"));
     const done = trigger(page, "Icon-only names", "Mark as done");
     await done.scrollIntoViewIfNeeded();
     await done.tap();
