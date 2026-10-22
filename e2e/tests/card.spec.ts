@@ -107,7 +107,7 @@ test.describe("Card (refinement R8)", () => {
     const scope = example(main(page), "Any heading level");
     const size = await probe(scope, "font-size", "var(--component-typography-h4-font-size)");
 
-    const headings = scope.getByRole("heading");
+    const headings = scope.getByRole("article").getByRole("heading");
     await expect(headings).toHaveCount(2);
     for (const heading of await headings.all()) {
       await expect(heading).toHaveCSS("font-size", size);

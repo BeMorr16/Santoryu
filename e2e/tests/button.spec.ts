@@ -1,10 +1,6 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator } from "@playwright/test";
-import { main } from "./support.ts";
-
-/** An example in the Button section, by its title. */
-const example = (button: Locator, title: string) =>
-  button.getByText(title, { exact: true }).locator("xpath=..");
+import { example, main } from "./support.ts";
 
 /**
  * What `property: value` computes to inside `scope`, read from a probe element set through CSSOM

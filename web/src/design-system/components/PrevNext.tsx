@@ -6,6 +6,8 @@ import styles from "./PrevNext.module.css";
 /**
  * One end of the pair, named "Previous: Link" (R4.9). The name is an aria-label, since a stacked
  * layout can make engines join the visible words differently; it holds both visible words in order.
+ * The space between the words keeps them two words in the text content, which checkers such as
+ * axe's label-content-name-mismatch read as the visible label.
  */
 function PageLink({
   direction,
@@ -25,8 +27,7 @@ function PageLink({
     >
       {direction === "Previous" && <Icon name="arrow-left" />}
       <span className={styles.text}>
-        <span className={styles.direction}>{direction}</span>
-        <span>{name}</span>
+        <span className={styles.direction}>{direction}</span> <span>{name}</span>
       </span>
       {direction === "Next" && <Icon name="arrow-right" />}
     </Link>

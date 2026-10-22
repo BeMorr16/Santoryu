@@ -25,7 +25,17 @@ test.describe("at 1280×720", () => {
 
     await expect(backToTop(page)).toHaveCSS("visibility", "hidden");
     await expect(page.getByRole("button", { name: "Back to top" })).toHaveCount(0);
-    await page.getByRole("contentinfo").getByText(/©/).click();
+    // Starts Tab from the footer without scrolling to it: a click would scroll the page past one
+    // viewport and show the button.
+    await page
+      .getByRole("contentinfo")
+      .getByText(/©/)
+      .evaluate((element) => {
+        if (!(element instanceof HTMLElement)) throw new Error("no footer text");
+        element.tabIndex = -1;
+        element.focus({ preventScroll: true });
+      });
+    expect(await page.evaluate(() => scrollY)).toBe(0);
     await page.keyboard.press(tabKey(browserName));
     await expect(backToTop(page)).not.toBeFocused();
   });

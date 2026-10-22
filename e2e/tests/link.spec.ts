@@ -1,10 +1,6 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator } from "@playwright/test";
-import { main, tabKey } from "./support.ts";
-
-/** An example in a section, by its title. */
-const example = (scope: Locator, title: string) =>
-  scope.getByText(title, { exact: true }).locator("xpath=..");
+import { example, main, tabKey } from "./support.ts";
 
 /** What `color: value` computes to inside `scope`, read from a probe set through CSSOM. */
 async function probeColor(scope: Locator, value: string) {

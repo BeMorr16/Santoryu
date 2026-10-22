@@ -38,6 +38,16 @@ describe("PrevNext (ds-components R4.9)", () => {
     );
   });
 
+  it("keeps the visible words apart in the text, so the name contains the visible label", () => {
+    renderAt(componentPath("link"));
+
+    expect(
+      within(list())
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Previous Button", "Next Menu"]);
+  });
+
   it("goes from the overview to the first component, with no previous link", () => {
     renderAt(componentsPath);
 
