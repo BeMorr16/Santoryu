@@ -263,7 +263,7 @@ export const accordionShowcase: Showcase = {
     'A closed panel is out of the Tab order and the accessibility tree, yet find-in-page and links to its content open it (hidden="until-found", in browsers that support it).',
     "No arrow keys move between headings, so arrows keep scrolling the page; Tab reaches every button.",
     "With region, each panel is a region named by its heading. More than about six regions clutter the landmarks list, so it's off by default.",
-    "The height and chevron animate over component.accordion.transition-duration, 0ms under reduced motion.",
+    "The height and chevron animate over component.accordion.transition-duration, 0ms under reduced motion, when the item's own button opens or closes it. A change made from outside, by a controlled parent, applies at once.",
     "In forced colors, the lines, chevron and focus ring use system colors, and the hover background is dropped.",
   ],
 };

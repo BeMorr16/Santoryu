@@ -125,7 +125,8 @@ test.describe("Accordion (refinement R13)", () => {
     await expect(page.locator("#accordion-find-word")).toBeInViewport();
   });
 
-  test("opens at once on a reveal, then animates the next outside change (R13.7, R13.8)", async ({
+  // ds-tokens §7.4 (decision 0011) amends R13.8: a change made from outside the item is instant.
+  test("opens at once on a reveal, animates its own next change, and applies outside changes at once (R13.7, R13.8)", async ({
     page,
   }) => {
     const scope = example(accordion(page), "Controlled");
@@ -148,14 +149,19 @@ test.describe("Accordion (refinement R13)", () => {
     expect(reveal.animations).toBe(0);
     expect(reveal.height).toBeCloseTo(reveal.content, 0);
 
-    const close = scope.getByRole("button", { name: "Close", exact: true });
-    await expect(outside).toHaveCount(0);
-    const closing = await pressAndSampleMidway(close, panel);
+    // The instant reveal lasts one change: the item's own button animates again.
+    const closing = await pressAndSampleMidway(button, panel);
     expect(closing).not.toBeNull();
     expect(closing?.height).toBeGreaterThan(0);
     expect(closing?.height).toBeLessThan(reveal.height);
     await settled(page);
     await expect(panel).toHaveAttribute("hidden", "until-found");
+
+    // The parent opening it from outside applies at once, at full height.
+    const opening = await pressAndSampleMidway(outside, panel);
+    expect(opening).toBeNull();
+    await expect(button).toHaveAttribute("aria-expanded", "true");
+    expect((await panel.boundingBox())?.height).toBeCloseTo(reveal.height, 0);
   });
 
   test("animates the panel's height, hides it only once closed, and clips only while moving (R13.8)", async ({

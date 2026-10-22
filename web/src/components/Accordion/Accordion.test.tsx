@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef, useState } from "react";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import typography from "../Typography/Typography.module.css";
 import { Accordion, AccordionItem } from "./Accordion.tsx";
@@ -12,6 +12,22 @@ function panelOf(button: HTMLElement) {
   const panel = id === null ? null : document.getElementById(id);
   if (!panel) throw new Error("No panel for this button");
   return panel;
+}
+
+/** Keeps every panel animation running, so `data-animating` stays set once a change starts. */
+function holdAnimations() {
+  const running = { finished: new Promise(() => undefined) } as unknown as Animation;
+  vi.spyOn(Element.prototype, "getAnimations").mockReturnValue([running]);
+}
+
+/** The values `data-motion` held on `element` since this was called, read from its mutations. */
+function motionHistory(element: HTMLElement): () => (string | null)[] {
+  const observer = new MutationObserver(() => undefined);
+  observer.observe(element, { attributeFilter: ["data-motion"], attributeOldValue: true });
+  return () => [
+    ...observer.takeRecords().map((record) => record.oldValue),
+    element.getAttribute("data-motion"),
+  ];
 }
 
 function Fixture({ exclusive = false }: { exclusive?: boolean }) {
@@ -395,6 +411,95 @@ describe("Accordion", () => {
     expect(group).toHaveAttribute("title", "FAQ");
     expect(item).toBe(itemRef.current);
     expect(item).toHaveClass("item");
+  });
+
+  describe("motion: only an item's own requests animate (ds-tokens §7.4, amending R13.8)", () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("opens instantly when a controlled parent opens it", () => {
+      holdAnimations();
+      const { rerender } = render(
+        <AccordionItem heading="One" open={false} onOpenChange={vi.fn()}>
+          x
+        </AccordionItem>,
+      );
+      const panel = panelOf(screen.getByRole("button", { name: "One" }));
+      const history = motionHistory(panel);
+
+      rerender(
+        <AccordionItem heading="One" open onOpenChange={vi.fn()}>
+          x
+        </AccordionItem>,
+      );
+
+      expect(history()).toContain("instant");
+      expect(panel).not.toHaveAttribute("data-animating");
+      expect(panel).toHaveAttribute("data-open");
+      expect(panel).not.toHaveAttribute("hidden");
+    });
+
+    it("still opens instantly from outside after its parent ignored a click", async () => {
+      const user = userEvent.setup();
+      holdAnimations();
+      const { rerender } = render(
+        <AccordionItem heading="One" open={false} onOpenChange={vi.fn()}>
+          x
+        </AccordionItem>,
+      );
+      const button = screen.getByRole("button", { name: "One" });
+      await user.click(button);
+      expect(button).toHaveAttribute("aria-expanded", "false");
+      const history = motionHistory(panelOf(button));
+
+      rerender(
+        <AccordionItem heading="One" open onOpenChange={vi.fn()}>
+          x
+        </AccordionItem>,
+      );
+
+      expect(history()).toContain("instant");
+      expect(panelOf(button)).not.toHaveAttribute("data-animating");
+    });
+
+    it("animates a click on a controlled item", async () => {
+      const user = userEvent.setup();
+      holdAnimations();
+      function Controlled() {
+        const [open, setOpen] = useState(false);
+        return (
+          <AccordionItem heading="One" open={open} onOpenChange={setOpen}>
+            x
+          </AccordionItem>
+        );
+      }
+      render(<Controlled />);
+      const button = screen.getByRole("button", { name: "One" });
+      const history = motionHistory(panelOf(button));
+
+      await user.click(button);
+
+      expect(button).toHaveAttribute("aria-expanded", "true");
+      expect(panelOf(button)).toHaveAttribute("data-animating");
+      expect(history()).not.toContain("instant");
+    });
+
+    it("animates an exclusive close", async () => {
+      const user = userEvent.setup();
+      render(<Fixture exclusive />);
+      const one = screen.getByRole("button", { name: "One" });
+      await user.click(one);
+      holdAnimations();
+      const history = motionHistory(panelOf(one));
+
+      await user.click(screen.getByRole("button", { name: "Two" }));
+
+      expect(one).toHaveAttribute("aria-expanded", "false");
+      expect(panelOf(one)).toHaveAttribute("data-animating");
+      expect(panelOf(one)).not.toHaveAttribute("hidden");
+      expect(history()).not.toContain("instant");
+    });
   });
 
   it("has no axe violations closed or open", async () => {

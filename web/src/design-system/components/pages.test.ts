@@ -25,6 +25,13 @@ describe("componentPages (ds-components R6.1)", () => {
     expect(runs).toEqual([...componentGroups]);
   });
 
+  it("puts Forms right after Actions, holding TextField (ds-tokens §11.6)", () => {
+    expect(componentGroups.slice(0, 2)).toEqual(["Actions", "Forms"]);
+    expect(componentPages.filter(({ group }) => group === "Forms")).toEqual([
+      { id: "text-field", name: "TextField", group: "Forms" },
+    ]);
+  });
+
   it("names each page after a folder in web/src/components/", () => {
     for (const { name } of componentPages) {
       expect(existsSync(new URL(`../../components/${name}/`, import.meta.url)), name).toBe(true);

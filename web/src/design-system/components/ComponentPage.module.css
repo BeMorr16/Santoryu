@@ -1,69 +1,16 @@
-/*
- * One column in source order; from 80em (size.breakpoint.lg) On this page is a sticky rail at the
- * inline end, beside the intro and the content (ds-components R4.2).
- */
-/* A one-word h1 such as "VisuallyHidden" breaks instead of widening the page at 200% text (R2.7). */
+/* The shared docs layout (DocLayout.module.css), under this module's class names. */
 .docPage {
-  overflow-wrap: break-word;
-  display: grid;
-  grid-template-areas:
-    "intro"
-    "toc"
-    "content";
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-stack-lg) var(--space-layout-sm);
+  composes: page from "../DocLayout.module.css";
 }
 
 .intro {
-  display: flex;
-  grid-area: intro;
-  flex-direction: column;
-  gap: var(--space-stack-sm);
+  composes: intro from "../DocLayout.module.css";
 }
 
 .toc {
-  grid-area: toc;
+  composes: toc from "../DocLayout.module.css";
 }
 
 .content {
-  display: flex;
-  grid-area: content;
-  flex-direction: column;
-  gap: var(--space-stack-xl);
-  min-inline-size: 0;
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-stack-md);
-}
-
-@media (min-width: 80em) {
-  .docPage {
-    grid-template-areas:
-      "intro toc"
-      "content toc";
-    grid-template-rows: auto 1fr;
-    grid-template-columns: minmax(0, 1fr) var(--size-column-sm);
-  }
-
-  .toc {
-    position: sticky;
-    inset-block-start: calc(var(--shell-header-block-size, 0px) + var(--space-stack-md));
-    align-self: start;
-    max-block-size: calc(100dvh - var(--shell-header-block-size, 0px) - 2 * var(--space-stack-md));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    /* The scroller clips, so it leaves room for its links' focus rings. */
-    padding: calc(var(--effect-focus-ring-width) + var(--effect-focus-ring-offset));
-  }
-}
-
-/* size.breakpoint.sm: on short screens the header scrolls away, so the rail does too. */
-@media (min-width: 80em) and (max-height: 30em) {
-  .toc {
-    position: static;
-    max-block-size: none;
-  }
+  composes: content from "../DocLayout.module.css";
 }

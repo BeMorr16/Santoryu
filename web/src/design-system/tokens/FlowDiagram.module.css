@@ -1,0 +1,132 @@
+.diagram {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+  margin: 0;
+}
+
+/* Below 48em (size.breakpoint.md) the tiers stack, each arrow pointing down to the next. */
+.tiers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-stack-lg);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tier {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+  min-inline-size: 0;
+}
+
+/* The arrow into this tier, drawn in the gap before it. Generated content: never announced. */
+.tier + .tier::before {
+  content: "";
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-start: 50%;
+  inline-size: var(--space-stack-lg);
+  block-size: var(--space-stack-lg);
+  translate: -50% 0;
+  background-color: var(--color-border-strong);
+  clip-path: polygon(30% 0, 70% 0, 70% 45%, 100% 45%, 50% 100%, 0 45%, 30% 45%);
+}
+
+.head,
+.rule {
+  margin: 0;
+}
+
+.count,
+.rule {
+  color: var(--color-text-muted);
+  font-size: var(--type-size-small);
+}
+
+.nodes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-stack-xs);
+  padding: var(--space-inset-sm);
+  border: var(--effect-border-width) solid var(--color-border-default);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-raised);
+}
+
+.path,
+.value {
+  font-size: var(--type-size-small);
+}
+
+.path {
+  font-family: var(--type-family-code);
+}
+
+.value {
+  color: var(--color-text-muted);
+}
+
+.preview {
+  display: block;
+}
+
+/*
+ * From 48em: four equal columns, each arrow pointing to the inline end. Each tier is a subgrid of
+ * three shared rows (name, rule, nodes), so the nodes line up across the columns whatever the
+ * rules' lengths, and single nodes sit level with the middle of the Light and Dark pair.
+ */
+@media (min-width: 48em) {
+  .tiers {
+    grid-template-rows: auto auto 1fr;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: var(--space-stack-sm) var(--space-inline-lg);
+  }
+
+  .tier {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+  }
+
+  .tier > :last-child {
+    align-self: center;
+  }
+
+  /* Placed in the nodes row, so the arrow points at the nodes. */
+  .tier + .tier::before {
+    grid-row: 3;
+    inset-block: 50% auto;
+    inset-inline: auto 100%;
+    inline-size: var(--space-inline-lg);
+    block-size: var(--space-inline-lg);
+    translate: 0 -50%;
+    clip-path: polygon(0 30%, 45% 30%, 45% 0, 100% 50%, 45% 100%, 45% 70%, 0 70%);
+  }
+
+  .tier:dir(rtl)::before {
+    scale: -1 1;
+  }
+}
+
+/* Forced colors would paint the arrows as the background, hiding them. */
+@media (forced-colors: active) {
+  .tier + .tier::before {
+    forced-color-adjust: none;
+    background-color: CanvasText;
+  }
+}

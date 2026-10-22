@@ -1,0 +1,66 @@
+.ramps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-lg);
+}
+
+.ramp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--type-family-code);
+  font-size: var(--type-size-body);
+}
+
+/* Steps wrap: as many half-column tracks as fit. */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--size-column-sm) / 2), 1fr));
+  gap: var(--space-stack-md) var(--space-inline-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-xs);
+  min-inline-size: 0;
+  padding: var(--space-inset-sm);
+  border-radius: var(--radius-control);
+  overflow-wrap: anywhere;
+}
+
+/* Over Specimen's own swatch size. */
+.step > .swatch {
+  inline-size: 100%;
+  block-size: var(--space-layout-md);
+}
+
+.name {
+  font-size: var(--type-size-small);
+  font-weight: var(--type-weight-strong);
+}
+
+/* The step's own color over a checkerboard of grid lines, so its alpha shows. */
+.step > .checkerboard {
+  forced-color-adjust: none;
+  background-color: transparent;
+  background-image:
+    linear-gradient(var(--specimen), var(--specimen)),
+    repeating-conic-gradient(var(--color-grid-line) 0 25%, transparent 0 50%);
+  background-size:
+    auto,
+    var(--space-stack-md) var(--space-stack-md);
+}
+
+/* Search hides steps and whole ramps; flex would otherwise override `hidden`. */
+.ramp[hidden],
+.step[hidden] {
+  display: none;
+}

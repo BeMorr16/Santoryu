@@ -2,12 +2,13 @@ import { CodeBlock } from "../../components/CodeBlock/CodeBlock.tsx";
 import { Link } from "../../components/Link/Link.tsx";
 import { Typography } from "../../components/Typography/Typography.tsx";
 import { repoUrl } from "../../site.config.ts";
-import { DocSection } from "./ComponentPage.tsx";
+import { DocSection } from "../DocSection.tsx";
 import styles from "./ComponentPage.module.css";
 import { OnThisPage } from "./OnThisPage.tsx";
 import { componentPages, componentsPath } from "./pages.ts";
 import { PrevNext } from "./PrevNext.tsx";
 import showcaseStyles from "./Showcase.module.css";
+import { stylingCode, usageCode } from "../snippets.ts";
 
 const [principles, usage, testing, source] = [
   { id: "principles", label: "Principles" },
@@ -15,19 +16,6 @@ const [principles, usage, testing, source] = [
   { id: "testing", label: "How it's tested" },
   { id: "source", label: "Source" },
 ];
-
-/** Importing and rendering a component, through the alias every main example uses (R3.3). */
-export const usageCode = `import { Button } from "@/components/Button";
-
-export function SaveButton() {
-  return <Button variant="primary">Save changes</Button>;
-}`;
-
-/** Restyling a component through its tokens, on a wrapper class (R3.3). */
-export const stylingCode = `.brand {
-  --component-button-primary-background: var(--color-accent-text);
-  --component-button-primary-border: var(--color-accent-text);
-}`;
 
 /** The components overview (ds-components R3): what the library is, how to use it and how it's tested. */
 export function Overview() {

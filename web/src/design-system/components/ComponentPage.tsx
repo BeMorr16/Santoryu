@@ -1,15 +1,16 @@
-import type { ReactNode } from "react";
 import { CodeBlock } from "../../components/CodeBlock/CodeBlock.tsx";
 import { Link } from "../../components/Link/Link.tsx";
 import { Stack } from "../../components/Stack/Stack.tsx";
 import { Typography } from "../../components/Typography/Typography.tsx";
+import { componentTokensOf } from "../../tokens/metadata.ts";
 import { ComponentTokenTable } from "../ComponentTokenTable.tsx";
+import { DocSection } from "../DocSection.tsx";
 import { pageMeta } from "../page-meta.ts";
 import styles from "./ComponentPage.module.css";
 import { ExampleGroup } from "./ExampleGroup.tsx";
 import { KeyboardTable } from "./KeyboardTable.tsx";
 import { OnThisPage } from "./OnThisPage.tsx";
-import { componentPage, componentPath } from "./pages.ts";
+import { componentPage, componentPath, tokensPath } from "./pages.ts";
 import { PrevNext } from "./PrevNext.tsx";
 import { PreviewPanel } from "./PreviewPanel.tsx";
 import { PropsTable } from "./PropsTable.tsx";
@@ -17,24 +18,6 @@ import type { Showcase } from "./Showcase.ts";
 import showcaseStyles from "./Showcase.module.css";
 import { sourceUrl } from "./source-url.ts";
 import { sections, tocItems } from "./toc.ts";
-
-/** An h2 section with the stable id its On this page link targets (R4.3). Unnamed: not a landmark. */
-export function DocSection({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className={styles.section}>
-      <h2 id={id}>{label}</h2>
-      {children}
-    </section>
-  );
-}
 
 /**
  * One component's docs page (ds-components R4.1): its name, purpose and source link, On this page,
@@ -72,7 +55,9 @@ export function ComponentPage({ showcase }: { showcase: Showcase }) {
           </PreviewPanel>
         </DocSection>
         <DocSection {...props}>
-          <p>Any native prop not listed here goes to the root element unchanged.</p>
+          {showcase.nativePropsToRoot !== false && (
+            <p>Any native prop not listed here goes to the root element unchanged.</p>
+          )}
           {showcase.propsNote && <p>{showcase.propsNote}</p>}
           {showcase.props.map(({ part, docs }) => (
             <PropsTable key={part} caption={`${part} props`} props={docs} />
@@ -82,7 +67,11 @@ export function ComponentPage({ showcase }: { showcase: Showcase }) {
           {showcase.tokens === null ? (
             <p>{showcase.tokensNote}</p>
           ) : (
-            <ComponentTokenTable component={showcase.tokens} caption={`${name} component tokens`} />
+            <ComponentTokenTable
+              tokens={componentTokensOf(showcase.tokens)}
+              caption={`${name} component tokens`}
+              linkBase={tokensPath}
+            />
           )}
         </DocSection>
         <DocSection {...accessibility}>

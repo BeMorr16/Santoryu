@@ -71,3 +71,23 @@ export interface ComponentTokenMeta extends TokenMetaBase {
 }
 
 export type TokenMeta = SemanticTokenMeta | ComponentTokenMeta;
+
+/** A primitive: a literal value, documented but never emitted as a custom property (0004, 0011). */
+export interface PrimitiveTokenMeta {
+  tier: "primitive";
+  /** e.g. `color.blue.600`. */
+  name: string;
+  category: TokenCategory;
+  /** Second path segment, the ramp or scale it belongs to: `blue`, `font-size`, `4`. */
+  group: string;
+  type: string;
+  description: string;
+  /** The resolved CSS value, as a semantic token aliasing it would get. */
+  css: string;
+  srgb?: Srgb;
+  alpha?: number;
+  /** Semantic tokens aliasing it in any theme or under reduced motion, in metadata order. */
+  usedBy: readonly string[];
+}
+
+export type AnyTokenMeta = TokenMeta | PrimitiveTokenMeta;

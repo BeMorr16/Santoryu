@@ -194,9 +194,9 @@ describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
       "components/button.json": buttonTokens,
       ...extra,
     });
-    const tokens = await buildTokens(dirs);
+    const { tokens, primitives } = await buildTokens(dirs);
     const css = await readFile(join(dirs.outDir, "tokens.css"), "utf8");
-    return { tokens, css };
+    return { tokens, primitives, css };
   }
 
   /** Top-level rule preludes in order, with `@media` blocks flattened to "@media … inner". */
@@ -247,6 +247,91 @@ describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
     });
     expect(tokens.find((t) => t.name === "color.text.default")).toMatchObject({
       tier: "semantic",
+    });
+  });
+
+  describe("primitive metadata (ds-tokens design §3.2)", () => {
+    const motion = {
+      "motion.json": {
+        motion: {
+          time: {
+            $type: "duration",
+            0: { $value: { value: 0, unit: "ms" }, $description: "None." },
+            150: { $value: { value: 150, unit: "ms" }, $description: "Fast." },
+          },
+          duration: {
+            $type: "duration",
+            fast: { $value: "{motion.time.150}", $description: "Fast duration." },
+          },
+        },
+      },
+      "themes/reduced-motion.json": {
+        motion: {
+          duration: {
+            $type: "duration",
+            fast: { $value: "{motion.time.0}", $description: "Off." },
+          },
+        },
+      },
+    };
+
+    it("lists every primitive and no semantic or component token", async () => {
+      const { primitives } = await build(motion);
+
+      expect(primitives.map((p) => p.name)).toEqual([
+        "color.gray.0",
+        "color.gray.1",
+        "type.letter-spacing.16",
+        "type.line-height.tight",
+        "type.line-length.65",
+        "motion.time.0",
+        "motion.time.150",
+      ]);
+      expect(primitives.find((p) => p.name === "color.gray.1")).toEqual({
+        tier: "primitive",
+        name: "color.gray.1",
+        category: "color",
+        group: "gray",
+        type: "color",
+        description: "White.",
+        css: "#ffffff",
+        srgb: [1, 1, 1],
+        alpha: 1,
+        usedBy: ["color.text.default"],
+      });
+    });
+
+    it("applies the CSS value transforms", async () => {
+      const { primitives } = await build(motion);
+      const css = (name: string) => primitives.find((p) => p.name === name)?.css;
+
+      expect(css("type.letter-spacing.16")).toBe("0.16em");
+      expect(css("type.line-length.65")).toBe("65ch");
+      expect(css("motion.time.150")).toBe("150ms");
+    });
+
+    it("lists the semantic tokens aliasing each primitive, in every theme and under reduced motion", async () => {
+      const { primitives } = await build(motion);
+      const usedBy = (name: string) => primitives.find((p) => p.name === name)?.usedBy;
+
+      expect(usedBy("color.gray.0")).toEqual(["color.text.default"]);
+      expect(usedBy("color.gray.1")).toEqual(["color.text.default"]);
+      expect(usedBy("motion.time.150")).toEqual(["motion.duration.fast"]);
+      expect(usedBy("motion.time.0")).toEqual(["motion.duration.fast"]);
+      expect(usedBy("type.line-height.tight")).toEqual(["type.leading.heading"]);
+    });
+
+    it("writes primitives.ts and never emits a primitive as a custom property", async () => {
+      const dirs = await fixture({ "color.json": twoGrays, ...motion });
+      const { primitives } = await buildTokens(dirs);
+      const css = await readFile(join(dirs.outDir, "tokens.css"), "utf8");
+      const ts = await readFile(join(dirs.outDir, "primitives.ts"), "utf8");
+
+      expect(ts).toContain("satisfies readonly PrimitiveTokenMeta[]");
+      for (const { name } of primitives) {
+        expect(ts).toContain(`"name": "${name}"`);
+        expect(css).not.toContain(`--${name.replaceAll(".", "-")}:`);
+      }
     });
   });
 

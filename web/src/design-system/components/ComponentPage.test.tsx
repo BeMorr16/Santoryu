@@ -132,6 +132,19 @@ describe("ComponentPage (ds-components R4)", () => {
     expect(within(block).getByRole("button", { name: "Copy code" })).toBeInTheDocument();
   });
 
+  it("gives its token table copy buttons and links to each alias on the tokens page (ds-tokens R6.3, R8.2)", async () => {
+    const { page } = await renderComponentPage(buttonRoute, "button");
+    const table = within(page).getByRole("table", { name: "Button component tokens" });
+
+    expect(
+      within(table).getByRole("button", { name: "Copy --component-button-radius" }),
+    ).toBeInTheDocument();
+    expect(within(table).getAllByRole("link", { name: "radius.control" })[0]).toHaveAttribute(
+      "href",
+      "/design-system/tokens#radius-control",
+    );
+  });
+
   it("ends with links to the previous and next pages (R4.9)", async () => {
     const { page } = await renderComponentPage(routeOf("link"), "link");
 

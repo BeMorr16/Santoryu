@@ -197,7 +197,10 @@ test.describe("activation (R5.5)", () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto(longPage);
       await scrollPage(page, 3000);
+      // Shown once scripts run; focus() doesn't wait for that, as click() does.
+      await expect(backToTop(page)).toBeVisible();
       await backToTop(page).focus();
+      await expect(backToTop(page)).toBeFocused();
 
       await page.keyboard.press(key);
 

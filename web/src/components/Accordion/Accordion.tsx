@@ -125,13 +125,24 @@ export function AccordionItem({
   const open = openProp ?? uncontrolledOpen;
   const controlled = openProp !== undefined;
   const [motion, setMotion] = useState<Motion>("animate");
+  // The change this item last asked for, through its button or its exclusive group.
+  const [requested, setRequested] = useState<boolean | null>(null);
 
-  // A change after the first render animates; a closing panel stays rendered until it ends (R13.8).
+  // A change the item requested animates; one made from outside (a controlled parent revealing a
+  // link target or search results) is instant (ds-tokens §7.4, amending R13.8). A closing panel
+  // stays rendered until its animation ends.
   const [animating, setAnimating] = useState(false);
   const [previousOpen, setPreviousOpen] = useState(open);
   if (open !== previousOpen) {
+    const ownRequest = requested === open;
     setPreviousOpen(open);
-    setAnimating(motion === "animate");
+    setRequested(null);
+    setAnimating(ownRequest && motion === "animate");
+    if (!ownRequest) setMotion("instant");
+  } else if (requested !== null && requested !== open) {
+    // A controlled parent ignored the request (R13.4): forget it, so a later change from outside
+    // to the same state is still instant.
+    setRequested(null);
   }
   const hidden = !open && !animating;
 
@@ -140,6 +151,7 @@ export function AccordionItem({
   const request = useCallback(
     (next: boolean, nextMotion: Motion) => {
       setMotion(nextMotion);
+      setRequested(next);
       if (!controlled) setUncontrolledOpen(next);
       onOpenChange?.(next);
     },

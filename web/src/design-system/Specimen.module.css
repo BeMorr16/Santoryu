@@ -12,7 +12,9 @@
   block-size: var(--space-layout-sm);
 }
 
+/* A swatch is the color itself, so forced colors leave it alone. */
 .swatch {
+  forced-color-adjust: none;
   border: thin solid var(--color-border-strong);
   border-radius: var(--radius-control);
   background-color: var(--specimen);

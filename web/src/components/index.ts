@@ -13,6 +13,7 @@ export * from "./Menu/index.ts";
 export * from "./Separator/index.ts";
 export * from "./Stack/index.ts";
 export * from "./Table/index.ts";
+export * from "./TextField/index.ts";
 export * from "./ThemeSwitcher/index.ts";
 export * from "./Tooltip/index.ts";
 export * from "./Typography/index.ts";

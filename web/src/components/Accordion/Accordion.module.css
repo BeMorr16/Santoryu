@@ -1,10 +1,11 @@
-/* A divided list (refinement R13.10): a line above each item and below the last. */
+/* A divided list (refinement R13.10): a line above each item and below the last one shown, so
+   a parent hiding items (the tokens page's search) keeps the closing line. */
 .item {
   border-block-start: var(--component-accordion-border-width) solid
     var(--component-accordion-border);
 }
 
-.item:last-child {
+.item:nth-last-child(1 of :not([hidden])) {
   border-block-end: var(--component-accordion-border-width) solid var(--component-accordion-border);
 }
 

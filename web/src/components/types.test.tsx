@@ -32,6 +32,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TextField,
   ThemeSwitcher,
   Tooltip,
   Typography,
@@ -796,6 +797,26 @@ describe("library types", () => {
         <Link key="l" href="/" appearance="button" variant="danger">
           x
         </Link>,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+  });
+
+  it("TextField requires a string label and takes only its own types and sizes (ds-tokens R10.2)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- a label is required: it names the field (decision 0008).
+        <TextField key="a" />,
+        // @ts-expect-error -- the label is plain text, so the clear button's name can use it.
+        <TextField key="b" label={<b>Email</b>} />,
+        // @ts-expect-error -- not a text type: other inputs aren't TextFields.
+        <TextField key="c" label="Agree" type="checkbox" />,
+        // @ts-expect-error -- not a size.
+        <TextField key="d" label="Email" size="lg" />,
+        // @ts-expect-error -- not a registry icon.
+        <TextField key="e" label="Email" iconStart="unicorn" />,
+        // @ts-expect-error -- a hidden label would hide the visible required cue.
+        <TextField key="f" label="Email" hideLabel required />,
       ];
     }
     expectTypeOf(invalid).toBeFunction();

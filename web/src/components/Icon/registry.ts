@@ -13,9 +13,11 @@ import { CopyIcon } from "@phosphor-icons/react/dist/ssr/Copy";
 import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr/EnvelopeSimple";
 import { GithubLogoIcon } from "@phosphor-icons/react/dist/ssr/GithubLogo";
 import { LinkedinLogoIcon } from "@phosphor-icons/react/dist/ssr/LinkedinLogo";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
 import { SunIcon } from "@phosphor-icons/react/dist/ssr/Sun";
 import { WarningIcon } from "@phosphor-icons/react/dist/ssr/Warning";
+import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
 
 export const icons = {
   sun: SunIcon,
@@ -31,6 +33,8 @@ export const icons = {
   github: GithubLogoIcon,
   mail: EnvelopeSimpleIcon,
   warning: WarningIcon,
+  search: MagnifyingGlassIcon,
+  close: XIcon,
 } as const;
 
 /** Our normalized weights → the family's weights. */

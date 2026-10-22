@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
-import type { TokenMeta } from "../tokens/types.ts";
+import { cx } from "../components/shared/cx.ts";
+import { semanticTokens } from "../tokens/metadata.ts";
+import type { AnyTokenMeta } from "../tokens/types.ts";
 import styles from "./Specimen.module.css";
 
 const kindByGroup: Record<string, string> = {
@@ -21,7 +23,7 @@ const kindByGroup: Record<string, string> = {
 /** Groups with no preview, checked before the category: a 480px breakpoint bar, an 80dvh image-cap bar or a 65ch measure bar would only widen the table. */
 const noSpecimen = new Set(["size.breakpoint", "size.viewport", "type.measure"]);
 
-const kindByCategory: Partial<Record<TokenMeta["category"], string>> = {
+const kindByCategory: Partial<Record<AnyTokenMeta["category"], string>> = {
   color: "swatch",
   space: "bar",
   size: "bar",
@@ -38,16 +40,27 @@ const textKinds = new Set([
   "underlineOffset",
 ]);
 
-/** A component token previews like the semantic token it aliases. */
-function specimenKind(token: TokenMeta): string | undefined {
+/**
+ * A component token previews like the semantic token it aliases, and a primitive like the first
+ * semantic token aliasing it; an unused primitive falls back to its category (ds-tokens §6.3).
+ */
+function specimenKind(token: AnyTokenMeta): string | undefined {
+  if (token.tier === "primitive") {
+    const user = semanticTokens.find((semantic) => semantic.name === token.usedBy[0]);
+    return user ? specimenKind(user) : kindByCategory[token.category];
+  }
   const name = token.tier === "component" ? token.aliases : token.name;
   const group = name.split(".").slice(0, 2).join(".");
   if (noSpecimen.has(group)) return undefined;
   return kindByGroup[name] ?? kindByGroup[group] ?? kindByCategory[token.category];
 }
 
-/** A decorative preview styled with the token's own custom property. Motion, layer, breakpoints, the viewport caps and the measure have none (R7.6, refinement R11.5, R12.14, R18.7). */
-export function Specimen({ token }: { token: TokenMeta }) {
+/**
+ * A decorative preview styled with the token's own custom property, or a primitive's literal value
+ * (it has no property). Motion, layer, breakpoints, the viewport caps and the measure have none
+ * (R7.6, refinement R11.5, R12.14, R18.7).
+ */
+export function Specimen({ token, className }: { token: AnyTokenMeta; className?: string }) {
   const kind = specimenKind(token);
   if (kind === undefined) {
     return (
@@ -57,13 +70,10 @@ export function Specimen({ token }: { token: TokenMeta }) {
       </>
     );
   }
-  const style = { "--specimen": `var(${token.cssVar})` } as CSSProperties;
+  const value = token.tier === "primitive" ? token.css : `var(${token.cssVar})`;
+  const style = { "--specimen": value } as CSSProperties;
   return (
-    <span
-      aria-hidden="true"
-      className={`${styles.specimen ?? ""} ${styles[kind] ?? ""}`}
-      style={style}
-    >
+    <span aria-hidden="true" className={cx(styles.specimen, styles[kind], className)} style={style}>
       {textKinds.has(kind) ? "Aa" : null}
     </span>
   );

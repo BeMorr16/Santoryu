@@ -34,6 +34,11 @@ export interface Showcase {
   props: readonly { part: string; docs: Readonly<Record<string, PropDoc>> }[];
   /** What else reaches the root element, beyond the native props, when it needs saying. */
   propsNote?: string;
+  /**
+   * False when native props don't all go to the root element (TextField's go to its input), so
+   * the page drops its "goes to the root element" sentence and propsNote says where. Default true.
+   */
+  nativePropsToRoot?: boolean;
   /** Kebab-case name of its component tokens, or null when it has none. */
   tokens: string | null;
   /** Why there are no component tokens, when `tokens` is null. */

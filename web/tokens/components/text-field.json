@@ -1,0 +1,205 @@
+{
+  "component": {
+    "text-field": {
+      "background": {
+        "$value": "{color.surface.raised}",
+        "$type": "color",
+        "$description": "The input's background."
+      },
+      "text": {
+        "$value": "{color.text.default}",
+        "$type": "color",
+        "$description": "The typed value.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "placeholder": {
+        "$value": "{color.text.subtle}",
+        "$type": "color",
+        "$description": "Placeholder text. Never the label.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "border": {
+        "$value": "{color.border.strong}",
+        "$type": "color",
+        "$description": "The input's boundary (3:1 against the surfaces it sits on and its own background).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "border-invalid": {
+        "$value": "{color.error.border}",
+        "$type": "color",
+        "$description": "The boundary while the field has an error.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Width of the input's boundary."
+      },
+      "radius": {
+        "$value": "{radius.control}",
+        "$type": "dimension",
+        "$description": "Corner radius of the input, as on buttons."
+      },
+      "height": {
+        "sm": {
+          "$value": "{size.control.sm}",
+          "$type": "dimension",
+          "$description": "Input height at size sm, matching Button."
+        },
+        "md": {
+          "$value": "{size.control.md}",
+          "$type": "dimension",
+          "$description": "Input height at size md, matching Button."
+        }
+      },
+      "padding-inline": {
+        "sm": {
+          "$value": "{space.inline.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of the input at size sm."
+        },
+        "md": {
+          "$value": "{space.inline.md}",
+          "$type": "dimension",
+          "$description": "Inline padding of the input at size md."
+        }
+      },
+      "font-size": {
+        "sm": {
+          "$value": "{type.size.small}",
+          "$type": "dimension",
+          "$description": "Text size of the input at size sm."
+        },
+        "md": {
+          "$value": "{type.size.body}",
+          "$type": "dimension",
+          "$description": "Text size of the input at size md."
+        }
+      },
+      "gap": {
+        "$value": "{space.stack.xs}",
+        "$type": "dimension",
+        "$description": "Space between the label, hint, input and error."
+      },
+      "label-weight": {
+        "$value": "{type.weight.strong}",
+        "$type": "fontWeight",
+        "$description": "Weight of the label."
+      },
+      "hint-text": {
+        "$value": "{color.text.muted}",
+        "$type": "color",
+        "$description": "Hint text under the label.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "error-text": {
+        "$value": "{color.error.text}",
+        "$type": "color",
+        "$description": "Error message under the input, beside its warning icon.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "icon": {
+        "$value": "{color.text.muted}",
+        "$type": "color",
+        "$description": "The start icon (decorative; the label names the field).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "icon-size": {
+        "$value": "{size.icon.sm}",
+        "$type": "dimension",
+        "$description": "Size of the start icon."
+      },
+      "disabled-background": {
+        "$value": "{color.surface.sunken}",
+        "$type": "color",
+        "$description": "The input's background while disabled."
+      },
+      "disabled-text": {
+        "$value": "{color.text.subtle}",
+        "$type": "color",
+        "$description": "The value's color while disabled."
+      }
+    }
+  }
+}

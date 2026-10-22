@@ -1,0 +1,135 @@
+/* A block that fills its container's inline size (ds-tokens R10.9). */
+.root {
+  display: grid;
+  gap: var(--component-text-field-gap);
+  min-inline-size: 0;
+}
+
+.sm {
+  --_height: var(--component-text-field-height-sm);
+  --_padding-inline: var(--component-text-field-padding-inline-sm);
+  --_font-size: var(--component-text-field-font-size-sm);
+}
+
+.md {
+  --_height: var(--component-text-field-height-md);
+  --_padding-inline: var(--component-text-field-padding-inline-md);
+  --_font-size: var(--component-text-field-font-size-md);
+}
+
+.label {
+  font-weight: var(--component-text-field-label-weight);
+}
+
+.hint,
+.error {
+  margin: 0;
+  font-size: var(--component-text-field-font-size-sm);
+}
+
+.hint {
+  color: var(--component-text-field-hint-text);
+}
+
+/* Text and an icon, so the error isn't shown by color alone (WCAG 1.4.1). */
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--component-text-field-gap);
+  color: var(--component-text-field-error-text);
+}
+
+.errorIcon {
+  flex: none;
+  inline-size: var(--component-text-field-icon-size);
+  block-size: var(--component-text-field-icon-size);
+  margin-block-start: calc((1lh - var(--component-text-field-icon-size)) / 2);
+}
+
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--_height);
+  padding-inline: var(--_padding-inline);
+  border: var(--component-text-field-border-width) solid var(--component-text-field-border);
+  border-radius: var(--component-text-field-radius);
+  background-color: var(--component-text-field-background);
+  color: var(--component-text-field-text);
+  font: inherit;
+  font-size: var(--_font-size);
+}
+
+.input::placeholder {
+  color: var(--component-text-field-placeholder);
+  opacity: 1;
+}
+
+/* One clear control only: the component's own (R10.8). Firefox has no native one. */
+.input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.input:focus-visible {
+  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+.invalid .input {
+  border-color: var(--component-text-field-border-invalid);
+}
+
+.input:disabled {
+  background-color: var(--component-text-field-disabled-background);
+  color: var(--component-text-field-disabled-text);
+  cursor: not-allowed;
+}
+
+/* The start icon sits in the input's start padding, which grows to hold it. */
+.icon {
+  position: absolute;
+  inset-inline-start: var(--_padding-inline);
+  inline-size: var(--component-text-field-icon-size);
+  block-size: var(--component-text-field-icon-size);
+  color: var(--component-text-field-icon);
+  pointer-events: none;
+}
+
+.control:has(.icon) .input {
+  padding-inline-start: calc(var(--_padding-inline) * 2 + var(--component-text-field-icon-size));
+}
+
+/*
+ * A search field's icon goes while the input has focus, and its space with it, so the text starts
+ * at the field's own padding instead of after a gap (R10.7, amended in visual review).
+ */
+.searchIcon:has(.input:focus) .icon {
+  display: none;
+}
+
+.searchIcon:has(.input:focus) .input {
+  padding-inline-start: var(--_padding-inline);
+}
+
+/* The clear button sits inside the input's end, which leaves room for it. */
+.clear {
+  position: absolute;
+  inset-inline-end: calc((var(--_height) - var(--component-text-field-height-sm)) / 2);
+}
+
+.control:has(.clear) .input {
+  padding-inline-end: var(--_height);
+}
+
+@media (forced-colors: active) {
+  .input,
+  .invalid .input {
+    border-color: ButtonBorder;
+  }
+}

@@ -1,19 +1,11 @@
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ComponentPropsWithRef,
-  type ReactNode,
-} from "react";
-import { flushSync } from "react-dom";
-import { Button } from "../Button/Button.tsx";
-import type { IconName } from "../Icon/registry.ts";
+import { useId, useRef, type ComponentPropsWithRef, type ReactNode } from "react";
+import { CopyButton } from "../shared/CopyButton.tsx";
 import { cx } from "../shared/cx.ts";
 import { useOverflowFocus } from "../shared/overflow.ts";
 import { Typography } from "../Typography/Typography.tsx";
-import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden.tsx";
 import styles from "./CodeBlock.module.css";
+
+export { COPY_RESET_MS } from "../shared/CopyButton.tsx";
 
 export interface CodeBlockOwnProps {
   /** The code, as plain text. One leading and one trailing line break are trimmed (refinement R15.1). */
@@ -32,15 +24,6 @@ export interface CodeBlockOwnProps {
 
 export type CodeBlockProps = CodeBlockOwnProps &
   Omit<ComponentPropsWithRef<"div">, keyof CodeBlockOwnProps>;
-
-/** How long the check icon and the "Copied" message stay (refinement R15.6): a behavior constant. */
-export const COPY_RESET_MS = 2000;
-
-const messages = { idle: "", copied: "Copied", failed: "Couldn't copy" } as const;
-const icons = { idle: "copy", copied: "check", failed: "warning" } as const satisfies Record<
-  keyof typeof messages,
-  IconName
->;
 
 /** Drops one leading and one trailing line break, so a template literal can sit on its own lines. */
 export function trimCode(code: string): string {
@@ -70,34 +53,6 @@ export function CodeBlock({
   // The pre follows its container; the code (max-content wide) follows its longest line through
   // text zoom, the web font loading and new children (R15.5).
   const focusable = useOverflowFocus(preRef, codeRef, !wrap);
-  const [status, setStatus] = useState<keyof typeof messages>("idle");
-  const resetTimer = useRef<number>(undefined);
-
-  useEffect(
-    () => () => {
-      window.clearTimeout(resetTimer.current);
-    },
-    [],
-  );
-
-  async function copyCode() {
-    window.clearTimeout(resetTimer.current);
-    // Emptied first, so a second press announces "Copied" again.
-    flushSync(() => {
-      setStatus("idle");
-    });
-    try {
-      await navigator.clipboard.writeText(code);
-      setStatus("copied");
-    } catch {
-      setStatus("failed");
-    }
-    // Again, for a press that started while this one waited on the clipboard.
-    window.clearTimeout(resetTimer.current);
-    resetTimer.current = window.setTimeout(() => {
-      setStatus("idle");
-    }, COPY_RESET_MS);
-  }
 
   return (
     <div {...rest} className={cx(styles.root, className)}>
@@ -106,22 +61,12 @@ export function CodeBlock({
           {label}
         </Typography>
         {copy && (
-          <span className={styles.actions}>
-            {/* Shown for sighted users; the status below announces it (refinement R15.6). */}
-            {status === "failed" && (
-              <Typography as="span" variant="small" aria-hidden="true" className={styles.failure}>
-                {messages.failed}
-              </Typography>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              iconStart={icons[status]}
-              aria-label="Copy code"
-              onClick={() => void copyCode()}
-            />
-            <VisuallyHidden role="status">{messages[status]}</VisuallyHidden>
-          </span>
+          <CopyButton
+            text={code}
+            label="Copy code"
+            className={styles.actions}
+            failureClassName={styles.failure}
+          />
         )}
       </div>
       <pre

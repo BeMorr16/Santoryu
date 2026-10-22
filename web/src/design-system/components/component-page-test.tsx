@@ -99,6 +99,13 @@ export function describeComponentPage(route: ComponentRoute, id: ComponentPageId
     it(`renders ${name}'s props note under the native-props sentence only when it has one`, async () => {
       const { page: section } = await renderComponentPage(route, id);
 
+      if (showcase.nativePropsToRoot === false) {
+        // Its native props go elsewhere, so the sentence would be wrong; the note says where.
+        expect(within(section).queryByText(/^Any native prop not listed here/)).toBeNull();
+        expect(showcase.propsNote).toBeDefined();
+        expect(within(section).getByText(showcase.propsNote ?? "")).toBeInTheDocument();
+        return;
+      }
       const native = within(section).getByText(/^Any native prop not listed here/);
       const next = native.nextElementSibling;
       if (showcase.propsNote === undefined) {

@@ -2,7 +2,8 @@ import { render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
-import { Overview, stylingCode, usageCode } from "./Overview.tsx";
+import { stylingCode, usageCode } from "../snippets.ts";
+import { Overview } from "./Overview.tsx";
 import { componentPages } from "./pages.ts";
 
 function renderOverview() {
@@ -33,7 +34,7 @@ describe("Overview (ds-components R3)", () => {
         exact: false,
       }),
     ).toBeInTheDocument();
-    expect(componentPages).toHaveLength(18);
+    expect(componentPages).toHaveLength(19);
   });
 
   it("lists its h2 sections in On this page, linking their ids (R3.1)", () => {

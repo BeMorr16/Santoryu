@@ -1,6 +1,13 @@
 // Plain data with no imports: routes.ts and react-router.config.ts load it too (ds-components design §3.1).
 
-export const componentGroups = ["Actions", "Content", "Layout", "Disclosure", "Utilities"] as const;
+export const componentGroups = [
+  "Actions",
+  "Forms",
+  "Content",
+  "Layout",
+  "Disclosure",
+  "Utilities",
+] as const;
 export type ComponentGroup = (typeof componentGroups)[number];
 
 /**
@@ -12,6 +19,7 @@ export const componentPages = [
   { id: "link", name: "Link", group: "Actions" },
   { id: "menu", name: "Menu", group: "Actions" },
   { id: "back-to-top", name: "BackToTop", group: "Actions" },
+  { id: "text-field", name: "TextField", group: "Forms" },
   { id: "typography", name: "Typography", group: "Content" },
   { id: "code-block", name: "CodeBlock", group: "Content" },
   { id: "table", name: "Table", group: "Content" },

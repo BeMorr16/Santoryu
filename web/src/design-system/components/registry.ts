@@ -14,6 +14,7 @@ import { menuShowcase } from "./showcases/menu.tsx";
 import { separatorShowcase } from "./showcases/separator.tsx";
 import { stackShowcase } from "./showcases/stack.tsx";
 import { tableShowcase } from "./showcases/table.tsx";
+import { textFieldShowcase } from "./showcases/text-field.tsx";
 import { themeSwitcherShowcase } from "./showcases/theme-switcher.tsx";
 import { tooltipShowcase } from "./showcases/tooltip.tsx";
 import { typographyShowcase } from "./showcases/typography.tsx";
@@ -28,6 +29,7 @@ export const showcases = {
   link: linkShowcase,
   menu: menuShowcase,
   "back-to-top": backToTopShowcase,
+  "text-field": textFieldShowcase,
   typography: typographyShowcase,
   "code-block": codeBlockShowcase,
   table: tableShowcase,
