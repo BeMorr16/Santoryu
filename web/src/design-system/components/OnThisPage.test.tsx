@@ -35,6 +35,14 @@ describe("OnThisPage (ds-components R4.2)", () => {
     expect(screen.queryByRole("navigation")).toBeNull();
   });
 
+  it("restates the list role on every list, which Safari drops from unmarked lists", () => {
+    renderList();
+
+    const lists = screen.getAllByRole("list");
+    expect(lists).toHaveLength(2);
+    for (const list of lists) expect(list).toHaveAttribute("role", "list");
+  });
+
   it("links each heading by its id, with the nested headings in a list under their parent", () => {
     renderList();
 

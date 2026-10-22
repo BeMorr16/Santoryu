@@ -1,4 +1,5 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -6,34 +7,37 @@ import { describe, expect, it } from "vitest";
 const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
 const thisFile = fileURLToPath(import.meta.url);
 
-/** Source roots and files that must use the section's new name (ds-components R1.8, design §2). */
-const roots = [
-  "web/src",
-  "web/scripts",
-  "web/test",
-  "e2e/tests",
-  "infra/src",
-  "infra/test",
+/**
+ * Every file git would commit, outside the history in `specs/` and `docs/`, must use the section's
+ * new name (ds-components R1.8, design §2).
+ */
+const skippedRoots = ["specs/", "docs/"];
+/** Local-only instructions, kept out of the public repo by `.git/info/exclude`; read when present. */
+const localOnly = [
   "CLAUDE.md",
+  ".claude/agents",
+  ".claude/hooks",
+  ".claude/rules",
+  ".claude/skills",
 ];
-const skippedDirectories = new Set(["node_modules", "generated"]);
 const binaryExtensions = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif", ".woff2"]);
 const oldName = [/\/lab\b/, /\bLab\b/, /\blab-/];
 /** The tests that check the old paths are gone (R1.2) have to name them. */
 const checksOldPaths = new Set(["e2e/tests/health.spec.ts", "web/test/build/docs-pages.test.ts"]);
 
-function filesUnder(path: string): string[] {
-  if (!statSync(path).isDirectory()) return [path];
-  return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
-    if (entry.isDirectory() && skippedDirectories.has(entry.name)) return [];
-    const child = join(path, entry.name);
-    return entry.isDirectory() ? filesUnder(child) : [child];
-  });
+function gitFiles(args: string[]): string[] {
+  return execFileSync("git", ["ls-files", "-z", ...args], { cwd: repoRoot, encoding: "utf8" })
+    .split("\0")
+    .filter((path) => path !== "");
 }
 
-const files = roots
-  .flatMap((root) => filesUnder(join(repoRoot, root)))
-  .filter((file) => file !== thisFile);
+const files = [
+  ...gitFiles(["--cached", "--others", "--exclude-standard", "--deduplicate"]),
+  ...gitFiles(["--others", "--", ...localOnly]),
+]
+  .filter((path) => !skippedRoots.some((root) => path.startsWith(root)))
+  .map((path) => join(repoRoot, path))
+  .filter((file) => file !== thisFile && existsSync(file));
 
 describe("the old Lab name (R1.8)", () => {
   it("scans source files", () => {

@@ -245,6 +245,7 @@ test.describe("reflow (R2.7)", () => {
         componentPath("table"),
         componentPath("code-block"),
         componentPath("menu"),
+        componentPath("visually-hidden"),
       ]) {
         await page.goto(path);
         if (fontSize) {

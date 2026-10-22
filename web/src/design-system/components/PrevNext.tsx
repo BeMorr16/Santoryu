@@ -1,5 +1,6 @@
 import { Icon } from "../../components/Icon/Icon.tsx";
 import { Link } from "../../components/Link/Link.tsx";
+import { Stack } from "../../components/Stack/Stack.tsx";
 import { docsSequence } from "./pages.ts";
 import styles from "./PrevNext.module.css";
 
@@ -40,17 +41,27 @@ export function PrevNext({ current }: { current: string }) {
   const previous = index > 0 ? docsSequence[index - 1] : undefined;
   const next = index >= 0 ? docsSequence[index + 1] : undefined;
   return (
-    <ul aria-label="Previous and next" className={styles.prevNext}>
-      {previous && (
-        <li>
-          <PageLink direction="Previous" {...previous} />
-        </li>
-      )}
-      {next && (
-        <li className={styles.next}>
-          <PageLink direction="Next" {...next} />
-        </li>
-      )}
-    </ul>
+    <div className={styles.prevNext}>
+      <Stack
+        as="ul"
+        direction="horizontal"
+        rowGap="sm"
+        columnGap="lg"
+        justify="between"
+        aria-label="Previous and next"
+        className={styles.list}
+      >
+        {previous && (
+          <li>
+            <PageLink direction="Previous" {...previous} />
+          </li>
+        )}
+        {next && (
+          <li className={styles.next}>
+            <PageLink direction="Next" {...next} />
+          </li>
+        )}
+      </Stack>
+    </div>
   );
 }

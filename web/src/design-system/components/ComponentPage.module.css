@@ -55,6 +55,8 @@
     max-block-size: calc(100dvh - var(--shell-header-block-size, 0px) - 2 * var(--space-stack-md));
     overflow-y: auto;
     overscroll-behavior: contain;
+    /* The scroller clips, so it leaves room for its links' focus rings. */
+    padding: calc(var(--effect-focus-ring-width) + var(--effect-focus-ring-offset));
   }
 }
 

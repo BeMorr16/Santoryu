@@ -23,6 +23,12 @@ describe("PrevNext (ds-components R4.9)", () => {
     expect(screen.queryByRole("navigation")).toBeNull();
   });
 
+  it("restates the list role, which Safari drops from unmarked lists", () => {
+    renderAt(componentPath("link"));
+
+    expect(list()).toHaveAttribute("role", "list");
+  });
+
   it("links the pages before and after, named for which is which", () => {
     renderAt(componentPath("link"));
 

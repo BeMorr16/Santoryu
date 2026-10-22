@@ -1,13 +1,14 @@
 import { useId } from "react";
 import { Link } from "../../components/Link/Link.tsx";
 import { cx } from "../../components/shared/cx.ts";
+import { Stack } from "../../components/Stack/Stack.tsx";
 import { Typography } from "../../components/Typography/Typography.tsx";
 import styles from "./OnThisPage.module.css";
 import type { TocItem } from "./toc.ts";
 
 function TocList({ items, labelledBy }: { items: readonly TocItem[]; labelledBy?: string }) {
   return (
-    <ul aria-labelledby={labelledBy} className={styles.list}>
+    <Stack as="ul" gap="xs" aria-labelledby={labelledBy} className={styles.list}>
       {items.map(({ id, label, children }) => (
         <li key={id}>
           <Link href={`#${id}`} underline="hover">
@@ -16,7 +17,7 @@ function TocList({ items, labelledBy }: { items: readonly TocItem[]; labelledBy?
           {children && children.length > 0 && <TocList items={children} />}
         </li>
       ))}
-    </ul>
+    </Stack>
   );
 }
 

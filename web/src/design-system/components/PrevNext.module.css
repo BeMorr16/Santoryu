@@ -1,12 +1,7 @@
+/* The rule and its spacing sit on a wrapper, so they don't contend with the list's reset. */
 .prevNext {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-stack-sm) var(--space-inline-lg);
-  justify-content: space-between;
-  margin: 0;
-  padding: var(--space-inset-md) 0 0;
+  padding-block-start: var(--space-inset-md);
   border-block-start: var(--effect-border-width) solid var(--color-border-subtle);
-  list-style: none;
 }
 
 /* At the inline end, even alone. */
@@ -34,7 +29,7 @@
 
 /* size.breakpoint.sm: one above the other. */
 @media (max-width: 30em) {
-  .prevNext {
+  .prevNext .list {
     flex-direction: column;
   }
 }
