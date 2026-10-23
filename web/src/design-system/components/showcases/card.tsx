@@ -8,7 +8,9 @@ import { Announced } from "../Announced.tsx";
 import type { PropDocs } from "../PropDocs.ts";
 import type { Showcase } from "../Showcase.ts";
 import styles from "../Showcase.module.css";
+import { fallsPhoto } from "./figure-photos.ts";
 import { CardExample } from "../examples/CardExample.tsx";
+import falls480 from "../images/lower-falls-480.jpg";
 import cardExampleSource from "../examples/CardExample.tsx?raw";
 
 const props = {
@@ -46,6 +48,10 @@ const props = {
     description: "Makes the heading the card's link, and the whole card clickable.",
   },
   newTab: { type: "boolean", default: "false", description: "With href: open in a new tab." },
+  media: {
+    type: "ReactNode",
+    description: "A picture or preview, full-bleed across the top. After the heading in the DOM.",
+  },
 } satisfies PropDocs<CardOwnProps & Pick<CardProps, "as">>;
 
 /** The customized example's CSS, shown under it and applied by `.accentCard`. */
@@ -137,6 +143,37 @@ function PartsExample() {
   );
 }
 
+function WithMediaExample() {
+  return (
+    <Grid min="sm" gap="sm">
+      <Card
+        heading="Color tokens"
+        headingLevel={4}
+        href="/design-system/tokens"
+        media={
+          <div aria-hidden="true" className={styles.mediaSwatches}>
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+        }
+      >
+        Decorative media, hidden from assistive technology.
+      </Card>
+      <Card
+        heading="Lower Falls"
+        headingLevel={4}
+        media={<img src={falls480} alt={fallsPhoto.alt} width={480} height={720} />}
+      >
+        A meaningful image, with alt text.
+      </Card>
+    </Grid>
+  );
+}
+
 function LinkedWithANestedControlExample() {
   return (
     <Grid min="sm" gap="sm">
@@ -221,6 +258,7 @@ export const cardShowcase: Showcase = {
   examples: [
     { title: "Variants", layout: "column", Content: VariantsExample },
     { title: "Parts", layout: "column", Content: PartsExample },
+    { title: "With media", layout: "column", Content: WithMediaExample },
     {
       title: "Linked, with a nested control",
       layout: "column",
@@ -238,7 +276,7 @@ export const cardShowcase: Showcase = {
   ],
   props: [{ part: "Card", docs: props }],
   propsNote:
-    "subgrid works only when the Card is a direct child of a Grid. For several footer items, use a horizontal Stack. Glass needs a varied backdrop behind it. On a link card, aria-current goes to its heading link.",
+    "subgrid works only when the Card is a direct child of a Grid. For several footer items, use a horizontal Stack. Glass needs a varied backdrop behind it. On a link card, aria-current goes to its heading link. Media is shown first but comes after the heading in the DOM.",
   tokens: "card",
   keyboard: [
     {
@@ -255,6 +293,9 @@ export const cardShowcase: Showcase = {
     "The heading's look comes from headingVariant and is the same at every level (except with inherit or code), so choose headingLevel by the page outline.",
     "Text inside a link card can't be selected, because the link's overlay covers it.",
     "The hover look shows only where a click follows the link: not over nested controls, and not on touch screens.",
+    "Media is shown above the heading but read after it, so the heading always comes first.",
+    "Card doesn't hide media: mark decorative media aria-hidden, and make a decorative preview of controls inert too. Give a meaningful image alt text.",
+    "A control in media is shown above the heading but focused after the heading link. Keep it inset from the media's edges by the focus ring's width plus offset, or its ring is clipped.",
     "Glass turns opaque when reduced transparency is requested.",
     "Backdrops, for text contrast: raised and flat work on any surface. Outlined is transparent, so use it only on surface.base, raised or sunken. Glass needs a varied backdrop made only of those surfaces and action.background.",
     "A link card's focus ring is drawn on the backdrop around the card, so keep link cards of every variant off action.background: there the ring is the same color in light, and nearly so in dark.",

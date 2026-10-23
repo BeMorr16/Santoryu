@@ -29,6 +29,11 @@ export type CardOwnProps = {
   footer?: ReactNode;
   /** In a Grid, spans one row per part with `subgrid`, so parts line up across the row (refinement R8.3). */
   subgrid?: boolean | undefined;
+  /**
+   * A picture or preview, shown full-bleed across the top. It comes after the heading in the DOM,
+   * so the heading is read first. Mark decorative media aria-hidden (and inert if it holds controls).
+   */
+  media?: ReactNode;
 } & CardLinkProps;
 
 export type CardProps<E extends CardElement = "article"> = PolymorphicProps<E, CardOwnProps>;
@@ -44,6 +49,7 @@ export function Card<E extends CardElement = "article">({
   variant = "raised",
   footer,
   subgrid = false,
+  media,
   href,
   newTab,
   className,
@@ -55,9 +61,12 @@ export function Card<E extends CardElement = "article">({
   const Element = (as ?? "article") as ElementType;
   const headingElement = `h${String(headingLevel)}` as `h${typeof headingLevel}`;
   const linked = href !== undefined;
-  const parts = [heading !== undefined, hasContent(children), hasContent(footer)].filter(
-    Boolean,
-  ).length;
+  const parts = [
+    heading !== undefined,
+    hasContent(media),
+    hasContent(children),
+    hasContent(footer),
+  ].filter(Boolean).length;
   return (
     <Element
       {...rest}
@@ -89,6 +98,7 @@ export function Card<E extends CardElement = "article">({
           )}
         </Typography>
       )}
+      {hasContent(media) && <div className={styles.media}>{media}</div>}
       {hasContent(children) && <div className={styles.body}>{children}</div>}
       {hasContent(footer) && <div className={styles.footer}>{footer}</div>}
     </Element>

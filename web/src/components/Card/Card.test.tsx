@@ -199,6 +199,119 @@ describe("Card", () => {
     );
   });
 
+  describe("media (R4)", () => {
+    it("comes after the heading and before the body and footer in the DOM (R4.2)", () => {
+      render(
+        <Card heading="Title" media={<span>Picture</span>} footer="Footer text">
+          Body text
+        </Card>,
+      );
+
+      const article = screen.getByRole("article");
+      expect([...article.children].map((child) => [child.tagName, child.textContent])).toEqual([
+        ["H3", "Title"],
+        ["DIV", "Picture"],
+        ["DIV", "Body text"],
+        ["DIV", "Footer text"],
+      ]);
+      expect(article.children[1]).toHaveClass(styles.media ?? "");
+    });
+
+    it.each([undefined, null, false] as const)(
+      "renders no media wrapper for %s (R4.1)",
+      (empty) => {
+        render(<Card heading="Title" media={empty} />);
+
+        const article = screen.getByRole("article");
+        expect(article.children).toHaveLength(1);
+        expect(article.querySelector(`.${styles.media ?? ""}`)).toBeNull();
+      },
+    );
+
+    it("renders media without href and without a heading", () => {
+      render(<Card media={<img src="/a.jpg" alt="A waterfall" />}>Body</Card>);
+
+      const article = screen.getByRole("article");
+      expect(article).not.toHaveClass(styles.interactive ?? "");
+      expect(article.children[0]).toHaveClass(styles.media ?? "");
+      expect(screen.getByRole("img", { name: "A waterfall" })).toBeInTheDocument();
+    });
+
+    it.each([
+      [
+        4,
+        <Card key="4" heading="Title" media="Picture" subgrid footer="Footer">
+          Body
+        </Card>,
+      ],
+      [
+        3,
+        <Card key="3" heading="Title" media="Picture" subgrid>
+          Body
+        </Card>,
+      ],
+    ])("counts media as a row: spans %s rows with subgrid (R4.3)", (rows, card) => {
+      render(card);
+
+      expect(screen.getByRole("article")).toHaveClass(
+        styles.subgrid ?? "",
+        styles[`rows-${String(rows)}`] ?? "",
+      );
+    });
+
+    it("keeps the link named by the heading alone (R4.4)", async () => {
+      renderInRouter(
+        <Card
+          heading="Personal site"
+          href="/projects/site"
+          media={<img src="/a.jpg" alt="A screenshot" />}
+        >
+          Body
+        </Card>,
+      );
+
+      expect(await screen.findByRole("link")).toHaveAccessibleName("Personal site");
+    });
+
+    // jsdom and user-event don't implement inert, so browsers' skipping of it is checked in e2e.
+    it("keeps the link first, and inert, hidden media adds no controls to the accessibility tree (R4.4, R4.5)", async () => {
+      const user = userEvent.setup();
+      renderInRouter(
+        <Card
+          heading="Personal site"
+          href="/projects/site"
+          media={
+            <div aria-hidden="true" inert>
+              <button type="button">Preview</button>
+            </div>
+          }
+        />,
+      );
+      await screen.findByRole("link");
+
+      await user.tab();
+      expect(screen.getByRole("link", { name: "Personal site" })).toHaveFocus();
+      expect(screen.queryByRole("button")).toBeNull();
+    });
+
+    it("gives a non-inert control in media its own Tab stop, after the link (R4.4)", async () => {
+      const user = userEvent.setup();
+      renderInRouter(
+        <Card
+          heading="Personal site"
+          href="/projects/site"
+          media={<button type="button">Play</button>}
+        />,
+      );
+      await screen.findByRole("link");
+
+      await user.tab();
+      expect(screen.getByRole("link", { name: "Personal site" })).toHaveFocus();
+      await user.tab();
+      expect(screen.getByRole("button", { name: "Play" })).toHaveFocus();
+    });
+  });
+
   describe("variant (refinement R8.5)", () => {
     it("is raised by default", () => {
       render(<Card heading="Title" />);

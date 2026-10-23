@@ -7,7 +7,7 @@
     "build": "pnpm run tokens && react-router build",
     "preview": "vite preview",
     "typecheck": "pnpm run tokens && react-router typegen && tsc --noEmit",
-    "tokens": "node scripts/build-tokens.ts",
+    "tokens": "node scripts/build-tokens.ts && node scripts/build-hub-data.ts",
     "test": "vitest run --project dom --project node",
     "test:build": "vitest run --project build"
   },

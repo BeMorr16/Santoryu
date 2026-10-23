@@ -62,6 +62,26 @@
   color: var(--component-card-heading-color);
 }
 
+/* Shown first, edge to edge inside the border; after the heading in the DOM (R4.2). */
+.media {
+  order: -1;
+  margin-block-start: calc(-1 * var(--component-card-padding));
+  margin-inline: calc(-1 * var(--component-card-padding));
+  border-block-end: var(--component-card-border-width) solid var(--component-card-media-border);
+  border-start-start-radius: calc(
+    var(--component-card-radius) - var(--component-card-border-width)
+  );
+  border-start-end-radius: calc(var(--component-card-radius) - var(--component-card-border-width));
+  overflow: clip;
+}
+
+/* Images and video fill the media's width. */
+.media > :is(img, picture, video, svg) {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
 /* At the bottom edge when the card is taller than its content (refinement R8.2). */
 .footer {
   margin-block-start: auto;
@@ -88,6 +108,10 @@
 
 .rows-3 {
   grid-row: span 3;
+}
+
+.rows-4 {
+  grid-row: span 4;
 }
 
 .interactive {

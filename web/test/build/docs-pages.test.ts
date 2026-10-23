@@ -10,6 +10,7 @@ import {
 } from "../../src/design-system/components/pages.ts";
 import { showcases } from "../../src/design-system/components/registry.ts";
 import { siteUrl } from "../../src/site.config.ts";
+import { fingerprint, scriptsOf } from "./page-scripts.ts";
 
 const clientDir = fileURLToPath(new URL("../../build/client/", import.meta.url));
 
@@ -34,13 +35,6 @@ const htmlFiles = () =>
   readdirSync(clientDir, { recursive: true, encoding: "utf8" }).filter((path) =>
     path.endsWith(".html"),
   );
-
-/** A purpose sentence as it appears in minified JS: up to its first quote or backslash. */
-function fingerprint(purpose: string): string {
-  const text = purpose.split(/["'`\\]/)[0] ?? "";
-  if (text.length < 20) throw new Error(`purpose too short to fingerprint: ${purpose}`);
-  return text;
-}
 
 beforeAll(() => {
   if (!existsSync(clientDir)) {
@@ -109,15 +103,6 @@ describe("the /lab section (R1.2)", () => {
 });
 
 describe("per-page code splitting (R4.11)", () => {
-  /** The JS a page loads up front: its module scripts' imports and its modulepreloads. */
-  function scriptsOf(path: string): string {
-    const html = readFileSync(fileOf(path), "utf8");
-    const files = new Set(html.match(/\/assets\/[\w.-]+\.js/g) ?? []);
-    return [...files]
-      .map((file) => readFileSync(`${clientDir}${file.slice(1)}`, "utf8"))
-      .join("\n");
-  }
-
   it.each(componentPages.map(({ id, name }) => [name, id] as const))(
     "%s's page loads its own examples and no other component's",
     (_name, id) => {

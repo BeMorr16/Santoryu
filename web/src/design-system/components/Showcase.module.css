@@ -128,6 +128,40 @@
     var(--size-pattern-cell) var(--size-pattern-cell);
 }
 
+/* The Card section's decorative media (ds-hub R4.7): a strip of semantic colors. */
+.mediaSwatches {
+  display: flex;
+  block-size: var(--size-control-md);
+}
+
+.mediaSwatches > span {
+  flex: 1;
+}
+
+.mediaSwatches > :nth-child(1) {
+  background-color: var(--color-action-background);
+}
+
+.mediaSwatches > :nth-child(2) {
+  background-color: var(--color-accent-2-fill);
+}
+
+.mediaSwatches > :nth-child(3) {
+  background-color: var(--color-accent-border);
+}
+
+.mediaSwatches > :nth-child(4) {
+  background-color: var(--color-success-border);
+}
+
+.mediaSwatches > :nth-child(5) {
+  background-color: var(--color-warning-border);
+}
+
+.mediaSwatches > :nth-child(6) {
+  background-color: var(--color-error-border);
+}
+
 /* The Card section's customized example (refinement R8.14); its CSS is shown beside it. */
 .accentCard {
   --component-card-raised-border: var(--color-accent-border);

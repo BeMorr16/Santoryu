@@ -6,6 +6,7 @@ import { componentPages, componentPath } from "../../src/design-system/component
 import { referenceTokens } from "../../src/design-system/tokens/groups.ts";
 import { tokenRowId, tokensToc } from "../../src/design-system/tokens/reference-ids.ts";
 import { primitiveTokens } from "../../src/tokens/primitives.ts";
+import { scriptsOf } from "./page-scripts.ts";
 
 const clientDir = fileURLToPath(new URL("../../build/client/", import.meta.url));
 const tokensDir = fileURLToPath(new URL("../../tokens/", import.meta.url));
@@ -13,13 +14,6 @@ const generatedCss = fileURLToPath(new URL("../../src/generated/tokens.css", imp
 
 const fileOf = (path: string) => `${clientDir}${path.slice(1)}/index.html`;
 const documentAt = (path: string) => new JSDOM(readFileSync(fileOf(path), "utf8")).window.document;
-
-/** The JS a page loads up front: its module scripts' imports and its modulepreloads. */
-function scriptsOf(path: string): string {
-  const html = readFileSync(fileOf(path), "utf8");
-  const files = new Set(html.match(/\/assets\/[\w.-]+\.js/g) ?? []);
-  return [...files].map((file) => readFileSync(`${clientDir}${file.slice(1)}`, "utf8")).join("\n");
-}
 
 /** A string only primitive metadata carries: color.blue.600's description, from its source. */
 function primitiveMarker(): string {

@@ -119,6 +119,11 @@
           ]
         }
       },
+      "media-border": {
+        "$value": "{color.border.default}",
+        "$type": "color",
+        "$description": "Divider between the media and the rest of the card, in every variant."
+      },
       "transition-duration": {
         "$value": "{motion.duration.fast}",
         "$type": "duration",

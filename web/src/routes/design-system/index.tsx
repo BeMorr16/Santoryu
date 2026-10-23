@@ -1,51 +1,14 @@
-import { Link } from "../../components/Link/Link.tsx";
-import { Stack } from "../../components/Stack/Stack.tsx";
+import { HubPage } from "../../design-system/hub/HubPage.tsx";
 import { pageMeta } from "../../design-system/page-meta.ts";
-
-export const designSystemPages = [
-  {
-    href: "/design-system/tokens",
-    title: "Tokens",
-    description: "Every design token behind this site, with its light and dark values.",
-  },
-  {
-    href: "/design-system/components",
-    title: "Components",
-    description:
-      "The component library: live examples, props, styling hooks and accessibility notes.",
-  },
-  {
-    href: "/design-system/theme-creator",
-    title: "Theme Creator",
-    description:
-      "Build your own theme from the tokens, see it on real components, and use it across the site.",
-  },
-] as const;
 
 const page = pageMeta(
   "/design-system",
   "Design System",
-  "The design system behind this site: its tokens, its component library and a theme creator.",
+  "The design system behind this site: its tokens, its component library with live examples, and a theme creator for building your own theme.",
 );
 export const meta = page.meta;
 export const links = page.links;
 
 export default function DesignSystem() {
-  return (
-    <>
-      <h1>Design System</h1>
-      <p>
-        The design system this site is built from: the tokens that set every color, size and motion,
-        and the components built on them.
-      </p>
-      <Stack as="ul" gap="md">
-        {designSystemPages.map((item) => (
-          <li key={item.href}>
-            <Link href={item.href}>{item.title}</Link>
-            <p>{item.description}</p>
-          </li>
-        ))}
-      </Stack>
-    </>
-  );
+  return <HubPage />;
 }

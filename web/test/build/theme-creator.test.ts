@@ -6,6 +6,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { componentPath, themeCreatorPath } from "../../src/design-system/components/pages.ts";
 import { siteUrl } from "../../src/site.config.ts";
 import { themeScript } from "../../src/theme/theme-script.ts";
+import { scriptsOf } from "./page-scripts.ts";
 
 const buildDir = fileURLToPath(new URL("../../build/", import.meta.url));
 const clientDir = `${buildDir}client/`;
@@ -13,13 +14,6 @@ const tokensDir = fileURLToPath(new URL("../../tokens/", import.meta.url));
 
 const fileOf = (path: string) => `${clientDir}${path === "/" ? "" : `${path.slice(1)}/`}index.html`;
 const documentAt = (path: string) => new JSDOM(readFileSync(fileOf(path), "utf8")).window.document;
-
-/** The JS a page loads up front: its module scripts' imports and its modulepreloads. */
-function scriptsOf(path: string): string {
-  const html = readFileSync(fileOf(path), "utf8");
-  const files = new Set(html.match(/\/assets\/[\w.-]+\.js/g) ?? []);
-  return [...files].map((file) => readFileSync(`${clientDir}${file.slice(1)}`, "utf8")).join("\n");
-}
 
 /** A string only semantic token metadata carries: color.surface.glass's description. */
 function metadataMarker(): string {

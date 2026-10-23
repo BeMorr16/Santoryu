@@ -29,6 +29,7 @@ describe("Card page examples", () => {
     expect(labels).toEqual([
       "Variants",
       "Parts",
+      "With media",
       "Linked, with a nested control",
       "Footers line up",
       "Subgrid",
@@ -64,6 +65,23 @@ describe("Card page examples", () => {
         .getAllByRole("listitem")
         .map((item) => item.textContent),
     ).toEqual(["S3", "CloudFront"]);
+
+    const media = example("With media");
+    const mediaCards = within(media).getAllByRole("article");
+    expect(mediaCards).toHaveLength(2);
+    const [decorative, image] = mediaCards.map(
+      (card) => card.querySelector(`.${cardStyles.media ?? ""}`)?.firstElementChild,
+    );
+    expect(within(media).getByRole("link", { name: "Color tokens" })).toHaveAttribute(
+      "href",
+      "/design-system/tokens",
+    );
+    expect(decorative).toHaveAttribute("aria-hidden", "true");
+    expect(decorative).toHaveClass(showcaseStyles.mediaSwatches ?? "");
+    expect(image?.tagName).toBe("IMG");
+    expect(image).toHaveAccessibleName(/^A tall waterfall/);
+    expect(image).toHaveAttribute("width", "480");
+    expect(image).toHaveAttribute("height", "720");
 
     const linked = example("Linked, with a nested control");
     expect(within(linked).getByRole("link", { name: "Design tokens" })).toHaveAttribute(
@@ -126,17 +144,20 @@ describe("Card page examples", () => {
 
     const card = showcases.find((s) => s.id === "card");
     expect(Object.keys(card?.props[0]?.docs ?? {})).toEqual(
-      expect.arrayContaining(["variant", "footer", "subgrid", "headingVariant"]),
+      expect.arrayContaining(["variant", "footer", "subgrid", "headingVariant", "media"]),
     );
     expect(card?.props[0]?.docs.headingVariant).toMatchObject({ default: '"h4"' });
     expect(card?.propsNote).toMatch(
-      /subgrid works only when the Card is a direct child of a Grid.+horizontal Stack.+varied backdrop.+aria-current goes to its heading link/,
+      /subgrid works only when the Card is a direct child of a Grid.+horizontal Stack.+varied backdrop.+aria-current goes to its heading link.+Media is shown first but comes after the heading in the DOM/,
     );
     for (const note of [
       /never marked aria-current automatically/,
       /look comes from headingVariant and is the same at every level \(except with inherit or code\), so choose headingLevel by the page outline/,
       /can't be selected, because the link's overlay covers it/,
       /hover look shows only where a click follows the link/,
+      /Media is shown above the heading but read after it, so the heading always comes first/,
+      /Card doesn't hide media: mark decorative media aria-hidden, and make a decorative preview of controls inert too. Give a meaningful image alt text/,
+      /A control in media is shown above the heading but focused after the heading link. Keep it inset from the media's edges by the focus ring's width plus offset, or its ring is clipped/,
       /Glass turns opaque when reduced transparency is requested/,
       /Outlined is transparent, so use it only on surface.base, raised or sunken/,
       /keep link cards of every variant off action.background/,
