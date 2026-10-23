@@ -21,9 +21,9 @@ describe("traceChain (theme-creator R8.2, design §8.6)", () => {
     const chain = semanticChain("color.action.background");
 
     expect(chain).toMatchObject({
-      primitive: "color.blue.700",
+      primitive: "color.gold.600",
       semantic: "color.action.background",
-      value: { css: "#185480" },
+      value: { css: "#b37500" },
     });
     expect(chain.components.map(({ token }) => token)).toContain(
       "component.button.primary.background",

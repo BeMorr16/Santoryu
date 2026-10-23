@@ -7,7 +7,7 @@ import { themeVars } from "./vars.ts";
 describe("presets (theme-creator R2.8, design §7)", () => {
   it("offers High contrast, Soft and Compact", () => {
     expect(presets.map(({ name, source }) => [name, source.base])).toEqual([
-      ["High contrast", "dark"],
+      ["High contrast", "light"],
       ["Soft", "light"],
       ["Compact", "dark"],
     ]);

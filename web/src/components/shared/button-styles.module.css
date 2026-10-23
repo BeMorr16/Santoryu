@@ -42,6 +42,7 @@
 /* After the hover rule, at the same specificity, so it wins while pressing (refinement R3.3). */
 .button:active:not([aria-disabled="true"]) {
   background-color: var(--_background-active);
+  color: var(--_text-active);
 }
 
 .button:focus-visible {
@@ -54,6 +55,7 @@
   --_background-hover: var(--component-button-primary-background-hover);
   --_background-active: var(--component-button-primary-background-active);
   --_text: var(--component-button-primary-text);
+  --_text-active: var(--component-button-primary-text-active);
   --_border: var(--component-button-primary-border);
 }
 
@@ -62,6 +64,7 @@
   --_background-hover: var(--component-button-secondary-background-hover);
   --_background-active: var(--component-button-secondary-background-active);
   --_text: var(--component-button-secondary-text);
+  --_text-active: var(--component-button-secondary-text);
   --_border: var(--component-button-secondary-border);
 }
 
@@ -70,6 +73,7 @@
   --_background-hover: var(--component-button-ghost-background-hover);
   --_background-active: var(--component-button-ghost-background-active);
   --_text: var(--component-button-ghost-text);
+  --_text-active: var(--component-button-ghost-text);
   --_border: var(--component-button-ghost-border);
 }
 
@@ -96,6 +100,7 @@
   --_background-hover: var(--component-button-primary-pressed-background-hover);
   --_background-active: var(--component-button-primary-pressed-background-hover);
   --_text: var(--component-button-primary-pressed-text);
+  --_text-active: var(--component-button-primary-pressed-text);
   --_border: var(--component-button-primary-pressed-border);
 }
 
@@ -104,6 +109,7 @@
   --_background-hover: var(--component-button-secondary-pressed-background-hover);
   --_background-active: var(--component-button-secondary-pressed-background-hover);
   --_text: var(--component-button-secondary-pressed-text);
+  --_text-active: var(--component-button-secondary-pressed-text);
   --_border: var(--component-button-secondary-pressed-border);
 }
 
@@ -112,6 +118,7 @@
   --_background-hover: var(--component-button-ghost-pressed-background-hover);
   --_background-active: var(--component-button-ghost-pressed-background-hover);
   --_text: var(--component-button-ghost-pressed-text);
+  --_text-active: var(--component-button-ghost-pressed-text);
   --_border: var(--component-button-ghost-pressed-border);
 }
 
@@ -138,6 +145,7 @@
     --_background-hover: Highlight;
     --_background-active: Highlight;
     --_text: HighlightText;
+    --_text-active: HighlightText;
     --_border: Highlight;
   }
 

@@ -37,7 +37,7 @@ export function tokenNamed(name: string, tokens = referenceTokens): AnyTokenMeta
 
 /** One real token per tier, for Naming (R3.1). */
 export const namingExamples: readonly AnyTokenMeta[] = [
-  "color.blue.600",
+  "color.gold.600",
   "color.text.muted",
   "component.button.radius",
 ].map((name) => tokenNamed(name));

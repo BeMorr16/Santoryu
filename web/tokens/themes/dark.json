@@ -3,19 +3,19 @@
     "$type": "color",
     "surface": {
       "base": {
-        "$value": "{color.blue.850}",
+        "$value": "{color.slate.950}",
         "$description": "Page background."
       },
       "raised": {
-        "$value": "{color.blue.800}",
+        "$value": "{color.slate.900}",
         "$description": "Background of raised areas: cards, menus, table headers."
       },
       "sunken": {
-        "$value": "{color.blue.900}",
+        "$value": "{color.slate.1000}",
         "$description": "Background of recessed areas: code, wells, preview panels."
       },
       "glass": {
-        "$value": "{color.overlay.blue-850-85}",
+        "$value": "{color.overlay.black-85}",
         "$description": "Translucent background for the sticky header and glass cards, over a varied backdrop (blurred). Only default and muted text, links, focus rings and controls whose boundary is contrast-checked against glass may sit on it.",
         "$extensions": {
           "personal-site.contrast-backdrop": [
@@ -27,17 +27,17 @@
         }
       },
       "inverse": {
-        "$value": "{color.gray.50}",
+        "$value": "{color.slate.50}",
         "$description": "Background of inverse bubbles, such as tooltips: the default text color, so the page reads inverted."
       },
       "code": {
-        "$value": "{color.gray.950}",
+        "$value": "{color.slate.925}",
         "$description": "Background of code samples (CodeBlock): a cool grey in light, near-black in dark, set apart from the other surfaces."
       }
     },
     "text": {
       "default": {
-        "$value": "{color.gray.50}",
+        "$value": "{color.gray.0}",
         "$description": "Primary text.",
         "$extensions": {
           "personal-site.contrast": [
@@ -69,7 +69,7 @@
         }
       },
       "muted": {
-        "$value": "{color.gray.200}",
+        "$value": "{color.slate.100}",
         "$description": "Secondary text.",
         "$extensions": {
           "personal-site.contrast": [
@@ -97,7 +97,7 @@
         }
       },
       "subtle": {
-        "$value": "{color.gray.300}",
+        "$value": "{color.slate.200}",
         "$description": "Tertiary text, such as metadata. Still body text, so 4.5:1. Not allowed on glass.",
         "$extensions": {
           "personal-site.contrast": [
@@ -121,7 +121,7 @@
         }
       },
       "inverse": {
-        "$value": "{color.blue.850}",
+        "$value": "{color.slate.950}",
         "$description": "Text on the inverse surface.",
         "$extensions": {
           "personal-site.contrast": [
@@ -135,7 +135,7 @@
     },
     "link": {
       "default": {
-        "$value": "{color.gold.300}",
+        "$value": "{color.champagne.400}",
         "$description": "Link text.",
         "$extensions": {
           "personal-site.contrast": [
@@ -159,7 +159,7 @@
         }
       },
       "hover": {
-        "$value": "{color.gold.200}",
+        "$value": "{color.champagne.300}",
         "$description": "Link text on hover.",
         "$extensions": {
           "personal-site.contrast": [
@@ -209,15 +209,15 @@
     },
     "action": {
       "background": {
-        "$value": "{color.gold.300}",
+        "$value": "{color.champagne.100}",
         "$description": "Fill of primary actions and current-state markers."
       },
       "background-hover": {
-        "$value": "{color.gold.200}",
+        "$value": "{color.champagne.50}",
         "$description": "Fill of primary actions on hover."
       },
       "text": {
-        "$value": "{color.blue.950}",
+        "$value": "{color.neutral.950}",
         "$description": "Text and icons on an action fill.",
         "$extensions": {
           "personal-site.contrast": [
@@ -231,11 +231,47 @@
             }
           ]
         }
+      },
+      "background-pressed": {
+        "$value": "{color.champagne.600}",
+        "$description": "Fill of a primary action while it's pressed (:active) and while a toggle is on: a darker gold than action.background. It's also the pressed toggle's boundary (3:1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "text-pressed": {
+        "$value": "{color.neutral.950}",
+        "$description": "Text and icons on action.background-pressed.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.action.background-pressed",
+              "min": "text"
+            }
+          ]
+        }
       }
     },
     "accent": {
       "text": {
-        "$value": "{color.gold.300}",
+        "$value": "{color.cyan.300}",
         "$description": "Accent text: accent badges and label highlights.",
         "$extensions": {
           "personal-site.contrast": [
@@ -259,11 +295,11 @@
         }
       },
       "background": {
-        "$value": "{color.blue.900}",
+        "$value": "{color.cyan.950}",
         "$description": "Accent fill behind accent text."
       },
       "border": {
-        "$value": "{color.gold.300}",
+        "$value": "{color.cyan.300}",
         "$description": "Decorative accent outline. Not contrast-checked; never the only boundary of a control."
       }
     },
@@ -318,22 +354,14 @@
       },
       "fill": {
         "$value": "{color.violet.700}",
-        "$description": "Solid violet fill: the pressed state of action.background (primary toggles). Its lightness is flipped against action.background (3:1), so it isn't a general-purpose violet button fill.",
-        "$extensions": {
-          "personal-site.contrast": [
-            {
-              "against": "color.action.background",
-              "min": "non-text"
-            }
-          ]
-        }
+        "$description": "Solid violet fill, such as a violet button or swatch."
       },
       "fill-hover": {
         "$value": "{color.violet.600}",
         "$description": "accent-2.fill on hover and while pressing."
       },
       "fill-text": {
-        "$value": "{color.gray.50}",
+        "$value": "{color.gray.0}",
         "$description": "Text and icons on accent-2.fill and accent-2.fill-hover.",
         "$extensions": {
           "personal-site.contrast": [
@@ -505,15 +533,15 @@
     },
     "border": {
       "subtle": {
-        "$value": "{color.blue.700}",
+        "$value": "{color.slate.800}",
         "$description": "Decorative dividers only. Not contrast-checked; never the only boundary of a control."
       },
       "default": {
-        "$value": "{color.blue.600}",
+        "$value": "{color.slate.500}",
         "$description": "Decorative lines that must read on every surface, such as a Separator's subtle line: firmer than subtle, about 1.5–2:1. Not contrast-checked; never the only boundary of a control."
       },
       "strong": {
-        "$value": "{color.gray.400}",
+        "$value": "{color.slate.400}",
         "$description": "Boundaries of UI components (3:1).",
         "$extensions": {
           "personal-site.contrast": [
@@ -565,7 +593,7 @@
     },
     "grid": {
       "line": {
-        "$value": "{color.overlay.cyan-300-10}",
+        "$value": "{color.overlay.slate-300-10}",
         "$description": "Faint blueprint grid lines on the page backdrop. Decorative; not contrast-checked."
       }
     },

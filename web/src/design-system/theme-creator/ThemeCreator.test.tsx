@@ -90,7 +90,7 @@ describe("ThemeCreator: key controls and preview (theme-creator R4, R5, R7)", ()
     const width = screen.getByRole("slider", { name: "Border width" });
     width.focus();
     await user.keyboard("{ArrowRight}");
-    expect(previewProperty("--effect-border-width")).toBe("2px");
+    expect(previewProperty("--effect-border-width")).toBe("3px");
 
     within(shape).getByRole("button", { name: "Reset Border width" }).focus();
     await user.keyboard("{Enter}");

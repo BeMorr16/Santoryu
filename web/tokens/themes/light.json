@@ -135,7 +135,7 @@
     },
     "link": {
       "default": {
-        "$value": "{color.blue.700}",
+        "$value": "{color.gold.700}",
         "$description": "Link text.",
         "$extensions": {
           "personal-site.contrast": [
@@ -159,7 +159,7 @@
         }
       },
       "hover": {
-        "$value": "{color.blue.850}",
+        "$value": "{color.gold.800}",
         "$description": "Link text on hover.",
         "$extensions": {
           "personal-site.contrast": [
@@ -209,15 +209,15 @@
     },
     "action": {
       "background": {
-        "$value": "{color.blue.700}",
+        "$value": "{color.gold.600}",
         "$description": "Fill of primary actions and current-state markers."
       },
       "background-hover": {
-        "$value": "{color.blue.850}",
+        "$value": "{color.gold.500}",
         "$description": "Fill of primary actions on hover."
       },
       "text": {
-        "$value": "{color.sand.50}",
+        "$value": "{color.neutral.950}",
         "$description": "Text and icons on an action fill.",
         "$extensions": {
           "personal-site.contrast": [
@@ -231,11 +231,47 @@
             }
           ]
         }
+      },
+      "background-pressed": {
+        "$value": "{color.gold.700}",
+        "$description": "Fill of a primary action while it's pressed (:active) and while a toggle is on: a darker gold than action.background. It's also the pressed toggle's boundary (3:1).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "text-pressed": {
+        "$value": "{color.sand.50}",
+        "$description": "Text and icons on action.background-pressed.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.action.background-pressed",
+              "min": "text"
+            }
+          ]
+        }
       }
     },
     "accent": {
       "text": {
-        "$value": "{color.gold.700}",
+        "$value": "{color.cyan.700}",
         "$description": "Accent text: accent badges and label highlights.",
         "$extensions": {
           "personal-site.contrast": [
@@ -259,11 +295,11 @@
         }
       },
       "background": {
-        "$value": "{color.gold.100}",
+        "$value": "{color.cyan.50}",
         "$description": "Accent fill behind accent text."
       },
       "border": {
-        "$value": "{color.gold.500}",
+        "$value": "{color.cyan.500}",
         "$description": "Decorative accent outline. Not contrast-checked; never the only boundary of a control."
       }
     },
@@ -318,15 +354,7 @@
       },
       "fill": {
         "$value": "{color.violet.200}",
-        "$description": "Solid violet fill: the pressed state of action.background (primary toggles). Its lightness is flipped against action.background (3:1), so it isn't a general-purpose violet button fill.",
-        "$extensions": {
-          "personal-site.contrast": [
-            {
-              "against": "color.action.background",
-              "min": "non-text"
-            }
-          ]
-        }
+        "$description": "Solid violet fill, such as a violet button or swatch."
       },
       "fill-hover": {
         "$value": "{color.violet.300}",
@@ -535,7 +563,7 @@
     },
     "focus": {
       "ring": {
-        "$value": "{color.blue.700}",
+        "$value": "{color.cyan.700}",
         "$description": "Focus indicator color (3:1 against every surface it can sit on).",
         "$extensions": {
           "personal-site.contrast": [
@@ -565,7 +593,7 @@
     },
     "grid": {
       "line": {
-        "$value": "{color.overlay.blue-700-8}",
+        "$value": "{color.overlay.cyan-700-8}",
         "$description": "Faint blueprint grid lines on the page backdrop. Decorative; not contrast-checked."
       }
     },

@@ -47,11 +47,11 @@ describe("ColorRamps (ds-tokens R5.3)", () => {
   });
 
   it("hides steps, and whole ramps, outside the search results (R11.3)", () => {
-    render(<ColorRamps tokens={colors} shown={new Set(["color-blue-700"])} />);
+    render(<ColorRamps tokens={colors} shown={new Set(["color-gold-700"])} />);
 
-    expect(document.getElementById("color-blue-700")).toBeVisible();
-    expect(document.getElementById("color-blue-600")).not.toBeVisible();
-    expect(screen.getByRole("heading", { name: "blue" })).toBeVisible();
-    expect(screen.queryByRole("heading", { name: "gold" })).toBeNull();
+    expect(document.getElementById("color-gold-700")).toBeVisible();
+    expect(document.getElementById("color-gold-600")).not.toBeVisible();
+    expect(screen.getByRole("heading", { name: "gold" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "cyan" })).toBeNull();
   });
 });

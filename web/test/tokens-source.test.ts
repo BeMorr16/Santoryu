@@ -1,5 +1,12 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import {
+  hexToOklch,
+  srgbToOklch,
+  type Oklch,
+} from "../src/design-system/theme-creator/model/oklch.ts";
+import { allTokens as metadata } from "../src/tokens/metadata.ts";
+import type { Srgb, TokenMeta } from "../src/tokens/types.ts";
 
 const tokensDir = new URL("../tokens/", import.meta.url);
 
@@ -21,8 +28,10 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
   color: {
     primitive: [
       "gray",
-      "blue",
+      "neutral",
+      "slate",
       "gold",
+      "champagne",
       "violet",
       "red",
       "green",
@@ -73,7 +82,7 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
   motion: { primitive: ["time", "curve"], semantic: ["duration", "easing"] },
   effect: {
     primitive: ["shadow", "line", "blur-radius"],
-    semantic: ["elevation", "focus-ring", "backdrop", "border", "underline"],
+    semantic: ["elevation", "focus-ring", "backdrop", "border", "grid", "underline"],
   },
   layer: { primitive: ["1", "2", "3"], semantic: ["raised", "sticky", "overlay"] },
 };
@@ -99,6 +108,8 @@ const expectedSemantic = [
   "color.action.background",
   "color.action.background-hover",
   "color.action.text",
+  "color.action.background-pressed",
+  "color.action.text-pressed",
   "color.accent.text",
   "color.accent.background",
   "color.accent.border",
@@ -196,6 +207,7 @@ const expectedSemantic = [
   "effect.backdrop.glass",
   "effect.border.width",
   "effect.border.width-thick",
+  "effect.grid.width",
   "effect.underline.thickness",
   "effect.underline.thickness-hover",
   "effect.underline.offset",
@@ -336,6 +348,14 @@ describe("token source files", () => {
     }
   });
 
+  it("aliases every color primitive from some semantic token (site-refresh design §3.1)", () => {
+    const aliased = new Set(allTokens.map((t) => aliasTarget(t.value)));
+    const unused = [...primitives.values()].filter(
+      (t) => t.type === "color" && !aliased.has(t.path),
+    );
+    expect(unused.map((t) => t.path)).toEqual([]);
+  });
+
   it("keeps every non-overlay color primitive opaque", () => {
     const translucent = [...primitives.values()].filter(
       (t) =>
@@ -455,6 +475,152 @@ describe("status colors (palette-expansion R2.4, R2.5)", () => {
   });
 });
 
+describe("role hues (site-refresh R1)", () => {
+  type Theme = "light" | "dark";
+  type ColorOf = (name: string, theme: Theme) => Oklch;
+  const themes = ["light", "dark"] as const;
+  // Below this OKLCH chroma a color reads as grey, so its hue means nothing (design §3.4).
+  const achromatic = 0.02;
+
+  const hueGap = (a: number, b: number) => {
+    const gap = Math.abs(a - b) % 360;
+    return Math.min(gap, 360 - gap);
+  };
+
+  /** R1.1: each role token keeps its hue, within 15°, across themes. */
+  function themeDrift(names: readonly string[], colorOf: ColorOf): string[] {
+    return names.flatMap((name) => {
+      const [light, dark] = themes.map((theme) => colorOf(name, theme));
+      if (!light || !dark || light.c < achromatic || dark.c < achromatic) return [];
+      const gap = hueGap(light.h, dark.h);
+      return gap > 15 ? [`${name}: ${gap.toFixed(0)}° between light and dark`] : [];
+    });
+  }
+
+  const roleKeys = ["color.action.background", "color.accent.border", "color.accent-2.border"];
+  const statusKeys = ["color.error.border", "color.success.border", "color.warning.border"];
+
+  /** R1.2: roles at least 60° apart, and each at least 20° from every status color. */
+  function crowding(theme: Theme, colorOf: ColorOf): string[] {
+    const hue = (name: string) => colorOf(name, theme).h;
+    const tooClose = (a: string, b: string, min: number) => {
+      const gap = hueGap(hue(a), hue(b));
+      return gap < min
+        ? [`${theme}: ${a} and ${b} are ${gap.toFixed(0)}° apart, need ${String(min)}°`]
+        : [];
+    };
+    return [
+      ...roleKeys.flatMap((a, i) => roleKeys.slice(i + 1).flatMap((b) => tooClose(a, b, 60))),
+      ...roleKeys.flatMap((role) => statusKeys.flatMap((status) => tooClose(role, status, 20))),
+    ];
+  }
+
+  /** R1.3: no pure #00ffff primitive. */
+  function pureCyan(tokens: readonly SourceToken[]): string[] {
+    return tokens
+      .filter((t) => t.type === "color" && (t.value as { hex?: string }).hex === "#00ffff")
+      .map((t) => t.path);
+  }
+
+  const byName = new Map(metadata.map((token) => [token.name, token]));
+  const srgbIn = (name: string, theme: Theme): Srgb => {
+    const token: TokenMeta | undefined = byName.get(name);
+    if (!token) throw new Error(`unknown token ${name}`);
+    const value =
+      token.tier === "component" || token.themed ? token.values[theme] : token.values.all;
+    if (!value.srgb) throw new Error(`${name} has no sRGB value`);
+    return value.srgb;
+  };
+  const colorOf: ColorOf = (name, theme) => srgbToOklch(srgbIn(name, theme));
+  const roles = {
+    gold: /^color\.(action\.|link\.(default|hover)$)/,
+    cyan: /^color\.accent\./,
+    violet: /^color\.accent-2\./,
+  };
+  const colorTokens = metadata.filter(
+    (token) => token.tier === "semantic" && token.type === "color",
+  );
+
+  it.each(Object.entries(roles))(
+    "keeps every %s role token's hue across themes (R1.1)",
+    (_role, re) => {
+      const names = colorTokens.filter((token) => re.test(token.name)).map((token) => token.name);
+      expect(names.length).toBeGreaterThan(1);
+      expect(themeDrift(names, colorOf)).toEqual([]);
+    },
+  );
+
+  it.each(themes)(
+    "spaces the roles from each other and from the status colors in %s (R1.2)",
+    (theme) => {
+      expect(crowding(theme, colorOf)).toEqual([]);
+    },
+  );
+
+  it("has no #00ffff primitive (R1.3)", () => {
+    expect(pureCyan([...primitives.values()])).toEqual([]);
+  });
+
+  describe("self-test", () => {
+    const fixture =
+      (hexes: Record<string, Partial<Record<Theme, `#${string}`>>>): ColorOf =>
+      (name, theme) =>
+        hexToOklch(hexes[name]?.[theme] ?? "#808080");
+
+    it("reports a role token whose hue moves more than 15°, and skips greys", () => {
+      const colorOf = fixture({
+        "color.action.background": { light: "#b37500", dark: "#d04040" },
+        "color.action.text": { light: "#0b0c0e", dark: "#f2f1ec" },
+        "color.link.default": { light: "#795616", dark: "#f9b730" },
+      });
+
+      expect(
+        themeDrift(["color.action.background", "color.action.text", "color.link.default"], colorOf),
+      ).toEqual([
+        expect.stringMatching(/^color\.action\.background: \d+° between light and dark$/),
+      ]);
+    });
+
+    it("reports roles closer than 60° and a role closer than 20° to a status", () => {
+      const colorOf = fixture({
+        "color.action.background": { light: "#b37500" },
+        "color.accent.border": { light: "#2f8f3a" },
+        "color.accent-2.border": { light: "#a0a000" },
+        "color.error.border": { light: "#c8372c" },
+        "color.success.border": { light: "#2a8556" },
+        "color.warning.border": { light: "#b04020" },
+      });
+
+      expect(crowding("light", colorOf)).toEqual([
+        expect.stringMatching(
+          /^light: color\.action\.background and color\.accent-2\.border are \d+° apart, need 60°$/,
+        ),
+        expect.stringMatching(
+          /^light: color\.accent\.border and color\.accent-2\.border are \d+° apart, need 60°$/,
+        ),
+        expect.stringMatching(
+          /^light: color\.accent\.border and color\.success\.border are \d+° apart, need 20°$/,
+        ),
+      ]);
+    });
+
+    it("reports a #00ffff primitive", () => {
+      const cyan: SourceToken = {
+        path: "color.cyan.400",
+        file: "color.json",
+        value: { colorSpace: "srgb", components: [0, 1, 1], alpha: 1, hex: "#00ffff" },
+        type: "color",
+        description: "Pure cyan.",
+        extensions: undefined,
+      };
+
+      expect(
+        pureCyan([cyan, { ...cyan, path: "color.cyan.300", value: { hex: "#54d8f4" } }]),
+      ).toEqual(["color.cyan.400"]);
+    });
+  });
+});
+
 describe("contrast pairing coverage (design §4.5)", () => {
   const minimums = ["text", "large-text", "non-text"];
   const mustPair = (path: string) =>
@@ -463,16 +629,18 @@ describe("contrast pairing coverage (design §4.5)", () => {
     [
       "color.border.strong",
       "color.action.text",
+      "color.action.text-pressed",
+      "color.action.background-pressed",
       "color.accent.text",
       "color.accent-2.text",
       "color.accent-2.fill-text",
       "color.accent-2.border",
-      "color.accent-2.fill",
     ].includes(path);
   // Fills that foregrounds sit on directly, besides surfaces.
   const fills = [
     "color.action.background",
     "color.action.background-hover",
+    "color.action.background-pressed",
     "color.accent.background",
     "color.accent-2.background",
     "color.accent-2.fill",

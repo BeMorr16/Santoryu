@@ -11,11 +11,12 @@
   anchor-name: --menu-trigger;
 }
 
-/* Open: the variant's pressed background, hovered or not (refinement R5.4). (0,2,0) beats the
-   variant classes whatever the module order. */
+/* Open: the variant's pressed background and text, hovered or not (refinement R5.4). (0,2,0)
+   beats the variant classes whatever the module order. */
 .trigger[aria-expanded="true"] {
   --_background: var(--_background-active);
   --_background-hover: var(--_background-active);
+  --_text: var(--_text-active);
 }
 
 /* An end chevron flips while open. ButtonContent renders the end icon last. */

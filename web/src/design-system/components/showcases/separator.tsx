@@ -31,7 +31,7 @@ const separatorDocs = {
     type: '"thin" | "thick"',
     default: '"thin"',
     description:
-      "thin is the border width (1px), thick twice that (2px). Thickness is only a look: a thick line doesn't mark a bigger break for assistive technology.",
+      "thin is the border width (2px), thick a step heavier (3px). Thickness is only a look: a thick line doesn't mark a bigger break for assistive technology.",
   },
 } satisfies PropDocs<Omit<SeparatorOwnProps, "children">>;
 

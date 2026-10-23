@@ -182,7 +182,7 @@ describe("exportTheme (theme-creator R10.1, design §9.2)", () => {
         name: "Night",
         colorScheme: "dark",
         base: "light",
-        keys: { background: "#0b2338", action: "#185480", density: 0.25 },
+        keys: { background: "#0b2338", action: "#b37500", density: 0.25 },
       },
     });
     expect(file.$description).toBe(
@@ -237,7 +237,7 @@ describe("importTheme: round trip (R10.4)", () => {
       keys: {},
       overrides: {
         semantic: {
-          "color.text.default": { kind: "color", hex: "#0e141b", ref: "color.gray.950" },
+          "color.text.default": { kind: "color", hex: "#0b0c0e", ref: "color.neutral.950" },
         },
         component: {},
       },
@@ -246,8 +246,8 @@ describe("importTheme: round trip (R10.4)", () => {
 
     expect(result.ok && result.source.overrides.semantic["color.text.default"]).toEqual({
       kind: "color",
-      hex: "#0e141b",
-      ref: "color.gray.950",
+      hex: "#0b0c0e",
+      ref: "color.neutral.950",
     });
   });
 });

@@ -56,6 +56,15 @@ describe("declared contrast pairings", () => {
   });
 });
 
+describe("dark theme contrast (site-refresh R3.6)", () => {
+  it("keeps every text pairing in dark at 7:1 or more", () => {
+    const low = cases
+      .filter(({ theme, result }) => theme === "dark" && result.min === "text" && result.ratio < 7)
+      .map(({ label, result }) => `${label}: ${result.ratio.toFixed(2)}:1`);
+    expect(low).toEqual([]);
+  });
+});
+
 describe("measured worst cases (design §4.1)", () => {
   const worstOver = (foreground: string, surfaces: string[], theme: Theme) =>
     Math.min(
@@ -68,25 +77,25 @@ describe("measured worst cases (design §4.1)", () => {
   const opaque = ["color.surface.base", "color.surface.raised", "color.surface.sunken"];
 
   it.each([
-    ["color.text.subtle", opaque, 4.85, 5.18],
-    ["color.action.text", ["color.action.background"], 7.57, 10.8],
-    ["color.border.strong", opaque, 3.57, 3.59],
-    ["color.focus.ring", opaque, 6.87, 6.25],
-    ["color.text.muted", ["color.surface.glass"], 5.78, 5.29],
+    ["color.text.subtle", opaque, 4.85, 11.79],
+    ["color.action.text", ["color.action.background"], 5.09, 15.51],
+    ["color.border.strong", opaque, 3.57, 4.76],
+    ["color.focus.ring", opaque, 6.15, 9.73],
+    ["color.text.muted", ["color.surface.glass"], 6.19, 13.33],
   ] as const)("%s: light %s, dark %s, within 0.01", (fg, surfaces, light, dark) => {
     expect(Math.abs(worstOver(fg, [...surfaces], "light") - light)).toBeLessThanOrEqual(0.01);
     expect(Math.abs(worstOver(fg, [...surfaces], "dark") - dark)).toBeLessThanOrEqual(0.01);
   });
 
-  it("keeps text.subtle off glass: it would fail there in dark (about 4.08:1)", () => {
-    const dark = colorIn("dark");
+  it("keeps text.subtle off glass: it only just passes there in light (about 4.52:1)", () => {
+    const light = colorIn("light");
     const glass = byName.get("color.surface.glass")?.contrastBackdrop;
     const ratio = Math.min(
-      ...backgroundsOf(dark, "color.surface.glass", glass).map((bg) =>
-        contrastRatio(dark("color.text.subtle").srgb, bg.srgb),
+      ...backgroundsOf(light, "color.surface.glass", glass).map((bg) =>
+        contrastRatio(light("color.text.subtle").srgb, bg.srgb),
       ),
     );
-    expect(ratio).toBeLessThan(minimumRatio.text);
+    expect(Math.abs(ratio - 4.52)).toBeLessThanOrEqual(0.01);
     expect(byName.get("color.text.subtle")?.contrast.map((p) => p.against)).not.toContain(
       "color.surface.glass",
     );

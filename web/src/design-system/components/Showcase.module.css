@@ -109,13 +109,13 @@
     ),
     linear-gradient(
       to right,
-      var(--color-grid-line) var(--effect-border-width),
-      transparent var(--effect-border-width)
+      var(--color-grid-line) var(--effect-grid-width),
+      transparent var(--effect-grid-width)
     ),
     linear-gradient(
       to bottom,
-      var(--color-grid-line) var(--effect-border-width),
-      transparent var(--effect-border-width)
+      var(--color-grid-line) var(--effect-grid-width),
+      transparent var(--effect-grid-width)
     );
   background-position:
     right top,

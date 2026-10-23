@@ -23,7 +23,7 @@ describe("Specimen (ds-tokens §6.3)", () => {
   });
 
   it("styles a primitive with its literal value, since it has no custom property", () => {
-    const token = primitive("color.blue.600");
+    const token = primitive("color.gold.600");
     const { container } = render(<Specimen token={token} />);
 
     const specimen = container.firstElementChild as HTMLElement;
@@ -68,7 +68,7 @@ describe("Specimen (ds-tokens §6.3)", () => {
   });
 
   it("adds a className", () => {
-    const { container } = render(<Specimen token={primitive("color.blue.600")} className="x" />);
+    const { container } = render(<Specimen token={primitive("color.gold.600")} className="x" />);
 
     expect(container.firstElementChild).toHaveClass("x", styles.swatch ?? "");
   });

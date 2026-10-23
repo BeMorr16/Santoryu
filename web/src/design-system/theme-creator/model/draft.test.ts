@@ -52,7 +52,7 @@ describe("draftReducer (theme-creator R11; design §8.2)", () => {
     expect(draft.source.keys).toEqual({ action: "#2a8556" });
     expect(isDirty(draft)).toBe(true);
 
-    draft = draftReducer(draft, { type: "setKey", key: "action", value: "#185480" });
+    draft = draftReducer(draft, { type: "setKey", key: "action", value: "#b37500" });
     expect(draft.source.keys).toEqual({});
     expect(isDirty(draft)).toBe(false);
   });

@@ -59,7 +59,9 @@ export const colorFamilies: readonly ColorFamily[] = [
     members: [
       member("action.background", "key"),
       member("action.background-hover", "shade"),
+      member("action.background-pressed", "shade"),
       member("action.text", "on"),
+      member("action.text-pressed", "on"),
       member("link.default", "text"),
       member("link.hover", "text"),
     ],

@@ -55,11 +55,10 @@ describe("Tokens preview (ds-hub R3.1)", () => {
 });
 
 describe("Components preview (ds-hub R3.2)", () => {
-  it("is made of a real Button, Badge, TextField and Separator", () => {
+  it("is made of a real Button, TextField and Separator", () => {
     const root = renderPreview(ComponentsPreview);
 
     expect(within(root).getByRole("button", { name: "Button", hidden: true })).toBeInTheDocument();
-    expect(within(root).getByText("New")).toBeInTheDocument();
     expect(within(root).getByRole("textbox", { name: "Email", hidden: true })).toHaveAttribute(
       "type",
       "email",

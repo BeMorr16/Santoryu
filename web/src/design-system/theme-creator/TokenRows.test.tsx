@@ -146,10 +146,10 @@ describe("token rows (theme-creator R6)", () => {
     const { user } = await renderCreator();
     await openDisclosure(user, "Color", "Semantic tokens");
     const action = row("color.action.background");
-    expect(within(action).getByRole("group", { name: "Blue swatches" })).toBeInTheDocument();
+    expect(within(action).getByRole("group", { name: "Gold swatches" })).toBeInTheDocument();
 
     await user.click(
-      within(action).getByRole("button", { name: "Family: Blue (color.action.background)" }),
+      within(action).getByRole("button", { name: "Family: Gold (color.action.background)" }),
     );
     await user.click(screen.getByRole("menuitemradio", { name: "Violet" }));
 

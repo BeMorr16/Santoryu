@@ -84,18 +84,18 @@ describe("resolveTheme: identity (design §3.2)", () => {
 
   it("starts each key at the base's value", () => {
     expect(defaultKeys("light")).toEqual({
-      action: "#185480",
-      accent: "#c49a4e",
+      action: "#b37500",
+      accent: "#1c87a5",
       accent2: "#5b3fa6",
       background: "#fbf8f2",
       headingFont: "space-grotesk",
       bodyFont: "inter",
       typeScale: 1,
       radius: 4,
-      borderWidth: 1,
+      borderWidth: 2,
       density: 0.25,
     });
-    expect(defaultKeys("dark").background).toBe("#123e5e");
+    expect(defaultKeys("dark").background).toBe("#0b1220");
   });
 });
 
@@ -335,7 +335,7 @@ describe("resolveTheme: overrides (R6.3)", () => {
 
 describe("themeVars (design §3.3)", () => {
   it("diffs against the built-in theme with the resolved scheme", () => {
-    const theme = resolveTheme(source("light", { background: "#123e5e" }));
+    const theme = resolveTheme(source("light", { background: "#0b1220" }));
 
     expect(theme.scheme).toBe("dark");
     // The key equals Dark's surface, so it's no difference from Dark.

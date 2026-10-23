@@ -228,6 +228,7 @@ export const buttonShowcase: Showcase = {
     'Always a native <button>, type="button" unless set.',
     "Named by its text. Icon-only buttons need an icon plus aria-label or aria-labelledby (a type error otherwise), or a VisuallyHidden label. With no visible text they're square.",
     "aria-pressed makes a toggle on any variant: the label stays the same and the pressed look shows the state. A button whose label changes (“Show grid” ↔ “Hide grid”) is a plain button, without aria-pressed.",
+    "A toggled-on primary is a darker gold, so its on and off looks differ by lightness alone. Where the state must read more clearly, show a check icon while it's on, or use a plain button whose label changes.",
     "disabled sets aria-disabled, not the native attribute: it stays focusable and announced, and blocks clicks, keys and form submission.",
     "A disabledReason is the disabled button's accessible description, and shows as a tooltip on hover, keyboard focus, and a press or tap (the first Disabled example).",
     "Icon-only buttons show their name as a tooltip on hover and keyboard focus, for sighted users who don't know the icon. It isn't announced again. Not for buttons named by aria-labelledby, whose name is already on screen.",

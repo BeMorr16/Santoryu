@@ -4,19 +4,21 @@ import { builtInValueOf } from "./model/builtin.ts";
 import { colorFamilies, type ColorKeyId } from "./model/families.ts";
 import type { Hex } from "./model/types.ts";
 
-/** The palette as swatches (theme-creator design §8.4): by ramp, named like "Blue 700". */
+/** The palette as swatches (theme-creator design §8.4): by ramp, named like "Gold 600". */
 
 /** The ramps a color row's Family menu offers, in this order. */
 export const families = [
-  "blue",
   "gold",
+  "champagne",
+  "cyan",
   "violet",
+  "slate",
+  "neutral",
   "gray",
   "sand",
   "red",
   "green",
   "orange",
-  "cyan",
 ] as const;
 export type Family = (typeof families)[number];
 
@@ -36,15 +38,17 @@ const ramp = (family: Family) =>
 
 /** Each ramp's swatches, lightest first. */
 export const rampSwatches: Readonly<Record<Family, readonly ColorSwatch[]>> = {
-  blue: ramp("blue"),
   gold: ramp("gold"),
+  champagne: ramp("champagne"),
+  cyan: ramp("cyan"),
   violet: ramp("violet"),
+  slate: ramp("slate"),
+  neutral: ramp("neutral"),
   gray: ramp("gray"),
   sand: ramp("sand"),
   red: ramp("red"),
   green: ramp("green"),
   orange: ramp("orange"),
-  cyan: ramp("cyan"),
 };
 
 /** The ramp a primitive belongs to, if it's one of the families. */
@@ -58,8 +62,8 @@ export function primitiveInFamily(family: Family, hex: Hex): string | undefined 
   return palette.find(({ group, swatch }) => group === family && swatch.value === hex)?.name;
 }
 
-const hueSteps = ["blue.700", "gold.500", "violet.600", "red.600", "green.600", "orange.600"];
-const surfaceSteps = ["gray.0", "gray.50", "sand.100", "violet.50", "blue.950", "gray.950"];
+const hueSteps = ["gold.600", "cyan.500", "violet.600", "red.600", "green.600", "orange.600"];
+const surfaceSteps = ["gray.0", "gray.50", "sand.100", "violet.50", "slate.900", "neutral.950"];
 
 /** A key control's suggestions: its anchor in both built-in themes, then a step per hue. */
 function suggestions(key: ColorKeyId): readonly ColorSwatch[] {

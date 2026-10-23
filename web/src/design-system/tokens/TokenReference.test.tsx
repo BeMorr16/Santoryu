@@ -177,11 +177,11 @@ describe("TokenReference (ds-tokens R4)", () => {
     it("hides rows and ramp swatches that don't match (R11.3)", () => {
       renderReference();
 
-      search("blue 700");
+      search("gold 700");
 
-      expect(rowsShown().toSorted()).toEqual([...matchesOf("blue 700")].toSorted());
-      expect(rowsShown()).toContain("color-blue-700");
-      expect(document.getElementById("color-blue-600")?.closest("[hidden]")).not.toBeNull();
+      expect(rowsShown().toSorted()).toEqual([...matchesOf("gold 700")].toSorted());
+      expect(rowsShown()).toContain("color-gold-700");
+      expect(document.getElementById("color-gold-600")?.closest("[hidden]")).not.toBeNull();
     });
 
     it("opens the groups with matches, counting n of m, and hides the rest (R11.3, R11.6)", () => {

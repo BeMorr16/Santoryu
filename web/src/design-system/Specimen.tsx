@@ -15,6 +15,7 @@ const kindByGroup: Record<string, string> = {
   "effect.focus-ring.offset": "ringOffset",
   "effect.backdrop": "blur",
   "effect.border": "lineWidth",
+  "effect.grid": "lineWidth",
   "effect.underline.thickness": "underlineThickness",
   "effect.underline.thickness-hover": "underlineThickness",
   "effect.underline.offset": "underlineOffset",

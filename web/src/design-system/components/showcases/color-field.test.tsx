@@ -20,14 +20,14 @@ describe("ColorField page examples (theme-creator design §13)", () => {
 
     const field = within(main).getByRole("group", { name: "Action color" });
     expect(field).toHaveAccessibleDescription("Buttons and links use it.");
-    expect(within(field).getByRole("textbox", { name: "Hex" })).toHaveValue("#185480");
+    expect(within(field).getByRole("textbox", { name: "Hex" })).toHaveValue("#b37500");
     const swatches = within(field).getByRole("group", { name: "Suggested colors" });
     expect(
       within(swatches)
         .getAllByRole("button")
         .map((button) => button.ariaLabel),
-    ).toEqual(["Blue 700", "Gold 500", "Violet 600", "Green 600"]);
-    expect(within(swatches).getByRole("button", { name: "Blue 700" })).toHaveAttribute(
+    ).toEqual(["Gold 600", "Cyan 500", "Violet 600", "Green 600"]);
+    expect(within(swatches).getByRole("button", { name: "Gold 600" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );

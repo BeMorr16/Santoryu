@@ -40,7 +40,7 @@ describe("OverviewTopics (ds-tokens R3)", () => {
       );
       if (token.tier !== "primitive") expect(naming).toHaveTextContent(token.cssVar);
     }
-    expect(naming).toHaveTextContent("color.blue.600, no custom property");
+    expect(naming).toHaveTextContent("color.gold.600, no custom property");
     const semantic = namingExamples.find((token) => token.tier === "semantic");
     if (semantic?.tier !== "semantic") throw new Error("expected a semantic example");
     expect(naming).toHaveTextContent(

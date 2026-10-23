@@ -23,7 +23,7 @@ import { themeVars } from "./model/vars.ts";
 import styles from "./ThemeCreator.module.css";
 
 const sampleCode = `:root {
-  --color-action-background: #185480;
+  --color-action-background: #b37500;
 }`;
 
 /**

@@ -123,9 +123,9 @@
           "$description": "Primary background on hover."
         },
         "background-active": {
-          "$value": "{color.action.background-hover}",
+          "$value": "{color.action.background-pressed}",
           "$type": "color",
-          "$description": "Primary background while pressed (:active)."
+          "$description": "Primary background while pressed (:active): a darker gold than the resting fill."
         },
         "text": {
           "$value": "{color.action.text}",
@@ -140,7 +140,16 @@
               {
                 "against": "component.button.primary.background-hover",
                 "min": "text"
-              },
+              }
+            ]
+          }
+        },
+        "text-active": {
+          "$value": "{color.action.text-pressed}",
+          "$type": "color",
+          "$description": "Primary text and icon color while pressed (:active), on the darker fill.",
+          "$extensions": {
+            "personal-site.contrast": [
               {
                 "against": "component.button.primary.background-active",
                 "min": "text"
@@ -155,17 +164,17 @@
         },
         "pressed": {
           "background": {
-            "$value": "{color.accent-2.fill}",
+            "$value": "{color.action.background-pressed}",
             "$type": "color",
-            "$description": "Primary toggle background while pressed (aria-pressed=\"true\"). Its lightness is flipped against the resting primary (3:1), so the state reads without hue."
+            "$description": "Primary toggle background while pressed (aria-pressed=\"true\"): the darker gold of a pressed primary. It differs from the resting fill by lightness only, so a toggle whose state must read clearly also changes its label or shows a check icon."
           },
           "background-hover": {
-            "$value": "{color.accent-2.fill-hover}",
+            "$value": "{color.action.background-pressed}",
             "$type": "color",
-            "$description": "Primary pressed toggle background on hover and while pressing."
+            "$description": "Primary pressed toggle background on hover and while pressing: it stays the darker gold."
           },
           "text": {
-            "$value": "{color.accent-2.fill-text}",
+            "$value": "{color.action.text-pressed}",
             "$type": "color",
             "$description": "Primary pressed toggle text and icon color.",
             "$extensions": {
@@ -182,9 +191,9 @@
             }
           },
           "border": {
-            "$value": "{color.accent-2.border}",
+            "$value": "{color.action.background-pressed}",
             "$type": "color",
-            "$description": "Primary pressed toggle border color. It's the toggle's boundary (3:1 against the surfaces), since the light-theme fill is close to the page.",
+            "$description": "Primary pressed toggle border color: the pressed fill, which is the toggle's boundary (3:1 against the surfaces).",
             "$extensions": {
               "personal-site.contrast": [
                 {

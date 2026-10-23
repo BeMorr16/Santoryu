@@ -18,7 +18,7 @@ describe("chain panel (theme-creator R8)", () => {
       "href",
       "/design-system/tokens#color-action-background",
     );
-    expect(within(chain).getByRole("link", { name: "color.blue.700" })).toBeInTheDocument();
+    expect(within(chain).getByRole("link", { name: "color.gold.600" })).toBeInTheDocument();
     expect(within(chain).getByText(/^Component tokens \(\d+\)$/)).toBeInTheDocument();
     expect(within(chain).getByRole("link", { name: "Button" })).toHaveAttribute(
       "href",
@@ -66,6 +66,6 @@ describe("chain panel (theme-creator R8)", () => {
     const chain = panel();
     expect(await within(chain).findByText("Custom")).toBeInTheDocument();
     expect(within(chain).getAllByText("#2a8556").length).toBeGreaterThan(0);
-    expect(within(chain).queryByRole("link", { name: "color.blue.700" })).toBeNull();
+    expect(within(chain).queryByRole("link", { name: "color.gold.600" })).toBeNull();
   });
 });
