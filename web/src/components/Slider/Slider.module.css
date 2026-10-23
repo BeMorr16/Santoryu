@@ -1,0 +1,172 @@
+/* A block that fills its container's inline size, like TextField. */
+.root {
+  --_thumb: var(--component-slider-thumb-size);
+
+  display: grid;
+  gap: var(--component-slider-gap);
+  min-inline-size: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--component-slider-gap) var(--space-inline-md);
+}
+
+.label {
+  font-weight: var(--type-weight-strong);
+}
+
+.value {
+  color: var(--component-slider-value-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--type-size-small);
+}
+
+/*
+ * The native range, restyled: a thin track filled up to the thumb (--_fill), and a round thumb
+ * at least 24px across (R13.5). The input is the thumb's height, so all of it is a target.
+ */
+.input {
+  appearance: none;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: var(--_thumb);
+  margin: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.input::-webkit-slider-runnable-track {
+  block-size: var(--component-slider-track-height);
+  border-radius: var(--component-slider-radius);
+  background: linear-gradient(
+    to right,
+    var(--component-slider-fill) var(--_fill),
+    var(--component-slider-track) var(--_fill)
+  );
+}
+
+.input::-moz-range-track {
+  block-size: var(--component-slider-track-height);
+  border-radius: var(--component-slider-radius);
+  background-color: var(--component-slider-track);
+}
+
+.input::-moz-range-progress {
+  block-size: var(--component-slider-track-height);
+  border-radius: var(--component-slider-radius);
+  background-color: var(--component-slider-fill);
+}
+
+.input::-webkit-slider-thumb {
+  appearance: none;
+  box-sizing: border-box;
+  inline-size: var(--_thumb);
+  block-size: var(--_thumb);
+  margin-block-start: calc((var(--component-slider-track-height) - var(--_thumb)) / 2);
+  border: var(--effect-border-width-thick) solid var(--component-slider-thumb-border);
+  border-radius: var(--component-slider-radius);
+  background-color: var(--component-slider-thumb);
+}
+
+.input::-moz-range-thumb {
+  box-sizing: border-box;
+  inline-size: var(--_thumb);
+  block-size: var(--_thumb);
+  border: var(--effect-border-width-thick) solid var(--component-slider-thumb-border);
+  border-radius: var(--component-slider-radius);
+  background-color: var(--component-slider-thumb);
+}
+
+/* The ring goes on the thumb, which is what moves (R13.5). */
+.input:focus-visible {
+  outline: none;
+}
+
+.input:focus-visible::-webkit-slider-thumb {
+  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+.input:focus-visible::-moz-range-thumb {
+  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+.input:disabled::-webkit-slider-thumb {
+  background-color: var(--color-text-subtle);
+}
+
+.input:disabled::-moz-range-thumb {
+  background-color: var(--color-text-subtle);
+}
+
+.input:disabled::-webkit-slider-runnable-track {
+  background: var(--component-slider-track);
+}
+
+.input:disabled::-moz-range-progress {
+  background-color: var(--component-slider-track);
+}
+
+/* Each mark sits under its value's thumb center, and never past the track's ends. */
+.marks {
+  position: relative;
+  block-size: 1lh;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--component-slider-mark-text);
+  font-size: var(--type-size-small);
+}
+
+.mark {
+  position: absolute;
+  inset-inline-start: calc(var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_pos));
+  translate: calc(var(--_pos) * -100%) 0;
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .input::-webkit-slider-runnable-track {
+    background: CanvasText;
+  }
+
+  .input::-moz-range-track,
+  .input::-moz-range-progress {
+    background-color: CanvasText;
+  }
+
+  /* One engine's pseudo-elements per rule: a selector list another engine can't parse is dropped. */
+  .input::-webkit-slider-thumb {
+    border-color: Canvas;
+    background-color: ButtonText;
+    outline: var(--effect-border-width) solid CanvasText;
+  }
+
+  .input::-moz-range-thumb {
+    border-color: Canvas;
+    background-color: ButtonText;
+    outline: var(--effect-border-width) solid CanvasText;
+  }
+
+  .input:focus-visible::-webkit-slider-thumb {
+    outline-color: Highlight;
+  }
+
+  .input:focus-visible::-moz-range-thumb {
+    outline-color: Highlight;
+  }
+}

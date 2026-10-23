@@ -28,10 +28,10 @@ const textFieldDocs = {
       "An error message under the field, with a warning icon. Marks the field invalid and is read after the hint.",
   },
   type: {
-    type: '"text" | "search" | "email" | "url" | "tel"',
+    type: '"text" | "search" | "email" | "url" | "tel" | "number"',
     default: '"text"',
     description:
-      'The native input type. "search" adds a search icon that hides while the field has focus, and the clear button.',
+      'The native input type. "search" adds a search icon that hides while the field has focus, and the clear button. "number" takes the native min, max and step.',
   },
   size: {
     type: '"sm" | "md"',

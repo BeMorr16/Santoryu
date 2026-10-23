@@ -1,0 +1,120 @@
+{
+  "component": {
+    "slider": {
+      "track": {
+        "$value": "{color.border.strong}",
+        "$type": "color",
+        "$description": "The unfilled track: the control's boundary.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "track-height": {
+        "$value": "{space.stack.xs}",
+        "$type": "dimension",
+        "$description": "Track thickness."
+      },
+      "fill": {
+        "$value": "{color.action.background}",
+        "$type": "color",
+        "$description": "The track from the minimum to the thumb."
+      },
+      "thumb": {
+        "$value": "{color.action.background}",
+        "$type": "color",
+        "$description": "The thumb: what the visitor drags.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "thumb-border": {
+        "$value": "{color.surface.raised}",
+        "$type": "color",
+        "$description": "A ring around the thumb that separates it from the fill."
+      },
+      "thumb-size": {
+        "$value": "{size.icon.lg}",
+        "$type": "dimension",
+        "$description": "Thumb diameter and the control's height: at least 24px (WCAG 2.5.8)."
+      },
+      "radius": {
+        "$value": "{radius.pill}",
+        "$type": "dimension",
+        "$description": "Rounds the track and the thumb."
+      },
+      "gap": {
+        "$value": "{space.stack.xs}",
+        "$type": "dimension",
+        "$description": "Space between the label row, hint, track and marks."
+      },
+      "value-text": {
+        "$value": "{color.text.muted}",
+        "$type": "color",
+        "$description": "The current value beside the label.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "mark-text": {
+        "$value": "{color.text.subtle}",
+        "$type": "color",
+        "$description": "Mark labels under the track.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

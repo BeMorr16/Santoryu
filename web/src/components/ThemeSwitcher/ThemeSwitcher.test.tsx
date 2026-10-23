@@ -1,8 +1,17 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  render as renderInDom,
+  screen,
+  waitFor,
+  within,
+  type RenderOptions,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactElement } from "react";
 import { renderToString } from "react-dom/server";
+import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { expectNoAxeViolations } from "../../../test/axe.ts";
 import { setSystemTheme } from "../../../test/system-theme.ts";
@@ -13,6 +22,10 @@ import { ThemeSwitcher, themeSwitcherName } from "./ThemeSwitcher.tsx";
 import styles from "./ThemeSwitcher.module.css";
 
 const root = document.documentElement;
+
+/** Its link item routes through React Router, so it renders in a router, as it does in the app. */
+const render = (ui: ReactElement, options?: RenderOptions) =>
+  renderInDom(ui, { wrapper: MemoryRouter, ...options });
 const css = readFileSync(join(import.meta.dirname, "ThemeSwitcher.module.css"), "utf8");
 
 /** The glyph inside an Icon's svg, to tell which icon a component drew. */
@@ -206,10 +219,11 @@ describe("ThemeSwitcher", () => {
       render(<ThemeSwitcher showLabel={showLabel} />);
 
       const trigger = screen.getByRole("button", { name: /^Theme/ });
+      // Sun, moon and palette (one shown by CSS), then the chevron (theme-creator design §4.3).
       const svgs = trigger.querySelectorAll("svg");
-      expect(svgs).toHaveLength(3);
-      expect(svgs[2]?.innerHTML).toBe(glyphOf("chevron-down"));
-      expect(svgs[2]).toHaveAttribute("aria-hidden", "true");
+      expect(svgs).toHaveLength(4);
+      expect(svgs[3]?.innerHTML).toBe(glyphOf("chevron-down"));
+      expect(svgs[3]).toHaveAttribute("aria-hidden", "true");
       expect(trigger).not.toHaveClass(buttonStyles.iconOnly ?? "");
     },
   );
@@ -228,7 +242,11 @@ describe("ThemeSwitcher", () => {
   it("hydrates with no mismatch, then names the theme in effect (R3.6, R13.8)", () => {
     setSystemTheme("dark");
     const container = document.createElement("div");
-    container.innerHTML = renderToString(<ThemeSwitcher />);
+    container.innerHTML = renderToString(
+      <MemoryRouter>
+        <ThemeSwitcher />
+      </MemoryRouter>,
+    );
     document.body.append(container);
     expect(container.querySelector("button")).toHaveAccessibleName("Theme");
     const onRecoverableError = vi.fn();
@@ -313,5 +331,102 @@ describe("ThemeSwitcher: name tooltip (refinement R14.13)", () => {
     for (const trigger of screen.getAllByRole("button", { name: /^Theme/ })) {
       expect(tooltipOf(trigger)).toBeNull();
     }
+  });
+});
+
+describe("ThemeSwitcher: custom themes (theme-creator R9.1, R9.2)", () => {
+  const source = { base: "dark", keys: {}, overrides: { semantic: {}, component: {} } };
+  const stored = (id: string, name: string, scheme: "light" | "dark") => ({
+    id,
+    name,
+    scheme,
+    vars: { "--color-action-background": "#7a5618" },
+    source,
+  });
+  const storeThemes = (...themes: ReturnType<typeof stored>[]) => {
+    localStorage.setItem("custom-themes", JSON.stringify({ v: 1, themes }));
+  };
+
+  beforeEach(() => {
+    onTestFinished(() => {
+      root.removeAttribute("data-custom-theme");
+      root.removeAttribute("style");
+    });
+  });
+
+  it("lists custom themes after Light and Dark, in creation order, with a palette icon", async () => {
+    const user = userEvent.setup();
+    storeThemes(stored("ocean123", "Ocean", "dark"), stored("forest12", "Forest", "light"));
+    render(<ThemeSwitcher />);
+
+    await user.click(screen.getByRole("button", { name: /^Theme/ }));
+
+    const group = screen.getByRole("group", { name: "Theme" });
+    const items = within(group).getAllByRole("menuitemradio");
+    expect(items.map((item) => item.textContent)).toEqual(["Light", "Dark", "Ocean", "Forest"]);
+    expect(items[2]?.querySelector("svg")?.innerHTML).toBe(glyphOf("palette"));
+  });
+
+  it("applies a chosen custom theme site-wide, stores it, and names the trigger by it", async () => {
+    const user = userEvent.setup();
+    storeThemes(stored("ocean123", "Ocean", "dark"));
+    render(<ThemeSwitcher />);
+
+    await user.click(screen.getByRole("button", { name: "Theme: Light" }));
+    await user.click(screen.getByRole("menuitemradio", { name: "Ocean" }));
+
+    expect(localStorage.getItem("theme")).toBe("custom:ocean123");
+    expect(root.getAttribute("data-theme")).toBe("dark");
+    expect(root.getAttribute("data-custom-theme")).toBe("ocean123");
+    expect(root.style.getPropertyValue("--color-action-background")).toBe("#7a5618");
+    const trigger = screen.getByRole("button", { name: "Theme: Ocean" });
+    expect(trigger).toHaveFocus();
+
+    await user.click(trigger);
+    expect(screen.getByRole("menuitemradio", { name: "Ocean" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+  });
+
+  it("ends with a link to the theme creator: Create a theme… with none, Edit themes… with some", async () => {
+    const user = userEvent.setup();
+    render(<ThemeSwitcher />);
+
+    await user.click(screen.getByRole("button", { name: /^Theme/ }));
+    const create = screen.getByRole("menuitem", { name: "Create a theme…" });
+    expect(create).toHaveAttribute("href", "/design-system/theme-creator");
+    expect(create.querySelector("svg")?.innerHTML).toBe(glyphOf("palette"));
+    expect(screen.getByRole("separator")).toBeInTheDocument();
+
+    act(() => {
+      storeThemes(stored("ocean123", "Ocean", "dark"));
+      window.dispatchEvent(new StorageEvent("storage", { key: "custom-themes" }));
+    });
+    expect(screen.getByRole("menuitem", { name: "Edit themes…" })).toHaveAttribute(
+      "href",
+      "/design-system/theme-creator",
+    );
+  });
+
+  it("names a custom choice by its theme, and an unknown one just Theme", () => {
+    const themes = [{ id: "ocean123", name: "Ocean" }];
+
+    expect(themeSwitcherName("custom:ocean123", themes)).toBe("Theme: Ocean");
+    expect(themeSwitcherName("custom:gone1234", themes)).toBe("Theme");
+    expect(themeSwitcherName("dark", themes)).toBe("Theme: Dark");
+  });
+
+  it("shows a palette icon for any custom theme, by CSS, from the first paint", () => {
+    render(<ThemeSwitcher />);
+
+    const trigger = screen.getByRole("button", { name: /^Theme/ });
+    const customIcon = trigger.querySelector(`.${styles.customIcon ?? ""}`);
+    expect(customIcon?.innerHTML).toBe(glyphOf("palette"));
+    expect(customIcon).toHaveAttribute("aria-hidden", "true");
+    expect(css).toMatch(/:global\(:root\[data-custom-theme\]\) \.customIcon \{\s*display: inline;/);
+    expect(css).toMatch(
+      /:global\(:root\[data-custom-theme\]\) \.lightIcon,\s*:global\(:root\[data-custom-theme\]\) \.darkIcon \{\s*display: none;/,
+    );
   });
 });

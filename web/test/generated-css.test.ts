@@ -4,6 +4,7 @@ import {
   componentTokens as component,
   semanticTokens as semantic,
 } from "../src/tokens/metadata.ts";
+import type { UnthemedTokenMeta } from "../src/tokens/types.ts";
 
 const css = readFileSync(new URL("../src/generated/tokens.css", import.meta.url), "utf8");
 
@@ -50,6 +51,12 @@ const componentBlock = bySelector.get(":root, [data-theme]");
 const reducedMotion = bySelector.get("@media (prefers-reduced-motion: reduce) :root");
 
 const themed = semantic.filter((t) => t.themed);
+// What a custom theme can change outside color: re-declared in each scoped theme (decision 0012).
+const scopedReset = semantic.filter(
+  (t): t is UnthemedTokenMeta =>
+    !t.themed &&
+    (["type", "space", "radius"].includes(t.category) || t.name === "effect.border.width"),
+);
 const durations = semantic.filter((t) => t.name.startsWith("motion.duration."));
 const cssVars = (block: Map<string, string> | undefined) =>
   [...(block?.keys() ?? [])].filter((name) => name.startsWith("--")).sort();
@@ -82,18 +89,30 @@ describe("generated tokens.css", () => {
     }
   });
 
-  it("declares every themed token's dark value in both dark selectors, and nothing else", () => {
+  it("declares every themed token's dark value in both dark selectors", () => {
     expect(themed.length).toBeGreaterThan(0);
     for (const block of [darkMedia, darkAttr]) {
-      expect(cssVars(block)).toEqual(themed.map((t) => t.cssVar).sort());
       for (const token of themed) {
         expect(block?.get(token.cssVar), token.cssVar).toBe(token.values.dark.css);
+      }
+    }
+    expect(cssVars(darkMedia)).toEqual(themed.map((t) => t.cssVar).sort());
+  });
+
+  it("resets type, space, radius and border width in each scoped theme, and nothing else (decision 0012)", () => {
+    expect(scopedReset.map((t) => t.category)).toEqual(
+      expect.arrayContaining(["type", "space", "radius", "effect"]),
+    );
+    expect(scopedReset.some((t) => t.category === "motion")).toBe(false);
+    for (const block of [darkAttr, lightAttr]) {
+      expect(cssVars(block)).toEqual([...themed, ...scopedReset].map((t) => t.cssVar).sort());
+      for (const token of scopedReset) {
+        expect(block?.get(token.cssVar), token.cssVar).toBe(token.values.all.css);
       }
     }
   });
 
   it("declares the full light themed set under [data-theme=light], so a scoped panel can opt out of dark", () => {
-    expect(cssVars(lightAttr)).toEqual(themed.map((t) => t.cssVar).sort());
     for (const token of themed) {
       expect(lightAttr?.get(token.cssVar), token.cssVar).toBe(token.values.light.css);
     }

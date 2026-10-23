@@ -206,3 +206,121 @@ describe("subscribe", () => {
     expect(listener).not.toHaveBeenCalled();
   });
 });
+
+describe("custom themes (theme-creator R9)", () => {
+  const source = { base: "dark", keys: {}, overrides: { semantic: {}, component: {} } };
+  const ocean = {
+    id: "ocean123",
+    name: "Ocean",
+    scheme: "dark" as const,
+    vars: { "--color-action-background": "#7a5618" },
+    source,
+  };
+  const storeThemes = (...themes: unknown[]) => {
+    localStorage.setItem("custom-themes", JSON.stringify({ v: 1, themes }));
+  };
+  const property = (name: string) => root.style.getPropertyValue(name);
+
+  afterEach(() => {
+    root.removeAttribute("data-custom-theme");
+    root.removeAttribute("style");
+  });
+
+  it("reads a stored custom:<id> choice, and applies its scheme, id and properties", async () => {
+    storeThemes(ocean);
+    localStorage.setItem("theme", "custom:ocean123");
+    const { applyPreference, readEffectiveTheme, readPreference } = await load();
+
+    expect(readPreference()).toBe("custom:ocean123");
+    expect(readEffectiveTheme()).toBe("custom:ocean123");
+    applyPreference(readPreference());
+
+    expect(root.getAttribute("data-theme")).toBe("dark");
+    expect(root.getAttribute("data-custom-theme")).toBe("ocean123");
+    expect(property("--color-action-background")).toBe("#7a5618");
+  });
+
+  it("writes a custom choice, then a built-in one removes its properties", async () => {
+    storeThemes(ocean);
+    const { writePreference } = await load();
+
+    writePreference("custom:ocean123");
+    expect(localStorage.getItem("theme")).toBe("custom:ocean123");
+    expect(property("--color-action-background")).toBe("#7a5618");
+
+    writePreference("light");
+    expect(root.getAttribute("data-theme")).toBe("light");
+    expect(root.hasAttribute("data-custom-theme")).toBe(false);
+    expect(property("--color-action-background")).toBe("");
+  });
+
+  it.each(["custom:nope1234", "custom:", "custom:OCEAN123"])(
+    "treats %j, an unknown custom theme, as no choice (R9.5)",
+    async (value) => {
+      storeThemes(ocean);
+      localStorage.setItem("theme", value);
+      setSystemTheme("dark");
+      const { applyPreference, readEffectiveTheme, readPreference } = await load();
+
+      expect(readPreference()).toBeNull();
+      expect(readEffectiveTheme()).toBe("dark");
+      applyPreference(readPreference());
+      expect(root.hasAttribute("data-theme")).toBe(false);
+    },
+  );
+
+  it("re-applies the active theme when another tab edits it (R9.4)", async () => {
+    storeThemes(ocean);
+    const { subscribe, writePreference } = await load();
+    writePreference("custom:ocean123");
+    const listener = vi.fn();
+    subscribe(listener);
+
+    storeThemes({ ...ocean, vars: { "--color-text-default": "#ffffff" } });
+    dispatchStorage("custom-themes", null);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(property("--color-action-background")).toBe("");
+    expect(property("--color-text-default")).toBe("#ffffff");
+  });
+
+  it("re-applies the active theme when this page saves it again (R3.5)", async () => {
+    storeThemes(ocean);
+    const { subscribe, writePreference } = await load();
+    const { saveCustomTheme } = await import("./custom-themes.ts");
+    writePreference("custom:ocean123");
+    const listener = vi.fn();
+    subscribe(listener);
+
+    saveCustomTheme({ ...ocean, vars: { "--color-action-background": "#1e6b45" } });
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(property("--color-action-background")).toBe("#1e6b45");
+  });
+
+  it("switches to the built-in theme with the same scheme when the active theme is deleted (R2.9)", async () => {
+    storeThemes(ocean, { ...ocean, id: "forest12", name: "Forest", scheme: "light" });
+    const { deleteTheme, readPreference, writePreference } = await load();
+    const { readCustomThemes } = await import("./custom-themes.ts");
+    writePreference("custom:ocean123");
+
+    deleteTheme("ocean123");
+
+    expect(readCustomThemes().map(({ id }) => id)).toEqual(["forest12"]);
+    expect(readPreference()).toBe("dark");
+    expect(localStorage.getItem("theme")).toBe("dark");
+    expect(root.getAttribute("data-theme")).toBe("dark");
+    expect(root.hasAttribute("data-custom-theme")).toBe(false);
+    expect(property("--color-action-background")).toBe("");
+  });
+
+  it("leaves the choice alone when another theme is deleted", async () => {
+    storeThemes(ocean, { ...ocean, id: "forest12", name: "Forest", scheme: "light" });
+    const { deleteTheme, readPreference, writePreference } = await load();
+    writePreference("custom:ocean123");
+
+    deleteTheme("forest12");
+
+    expect(readPreference()).toBe("custom:ocean123");
+  });
+});

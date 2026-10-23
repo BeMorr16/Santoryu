@@ -32,6 +32,16 @@ describe("Specimen (ds-tokens §6.3)", () => {
     expect(specimen).toHaveClass(styles.swatch ?? "");
   });
 
+  it("previews a literal value instead when given one: the theme creator's draft (theme-creator R8.3)", () => {
+    const token = semanticTokens.find((candidate) => candidate.name === "color.text.muted");
+    if (!token) throw new Error("No color.text.muted");
+    const { container } = render(<Specimen token={token} value="#123456" />);
+
+    const specimen = container.firstElementChild as HTMLElement;
+    expect(specimen.style.getPropertyValue("--specimen")).toBe("#123456");
+    expect(specimen).toHaveClass(styles.swatch ?? "");
+  });
+
   it("previews a primitive like the first semantic token aliasing it", () => {
     const fontSizes = primitiveTokens.filter((token) => token.name.startsWith("type.font-size."));
     expect(fontSizes.length).toBeGreaterThan(0);

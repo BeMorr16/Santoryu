@@ -11,6 +11,9 @@ import {
   Button,
   Card,
   CodeBlock,
+  ColorField,
+  Dialog,
+  DialogButton,
   Figure,
   Grid,
   Icon,
@@ -24,6 +27,7 @@ import {
   MenuSeparator,
   MenuTrigger,
   Separator,
+  Slider,
   Stack,
   Table,
   TableBody,
@@ -817,6 +821,65 @@ describe("library types", () => {
         <TextField key="e" label="Email" iconStart="unicorn" />,
         // @ts-expect-error -- a hidden label would hide the visible required cue.
         <TextField key="f" label="Email" hideLabel required />,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+  });
+
+  it("Dialog requires a title and takes only its own sizes, roles and levels (theme-creator R12.2)", () => {
+    const close = () => undefined;
+    function invalid() {
+      return [
+        // @ts-expect-error -- a title is required: it names the dialog (decision 0008).
+        <Dialog key="a" open onClose={close} />,
+        // @ts-expect-error -- not a size.
+        <Dialog key="b" open onClose={close} title="T" size="lg" />,
+        // @ts-expect-error -- only dialog roles.
+        <Dialog key="c" open onClose={close} title="T" role="menu" />,
+        // @ts-expect-error -- the page has its own h1.
+        <Dialog key="d" open onClose={close} title="T" titleLevel={1} />,
+        // @ts-expect-error -- controlled: `open` is required.
+        <Dialog key="e" onClose={close} title="T" />,
+        // @ts-expect-error -- not a result.
+        <DialogButton key="f" result="maybe">
+          OK
+        </DialogButton>,
+        // @ts-expect-error -- a DialogButton is a Button: it needs a label or a name.
+        <DialogButton key="g" result="success" />,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+  });
+
+  it("Slider requires a string label and is only a range (theme-creator R13.2)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- a label is required: it names the slider (decision 0008).
+        <Slider key="a" />,
+        // @ts-expect-error -- the label is plain text.
+        <Slider key="b" label={<b>Radius</b>} />,
+        // @ts-expect-error -- always a range: the type isn't a prop.
+        <Slider key="c" label="Radius" type="number" />,
+        // @ts-expect-error -- values are numbers.
+        <Slider key="d" label="Radius" value="4" />,
+        // @ts-expect-error -- marks need a label.
+        <Slider key="e" label="Radius" marks={[{ value: 4 }]} />,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+  });
+
+  it("ColorField requires a string label and hex values (theme-creator R14.2)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- a label is required: it names the group and the picker (decision 0008).
+        <ColorField key="a" />,
+        // @ts-expect-error -- the legend is plain text.
+        <ColorField key="b" label={<b>Action</b>} />,
+        // @ts-expect-error -- a value is a hex string.
+        <ColorField key="c" label="Action" value="red" />,
+        // @ts-expect-error -- swatches need a name.
+        <ColorField key="d" label="Action" swatches={[{ value: "#000000" }]} />,
       ];
     }
     expectTypeOf(invalid).toBeFunction();

@@ -28,7 +28,27 @@ async function walk(page: Page, browserName: string) {
       while (getComputedStyle(ringElement).outlineStyle === "none" && ringElement.parentElement) {
         ringElement = ringElement.parentElement;
       }
-      const style = getComputedStyle(ringElement);
+      let style: { outlineWidth: string; outlineColor: string } = getComputedStyle(ringElement);
+      // A slider draws its ring on the thumb (theme-creator R13.5), a pseudo-element that
+      // getComputedStyle can't read, so the ring is its stylesheet rule's, resolved on a probe.
+      if (focused.matches("input[type='range']")) {
+        const thumb = [...document.styleSheets]
+          .flatMap((sheet) => [...sheet.cssRules])
+          .find(
+            (rule): rule is CSSStyleRule =>
+              rule instanceof CSSStyleRule &&
+              rule.selectorText.endsWith("::-webkit-slider-thumb") &&
+              rule.style.getPropertyValue("outline") !== "" &&
+              focused.matches(rule.selectorText.replace(/::-webkit-slider-thumb$/, "")),
+          );
+        const probe = document.createElement("span");
+        probe.style.setProperty("outline", thumb?.style.getPropertyValue("outline") ?? "none");
+        focused.after(probe);
+        const { outlineWidth, outlineColor } = getComputedStyle(probe);
+        probe.remove();
+        ringElement = focused;
+        style = { outlineWidth, outlineColor };
+      }
       const parse = (color: string) => {
         const [r = 0, g = 0, b = 0, a = 1] = (color.match(/[\d.]+/g) ?? []).map(Number);
         return { rgb: [r / 255, g / 255, b / 255], a };

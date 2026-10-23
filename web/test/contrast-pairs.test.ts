@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { allTokens as tokens } from "../src/tokens/metadata.ts";
-import { composite, contrastRatio, minimumRatio } from "../src/tokens/contrast.ts";
-import type { Srgb, TokenMeta, TokenValue } from "../src/tokens/types.ts";
+import {
+  backgroundsOf,
+  contrastRatio,
+  minimumRatio,
+  pairingResults,
+  worstCase,
+  type ColorOf,
+} from "../src/tokens/contrast.ts";
+import type { TokenMeta, TokenValue } from "../src/tokens/types.ts";
 
 const themes = ["light", "dark"] as const;
 type Theme = (typeof themes)[number];
@@ -13,53 +20,22 @@ function valueIn(token: TokenMeta, theme: Theme): TokenValue {
   return token.values.all;
 }
 
-function opaqueColor(name: string, theme: Theme): Srgb {
-  const token = byName.get(name);
-  if (!token) throw new Error(`unknown token ${name}`);
-  const value = valueIn(token, theme);
-  if (!value.srgb) throw new Error(`${name} has no sRGB value`);
-  if (value.alpha !== 1) throw new Error(`${name} is translucent in ${theme} (${value.ref})`);
-  return value.srgb;
-}
-
-/**
- * Every color a background can actually show. An opaque background is itself; a translucent one
- * (glass) is composited over each opaque backdrop it declares (design §4.6).
- */
-function backgroundsOf(name: string, theme: Theme): { label: string; srgb: Srgb }[] {
-  const token = byName.get(name);
-  if (!token) throw new Error(`unknown surface ${name}`);
-  const value = valueIn(token, theme);
-  if (!value.srgb) throw new Error(`${name} has no sRGB value`);
-  const alpha = value.alpha ?? 1;
-  if (alpha === 1) return [{ label: value.ref, srgb: value.srgb }];
-  const backdrop = token.contrastBackdrop ?? [];
-  if (backdrop.length === 0) {
-    throw new Error(`${name} is translucent but declares no personal-site.contrast-backdrop`);
-  }
-  const srgb = value.srgb;
-  return backdrop.map((under) => ({
-    label: `${value.ref} over ${under}`,
-    srgb: composite(srgb, alpha, opaqueColor(under, theme)),
-  }));
-}
-
-function worstCase(foreground: string, against: string, theme: Theme) {
-  const fg = opaqueColor(foreground, theme);
-  return backgroundsOf(against, theme)
-    .map((bg) => ({ label: bg.label, ratio: contrastRatio(fg, bg.srgb) }))
-    .reduce((worst, current) => (current.ratio < worst.ratio ? current : worst));
+function colorIn(theme: Theme): ColorOf {
+  return (name) => {
+    const token = byName.get(name);
+    if (!token) throw new Error(`unknown token ${name}`);
+    const value = valueIn(token, theme);
+    if (!value.srgb || value.alpha === undefined) throw new Error(`${name} has no sRGB value`);
+    return { srgb: value.srgb, alpha: value.alpha };
+  };
 }
 
 const cases = themes.flatMap((theme) =>
-  tokens.flatMap((token) =>
-    token.contrast.map((pairing) => ({
-      theme,
-      token,
-      pairing,
-      label: `${theme}: ${token.name} on ${pairing.against} (${pairing.min})`,
-    })),
-  ),
+  pairingResults(colorIn(theme), tokens).map((result) => ({
+    theme,
+    result,
+    label: `${theme}: ${result.token} on ${result.against} (${result.min})`,
+  })),
 );
 
 describe("declared contrast pairings", () => {
@@ -68,18 +44,27 @@ describe("declared contrast pairings", () => {
   });
 
   it.each(cases.map((c) => [c.label, c] as const))("%s meets its minimum", (_label, c) => {
-    const fg = valueIn(c.token, c.theme);
-    const worst = worstCase(c.token.name, c.pairing.against, c.theme);
+    const { token, against, backdrop, ratio, min } = c.result;
+    const fg = byName.get(token);
+    const bg = byName.get(against);
+    if (!fg || !bg) throw new Error(`unknown pairing ${c.label}`);
+    const over = backdrop === undefined ? "" : ` over ${backdrop}`;
     expect(
-      worst.ratio,
-      `${fg.ref} on ${worst.label} is ${worst.ratio.toFixed(2)}:1, needs ${String(minimumRatio[c.pairing.min])}:1`,
-    ).toBeGreaterThanOrEqual(minimumRatio[c.pairing.min]);
+      ratio,
+      `${valueIn(fg, c.theme).ref} on ${valueIn(bg, c.theme).ref}${over} is ${ratio.toFixed(2)}:1, needs ${String(minimumRatio[min])}:1`,
+    ).toBeGreaterThanOrEqual(minimumRatio[min]);
   });
 });
 
 describe("measured worst cases (design §4.1)", () => {
   const worstOver = (foreground: string, surfaces: string[], theme: Theme) =>
-    Math.min(...surfaces.map((surface) => worstCase(foreground, surface, theme).ratio));
+    Math.min(
+      ...surfaces.map(
+        (surface) =>
+          worstCase(colorIn(theme), foreground, surface, byName.get(surface)?.contrastBackdrop)
+            .ratio,
+      ),
+    );
   const opaque = ["color.surface.base", "color.surface.raised", "color.surface.sunken"];
 
   it.each([
@@ -94,9 +79,11 @@ describe("measured worst cases (design §4.1)", () => {
   });
 
   it("keeps text.subtle off glass: it would fail there in dark (about 4.08:1)", () => {
+    const dark = colorIn("dark");
+    const glass = byName.get("color.surface.glass")?.contrastBackdrop;
     const ratio = Math.min(
-      ...backgroundsOf("color.surface.glass", "dark").map((bg) =>
-        contrastRatio(opaqueColor("color.text.subtle", "dark"), bg.srgb),
+      ...backgroundsOf(dark, "color.surface.glass", glass).map((bg) =>
+        contrastRatio(dark("color.text.subtle").srgb, bg.srgb),
       ),
     );
     expect(ratio).toBeLessThan(minimumRatio.text);

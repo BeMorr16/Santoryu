@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { composite, contrastRatio, minimumRatio, relativeLuminance } from "./contrast.ts";
+import {
+  backgroundsOf,
+  composite,
+  contrastRatio,
+  minimumRatio,
+  pairingResults,
+  relativeLuminance,
+  worstCase,
+  type ColorOf,
+  type PaintedColor,
+} from "./contrast.ts";
 import type { Srgb } from "./types.ts";
 
 function gray(byte: number): Srgb {
@@ -70,5 +80,62 @@ describe("composite", () => {
     const gold: Srgb = [0xef / 255, 0xd0 / 255, 0x9b / 255];
     const subtle: Srgb = [0xad / 255, 0xba / 255, 0xc8 / 255];
     expect(contrastRatio(subtle, composite(navy, 0.85, gold))).toBeCloseTo(4.08, 1);
+  });
+});
+
+describe("pairing evaluation (theme-creator design §6)", () => {
+  const gold: Srgb = [0xef / 255, 0xd0 / 255, 0x9b / 255];
+  const colors: Record<string, PaintedColor> = {
+    paper: { srgb: white, alpha: 1 },
+    ink: { srgb: gray(0x77), alpha: 1 },
+    gold: { srgb: gold, alpha: 1 },
+    glass: { srgb: black, alpha: 0.5 },
+  };
+  const colorOf: ColorOf = (name) => {
+    const color = colors[name];
+    if (!color) throw new Error(`unknown ${name}`);
+    return color;
+  };
+
+  it("composites a translucent background over each declared backdrop", () => {
+    expect(backgroundsOf(colorOf, "glass", ["paper", "gold"])).toEqual([
+      { srgb: composite(black, 0.5, white), backdrop: "paper" },
+      { srgb: composite(black, 0.5, gold), backdrop: "gold" },
+    ]);
+    expect(backgroundsOf(colorOf, "paper")).toEqual([{ srgb: white }]);
+  });
+
+  it("refuses a translucent background without backdrops", () => {
+    expect(() => backgroundsOf(colorOf, "glass")).toThrow(/declares no/);
+  });
+
+  it("chooses the backdrop giving the lowest ratio as the worst case", () => {
+    const overPaper = contrastRatio(white, composite(black, 0.5, white));
+    const overGold = contrastRatio(white, composite(black, 0.5, gold));
+    expect(overPaper).toBeLessThan(overGold);
+
+    expect(worstCase(colorOf, "paper", "glass", ["gold", "paper"])).toEqual({
+      ratio: overPaper,
+      backdrop: "paper",
+    });
+  });
+
+  it("measures every declared pairing in token order, with its backdrop when translucent", () => {
+    const results = pairingResults(colorOf, [
+      { name: "ink", contrast: [{ against: "paper", min: "text" }] },
+      { name: "glass", contrast: [], contrastBackdrop: ["gold", "paper"] },
+      { name: "paper", contrast: [{ against: "glass", min: "non-text" }] },
+    ]);
+
+    expect(results).toEqual([
+      { token: "ink", against: "paper", min: "text", ratio: contrastRatio(gray(0x77), white) },
+      {
+        token: "paper",
+        against: "glass",
+        min: "non-text",
+        ratio: contrastRatio(white, composite(black, 0.5, white)),
+        backdrop: "paper",
+      },
+    ]);
   });
 });

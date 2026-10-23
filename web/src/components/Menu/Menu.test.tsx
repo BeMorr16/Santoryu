@@ -471,11 +471,13 @@ describe("Menu: edge cases from review", () => {
     render(<Fixture />);
     await openWithClick();
 
-    fireEvent.keyDown(trigger(), { key: "Escape" });
+    const notCanceled = fireEvent.keyDown(trigger(), { key: "Escape" });
     document.removeEventListener("keydown", onKeyDown);
 
     expect(screen.queryByRole("menu")).toBeNull();
     expect(onKeyDown).not.toHaveBeenCalled();
+    // Prevented, so a native modal dialog around the menu stays open (theme-creator R12.4).
+    expect(notCanceled).toBe(false);
   });
 });
 

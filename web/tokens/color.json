@@ -552,7 +552,7 @@
       }
     },
     "overlay": {
-      "$description": "Translucent primitives. Only color.surface.glass and color.grid.line may alias them.",
+      "$description": "Translucent primitives. Only color.surface.glass, color.grid.line, color.fill.none and color.fill.scrim may alias them.",
       "sand-50-85": {
         "$value": {
           "colorSpace": "srgb",
@@ -588,6 +588,24 @@
           "hex": "#8fd3f7"
         },
         "$description": "cyan.300 at 10% opacity. Dark-theme grid lines."
+      },
+      "gray-950-40": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.0549, 0.0784, 0.1059],
+          "alpha": 0.4,
+          "hex": "#0e141b"
+        },
+        "$description": "gray.950 at 40% opacity. Light-theme modal scrim."
+      },
+      "gray-950-60": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.0549, 0.0784, 0.1059],
+          "alpha": 0.6,
+          "hex": "#0e141b"
+        },
+        "$description": "gray.950 at 60% opacity. Dark-theme modal scrim."
       },
       "transparent": {
         "$value": {

@@ -20,13 +20,18 @@ describe("Icon", () => {
       "chevron-down",
       "close",
       "copy",
+      "download",
       "external-link",
       "github",
       "linkedin",
       "mail",
       "moon",
+      "palette",
+      "reset",
       "search",
       "sun",
+      "trash",
+      "upload",
       "warning",
     ]);
   });

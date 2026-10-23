@@ -14,12 +14,18 @@ export const designSystemPages = [
     description:
       "The component library: live examples, props, styling hooks and accessibility notes.",
   },
+  {
+    href: "/design-system/theme-creator",
+    title: "Theme Creator",
+    description:
+      "Build your own theme from the tokens, see it on real components, and use it across the site.",
+  },
 ] as const;
 
 const page = pageMeta(
   "/design-system",
   "Design System",
-  "The design system behind this site: its tokens and its component library.",
+  "The design system behind this site: its tokens, its component library and a theme creator.",
 );
 export const meta = page.meta;
 export const links = page.links;

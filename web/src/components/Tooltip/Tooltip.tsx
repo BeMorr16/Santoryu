@@ -353,11 +353,13 @@ export function TooltipBase({
     };
   }, [open, side]);
 
-  // Escape hides it and goes no further, so a dialog or menu around it stays open (R14.6).
+  // Escape hides it and goes no further, so a dialog or menu around it stays open (R14.6). A
+  // native modal <dialog> closes on Escape's default action, so that's prevented too.
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
+      event.preventDefault();
       event.stopPropagation();
       hide();
     };

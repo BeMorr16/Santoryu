@@ -25,10 +25,12 @@ describe("componentPages (ds-components R6.1)", () => {
     expect(runs).toEqual([...componentGroups]);
   });
 
-  it("puts Forms right after Actions, holding TextField (ds-tokens §11.6)", () => {
+  it("puts Forms right after Actions, holding TextField, Slider and ColorField (ds-tokens §11.6, theme-creator §12, §13)", () => {
     expect(componentGroups.slice(0, 2)).toEqual(["Actions", "Forms"]);
     expect(componentPages.filter(({ group }) => group === "Forms")).toEqual([
       { id: "text-field", name: "TextField", group: "Forms" },
+      { id: "slider", name: "Slider", group: "Forms" },
+      { id: "color-field", name: "ColorField", group: "Forms" },
     ]);
   });
 

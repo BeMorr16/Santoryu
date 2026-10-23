@@ -123,6 +123,7 @@ const expectedSemantic = [
   "color.focus.ring",
   "color.grid.line",
   "color.fill.none",
+  "color.fill.scrim",
   "type.family.body",
   "type.family.heading",
   "type.family.code",
@@ -204,7 +205,12 @@ const expectedSemantic = [
 ];
 
 // Translucent primitives and the only semantic tokens allowed to alias them (decision 0004 amendment).
-const overlayAliases = ["color.surface.glass", "color.grid.line", "color.fill.none"];
+const overlayAliases = [
+  "color.surface.glass",
+  "color.grid.line",
+  "color.fill.none",
+  "color.fill.scrim",
+];
 
 interface SourceToken {
   path: string;
@@ -322,7 +328,7 @@ describe("token source files", () => {
     expect([...semanticPaths].sort()).toEqual([...expectedSemantic].sort());
   });
 
-  it("aliases color.overlay.* primitives only from glass, grid lines and the empty fill", () => {
+  it("aliases color.overlay.* primitives only from glass, grid lines, the empty fill and the scrim", () => {
     const aliasing = allTokens.filter((t) => aliasTarget(t.value)?.startsWith("color.overlay."));
     expect(aliasing.length).toBeGreaterThan(0);
     for (const token of aliasing) {

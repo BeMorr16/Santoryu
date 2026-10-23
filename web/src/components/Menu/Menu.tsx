@@ -336,6 +336,8 @@ export function MenuTrigger({
       onKeyDown?.(event);
       // Escape also closes an open menu while focus is on its trigger, and goes no further.
       if (event.key === "Escape" && menu.open) {
+        // Prevented too: a native modal <dialog> closes on Escape's default action.
+        event.preventDefault();
         event.stopPropagation();
         menu.closeMenu({ focusTrigger: true });
         return;

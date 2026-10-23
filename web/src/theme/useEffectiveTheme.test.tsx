@@ -38,6 +38,21 @@ describe("useEffectiveTheme (R13.2, R13.6, R13.8)", () => {
     expect(consoleError).not.toHaveBeenCalled();
   });
 
+  it("renders no value on the server for a custom choice, then the choice after hydration (theme-creator R9.2)", () => {
+    localStorage.setItem(
+      "custom-themes",
+      JSON.stringify({
+        v: 1,
+        themes: [{ id: "ocean123", name: "Ocean", scheme: "dark", vars: {}, source: {} }],
+      }),
+    );
+    localStorage.setItem("theme", "custom:ocean123");
+    expect(renderToString(<Probe />)).toBe("<p>unknown</p>");
+
+    render(<Probe />);
+    expect(screen.getByRole("paragraph")).toHaveTextContent("custom:ocean123");
+  });
+
   it("shows the OS scheme when there's no choice, and follows it live", () => {
     setSystemTheme("dark");
     render(<Probe />);

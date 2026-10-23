@@ -60,7 +60,16 @@ function specimenKind(token: AnyTokenMeta): string | undefined {
  * (it has no property). Motion, layer, breakpoints, the viewport caps and the measure have none
  * (R7.6, refinement R11.5, R12.14, R18.7).
  */
-export function Specimen({ token, className }: { token: AnyTokenMeta; className?: string }) {
+export function Specimen({
+  token,
+  value: literal,
+  className,
+}: {
+  token: AnyTokenMeta;
+  /** A literal value to preview instead, such as the theme creator's draft value (R8.3). */
+  value?: string | undefined;
+  className?: string;
+}) {
   const kind = specimenKind(token);
   if (kind === undefined) {
     return (
@@ -70,7 +79,7 @@ export function Specimen({ token, className }: { token: AnyTokenMeta; className?
       </>
     );
   }
-  const value = token.tier === "primitive" ? token.css : `var(${token.cssVar})`;
+  const value = literal ?? (token.tier === "primitive" ? token.css : `var(${token.cssVar})`);
   const style = { "--specimen": value } as CSSProperties;
   return (
     <span aria-hidden="true" className={cx(styles.specimen, styles[kind], className)} style={style}>

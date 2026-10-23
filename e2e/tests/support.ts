@@ -3,6 +3,7 @@ import {
   componentPages,
   componentPath,
   componentsPath,
+  themeCreatorPath,
   type ComponentPageId,
 } from "../../web/src/design-system/components/pages.ts";
 import { tokens } from "../../web/src/generated/tokens.ts";
@@ -12,6 +13,7 @@ export const pages = [
   "/",
   "/design-system",
   "/design-system/tokens",
+  themeCreatorPath,
   componentsPath,
   ...componentPages.map(({ id }) => componentPath(id)),
   "/nope",

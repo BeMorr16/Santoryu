@@ -4,6 +4,7 @@ import {
   themeSwitcherName,
   type ThemeSwitcherOwnProps,
 } from "../../../components/ThemeSwitcher/ThemeSwitcher.tsx";
+import { useCustomThemes } from "../../../theme/useCustomThemes.ts";
 import { useEffectiveTheme } from "../../../theme/useEffectiveTheme.ts";
 import { Announced } from "../Announced.tsx";
 import type { KeyboardRow } from "../KeyboardTable.tsx";
@@ -56,8 +57,12 @@ function LooksExample() {
 
 function LabelExample() {
   const theme = useEffectiveTheme();
+  const customThemes = useCustomThemes();
   // The trigger's own name, role and state at rest (refinement R10.5).
-  const announced = { name: themeSwitcherName(theme), role: "menu button, collapsed" };
+  const announced = {
+    name: themeSwitcherName(theme, customThemes),
+    role: "menu button, collapsed",
+  };
   return (
     <>
       <div className={styles.row}>
@@ -83,7 +88,7 @@ export const themeSwitcherShowcase: Showcase = {
   id: "theme-switcher",
   exports: ["ThemeSwitcher"],
   purpose:
-    "Light or Dark for the whole site: it starts from the visitor's OS setting, and a choice is remembered.",
+    "Light, Dark or one of the visitor's own themes for the whole site: it starts from the visitor's OS setting, and a choice is remembered.",
   main: {
     Example: ThemeSwitcherExample,
     source: themeSwitcherExampleSource,
@@ -107,7 +112,8 @@ export const themeSwitcherShowcase: Showcase = {
   tokensNote: "None of its own: it's a Menu with a Button trigger, so it uses their tokens.",
   keyboard: themeSwitcherKeyboard,
   a11y: [
-    'The trigger is named by the theme in effect, e.g. "Theme: Dark", with a matching icon.',
+    'The trigger is named by the theme in effect, e.g. "Theme: Dark" or "Theme: Ocean", with a matching icon: a sun, a moon, or a palette for a custom theme.',
+    'Custom themes made in the theme creator follow Light and Dark, by name, in the same radio group. After a separator, a link item ("Create a theme…", or "Edit themes…" once one exists) opens the theme creator.',
     "Until the visitor chooses, it shows and follows their OS color scheme, live.",
     "The choice applies before first paint on every page, and follows other tabs.",
     "Without JavaScript it's hidden and the system theme applies.",

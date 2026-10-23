@@ -1,66 +1,21 @@
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Button } from "../../components/Button/Button.tsx";
 import { Link } from "../../components/Link/Link.tsx";
 import { listRole } from "../../components/shared/layout.ts";
 import { Typography } from "../../components/Typography/Typography.tsx";
-import type { AnyTokenMeta } from "../../tokens/types.ts";
 import { componentPath } from "../components/pages.ts";
-import { Specimen } from "../Specimen.tsx";
 import type { FlowChain } from "./flow.ts";
 import styles from "./FlowDiagram.module.css";
 import type { Tier } from "./groups.ts";
 import { tierSections } from "./reference-ids.ts";
 import { tierRules } from "./stats.ts";
-import { TokenLink } from "./TokenLink.tsx";
+import { TokenNode } from "./TokenNode.tsx";
 
 const tierNames: Record<Tier, string> = {
   primitive: "Primitive",
   semantic: "Semantic",
   component: "Component",
 };
-
-/** A token path that may break after each dot, so the longest fits a column (§4.3). */
-function BreakablePath({ path }: { path: string }) {
-  return path.split(".").map((part, index) => (
-    // Parts have no identity beyond their position in this one path.
-    <Fragment key={index}>
-      {index > 0 && (
-        <>
-          .<wbr />
-        </>
-      )}
-      {part}
-    </Fragment>
-  ));
-}
-
-/** One token in the chain: a decorative specimen, its path linking to its row, and its value (R2.5). */
-function TokenNode({
-  token,
-  label,
-  children,
-}: {
-  token: AnyTokenMeta;
-  label?: string | undefined;
-  children: ReactNode;
-}) {
-  return (
-    <div className={styles.node}>
-      <Specimen token={token} />
-      {label && (
-        <Typography as="span" variant="label">
-          {label}
-        </Typography>
-      )}
-      <code className={styles.path}>
-        <TokenLink token={token.name}>
-          <BreakablePath path={token.name} />
-        </TokenLink>
-      </code>
-      <span className={styles.value}>{children}</span>
-    </div>
-  );
-}
 
 /** A tier's name (linking to its h2), count and rule, then its nodes (R2.2). */
 function TierColumn({ tier, count, children }: { tier: Tier; count: number; children: ReactNode }) {
@@ -129,7 +84,7 @@ export function FlowDiagram({ chain, counts }: { chain: FlowChain; counts: Recor
             </Typography>
           </p>
           <p className={styles.rule}>Components read only their own tokens.</p>
-          <div className={styles.node}>
+          <div className={styles.siteNode}>
             <Link href={componentPath(page.id)}>{page.name}</Link>
             {/* The real component with the real tokens, so it can't drift; not a control (R2.6). */}
             <span inert aria-hidden="true" className={styles.preview}>

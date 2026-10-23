@@ -20,6 +20,8 @@ export const componentPages = [
   { id: "menu", name: "Menu", group: "Actions" },
   { id: "back-to-top", name: "BackToTop", group: "Actions" },
   { id: "text-field", name: "TextField", group: "Forms" },
+  { id: "slider", name: "Slider", group: "Forms" },
+  { id: "color-field", name: "ColorField", group: "Forms" },
   { id: "typography", name: "Typography", group: "Content" },
   { id: "code-block", name: "CodeBlock", group: "Content" },
   { id: "table", name: "Table", group: "Content" },
@@ -31,6 +33,7 @@ export const componentPages = [
   { id: "card", name: "Card", group: "Layout" },
   { id: "accordion", name: "Accordion", group: "Disclosure" },
   { id: "tooltip", name: "Tooltip", group: "Disclosure" },
+  { id: "dialog", name: "Dialog", group: "Disclosure" },
   { id: "icon", name: "Icon", group: "Utilities" },
   { id: "visually-hidden", name: "VisuallyHidden", group: "Utilities" },
   { id: "theme-switcher", name: "ThemeSwitcher", group: "Utilities" },
@@ -43,6 +46,7 @@ export const designSystemPath = "/design-system";
 export const tokensPath = `${designSystemPath}/tokens`;
 export const componentsPath = `${designSystemPath}/components`;
 export const componentPath = (id: ComponentPageId) => `${componentsPath}/${id}`;
+export const themeCreatorPath = `${designSystemPath}/theme-creator`;
 
 /** The page with this id. */
 export function componentPage(id: ComponentPageId): ComponentPage {

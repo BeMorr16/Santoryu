@@ -1,0 +1,94 @@
+{
+  "component": {
+    "color-field": {
+      "gap": {
+        "$value": "{space.stack.sm}",
+        "$type": "dimension",
+        "$description": "Space between the legend, hint, controls and swatches, and between swatches."
+      },
+      "swatch-size": {
+        "$value": "{size.icon.lg}",
+        "$type": "dimension",
+        "$description": "Swatch button size: at least 24px (WCAG 2.5.8)."
+      },
+      "swatch-border": {
+        "$value": "{color.border.strong}",
+        "$type": "color",
+        "$description": "Swatch outline, so a swatch close to the surface still has a 3:1 boundary.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "swatch-radius": {
+        "$value": "{radius.control}",
+        "$type": "dimension",
+        "$description": "Swatch corner radius."
+      },
+      "picker-size": {
+        "$value": "{size.control.sm}",
+        "$type": "dimension",
+        "$description": "The color picker's size: the height of the small hex field beside it."
+      },
+      "picker-border": {
+        "$value": "{color.border.strong}",
+        "$type": "color",
+        "$description": "Color picker outline.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "picker-radius": {
+        "$value": "{radius.control}",
+        "$type": "dimension",
+        "$description": "Color picker corner radius."
+      },
+      "legend-text": {
+        "$value": "{color.text.default}",
+        "$type": "color",
+        "$description": "The legend.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

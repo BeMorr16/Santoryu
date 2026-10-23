@@ -1,0 +1,373 @@
+/* The theme creator (theme-creator design §8). Every value is a semantic token (R1.5). */
+.creator {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-lg);
+  min-inline-size: 0;
+}
+
+/* ---- Theme bar (design §8.3) ---- */
+
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+  padding: var(--space-inset-md);
+  border: var(--effect-border-width) solid var(--color-border-default);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-raised);
+}
+
+.barRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-stack-sm) var(--space-inline-md);
+}
+
+.name {
+  flex: 1 1 var(--size-column-md);
+}
+
+.barActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-stack-xs) var(--space-inline-sm);
+}
+
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-inline-xs);
+}
+
+.status,
+.notice {
+  margin: 0;
+}
+
+.status {
+  font-weight: var(--type-weight-strong);
+}
+
+.importErrors {
+  padding: var(--space-inset-sm);
+  border: var(--effect-border-width) solid var(--color-error-border);
+  border-radius: var(--radius-control);
+  background-color: var(--color-error-background);
+  color: var(--color-error-text);
+}
+
+.importErrors p,
+.importErrors ul {
+  margin: 0;
+}
+
+/* ---- Workspace: the editor, then the preview and chain (design §8.5, R7.3, R7.4) ---- */
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-lg);
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-xl);
+  min-inline-size: 0;
+}
+
+/*
+ * Below 48em: first on screen, though after the editor in reading order (R15.1), and sticky
+ * under the site header as a "Preview" bar whose panel opens to half the viewport (R7.4).
+ */
+.aside {
+  position: sticky;
+  inset-block-start: var(--shell-header-block-size, 0px);
+  z-index: var(--layer-raised);
+  order: -1;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  border-block-end: var(--effect-border-width) solid var(--color-border-default);
+  background-color: var(--color-surface-base);
+}
+
+/*
+ * Below 48em, and unless the screen is short: focused controls and in-page targets stay clear of
+ * the sticky bar, and of its panel while it's open, as well as of the site header (WCAG 2.4.11).
+ */
+@media not ((min-width: 48em) or (max-height: 30em)) {
+  :global(:root):has(.aside) {
+    scroll-padding-block-start: calc(
+      var(--shell-header-block-size, 0px) + var(--size-control-sm) + 2 * var(--space-stack-xs) +
+        var(--effect-border-width) + var(--effect-focus-ring-width) +
+        var(--effect-focus-ring-offset)
+    );
+  }
+
+  :global(:root):has(.asidePanel:not([hidden])) {
+    scroll-padding-block-start: calc(
+      var(--shell-header-block-size, 0px) + var(--size-control-sm) + 2 * var(--space-stack-xs) +
+        var(--effect-border-width) + 50dvh + var(--effect-focus-ring-width) +
+        var(--effect-focus-ring-offset)
+    );
+  }
+}
+
+/* Short screens get the whole viewport, as the header does (refinement R11.4); size.breakpoint.sm. */
+@media (max-height: 30em) {
+  .aside {
+    position: static;
+  }
+}
+
+.asideBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-inline-sm);
+  padding-block: var(--space-stack-xs);
+}
+
+.asideTitle {
+  margin: 0;
+  font-weight: var(--type-weight-strong);
+}
+
+.asidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-lg);
+  max-block-size: 50dvh;
+  padding-block-end: var(--space-stack-md);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.asideHeading {
+  margin: 0;
+}
+
+/* From 48em: controls on the left; preview and chain on the right, sticky, scrolling inside (R7.3). */
+@media (min-width: 48em) {
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-layout-sm);
+  }
+
+  .aside {
+    order: 0;
+    inset-block-start: calc(var(--shell-header-block-size, 0px) + var(--space-stack-md));
+    max-block-size: calc(100dvh - var(--shell-header-block-size, 0px) - 2 * var(--space-stack-md));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-block-end: none;
+    background-color: transparent;
+  }
+
+  .asideBar {
+    display: none;
+  }
+
+  /* Always shown here, whatever the narrow toggle says. */
+  .asidePanel,
+  .asidePanel[hidden] {
+    display: flex;
+    max-block-size: none;
+    padding-block-end: 0;
+  }
+}
+
+/* ---- Sections, key controls and rows (design §8.4) ---- */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+}
+
+.section h2 {
+  margin: 0;
+}
+
+.keys {
+  display: grid;
+  gap: var(--space-stack-lg);
+}
+
+.keyControl {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-stack-xs);
+}
+
+/* Fields fill the column; buttons keep their size. */
+.keyControl > :first-child {
+  align-self: stretch;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-stack-xs);
+  padding-block-end: var(--space-stack-md);
+  border-block-end: var(--effect-border-width) solid var(--color-border-subtle);
+}
+
+.row > :not(.badge, .reset) {
+  align-self: stretch;
+}
+
+.colorControl {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-stack-xs);
+}
+
+.colorControl > :first-child {
+  align-self: stretch;
+}
+
+.labelled {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-stack-xs) var(--space-inline-sm);
+}
+
+.path {
+  font-family: var(--type-family-code);
+  font-size: var(--type-size-small);
+  overflow-wrap: anywhere;
+}
+
+.value {
+  color: var(--color-text-muted);
+  font-size: var(--type-size-small);
+}
+
+.componentGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+}
+
+.componentGroup + .componentGroup {
+  margin-block-start: var(--space-stack-lg);
+}
+
+.componentGroup h4 {
+  margin: 0;
+}
+
+/* ---- Preview (design §8.5) ---- */
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+}
+
+/* The draft's own page: its background, text and type, scoped to this box (R7.1). */
+.previewPage {
+  padding: var(--space-inset-md);
+  border: var(--effect-border-width) solid var(--color-border-default);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-base);
+  color: var(--color-text-default);
+  font-family: var(--type-family-body);
+}
+
+.statuses {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.statuses li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-inline-xs);
+}
+
+/* ---- Chain panel (design §8.6) ---- */
+
+.chainPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+}
+
+.chainPanel h2 {
+  margin: 0;
+}
+
+.chain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chainList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---- Dialogs (design §8.7) ---- */
+
+.failures,
+.savedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.failures li,
+.savedList li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-stack-xs) var(--space-inline-sm);
+}
+
+.failures code {
+  overflow-wrap: anywhere;
+}
+
+.pairing {
+  display: block;
+}
+
+.renameForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+}

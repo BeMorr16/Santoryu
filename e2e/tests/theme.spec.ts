@@ -44,12 +44,15 @@ test.describe("first paint with no choice (R13.2)", () => {
       await page.goto("/", { waitUntil: "domcontentloaded" });
 
       const icons = page.getByRole("banner").locator("button svg");
-      await expect(icons).toHaveCount(3);
+      await expect(icons).toHaveCount(4);
       const visible = await icons.evaluateAll((svgs) =>
         svgs.map((svg) => getComputedStyle(svg).display !== "none"),
       );
-      // Light icon first, then dark, then the chevron, shown in both schemes (ThemeSwitcher.tsx).
-      expect(visible).toEqual(shown === "Sun" ? [true, false, true] : [false, true, true]);
+      // Light icon first, then dark, then a custom theme's palette, then the chevron, shown in
+      // both schemes (ThemeSwitcher.tsx).
+      expect(visible).toEqual(
+        shown === "Sun" ? [true, false, false, true] : [false, true, false, true],
+      );
     });
   }
 });

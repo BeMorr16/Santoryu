@@ -72,6 +72,10 @@ export interface ComponentTokenMeta extends TokenMetaBase {
 
 export type TokenMeta = SemanticTokenMeta | ComponentTokenMeta;
 
+/** A JSON value, as DTCG writes a token's `$value`. */
+export type DtcgValue =
+  string | number | boolean | null | readonly DtcgValue[] | { readonly [key: string]: DtcgValue };
+
 /** A primitive: a literal value, documented but never emitted as a custom property (0004, 0011). */
 export interface PrimitiveTokenMeta {
   tier: "primitive";
@@ -84,6 +88,8 @@ export interface PrimitiveTokenMeta {
   description: string;
   /** The resolved CSS value, as a semantic token aliasing it would get. */
   css: string;
+  /** The source `$value`, exactly as in `web/tokens/`: what a DTCG export writes (theme-creator §9.1). */
+  dtcg: DtcgValue;
   srgb?: Srgb;
   alpha?: number;
   /** Semantic tokens aliasing it in any theme or under reduced motion, in metadata order. */

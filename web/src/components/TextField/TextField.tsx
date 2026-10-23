@@ -26,7 +26,7 @@ export interface TextFieldOwnProps {
   /** Error message: sets aria-invalid and is referenced by aria-describedby after the hint. */
   error?: ReactNode;
   /** Default "text". */
-  type?: "text" | "search" | "email" | "url" | "tel" | undefined;
+  type?: "text" | "search" | "email" | "url" | "tel" | "number" | undefined;
   /** Control height, matching Button. Default "md". */
   size?: "sm" | "md" | undefined;
   /** A decorative icon at the start of the field. A search field gets `search` unless this names another. */

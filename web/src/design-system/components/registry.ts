@@ -6,12 +6,15 @@ import { badgeShowcase } from "./showcases/badge.tsx";
 import { buttonShowcase } from "./showcases/button.tsx";
 import { cardShowcase } from "./showcases/card.tsx";
 import { codeBlockShowcase } from "./showcases/code-block.tsx";
+import { colorFieldShowcase } from "./showcases/color-field.tsx";
+import { dialogShowcase } from "./showcases/dialog.tsx";
 import { figureShowcase } from "./showcases/figure.tsx";
 import { gridShowcase } from "./showcases/grid.tsx";
 import { iconShowcase } from "./showcases/icon.tsx";
 import { linkShowcase } from "./showcases/link.tsx";
 import { menuShowcase } from "./showcases/menu.tsx";
 import { separatorShowcase } from "./showcases/separator.tsx";
+import { sliderShowcase } from "./showcases/slider.tsx";
 import { stackShowcase } from "./showcases/stack.tsx";
 import { tableShowcase } from "./showcases/table.tsx";
 import { textFieldShowcase } from "./showcases/text-field.tsx";
@@ -30,6 +33,8 @@ export const showcases = {
   menu: menuShowcase,
   "back-to-top": backToTopShowcase,
   "text-field": textFieldShowcase,
+  slider: sliderShowcase,
+  "color-field": colorFieldShowcase,
   typography: typographyShowcase,
   "code-block": codeBlockShowcase,
   table: tableShowcase,
@@ -41,6 +46,7 @@ export const showcases = {
   card: cardShowcase,
   accordion: accordionShowcase,
   tooltip: tooltipShowcase,
+  dialog: dialogShowcase,
   icon: iconShowcase,
   "visually-hidden": visuallyHiddenShowcase,
   "theme-switcher": themeSwitcherShowcase,

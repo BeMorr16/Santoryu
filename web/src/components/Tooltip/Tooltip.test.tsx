@@ -411,6 +411,23 @@ describe("Tooltip: hiding (refinement R14.6)", () => {
     expect(outer).toHaveBeenCalledTimes(1);
   });
 
+  it("prevents the Escape that hides it, so a native modal dialog around it stays open", async () => {
+    const user = setup();
+    render(<Fixture />);
+    await user.tab();
+    await user.tab();
+    const trigger = screen.getByRole("button", { name: "Save draft" });
+    expect(popupOf(trigger)).toBeVisible();
+    const escape = new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
+
+    act(() => {
+      trigger.dispatchEvent(escape);
+    });
+
+    expect(escape.defaultPrevented).toBe(true);
+    expect(popupOf(trigger)).not.toBeVisible();
+  });
+
   it("hides on a pointer press on the trigger", async () => {
     const user = setup();
     render(<Fixture />);

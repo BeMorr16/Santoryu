@@ -19,11 +19,17 @@ function fields(token: AnyTokenMeta): string[] {
   return [...common, token.aliases, token.component, page?.name ?? ""];
 }
 
-/** One entry per token. The data is static, so callers build it once at module scope. */
-export function searchIndex(tokens: readonly AnyTokenMeta[]): readonly SearchEntry[] {
+/**
+ * One entry per token. The data is static, so callers build it once at module scope. `groupOf`
+ * names the group a row opens in: the tokens page's tier and category by default.
+ */
+export function searchIndex(
+  tokens: readonly AnyTokenMeta[],
+  groupOf: (token: AnyTokenMeta) => string = (token) => groupId(token.tier, token.category),
+): readonly SearchEntry[] {
   return tokens.map((token) => ({
     rowId: tokenRowId(token.name),
-    groupId: groupId(token.tier, token.category),
+    groupId: groupOf(token),
     haystack: fields(token).join("\n").toLowerCase(),
   }));
 }

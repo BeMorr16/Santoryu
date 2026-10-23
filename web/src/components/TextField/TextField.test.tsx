@@ -132,6 +132,17 @@ describe("TextField (ds-tokens R10)", () => {
     },
   );
 
+  it("supports type=number, passing min, max and step to the input (theme-creator R6.1)", () => {
+    render(<TextField label="Radius" hint="px" type="number" min={0} max={48} step={1} />);
+
+    const input = screen.getByRole("spinbutton", { name: "Radius" });
+    expect(input).toHaveAttribute("type", "number");
+    expect(input).toHaveAttribute("min", "0");
+    expect(input).toHaveAttribute("max", "48");
+    expect(input).toHaveAttribute("step", "1");
+    expect(input).toHaveAccessibleDescription("px");
+  });
+
   it("works uncontrolled, passing native props and the ref to the input (R10.3)", async () => {
     const user = userEvent.setup();
     const ref = createRef<HTMLInputElement>();

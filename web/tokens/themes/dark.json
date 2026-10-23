@@ -568,6 +568,12 @@
         "$value": "{color.overlay.cyan-300-10}",
         "$description": "Faint blueprint grid lines on the page backdrop. Decorative; not contrast-checked."
       }
+    },
+    "fill": {
+      "scrim": {
+        "$value": "{color.overlay.gray-950-60}",
+        "$description": "Dims the page behind a modal dialog. Text never sits on it (the dialog surface does), so it has no contrast pairing."
+      }
     }
   },
   "effect": {

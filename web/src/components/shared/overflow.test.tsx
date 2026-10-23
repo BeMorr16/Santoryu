@@ -5,10 +5,10 @@ import { describe, expect, it, vi } from "vitest";
 import { resize } from "../../../test/resize-observer.ts";
 import { useOverflowFocus } from "./overflow.ts";
 
-function Scroller({ enabled }: { enabled?: boolean }) {
+function Scroller({ enabled, axis }: { enabled?: boolean; axis?: "inline" | "block" }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const focusable = useOverflowFocus(scrollerRef, contentRef, enabled);
+  const focusable = useOverflowFocus(scrollerRef, contentRef, enabled, axis);
   return (
     <div ref={scrollerRef} {...(focusable && { tabIndex: 0 })}>
       <div ref={contentRef} />
@@ -52,6 +52,22 @@ describe("useOverflowFocus (refinement R15.5, R16.6)", () => {
     setOverflow(scroller, false);
     expect(scroller).not.toHaveAttribute("tabindex");
     setOverflow(scroller, true);
+    expect(scroller).toHaveAttribute("tabindex", "0");
+  });
+
+  it("with axis block, follows vertical overflow instead (theme-creator design §11.2)", () => {
+    const { container } = render(<Scroller axis="block" />);
+    const { scroller } = parts(container);
+    Object.defineProperty(scroller, "clientHeight", { configurable: true, value: 300 });
+    Object.defineProperty(scroller, "scrollHeight", { configurable: true, value: 300 });
+
+    setOverflow(scroller, true);
+    expect(scroller).not.toHaveAttribute("tabindex");
+
+    Object.defineProperty(scroller, "scrollHeight", { configurable: true, value: 600 });
+    act(() => {
+      resize(scroller, 100);
+    });
     expect(scroller).toHaveAttribute("tabindex", "0");
   });
 

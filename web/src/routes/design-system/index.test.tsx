@@ -17,15 +17,16 @@ describe("design system route (R1.3)", () => {
     expect(screen.getByText(/design system/i, { selector: "p" })).toBeVisible();
   });
 
-  it("links Tokens and Components, each with a one-line description", async () => {
+  it("links Tokens, Components and the Theme Creator, each with a one-line description (theme-creator R1.3)", async () => {
     renderPage();
 
     const list = await screen.findByRole("list");
     const items = within(list).getAllByRole("listitem");
-    expect(items).toHaveLength(2);
+    expect(items).toHaveLength(3);
     expect(designSystemPages.map((page) => [page.title, page.href])).toEqual([
       ["Tokens", "/design-system/tokens"],
       ["Components", "/design-system/components"],
+      ["Theme Creator", "/design-system/theme-creator"],
     ]);
     for (const [index, page] of designSystemPages.entries()) {
       const item = items[index];

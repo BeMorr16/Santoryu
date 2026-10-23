@@ -11,6 +11,7 @@ const tokens: AnyTokenMeta[] = [
     type: "color",
     description: "Brand blue.",
     css: "#185480",
+    dtcg: { colorSpace: "srgb", components: [0.0941, 0.3294, 0.502], alpha: 1, hex: "#185480" },
     usedBy: ["color.action.background"],
   },
   {

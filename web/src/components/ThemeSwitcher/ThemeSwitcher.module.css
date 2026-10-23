@@ -7,7 +7,8 @@
  * The icon for the theme in effect, from the same conditions as the generated theme CSS: a
  * choice on <html>, or else the OS scheme.
  */
-.darkIcon {
+.darkIcon,
+.customIcon {
   display: none;
 }
 
@@ -26,6 +27,16 @@
 }
 
 :global(:root[data-theme="dark"]) .darkIcon {
+  display: inline;
+}
+
+/* A custom theme shows the palette, whatever its scheme (theme-creator design §4.3). */
+:global(:root[data-custom-theme]) .lightIcon,
+:global(:root[data-custom-theme]) .darkIcon {
+  display: none;
+}
+
+:global(:root[data-custom-theme]) .customIcon {
   display: inline;
 }
 

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { PreviewPanel } from "./PreviewPanel.tsx";
@@ -69,5 +69,67 @@ describe("PreviewPanel (R15.6, R15.7)", () => {
     await choose(user, "Button", "Dark");
 
     expect(localStorage.length).toBe(0);
+  });
+
+  describe("custom themes (theme-creator R9.7)", () => {
+    const ocean = {
+      id: "ocean123",
+      name: "Ocean",
+      scheme: "dark",
+      vars: { "--color-action-background": "#7a5618" },
+      source: {},
+    };
+    const storeThemes = (...themes: unknown[]) => {
+      localStorage.setItem("custom-themes", JSON.stringify({ v: 1, themes }));
+      window.dispatchEvent(new StorageEvent("storage", { key: "custom-themes" }));
+    };
+
+    it("lists them after Site, Light and Dark, and applies one to its panel only", async () => {
+      const user = userEvent.setup();
+      localStorage.clear();
+      storeThemes(ocean);
+      const panels = renderPanels();
+
+      await user.click(
+        screen.getByRole("button", { name: "Theme: Site (Button examples preview)" }),
+      );
+      expect(screen.getAllByRole("menuitemradio").map((item) => item.textContent)).toEqual([
+        "Site",
+        "Light",
+        "Dark",
+        "Ocean",
+      ]);
+      await user.click(screen.getByRole("menuitemradio", { name: "Ocean" }));
+
+      expect(panels.button).toHaveAttribute("data-theme", "dark");
+      expect(panels.button.style.getPropertyValue("--color-action-background")).toBe("#7a5618");
+      expect(panels.link).not.toHaveAttribute("data-theme");
+      expect(document.documentElement).not.toHaveAttribute("data-theme");
+      expect(document.documentElement).not.toHaveAttribute("data-custom-theme");
+      expect(document.documentElement.style.getPropertyValue("--color-action-background")).toBe("");
+      expect(
+        screen.getByRole("button", { name: "Theme: Ocean (Button examples preview)" }),
+      ).toBeInTheDocument();
+      localStorage.clear();
+    });
+
+    it("falls back to Site when the chosen theme is deleted", async () => {
+      const user = userEvent.setup();
+      localStorage.clear();
+      storeThemes(ocean);
+      const panels = renderPanels();
+      await choose(user, "Button", "Ocean");
+
+      act(() => {
+        storeThemes();
+      });
+
+      expect(panels.button).not.toHaveAttribute("data-theme");
+      expect(panels.button.style.getPropertyValue("--color-action-background")).toBe("");
+      expect(
+        screen.getByRole("button", { name: "Theme: Site (Button examples preview)" }),
+      ).toBeInTheDocument();
+      localStorage.clear();
+    });
   });
 });

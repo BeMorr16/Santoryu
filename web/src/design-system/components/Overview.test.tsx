@@ -34,7 +34,7 @@ describe("Overview (ds-components R3)", () => {
         exact: false,
       }),
     ).toBeInTheDocument();
-    expect(componentPages).toHaveLength(19);
+    expect(componentPages).toHaveLength(22);
   });
 
   it("lists its h2 sections in On this page, linking their ids (R3.1)", () => {

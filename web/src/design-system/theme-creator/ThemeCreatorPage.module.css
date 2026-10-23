@@ -1,0 +1,21 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-lg);
+  min-inline-size: 0;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+}
+
+.intro h1 {
+  margin: 0;
+}
+
+/* The pre-paint script marks the page as having JavaScript, so the note never flashes (R1.4). */
+:global(:root[data-js]) .noScript {
+  display: none;
+}

@@ -295,10 +295,46 @@ describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
         type: "color",
         description: "White.",
         css: "#ffffff",
+        dtcg: { colorSpace: "srgb", components: [1, 1, 1], alpha: 1, hex: "#ffffff" },
         srgb: [1, 1, 1],
         alpha: 1,
         usedBy: ["color.text.default"],
       });
+    });
+
+    it("carries each primitive's source $value as dtcg (theme-creator §9.1)", async () => {
+      const shadow = {
+        color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.08, hex: "#000000" },
+        offsetX: { value: 0, unit: "px" },
+        offsetY: { value: 1, unit: "px" },
+        blur: { value: 2, unit: "px" },
+        spread: { value: 0, unit: "px" },
+      };
+      const { primitives } = await build({
+        ...motion,
+        "space.json": {
+          space: {
+            $type: "dimension",
+            4: { $value: { value: 1, unit: "rem" }, $description: "1rem." },
+          },
+        },
+        "curve.json": {
+          motion: {
+            curve: { $type: "cubicBezier", out: { $value: [0, 0, 0.2, 1], $description: "Out." } },
+          },
+        },
+        "effect.json": {
+          effect: { shadow: { $type: "shadow", sm: { $value: shadow, $description: "Small." } } },
+        },
+      });
+      const dtcg = (name: string) => primitives.find((p) => p.name === name)?.dtcg;
+
+      expect(dtcg("color.gray.0")).toEqual(color("#000000"));
+      expect(dtcg("space.4")).toEqual({ value: 1, unit: "rem" });
+      expect(dtcg("motion.time.150")).toEqual({ value: 150, unit: "ms" });
+      expect(dtcg("motion.curve.out")).toEqual([0, 0, 0.2, 1]);
+      expect(dtcg("effect.shadow.sm")).toEqual(shadow);
+      expect(dtcg("type.letter-spacing.16")).toBe(0.16);
     });
 
     it("applies the CSS value transforms", async () => {
@@ -335,6 +371,24 @@ describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
     });
   });
 
+  it("writes token-names.ts: every custom property tokens.css declares (theme-creator §3.4)", async () => {
+    const dirs = await fixture({
+      "color.json": twoGrays,
+      "type.json": typeTokens,
+      "components/button.json": buttonTokens,
+    });
+    await buildTokens(dirs);
+    const css = await readFile(join(dirs.outDir, "tokens.css"), "utf8");
+    const { tokenNames } = (await import(join(dirs.outDir, "token-names.ts"))) as {
+      tokenNames: readonly string[];
+    };
+
+    const declared = new Set([...css.matchAll(/^\s*(--[a-z0-9-]+):/gm)].map((match) => match[1]));
+    expect(new Set(tokenNames)).toEqual(declared);
+    expect(tokenNames).toHaveLength(declared.size);
+    expect(tokenNames).toContain("--component-button-text");
+  });
+
   it("emits the blocks of §4.4, in order", async () => {
     const { css } = await build();
 
@@ -355,6 +409,38 @@ describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
     const light = block(css, '[data-theme="light"]');
     expect(light).toContain("color-scheme: light;");
     expect(light).toContain("--color-text-default: #000000;");
+  });
+
+  it("re-declares unthemed type, space, radius and border width in each scoped theme, but not motion (decision 0012)", async () => {
+    const { css } = await build({
+      "space.json": {
+        space: {
+          $type: "dimension",
+          4: { $value: { value: 1, unit: "rem" }, $description: "1rem." },
+          inset: { md: { $value: "{space.4}", $description: "Inset." } },
+        },
+      },
+      "motion.json": {
+        motion: {
+          time: {
+            $type: "duration",
+            150: { $value: { value: 150, unit: "ms" }, $description: "Fast." },
+          },
+          duration: {
+            $type: "duration",
+            fast: { $value: "{motion.time.150}", $description: "Fast." },
+          },
+        },
+      },
+    });
+
+    for (const selector of ['[data-theme="dark"]', '[data-theme="light"]']) {
+      const scoped = block(css, selector);
+      expect(scoped).toContain("--space-inset-md: 1rem;");
+      expect(scoped).toContain("--type-leading-heading: 1.2;");
+      expect(scoped).not.toContain("--motion-duration-fast");
+    }
+    expect(block(css, ':root:not([data-theme="light"])')).not.toContain("--space-inset-md");
   });
 
   it("emits component tokens as var() references, only in the `:root, [data-theme]` block", async () => {
