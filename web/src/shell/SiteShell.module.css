@@ -17,48 +17,6 @@
   inset-inline-start: var(--space-layout-xs);
 }
 
-/* Sticky glass header: blurred translucent surface over the grid backdrop (decision 0006). */
-.header {
-  position: sticky;
-  inset-block-start: 0;
-  /* Below revealed overlays such as the skip link (layer.overlay). */
-  z-index: var(--layer-sticky);
-  padding: var(--space-inset-md) var(--space-layout-xs);
-  border-block-end: var(--effect-border-width) solid var(--color-border-subtle);
-  background-color: var(--color-surface-glass);
-  backdrop-filter: blur(var(--effect-backdrop-glass));
-}
-
-/* Short screens get the whole viewport for content (refinement R11.4); size.breakpoint.sm. */
-@media (max-height: 30em) {
-  .header {
-    position: static;
-  }
-}
-
-/* Progressive enhancement: as far as known, only Chromium supports this query (design §4.6). */
-@media (prefers-reduced-transparency: reduce) {
-  .header {
-    background-color: var(--color-surface-raised);
-    backdrop-filter: none;
-  }
-}
-
-/* Text-colored, also on hover, through Link's component tokens (refinement R11.8). */
-.siteName {
-  --component-link-color: var(--color-text-default);
-  --component-link-color-hover: var(--color-text-default);
-
-  padding-block: var(--space-inset-sm);
-  font-weight: var(--type-weight-heading);
-}
-
-.navLink {
-  display: inline-block;
-  padding: var(--space-inset-sm);
-  border-radius: var(--radius-control);
-}
-
 /* The middle row: main alone, or a route's aside (ds-components design §4) above it, then beside it. */
 .body {
   display: grid;

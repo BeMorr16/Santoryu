@@ -65,9 +65,10 @@ test.describe("Design System hub (ds-hub R5.3)", () => {
     await page.goto(designSystemPath);
 
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    await expect(main(page).locator('[inert] [data-theme="light"]')).toHaveCSS(
-      "background-color",
-      tokenColor("color.surface.base", "light"),
-    );
+    // High contrast is light-based too (site-refresh amendment), so the Light panel is picked by name.
+    const light = main(page)
+      .locator('[inert] [data-theme="light"]')
+      .filter({ hasText: /^Light/ });
+    await expect(light).toHaveCSS("background-color", tokenColor("color.surface.base", "light"));
   });
 });

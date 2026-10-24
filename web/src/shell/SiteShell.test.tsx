@@ -45,13 +45,19 @@ function renderAt(path: string, { strict = false } = {}) {
             <>
               <h1>Home page</h1>
               <Link to="/plain">Plain page</Link>
+              <Link to="/design-system">Go to Design System</Link>
             </>
           ),
           meta: () => [{ title: "Home title" }],
         },
         {
           path: "design-system",
-          Component: () => <h1>Design System page</h1>,
+          Component: () => (
+            <>
+              <h1>Design System page</h1>
+              <Link to="/design-system">This page</Link>
+            </>
+          ),
           meta: () => [{ title: "Design System title" }],
         },
         { path: "design-system/tokens", Component: () => <h1>Tokens page</h1> },
@@ -80,70 +86,35 @@ function renderAt(path: string, { strict = false } = {}) {
 }
 
 describe("SiteShell", () => {
-  it("renders exactly one of each landmark, with the nav named Primary", () => {
+  it("renders exactly one of each landmark, with the site header as the banner", () => {
     renderAt("/");
 
     expect(screen.getAllByRole("banner")).toHaveLength(1);
-    expect(screen.getAllByRole("navigation")).toHaveLength(1);
-    expect(screen.getByRole("navigation", { name: "Primary" })).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("banner")).getByRole("link", { name: "BM, Ben Morrison, home" }),
+    ).toBeInTheDocument();
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
   });
 
-  it("puts the theme switcher in the header (R13.1)", () => {
+  it("lays out main as a vertical Stack", () => {
     renderAt("/");
 
-    const banner = screen.getByRole("banner");
-    expect(within(banner).getByRole("button", { name: "Theme: Light" })).toHaveAttribute(
-      "aria-haspopup",
-      "menu",
-    );
-  });
-
-  it("puts the site name link to / in the header", () => {
-    renderAt("/design-system");
-
-    const banner = screen.getByRole("banner");
-    expect(within(banner).getByRole("link", { name: "Ben" })).toHaveAttribute("href", "/");
-  });
-
-  it("never marks the site name as current, while Home marks the home page (refinement R11.8)", () => {
-    renderAt("/");
-
-    const banner = screen.getByRole("banner");
-    expect(within(banner).getByRole("link", { name: "Ben" })).toHaveAttribute(
-      "aria-current",
-      "false",
-    );
-    expect(within(banner).getByRole("link", { name: "Home" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
-  });
-
-  it("lays out the header and the nav list as horizontal Stacks (refinement R11.8)", () => {
-    renderAt("/");
-
-    const horizontal = [
-      stackStyles.stack ?? "",
-      stackStyles.horizontal ?? "",
-      stackStyles.wrap ?? "",
-    ];
-    expect(screen.getByRole("banner")).toHaveClass(...horizontal);
-    const nav = screen.getByRole("navigation", { name: "Primary" });
-    expect(within(nav).getByRole("list")).toHaveClass(...horizontal);
     expect(screen.getByRole("main")).toHaveClass(
       stackStyles.stack ?? "",
       stackStyles.vertical ?? "",
     );
   });
 
-  it("sets the measured header height on the root, and removes it on unmount (refinement R11.3)", () => {
+  it("sets the space the bar takes, its measured height plus its top inset, on the root, and removes it on unmount (refinement R11.3, site-refresh design §4.6)", () => {
     const { unmount } = renderAt("/");
     const root = document.documentElement;
 
-    resize(screen.getByRole("banner"), 120);
-    expect(root.style.getPropertyValue("--shell-header-block-size")).toBe("120px");
+    // jsdom loads no CSS modules, so the bar's top margin (its inset) is set here.
+    const banner = screen.getByRole("banner");
+    banner.style.marginTop = "8px";
+    resize(banner, 120);
+    expect(root.style.getPropertyValue("--shell-header-block-size")).toBe("128px");
 
     unmount();
     expect(root.style.getPropertyValue("--shell-header-block-size")).toBe("");
@@ -174,52 +145,13 @@ describe("SiteShell", () => {
     expect(screen.getByRole("main")).toHaveFocus();
   });
 
-  it("links Home and Design System in the primary nav (R1.6)", () => {
-    renderAt("/");
-
-    const nav = screen.getByRole("navigation", { name: "Primary" });
-    expect(within(nav).getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
-    expect(within(nav).getByRole("link", { name: "Design System" })).toHaveAttribute(
-      "href",
-      "/design-system",
-    );
-  });
-
-  it.each([
-    ["/", "Home", "Design System"],
-    ["/design-system", "Design System", "Home"],
-  ])("on %s marks only %s as the current page", (path, current, other) => {
-    renderAt(path);
-
-    const nav = screen.getByRole("navigation", { name: "Primary" });
-    expect(within(nav).getByRole("link", { name: current })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
-    expect(within(nav).getByRole("link", { name: other })).not.toHaveAttribute("aria-current");
-  });
-
-  it.each(["/design-system/tokens", "/design-system/components"])(
-    "on %s marks Design System as current with aria-current=true, and not Home (R1.6)",
-    async (path) => {
-      renderAt(path);
-
-      const nav = await screen.findByRole("navigation", { name: "Primary" });
-      expect(within(nav).getByRole("link", { name: "Design System" })).toHaveAttribute(
-        "aria-current",
-        "true",
-      );
-      expect(within(nav).getByRole("link", { name: "Home" })).not.toHaveAttribute("aria-current");
-    },
-  );
-
   it("navigates client-side to Design System, updating content and title, and focuses its h1 (refinement R11.1)", async () => {
     const user = userEvent.setup();
     renderAt("/");
     const main = screen.getByRole("main");
     expect(await screen.findByRole("heading", { level: 1, name: "Home page" })).toBeVisible();
 
-    await user.click(screen.getByRole("link", { name: "Design System" }));
+    await user.click(screen.getByRole("link", { name: "Go to Design System" }));
 
     const heading = await screen.findByRole("heading", { level: 1, name: "Design System page" });
     expect(heading).toBeVisible();
@@ -230,10 +162,10 @@ describe("SiteShell", () => {
     expect(document.title).toBe("Design System title");
   });
 
-  it("focuses the new page's h1 after keyboard navigation from the nav (refinement R11.1)", async () => {
+  it("focuses the new page's h1 after keyboard navigation from a link (refinement R11.1)", async () => {
     const user = userEvent.setup();
     renderAt("/");
-    const designSystem = screen.getByRole("link", { name: "Design System" });
+    const designSystem = screen.getByRole("link", { name: "Go to Design System" });
 
     designSystem.focus();
     await user.keyboard("{Enter}");
@@ -256,11 +188,11 @@ describe("SiteShell", () => {
   it("leaves focus on the link when activating the current page's link", async () => {
     const user = userEvent.setup();
     renderAt("/design-system");
-    const designSystem = await screen.findByRole("link", { name: "Design System" });
+    const thisPage = await screen.findByRole("link", { name: "This page" });
 
-    await user.click(designSystem);
+    await user.click(thisPage);
 
-    expect(designSystem).toHaveFocus();
+    expect(thisPage).toHaveFocus();
   });
 
   it("renders no aside when the route's handle has none", () => {

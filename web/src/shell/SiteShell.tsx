@@ -1,14 +1,13 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useLocation } from "react-router";
 import { BackToTop } from "../components/BackToTop/BackToTop.tsx";
-import { Link } from "../components/Link/Link.tsx";
 import { cx } from "../components/shared/cx.ts";
 import { focusWithoutScroll, pageFocusTarget } from "../components/shared/focus.ts";
 import { Stack } from "../components/Stack/Stack.tsx";
-import { ThemeSwitcher } from "../components/ThemeSwitcher/ThemeSwitcher.tsx";
 import { VisuallyHidden } from "../components/VisuallyHidden/VisuallyHidden.tsx";
-import { footerText, siteName } from "../site.config.ts";
+import { footerText } from "../site.config.ts";
 import { useRouteHandle } from "./route-handle.ts";
+import { SiteHeader } from "./SiteHeader.tsx";
 import styles from "./SiteShell.module.css";
 
 export function SiteShell({ children }: { children: ReactNode }) {
@@ -26,14 +25,19 @@ export function SiteShell({ children }: { children: ReactNode }) {
     focusWithoutScroll(pageFocusTarget(mainRef.current));
   }, [pathname]);
 
-  // The scroll padding follows the header's height, however many rows it wraps onto (refinement R11.3).
+  // The space the bar takes at the top: its height, however many rows it wraps onto (refinement
+  // R11.3), plus its top inset (space.stack.sm, site-refresh design §4.6). Scroll padding and the
+  // sticky asides read it.
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
     const root = document.documentElement;
     const observer = new ResizeObserver(([entry]) => {
       const blockSize = entry?.borderBoxSize[0]?.blockSize ?? header.offsetHeight;
-      root.style.setProperty("--shell-header-block-size", `${String(blockSize)}px`);
+      // Its top margin equals its sticky inset. Resolved here, in px: with a rem inset in the
+      // property, WebKit's scroll padding missed a root font-size change (e2e, 200% text).
+      const inset = Number.parseFloat(getComputedStyle(header).marginTop);
+      root.style.setProperty("--shell-header-block-size", `${String(blockSize + inset)}px`);
     });
     observer.observe(header, { box: "border-box" });
     return () => {
@@ -55,42 +59,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       >
         Skip to main content
       </VisuallyHidden>
-      <Stack
-        as="header"
-        ref={headerRef}
-        direction="horizontal"
-        justify="between"
-        align="center"
-        rowGap="sm"
-        columnGap="md"
-        className={styles.header}
-      >
-        {/* Not part of the nav, and "Home" already marks the home page (refinement R11.8). */}
-        <Link href="/" underline="hover" aria-current={false} className={styles.siteName}>
-          {siteName}
-        </Link>
-        <nav aria-label="Primary">
-          <Stack as="ul" direction="horizontal" gap="md">
-            <li>
-              <Link href="/" underline="hover" className={styles.navLink}>
-                Home
-              </Link>
-            </li>
-            <li>
-              {/* Marked on every design-system page: "page" on /design-system, "true" below it (R1.6). */}
-              <Link
-                href="/design-system"
-                currentMatch="section"
-                underline="hover"
-                className={styles.navLink}
-              >
-                Design System
-              </Link>
-            </li>
-          </Stack>
-        </nav>
-        <ThemeSwitcher />
-      </Stack>
+      <SiteHeader ref={headerRef} />
       <div className={cx(styles.body, Aside && styles.withAside)}>
         {/* Before main, so the skip link bypasses it; the key remounts it collapsed after every navigation. */}
         {Aside && <Aside key={pathname} />}

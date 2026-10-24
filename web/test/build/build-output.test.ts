@@ -145,8 +145,12 @@ describe.each(pages)("$file", (page) => {
 
   it("has exactly one banner, Primary navigation, main and contentinfo landmark (and on docs pages, a Components navigation)", () => {
     expect(body().getAllByRole("banner")).toHaveLength(1);
-    expect(body().getAllByRole("navigation")).toHaveLength("docs" in page ? 2 : 1);
-    expect(body().getByRole("navigation", { name: "Primary" })).toBeTruthy();
+    // hidden: jsdom's UA sheet hides the closed [popover] panel that holds Primary; the site's CSS,
+    // which shows it on wide screens, isn't loaded here (site-refresh design §4.3).
+    expect(body().getAllByRole("navigation", { hidden: true })).toHaveLength(
+      "docs" in page ? 2 : 1,
+    );
+    expect(body().getByRole("navigation", { name: "Primary", hidden: true })).toBeTruthy();
     expect(body().getAllByRole("main")).toHaveLength(1);
     expect(body().getAllByRole("contentinfo")).toHaveLength(1);
   });

@@ -61,7 +61,9 @@ describe.each(docsPages)("$path", ({ path, title, h1 }) => {
 
   it("has a Primary and a Components navigation, uniquely labelled, with Components outside and before main (R2.1)", () => {
     const body = within(documentAt(path).body);
-    const navs = body.getAllByRole("navigation");
+    // hidden: jsdom's UA sheet hides the closed [popover] panel that holds Primary; the site's CSS,
+    // which shows it on wide screens, isn't loaded here (site-refresh design §4.3).
+    const navs = body.getAllByRole("navigation", { hidden: true });
     const labels = navs.map((nav) => nav.getAttribute("aria-label"));
     expect(labels).toEqual(["Primary", "Components"]);
     const components = body.getByRole("navigation", { name: "Components" });

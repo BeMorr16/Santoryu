@@ -25,6 +25,7 @@ describe("Icon", () => {
       "github",
       "linkedin",
       "mail",
+      "menu",
       "moon",
       "palette",
       "reset",

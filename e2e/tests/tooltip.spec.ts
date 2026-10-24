@@ -303,6 +303,11 @@ test.describe("Tooltip at 320px wide (refinement R14.7, R14.9, R14.13)", () => {
     browserName,
   }) => {
     await page.goto("/");
+    // At 320px the switcher is in the header's Menu panel (site-refresh R8.2), opened from the keyboard.
+    const menu = page.getByRole("banner").getByRole("button", { name: "Menu" });
+    await menu.focus();
+    await page.keyboard.press("Enter");
+    await expect(menu).toHaveAttribute("aria-expanded", "true");
     const switcher = page.getByRole("banner").getByRole("button", { name: /^Theme/ });
     const popup = popupOf(switcher);
     await keyboardFocus(page, browserName, switcher);
@@ -322,12 +327,19 @@ test.describe("Tooltip at 320px wide (refinement R14.7, R14.9, R14.13)", () => {
   });
 });
 
-test("doesn't show the header ThemeSwitcher's name while its label is displayed (R14.13)", async ({
+// The header's switcher is icon-only since site-refresh (design §4.2), so the docs' auto-label one,
+// which has a name tooltip and shows its label at this width, shows the rule.
+test("doesn't show a ThemeSwitcher's name while its label is displayed (R14.13)", async ({
   page,
   browserName,
 }) => {
-  await page.goto("/");
-  const switcher = page.getByRole("banner").getByRole("button", { name: /^Theme/ });
+  await page.goto(componentPath("theme-switcher"));
+  const switcher = example(main(page), "Label (changes the whole site, not this panel)")
+    .getByRole("button", { name: /^Theme/ })
+    .first();
+  // Hydrated (the name gains the theme), then the visible label: the aria-hidden "Theme".
+  await expect(switcher).toHaveAccessibleName(/^Theme: (Light|Dark)$/);
+  await expect(switcher.locator('span[aria-hidden="true"]', { hasText: /^Theme$/ })).toBeVisible();
   await keyboardFocus(page, browserName, switcher);
   await page.waitForTimeout(400);
   expect(await isOpen(popupOf(switcher))).toBe(false);

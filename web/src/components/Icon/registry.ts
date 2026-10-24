@@ -15,6 +15,7 @@ import { DownloadSimpleIcon } from "@phosphor-icons/react/dist/ssr/DownloadSimpl
 import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr/EnvelopeSimple";
 import { GithubLogoIcon } from "@phosphor-icons/react/dist/ssr/GithubLogo";
 import { LinkedinLogoIcon } from "@phosphor-icons/react/dist/ssr/LinkedinLogo";
+import { ListIcon } from "@phosphor-icons/react/dist/ssr/List";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
 import { PaletteIcon } from "@phosphor-icons/react/dist/ssr/Palette";
@@ -45,6 +46,7 @@ export const icons = {
   upload: UploadSimpleIcon,
   reset: ArrowCounterClockwiseIcon,
   trash: TrashIcon,
+  menu: ListIcon,
 } as const;
 
 /** Our normalized weights → the family's weights. */

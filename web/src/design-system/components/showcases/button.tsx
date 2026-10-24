@@ -14,9 +14,12 @@ const variants = ["primary", "secondary", "ghost"] as const;
 
 /** The customized example's CSS, shown under it and applied by `.brandCta`. */
 export const brandCtaCss = `.brandCta {
-  --component-button-primary-background: var(--color-accent-text);
-  --component-button-primary-border: var(--color-accent-text);
-  --component-button-primary-background-hover: var(--color-link-hover);
+  --component-button-primary-background: var(--color-accent-2-fill);
+  --component-button-primary-background-hover: var(--color-accent-2-fill-hover);
+  --component-button-primary-background-active: var(--color-accent-2-fill-hover);
+  --component-button-primary-border: var(--color-accent-2-fill);
+  --component-button-primary-text: var(--color-accent-2-fill-text);
+  --component-button-primary-text-active: var(--color-accent-2-fill-text);
 }`;
 
 /** Icon-only buttons, captioned with their size and how they're named (refinement R3.11). */

@@ -75,9 +75,12 @@
 
 /* The documented styling API (design §4.3): override a component token on a wrapper. */
 .brandCta {
-  --component-button-primary-background: var(--color-accent-text);
-  --component-button-primary-border: var(--color-accent-text);
-  --component-button-primary-background-hover: var(--color-link-hover);
+  --component-button-primary-background: var(--color-accent-2-fill);
+  --component-button-primary-background-hover: var(--color-accent-2-fill-hover);
+  --component-button-primary-background-active: var(--color-accent-2-fill-hover);
+  --component-button-primary-border: var(--color-accent-2-fill);
+  --component-button-primary-text: var(--color-accent-2-fill-text);
+  --component-button-primary-text-active: var(--color-accent-2-fill-text);
 }
 
 .quietLinks {

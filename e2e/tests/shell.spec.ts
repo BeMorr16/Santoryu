@@ -3,6 +3,8 @@ import { expect, test, type Page } from "@playwright/test";
 import { tabKey, tokenColor } from "./support.ts";
 
 const nav = (page: Page) => page.getByRole("navigation", { name: "Primary" });
+const home = (page: Page) =>
+  page.getByRole("banner").getByRole("link", { name: "BM, Ben Morrison, home" });
 const rootStyle = (page: Page, property: string) =>
   page.evaluate(
     (name) => getComputedStyle(document.documentElement).getPropertyValue(name),
@@ -28,12 +30,12 @@ test("focuses the new page's h1 after navigation, with a ring after the keyboard
     .evaluate((element) => element.getBoundingClientRect().bottom);
   expect((await heading.boundingBox())?.y).toBeGreaterThanOrEqual(headerBottom);
 
-  await nav(page).getByRole("link", { name: "Home" }).click();
+  await home(page).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toBeFocused();
 });
 
-test.describe("with the header wrapped at 200% text, 320px wide (refinement R11.3)", () => {
+test.describe("with the bar grown by 200% text, 320px wide (refinement R11.3)", () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
   test("keeps every focused element clear of the header, both ways", async ({
@@ -42,21 +44,19 @@ test.describe("with the header wrapped at 200% text, 320px wide (refinement R11.
   }) => {
     test.slow();
     await page.goto(componentPath("button"));
+    const header = page.getByRole("banner");
+    const heightOf = () => header.evaluate((element) => element.getBoundingClientRect().height);
+    const before = await heightOf();
     // Through the CSSOM, which the CSP allows.
     await page.evaluate(() => {
       document.documentElement.style.fontSize = "200%";
     });
-    const header = page.getByRole("banner");
-    const rows = await header.evaluate(
-      (element) =>
-        new Set([...element.children].map((child) => Math.round(child.getBoundingClientRect().top)))
-          .size,
-    );
-    expect(rows).toBeGreaterThan(1);
-    const height = await header.evaluate((element) => element.getBoundingClientRect().height);
+    await expect.poll(heightOf).toBeGreaterThan(before);
+    const height = await heightOf();
+    // The bar's top inset (space.stack.sm, 0.5rem = 16px at 200%), its height, then the focus ring.
     await expect
       .poll(async () => Number.parseFloat(await rootStyle(page, "scroll-padding-top")))
-      .toBeCloseTo(height + 4, 0);
+      .toBeCloseTo(16 + height + 4, 0);
 
     /**
      * Whether the focused element is clear of the header, or null outside the page content. One
@@ -103,7 +103,8 @@ test.describe("at 320×256, as at 400% zoom (refinement R11.4)", () => {
   test("puts the header in the page flow, with no scroll padding", async ({ page }) => {
     await page.goto("/design-system");
 
-    await expect(page.getByRole("banner")).toHaveCSS("position", "static");
+    // Relative rather than static: still in the flow, and the containing block of its brackets.
+    await expect(page.getByRole("banner")).toHaveCSS("position", "relative");
     expect(await rootStyle(page, "scroll-padding-top")).toBe("0px");
   });
 });
@@ -150,21 +151,23 @@ test("moves focus into main from the skip link, clear of the header (R3.3)", asy
   expect((await next.boundingBox())?.y).toBeGreaterThanOrEqual(headerBottom);
 });
 
-test("keeps the site name text-colored, underlined only on hover (refinement R11.8)", async ({
+test("keeps BM text-colored and never underlined, on hover or as the current page (refinement R11.8, site-refresh R7.1)", async ({
   page,
 }) => {
-  await page.goto("/design-system");
-  const name = page.getByRole("banner").getByRole("link", { name: "Ben" });
   const text = tokenColor("color.text.default", "light");
+  for (const path of ["/design-system", "/"]) {
+    await page.goto(path);
+    const name = home(page);
 
-  await expect(name).toHaveCSS("text-decoration-line", "none");
-  await expect(name).toHaveCSS("color", text);
-  await name.hover();
-  await expect(name).toHaveCSS("text-decoration-line", "underline");
-  await expect(name).toHaveCSS("color", text);
+    await expect(name).toHaveCSS("text-decoration-line", "none");
+    await expect(name).toHaveCSS("color", text);
+    await name.hover();
+    await expect(name).toHaveCSS("text-decoration-line", "none");
+    await expect(name).toHaveCSS("color", text);
+  }
 });
 
-test("underlines the nav's links on hover, and the current one always (refinement R11.7)", async ({
+test("never underlines the nav's links, and recolors one on hover (site-refresh, owner's review)", async ({
   page,
 }) => {
   await page.goto("/");
@@ -172,11 +175,8 @@ test("underlines the nav's links on hover, and the current one always (refinemen
 
   await expect(designSystem).toHaveCSS("text-decoration-line", "none");
   await designSystem.hover();
-  await expect(designSystem).toHaveCSS("text-decoration-line", "underline");
-  await expect(nav(page).getByRole("link", { name: "Home" })).toHaveCSS(
-    "text-decoration-line",
-    "underline",
-  );
+  await expect(designSystem).toHaveCSS("text-decoration-line", "none");
+  await expect(designSystem).toHaveCSS("color", tokenColor("color.link.hover", "light"));
 });
 
 test.describe("the nav's Design System link (ds-components R1.6)", () => {
@@ -186,29 +186,27 @@ test.describe("the nav's Design System link (ds-components R1.6)", () => {
     ["/design-system/components", "true"],
     ["/design-system/components/button", "true"],
   ] as const) {
-    test(`is aria-current="${current}" on ${path}, with Link's current look, and Home is not marked`, async ({
+    test(`is aria-current="${current}" on ${path}, framed by brackets rather than underlined, and BM is not marked`, async ({
       page,
     }) => {
       await page.goto(path);
       const designSystem = nav(page).getByRole("link", { name: "Design System" });
 
       await expect(designSystem).toHaveAttribute("aria-current", current);
-      await expect(designSystem).toHaveCSS("text-decoration-line", "underline");
-      await expect(nav(page).getByRole("link", { name: "Home" })).not.toHaveAttribute(
-        "aria-current",
-      );
+      await expect(designSystem).toHaveCSS("text-decoration-line", "none");
+      expect(
+        await designSystem.evaluate((element) => getComputedStyle(element, "::before").content),
+      ).toBe('""');
+      await expect(home(page)).not.toHaveAttribute("aria-current");
     });
   }
 
-  test("is not marked on the home page, where Home is", async ({ page }) => {
+  test("is not marked on the home page, where BM is", async ({ page }) => {
     await page.goto("/");
 
     await expect(nav(page).getByRole("link", { name: "Design System" })).not.toHaveAttribute(
       "aria-current",
     );
-    await expect(nav(page).getByRole("link", { name: "Home" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
+    await expect(home(page)).toHaveAttribute("aria-current", "page");
   });
 });

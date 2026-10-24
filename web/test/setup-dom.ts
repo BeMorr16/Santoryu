@@ -14,8 +14,10 @@ afterEach(() => {
 
 /**
  * Minimal popover API shim (design §9.10): jsdom 30 has none. showPopover/hidePopover toggle a
- * `data-popover-open` attribute, and a UA-like rule hides closed popovers so role queries and
- * visibility match a browser. Real top-layer behavior is covered by the Playwright tests.
+ * `data-popover-open` attribute and fire `toggle` with newState and oldState, as a browser does
+ * (there, a task later; here, at once). `:popover-open` matches open ones. A UA-like rule hides
+ * closed popovers so role queries and visibility match a browser. Real top-layer behavior,
+ * popovertarget and light dismiss are covered by the Playwright tests.
  */
 if (!("showPopover" in HTMLElement.prototype)) {
   const OPEN = "data-popover-open";
@@ -30,14 +32,31 @@ if (!("showPopover" in HTMLElement.prototype)) {
       );
     }
   };
+  const toggled = (element: HTMLElement, newState: "open" | "closed") => {
+    const oldState = newState === "open" ? "closed" : "open";
+    element.dispatchEvent(Object.assign(new Event("toggle"), { newState, oldState }));
+  };
   Object.assign(HTMLElement.prototype, {
     showPopover(this: HTMLElement) {
       check(this, true);
       this.setAttribute(OPEN, "");
+      toggled(this, "open");
     },
     hidePopover(this: HTMLElement) {
       check(this, false);
       this.removeAttribute(OPEN);
+      toggled(this, "closed");
+    },
+  });
+  const nativeMatches = Object.getOwnPropertyDescriptor(Element.prototype, "matches")?.value as (
+    this: Element,
+    selectors: string,
+  ) => boolean;
+  Object.assign(Element.prototype, {
+    matches(this: Element, selectors: string): boolean {
+      return selectors === ":popover-open"
+        ? this.hasAttribute(OPEN)
+        : nativeMatches.call(this, selectors);
     },
   });
   const style = document.createElement("style");

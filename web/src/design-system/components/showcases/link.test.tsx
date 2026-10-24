@@ -56,7 +56,17 @@ describe("Link page examples", () => {
       "page",
     );
     const underlineRow = within(section).getByRole("row", { name: /^underline\b/ });
-    expect(underlineRow).toHaveTextContent('"always" | "hover"');
+    expect(underlineRow).toHaveTextContent('"always" | "hover" | "none"');
+    expect(labels.indexOf("No underline")).toBe(labels.indexOf("Underline on hover") + 1);
+    const barePages = within(example("No underline")).getByRole("list", {
+      name: "Design System pages, no underline",
+    });
+    for (const link of within(barePages).getAllByRole("link")) {
+      expect(link).toHaveClass(linkStyles.underlineNone ?? "");
+    }
+    expect(section).toHaveTextContent(
+      /underline="none" never underlines, even when current or hovered\. Use it only where the position marks the links/,
+    );
     expect(section).toHaveTextContent(
       /underline="hover" drops the underline at rest\. Use it only where the position marks the links/,
     );

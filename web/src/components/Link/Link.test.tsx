@@ -421,6 +421,35 @@ describe("Link", () => {
     }
   });
 
+  it('adds the no-underline class only with underline="none" (site-refresh)', () => {
+    render(
+      <>
+        <Link href="#a" underline="none">
+          Bare
+        </Link>
+        <Link href="#b" underline="hover">
+          Nav
+        </Link>
+        <Link href="#c">Default</Link>
+      </>,
+    );
+
+    expect(screen.getByRole("link", { name: "Bare" })).toHaveClass(
+      styles.link ?? "",
+      styles.underlineNone ?? "",
+    );
+    expect(screen.getByRole("link", { name: "Bare" })).not.toHaveClass(styles.underlineHover ?? "");
+    for (const name of ["Nav", "Default"]) {
+      expect(screen.getByRole("link", { name })).not.toHaveClass(styles.underlineNone ?? "");
+    }
+  });
+
+  it("never underlines a no-underline link, at rest, on hover or when current (site-refresh)", () => {
+    expect(css).toMatch(/^\.underlineNone \{\s*text-decoration-line: none;\s*\}/m);
+    expect(css).not.toMatch(/\.underlineNone[^{]*:hover/);
+    expect(css).not.toMatch(/\.underlineNone\[aria-current\]/);
+  });
+
   it("underlines a hover-underline link only on hover, where the device hovers, or when current (refinement R11.7)", () => {
     expect(css).toMatch(/^\.underlineHover \{\s*text-decoration-line: none;/m);
     expect(css).toMatch(

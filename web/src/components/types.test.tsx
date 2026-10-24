@@ -213,7 +213,7 @@ describe("library types", () => {
           x
         </Link>,
         // @ts-expect-error -- not an underline mode.
-        <Link key="i" href="/" underline="none">
+        <Link key="i" href="/" underline="dotted">
           x
         </Link>,
       ];
@@ -245,6 +245,9 @@ describe("library types", () => {
           Design System
         </Link>,
         <Link key="f" href="/design-system" underline="hover">
+          Design System
+        </Link>,
+        <Link key="f2" href="/design-system" underline="none">
           Design System
         </Link>,
       ];

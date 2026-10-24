@@ -54,6 +54,11 @@
   text-decoration-line: underline;
 }
 
+/* Opt-in, where position and another cue mark the links and the current one (site-refresh). */
+.underlineNone {
+  text-decoration-line: none;
+}
+
 /* Keeps the new-tab icon on the last word's line (refinement R4.2). */
 .newTab {
   white-space: nowrap;

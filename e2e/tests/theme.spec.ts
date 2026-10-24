@@ -1,11 +1,21 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { chooseInMenu, example, main, storeTheme } from "./support.ts";
+import { chooseInMenu, example, main, storeTheme, tokenColor } from "./support.ts";
 
-// surface.base per theme (decision 0006): sand.50 and blue.850.
-const pageBackground = { light: "rgb(251, 248, 242)", dark: "rgb(18, 62, 94)" };
+// surface.base per theme, from the token metadata.
+const pageBackground = {
+  light: tokenColor("color.surface.base", "light"),
+  dark: tokenColor("color.surface.base", "dark"),
+};
 
 const switcher = (page: Page) => page.getByRole("banner").getByRole("button", { name: /^Theme: / });
+
+/** Below size.breakpoint.md the header's switcher is in the Menu panel (site-refresh R8.2). */
+async function openHeaderPanel(page: Page) {
+  const menu = page.getByRole("banner").getByRole("button", { name: "Menu" });
+  await menu.click();
+  await expect(menu).toHaveAttribute("aria-expanded", "true");
+}
 const background = (page: Page) =>
   page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
@@ -43,7 +53,8 @@ test.describe("first paint with no choice (R13.2)", () => {
 
       await page.goto("/", { waitUntil: "domcontentloaded" });
 
-      const icons = page.getByRole("banner").locator("button svg");
+      // The switcher's trigger: before hydration its name is just "Theme".
+      const icons = page.getByRole("banner").locator('button[aria-haspopup="menu"] svg');
       await expect(icons).toHaveCount(4);
       const visible = await icons.evaluateAll((svgs) =>
         svgs.map((svg) => getComputedStyle(svg).display !== "none"),
@@ -110,6 +121,7 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
   test("the header popup stays inside a 320px viewport", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     await page.goto("/");
+    await openHeaderPanel(page);
 
     const { popup } = await openPopup(page, switcher(page));
 
@@ -134,15 +146,18 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
     expect(Math.abs(end.popup.right - end.trigger.right)).toBeLessThanOrEqual(1);
   });
 
-  test("the header label shows from 30em up, and the name stays the same", async ({ page }) => {
+  test("the header's switcher is icon-only at every size, with the same name (site-refresh design §4.2)", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     await page.goto("/");
-    await expect(visibleLabel(switcher(page))).toBeHidden();
+    await openHeaderPanel(page);
+    await expect(visibleLabel(switcher(page))).toHaveCount(0);
     await expect(switcher(page)).toHaveAccessibleName(/^Theme: (Light|Dark)$/);
 
     await page.setViewportSize({ width: 1280, height: 720 });
 
-    await expect(visibleLabel(switcher(page))).toBeVisible();
+    await expect(visibleLabel(switcher(page))).toHaveCount(0);
     await expect(switcher(page)).toHaveAccessibleName(/^Theme: (Light|Dark)$/);
   });
 

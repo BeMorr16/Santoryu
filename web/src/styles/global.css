@@ -7,15 +7,15 @@
 html {
   text-size-adjust: 100%;
   /*
-   * Keeps focused elements and in-page anchor targets clear of the sticky header (WCAG 2.4.11):
-   * its measured height (refinement R11.3), or before hydration one row (its padding, link
-   * padding + one line, its border), plus the focus ring.
+   * Keeps focused elements and in-page anchor targets clear of the sticky bar (WCAG 2.4.11): its
+   * measured height and top inset (refinement R11.3), or before hydration one row (the inset, its
+   * padding, a small control, its borders), plus the focus ring (site-refresh design §4.6).
    */
   scroll-padding-block-start: calc(
     var(
         --shell-header-block-size,
-        2 * var(--space-inset-md) + 2 * var(--space-inset-sm) + var(--type-leading-body) *
-          var(--type-size-body) + var(--effect-border-width)
+        var(--space-stack-sm) + 2 * var(--space-inset-sm) + var(--size-control-sm) + 2 *
+          var(--effect-border-width)
       ) +
       var(--effect-focus-ring-width) + var(--effect-focus-ring-offset)
   );

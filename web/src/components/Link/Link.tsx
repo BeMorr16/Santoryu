@@ -40,8 +40,12 @@ interface LinkInline {
   showVisited?: boolean | undefined;
   /** "section" also marks pages below href, as aria-current="true" (refinement R4.8). */
   currentMatch?: CurrentMatch | undefined;
-  /** "hover": underlined on hover and when current; for navs and site names (refinement R11.7). */
-  underline?: "always" | "hover" | undefined;
+  /**
+   * "hover": underlined on hover and when current; for navs and site names (refinement R11.7).
+   * "none": never underlined; for links that position and another cue already mark, such as a
+   * bar's bracketed nav (site-refresh).
+   */
+  underline?: "always" | "hover" | "none" | undefined;
   variant?: never;
   size?: never;
   iconStart?: never;
@@ -162,6 +166,7 @@ export function Link({
           styles.link,
           showVisited && styles.showVisited,
           underline === "hover" && styles.underlineHover,
+          underline === "none" && styles.underlineNone,
         )
       : buttonClassName({ variant, size, iconStart, iconEnd, children, extraIcon: newTab }),
     className,

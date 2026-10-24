@@ -15,12 +15,12 @@ const generatedCss = fileURLToPath(new URL("../../src/generated/tokens.css", imp
 const fileOf = (path: string) => `${clientDir}${path.slice(1)}/index.html`;
 const documentAt = (path: string) => new JSDOM(readFileSync(fileOf(path), "utf8")).window.document;
 
-/** A string only primitive metadata carries: color.blue.600's description, from its source. */
+/** A string only primitive metadata carries: color.gold.600's description, from its source. */
 function primitiveMarker(): string {
   const source = JSON.parse(readFileSync(`${tokensDir}color.json`, "utf8")) as {
-    color: { blue: { "600": { $description: string } } };
+    color: { gold: { "600": { $description: string } } };
   };
-  return source.color.blue["600"].$description;
+  return source.color.gold["600"].$description;
 }
 
 beforeAll(() => {

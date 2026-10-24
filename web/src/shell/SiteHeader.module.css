@@ -1,0 +1,225 @@
+/*
+ * The floating glass bar (site-refresh design §4.5). Narrow first: "BM" and the menu button, with
+ * the panel a popover. From size.breakpoint.md the panel is shown inline and the button hides.
+ */
+.bar {
+  position: sticky;
+  inset-block-start: var(--space-stack-sm);
+  /* Below revealed overlays such as the skip link (layer.overlay). */
+  z-index: var(--layer-sticky);
+  display: flex;
+  gap: var(--space-inline-md);
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--space-stack-sm) var(--space-layout-xs) 0;
+  padding: var(--space-inset-sm) var(--space-inset-md);
+  border: var(--effect-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-glass);
+  backdrop-filter: blur(var(--effect-backdrop-glass));
+}
+
+/*
+ * Corner brackets: one thick border, masked to four corners. The conic gradient keeps a corner of
+ * each tile, and two tiles per axis put those corners at both ends. Decorative, and never in the way.
+ */
+.bar::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--effect-border-width));
+  border: var(--effect-border-width-thick) solid var(--color-action-background);
+  border-radius: inherit;
+  pointer-events: none;
+  mask: conic-gradient(
+      at var(--size-icon-sm) var(--size-icon-sm),
+      transparent 75%,
+      var(--color-action-background) 0
+    )
+    0 0 / calc(100% - var(--size-icon-sm)) calc(100% - var(--size-icon-sm));
+}
+
+/* The current page is framed in gold, only for aria-current: the look follows the semantics (R6.4). */
+.navLink[aria-current]:not([aria-current="false"])::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: var(--effect-border-width-thick) solid var(--color-action-background);
+  pointer-events: none;
+  mask: conic-gradient(
+      at var(--space-inset-sm) var(--space-inset-sm),
+      transparent 75%,
+      var(--color-action-background) 0
+    )
+    0 0 / calc(100% - var(--space-inset-sm)) calc(100% - var(--space-inset-sm));
+}
+
+/* The home link: the initials in the heading type, text-colored in every state. */
+.initials {
+  --component-link-color: var(--color-text-default);
+  --component-link-color-hover: var(--color-text-default);
+  --component-link-color-current: var(--color-text-default);
+
+  /*
+   * A small control's height, like everything in the bar, so one row is exactly what the scroll
+   * padding's pre-hydration fallback assumes; padded inline, so two letters still make a target
+   * well over 24px wide (R9.4).
+   */
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--size-control-sm);
+  padding-inline: var(--space-inset-sm);
+  font-family: var(--type-family-heading);
+  font-size: var(--type-size-h5);
+  font-weight: var(--type-weight-heading);
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A small control's height, as for BM. */
+.navLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--size-control-sm);
+  padding-inline: var(--space-inset-sm);
+  font-family: var(--type-family-label);
+  font-size: var(--type-size-label);
+  letter-spacing: var(--type-tracking-label);
+  text-transform: uppercase;
+}
+
+.end {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-inline-sm);
+  align-items: center;
+}
+
+/* A ghost action in the label type (R7.4, owner's review), through Button's own tokens. */
+.contact {
+  --component-button-font-family: var(--type-family-label);
+  --component-button-font-size-sm: var(--type-size-label);
+
+  letter-spacing: var(--type-tracking-label);
+  text-transform: uppercase;
+}
+
+/*
+ * Narrow: a real popover in the top layer, under the bar and across the gutters (design §4.3). Its
+ * UA look is replaced with the bar's glass. It sits a gap below the space the bar takes (its inset
+ * and height); before hydration that isn't measured yet, so the fallback is one row.
+ */
+.panel {
+  inset: calc(
+      var(
+          --shell-header-block-size,
+          var(--space-stack-sm) + var(--size-control-sm) + 2 * var(--space-inset-sm) + 2 *
+            var(--effect-border-width)
+        ) +
+        var(--space-stack-sm)
+    )
+    var(--space-layout-xs) auto;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+  inline-size: auto;
+  margin: 0;
+  padding: var(--space-inset-md);
+  border: var(--effect-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-glass);
+  box-shadow: var(--effect-elevation-overlay);
+  color: inherit;
+  backdrop-filter: blur(var(--effect-backdrop-glass));
+  opacity: 0;
+  transition-property: opacity, display, overlay;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-easing-standard);
+  transition-behavior: allow-discrete;
+}
+
+.panel:popover-open {
+  display: flex;
+  opacity: 1;
+}
+
+/* Fades in from transparent; reduced motion makes the duration 0ms (R8.6). */
+@starting-style {
+  .panel:popover-open {
+    opacity: 0;
+  }
+}
+
+/*
+ * size.breakpoint.md: the panel is the bar's middle and end. display: contents makes the nav and
+ * the end group the bar's grid items, so the nav sits in the bar's true center.
+ */
+@media (min-width: 48em) {
+  .bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  /* Beats the shared button class's display, whatever the module order. */
+  .bar .menuButton {
+    display: none;
+  }
+
+  .panel:not(:popover-open) {
+    display: contents;
+  }
+
+  .links {
+    flex-direction: row;
+    gap: var(--space-inline-md);
+  }
+
+  .end {
+    justify-self: end;
+  }
+}
+
+/* size.breakpoint.lg: about 80% of the viewport, centered (R6.2). A layout ratio, so no token. */
+@media (min-width: 80em) {
+  .bar {
+    inline-size: 80%;
+    margin-inline: auto;
+  }
+}
+
+/* Short screens get the whole viewport for content (refinement R11.4); size.breakpoint.sm. */
+@media (max-height: 30em) {
+  /* In the page flow, and still the brackets' containing block; the sticky offset is dropped. */
+  .bar {
+    position: relative;
+    inset-block-start: auto;
+  }
+
+  /* Scrolls with the page, under the bar that does too (design §4.5). */
+  .panel {
+    position: absolute;
+  }
+}
+
+/* Progressive enhancement: as far as known, only Chromium supports this query (R6.6). */
+@media (prefers-reduced-transparency: reduce) {
+  .bar,
+  .panel {
+    background-color: var(--color-surface-raised);
+    backdrop-filter: none;
+  }
+}
+
+/* The forced palette keeps borders; the brackets stay visible in the text color (R6.6). */
+@media (forced-colors: active) {
+  .bar::before,
+  .navLink[aria-current]:not([aria-current="false"])::before {
+    border-color: CanvasText;
+  }
+}

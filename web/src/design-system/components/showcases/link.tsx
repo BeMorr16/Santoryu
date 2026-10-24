@@ -45,7 +45,7 @@ const props = {
       'Inline only. Routed inline links set aria-current themselves: "page" on an exact match, and with "section", "true" on pages below it. Your own aria-current overrides it. The hash is ignored, so use #id hrefs for in-page links.',
   },
   underline: {
-    type: '"always" | "hover"',
+    type: '"always" | "hover" | "none"',
     default: '"always"',
     description: "Where the underline shows. Inline links only.",
   },
@@ -170,6 +170,28 @@ function UnderlineOnHoverExample() {
   );
 }
 
+function NoUnderlineExample() {
+  return (
+    <Stack as="ul" direction="horizontal" aria-label="Design System pages, no underline">
+      <li>
+        <Link href="/design-system" underline="none">
+          Design System
+        </Link>
+      </li>
+      <li>
+        <Link href="/design-system/tokens" underline="none">
+          Tokens
+        </Link>
+      </li>
+      <li>
+        <Link href="/design-system/components/link" underline="none">
+          Link
+        </Link>
+      </li>
+    </Stack>
+  );
+}
+
 function AsAButtonExample() {
   return (
     <>
@@ -217,6 +239,7 @@ export const linkShowcase: Showcase = {
     { title: "Visited (opt-in)", layout: "column", Content: VisitedOptInExample },
     { title: "Current page", layout: "column", Content: CurrentPageExample },
     { title: "Underline on hover", Content: UnderlineOnHoverExample },
+    { title: "No underline", Content: NoUnderlineExample },
     { title: "As a button", Content: AsAButtonExample },
     {
       title: "Customized with a component token",
@@ -234,6 +257,7 @@ export const linkShowcase: Showcase = {
     "The current page is shown by weight as well as color.",
     "Inline links are underlined, so they're told apart from text by more than color. Hover thickens the underline.",
     'underline="hover" drops the underline at rest. Use it only where the position marks the links (a nav, a site name), since color alone can\'t (WCAG 1.4.1). A current link keeps its underline.',
+    'underline="none" never underlines, even when current or hovered. Use it only where the position marks the links and something besides color marks the current one, such as the site bar\'s brackets (WCAG 1.4.1). A current link is still bold.',
     "The visited color is opt-in and color-only, so nothing depends on it.",
     "New-tab links end their name with “, opens in new tab”, also when named by aria-label or aria-labelledby, and the icon stays on the line of the last word.",
     "The focus ring uses component.link.focus-ring-color.",

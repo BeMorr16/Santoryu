@@ -113,7 +113,9 @@ test.describe("theme creator (theme-creator R16.3)", () => {
         `Tab ${String(press + 1)}`,
       ).toBe(true);
     }
-    await expect(dialog.getByRole("button", { name: "Keep editing" })).toBeVisible();
+    // Where the Tabs end depends on how many issues are listed. On Close, its name tooltip would
+    // take the first Escape (R12.4, tested below), so Escape starts from a button with none.
+    await dialog.getByRole("button", { name: "Keep editing" }).focus();
 
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
