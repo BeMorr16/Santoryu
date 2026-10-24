@@ -34,29 +34,33 @@ describe("design system tokens route (ds-tokens R1)", () => {
     Reflect.deleteProperty(Element.prototype, "scrollIntoView");
   });
 
-  it("shows the back link, h1, lead, On this page, diagram, topics, search, then the tiers, in order (R1.1)", { timeout: 10000 }, async () => {
-    const h1 = await renderPage();
+  it(
+    "shows the back link, h1, lead, On this page, diagram, topics, search, then the tiers, in order (R1.1)",
+    { timeout: 10000 },
+    async () => {
+      const h1 = await renderPage();
 
-    expect(h1).toHaveTextContent("Tokens");
-    const parts = [
-      screen.getByRole("link", { name: "Back to Design System" }),
-      h1,
-      screen.getByText(/^Every design token behind this site/),
-      screen.getByRole("list", { name: "On this page" }),
-      screen.getByRole("figure"),
-      ...h2s.slice(0, 5).map((name) => screen.getByRole("heading", { level: 2, name })),
-      screen.getByRole("searchbox", { name: "Search tokens" }),
-      ...h2s.slice(5).map((name) => screen.getByRole("heading", { level: 2, name })),
-    ];
-    for (const [index, part] of parts.entries()) {
-      const next = parts[index + 1];
-      if (next) expect(follows(part, next), `part ${String(index)}`).toBe(true);
-    }
-    expect(screen.getByRole("link", { name: "Back to Design System" })).toHaveAttribute(
-      "href",
-      "/design-system",
-    );
-  });
+      expect(h1).toHaveTextContent("Tokens");
+      const parts = [
+        screen.getByRole("link", { name: "Back to Design System" }),
+        h1,
+        screen.getByText(/^Every design token behind this site/),
+        screen.getByRole("list", { name: "On this page" }),
+        screen.getByRole("figure"),
+        ...h2s.slice(0, 5).map((name) => screen.getByRole("heading", { level: 2, name })),
+        screen.getByRole("searchbox", { name: "Search tokens" }),
+        ...h2s.slice(5).map((name) => screen.getByRole("heading", { level: 2, name })),
+      ];
+      for (const [index, part] of parts.entries()) {
+        const next = parts[index + 1];
+        if (next) expect(follows(part, next), `part ${String(index)}`).toBe(true);
+      }
+      expect(screen.getByRole("link", { name: "Back to Design System" })).toHaveAttribute(
+        "href",
+        "/design-system",
+      );
+    },
+  );
 
   it("lists the page's eight h2s, and only those, under On this page (R1.2)", async () => {
     await renderPage();

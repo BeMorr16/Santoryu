@@ -184,35 +184,39 @@ describe("TokenReference (ds-tokens R4)", () => {
       expect(document.getElementById("color-gold-600")?.closest("[hidden]")).not.toBeNull();
     });
 
-    it("opens the groups with matches, counting n of m, and hides the rest (R11.3, R11.6)", { timeout: 10000 }, () => {
-      renderReference();
-      const query = "--color-text-muted";
-      const matches = matchesOf(query);
-      const groups = new Set([...matches].map((row) => rowGroups.get(row)));
+    it(
+      "opens the groups with matches, counting n of m, and hides the rest (R11.3, R11.6)",
+      { timeout: 10000 },
+      () => {
+        renderReference();
+        const query = "--color-text-muted";
+        const matches = matchesOf(query);
+        const groups = new Set([...matches].map((row) => rowGroups.get(row)));
 
-      search(query);
+        search(query);
 
-      for (const group of [
-        ...referenceGroups.primitive,
-        ...referenceGroups.semantic,
-        ...referenceGroups.component,
-      ]) {
-        const label = categoryLabels[group.category];
-        const shown = group.tokens.filter((token) => matches.has(tokenRowId(token.name))).length;
-        const section = tierSection(
-          { primitive: "Primitives", semantic: "Semantic", component: "Component" }[group.tier],
-        );
-        const button = within(section).queryByRole("button", { name: new RegExp(`^${label},`) });
-        if (!groups.has(group.id)) {
-          expect(button, group.id).toBeNull();
-          continue;
+        for (const group of [
+          ...referenceGroups.primitive,
+          ...referenceGroups.semantic,
+          ...referenceGroups.component,
+        ]) {
+          const label = categoryLabels[group.category];
+          const shown = group.tokens.filter((token) => matches.has(tokenRowId(token.name))).length;
+          const section = tierSection(
+            { primitive: "Primitives", semantic: "Semantic", component: "Component" }[group.tier],
+          );
+          const button = within(section).queryByRole("button", { name: new RegExp(`^${label},`) });
+          if (!groups.has(group.id)) {
+            expect(button, group.id).toBeNull();
+            continue;
+          }
+          expect(button).toHaveAttribute("aria-expanded", "true");
+          expect(button).toHaveAccessibleName(
+            `${label}, ${String(shown)} of ${String(group.tokens.length)} tokens`,
+          );
         }
-        expect(button).toHaveAttribute("aria-expanded", "true");
-        expect(button).toHaveAccessibleName(
-          `${label}, ${String(shown)} of ${String(group.tokens.length)} tokens`,
-        );
-      }
-    });
+      },
+    );
 
     it("notes a tier with no matches, keeping its h2 (R11.3)", () => {
       renderReference();
