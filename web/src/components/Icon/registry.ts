@@ -19,6 +19,8 @@ import { ListIcon } from "@phosphor-icons/react/dist/ssr/List";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
 import { PaletteIcon } from "@phosphor-icons/react/dist/ssr/Palette";
+import { PauseIcon } from "@phosphor-icons/react/dist/ssr/Pause";
+import { PlayIcon } from "@phosphor-icons/react/dist/ssr/Play";
 import { SunIcon } from "@phosphor-icons/react/dist/ssr/Sun";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { UploadSimpleIcon } from "@phosphor-icons/react/dist/ssr/UploadSimple";
@@ -47,6 +49,8 @@ export const icons = {
   reset: ArrowCounterClockwiseIcon,
   trash: TrashIcon,
   menu: ListIcon,
+  pause: PauseIcon,
+  play: PlayIcon,
 } as const;
 
 /** Our normalized weights → the family's weights. */

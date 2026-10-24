@@ -609,16 +609,7 @@
           "alpha": 0.24,
           "hex": "#54d8f4"
         },
-        "$description": "cyan.300 at 24% opacity. Dark-theme glow behind the backdrop sphere."
-      },
-      "violet-600-40": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [0.3569, 0.2471, 0.651],
-          "alpha": 0.4,
-          "hex": "#5b3fa6"
-        },
-        "$description": "violet.600 at 40% opacity. Dark-theme frame glow."
+        "$description": "cyan.300 at 24% opacity. Dark-theme glow behind the backdrop sphere, and frame glow."
       },
       "cyan-300-30": {
         "$value": {

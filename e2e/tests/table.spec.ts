@@ -1,6 +1,15 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { example, main, probe, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
+import {
+  animationsSettled,
+  example,
+  main,
+  probe,
+  storeTheme,
+  tabKey,
+  themes,
+  tokenColor,
+} from "./support.ts";
 
 const tables = (page: Page) => main(page);
 
@@ -30,6 +39,7 @@ test.describe("Table (refinement R16)", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 320, height: 640 });
+    await animationsSettled(page);
     const wide = rootIn(page, "Wide");
 
     expect(await overflows(wide)).toBe(true);

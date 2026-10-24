@@ -273,6 +273,23 @@ describe("SiteShell", () => {
     expect(container.getElementsByClassName(backdropStyles.quiet ?? "")).toHaveLength(0);
   });
 
+  it("offers the sphere's pause toggle on striking pages only (site-backdrop R6.7)", async () => {
+    const user = userEvent.setup();
+    renderAt("/striking");
+    await screen.findByRole("heading", { name: "Striking page" });
+    const pause = () =>
+      within(screen.getByRole("banner")).queryByRole("button", {
+        name: "Pause background animation",
+        hidden: true,
+      });
+    expect(pause()).not.toBeNull();
+
+    await user.click(screen.getByRole("link", { name: "Go to Design System" }));
+
+    expect(await screen.findByRole("heading", { name: "Design System page" })).toBeInTheDocument();
+    expect(pause()).toBeNull();
+  });
+
   it("swaps the sphere for the frame glow on navigating to a quiet page (site-backdrop R1.4)", async () => {
     const user = userEvent.setup();
     const { container } = renderAt("/striking");

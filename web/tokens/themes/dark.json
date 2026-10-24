@@ -605,7 +605,7 @@
         "$description": "Translucent glow of the page backdrop layer, behind the sphere. Decorative; not contrast-checked."
       },
       "frame": {
-        "$value": "{color.overlay.violet-600-40}",
+        "$value": "{color.overlay.cyan-300-24}",
         "$description": "Translucent glow of the page backdrop layer's frame: an even band along every edge of quiet pages. Decorative; not contrast-checked."
       }
     },

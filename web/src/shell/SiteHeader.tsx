@@ -4,6 +4,7 @@ import { Button } from "../components/Button/Button.tsx";
 import { Link } from "../components/Link/Link.tsx";
 import { ThemeSwitcher } from "../components/ThemeSwitcher/ThemeSwitcher.tsx";
 import { initials, linkedinUrl, ownerName } from "../site.config.ts";
+import { BackdropPauseToggle } from "./backdrop/BackdropPauseToggle.tsx";
 import { contactHref, navLinks } from "./nav.ts";
 import styles from "./SiteHeader.module.css";
 
@@ -68,7 +69,14 @@ function usePanel(
  * The floating bar (site-refresh design §4): "BM", a menu button for narrow screens, and one panel
  * that CSS shows inline when wide and the browser shows as a popover when narrow.
  */
-export function SiteHeader({ ref }: { ref?: Ref<HTMLElement> }) {
+export function SiteHeader({
+  ref,
+  showBackdropPause = false,
+}: {
+  ref?: Ref<HTMLElement>;
+  /** Shows the sphere's pause toggle, before the theme switcher (site-backdrop R6.7). */
+  showBackdropPause?: boolean;
+}) {
   const panelId = useId();
   const panel = useRef<HTMLDivElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
@@ -120,6 +128,7 @@ export function SiteHeader({ ref }: { ref?: Ref<HTMLElement> }) {
           </ul>
         </nav>
         <div className={styles.end}>
+          {showBackdropPause && <BackdropPauseToggle />}
           <ThemeSwitcher variant="ghost" size="sm" showLabel={false} />
           <Link
             href={linkedinUrl}

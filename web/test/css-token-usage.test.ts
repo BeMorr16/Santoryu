@@ -2,26 +2,7 @@ import { globSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { componentTokens, semanticTokens } from "../src/tokens/metadata.ts";
-
-// CSS named colors (CSS Color Module Level 4), minus the allowed keywords.
-const namedColors = new Set(
-  `aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue blueviolet
-  brown burlywood cadetblue chartreuse chocolate coral cornflowerblue cornsilk crimson cyan darkblue
-  darkcyan darkgoldenrod darkgray darkgreen darkgrey darkkhaki darkmagenta darkolivegreen darkorange
-  darkorchid darkred darksalmon darkseagreen darkslateblue darkslategray darkslategrey darkturquoise
-  darkviolet deeppink deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite forestgreen fuchsia
-  gainsboro ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink indianred indigo
-  ivory khaki lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan
-  lightgoldenrodyellow lightgray lightgreen lightgrey lightpink lightsalmon lightseagreen lightskyblue
-  lightslategray lightslategrey lightsteelblue lightyellow lime limegreen linen magenta maroon
-  mediumaquamarine mediumblue mediumorchid mediumpurple mediumseagreen mediumslateblue
-  mediumspringgreen mediumturquoise mediumvioletred midnightblue mintcream mistyrose moccasin
-  navajowhite navy oldlace olive olivedrab orange orangered orchid palegoldenrod palegreen
-  paleturquoise palevioletred papayawhip peachpuff peru pink plum powderblue purple rebeccapurple red
-  rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue slateblue
-  slategray slategrey snow springgreen steelblue tan teal thistle tomato turquoise violet wheat white
-  whitesmoke yellow yellowgreen`.split(/\s+/),
-);
+import { namedColors } from "./named-colors.ts";
 
 // --shell-header-block-size is a runtime measurement set by the shell, not a token (refinement R11.3).
 const allowedCustomProperties = new Set(["--specimen", "--shell-header-block-size"]);

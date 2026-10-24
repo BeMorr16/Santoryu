@@ -7,16 +7,28 @@
 }
 
 /*
- * An even band of one color along every edge (owner: frame, not vignette; one color per theme,
+ * An even band of accent cyan along every edge, in both themes (owner: frame, not vignette,
  * 2026-10-24). The vmin depths keep the band in proportion on phones and wide screens.
  */
 .quiet {
   box-shadow: inset 0 0 32vmin 4vmin var(--color-backdrop-frame);
 }
 
+/* Transparent until the first frame, then faded in; motion.duration.slow is 0 under reduced motion (R2.9). */
 .sphere {
   inline-size: 100%;
   block-size: 100%;
+  opacity: 0;
+  transition: opacity var(--motion-duration-slow) var(--motion-easing-standard);
+}
+
+.ready {
+  opacity: 1;
+}
+
+/* The pause toggle does nothing without JavaScript (nor does the sphere), so it's hidden until scripts run. */
+:global(:root:not([data-js])) .pause {
+  display: none;
 }
 
 @media (forced-colors: active) {

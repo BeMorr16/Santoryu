@@ -97,6 +97,16 @@ export async function probe(scope: Locator, property: string, value: string) {
 }
 
 /**
+ * Waits until no CSS transition or animation is running, so layout is measured as it settles: a
+ * resize across size.breakpoint.md, for one, runs the header panel's display transition.
+ */
+export async function animationsSettled(page: Page) {
+  await page.waitForFunction(() =>
+    document.getAnimations().every((animation) => animation.playState !== "running"),
+  );
+}
+
+/**
  * Opens every closed Accordion item on the page (refinement R13.15), so axe and layout checks
  * cover the folded content, then waits for the panels to settle. An exclusive group keeps only
  * its last item open.
@@ -108,8 +118,6 @@ export async function openAllAccordions(page: Page) {
     const button = buttons.nth(index);
     if ((await button.getAttribute("aria-expanded")) === "false") await button.click();
   }
-  await page.waitForFunction(() =>
-    document.getAnimations().every((animation) => animation.playState !== "running"),
-  );
+  await animationsSettled(page);
   return count;
 }

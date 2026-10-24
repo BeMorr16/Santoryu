@@ -28,6 +28,8 @@ describe("Icon", () => {
       "menu",
       "moon",
       "palette",
+      "pause",
+      "play",
       "reset",
       "search",
       "sun",

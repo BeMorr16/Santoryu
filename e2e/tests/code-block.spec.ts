@@ -1,6 +1,15 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { example, main, probe, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
+import {
+  animationsSettled,
+  example,
+  main,
+  probe,
+  storeTheme,
+  tabKey,
+  themes,
+  tokenColor,
+} from "./support.ts";
 
 const codeBlocks = (page: Page) => main(page);
 
@@ -32,6 +41,7 @@ test.describe("CodeBlock (refinement R15)", () => {
 
   test("long lines scroll inside the block, never the page, at 320px (R15.4)", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
+    await animationsSettled(page);
 
     for (const block of await blocksIn(page, "Long lines").all()) {
       expect(await overflows(preOf(block))).toBe(true);

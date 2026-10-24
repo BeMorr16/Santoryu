@@ -8,6 +8,8 @@ const designSystem = (page: Page) => bar(page).getByRole("link", { name: "Design
 const linkedin = (page: Page) => bar(page).getByRole("link", { name: "LinkedIn" });
 const theme = (page: Page) => bar(page).getByRole("button", { name: /^Theme: / });
 const contact = (page: Page) => bar(page).getByRole("link", { name: "Contact" });
+const pauseBackdrop = (page: Page) =>
+  bar(page).getByRole("button", { name: "Pause background animation" });
 
 async function panel(page: Page) {
   return page.locator(`[id="${(await menuButton(page).getAttribute("aria-controls")) ?? ""}"]`);
@@ -40,7 +42,7 @@ test.describe("at 1280×800 (site-refresh R6)", () => {
     expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(2);
   });
 
-  test("tabs BM, Design System, Theme, LinkedIn, then Contact (R9.2)", async ({
+  test("tabs BM, Design System, the backdrop's pause toggle, Theme, LinkedIn, then Contact on Home (R9.2, site-backdrop R6.7)", async ({
     page,
     browserName,
   }) => {
@@ -48,7 +50,7 @@ test.describe("at 1280×800 (site-refresh R6)", () => {
 
     await page.keyboard.press(tabKey(browserName));
     await expect(page.getByRole("link", { name: "Skip to main content" })).toBeFocused();
-    for (const control of [home, designSystem, theme, linkedin, contact]) {
+    for (const control of [home, designSystem, pauseBackdrop, theme, linkedin, contact]) {
       await page.keyboard.press(tabKey(browserName));
       await expect(control(page)).toBeFocused();
     }

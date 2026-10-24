@@ -1,6 +1,6 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator } from "@playwright/test";
-import { example, main, probe } from "./support.ts";
+import { animationsSettled, example, main, probe } from "./support.ts";
 
 /** Width, its container's width, overflow and the number of lines its text runs over. */
 const fit = (element: Locator) =>
@@ -105,6 +105,7 @@ test.describe("Badge (refinement R9)", () => {
 
   test("causes no horizontal scroll at 320px (R9.3)", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
+    await animationsSettled(page);
     const badges = main(page);
     await badges.scrollIntoViewIfNeeded();
 

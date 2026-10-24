@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { seededRandom } from "../../../../test/seeded-random.ts";
 import { primitiveTokens } from "../../../tokens/primitives.ts";
 import { semanticTokens } from "../../../tokens/metadata.ts";
 import {
@@ -79,17 +80,6 @@ function fitsType(type: unknown, value: unknown): boolean {
   }
 }
 
-/** A small seeded PRNG (mulberry32), so the fuzzed round trip is the same every run. */
-function random(seed: number) {
-  let state = seed;
-  return () => {
-    state = (state + 0x6d2b79f5) | 0;
-    let t = Math.imul(state ^ (state >>> 15), 1 | state);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 function pick<T>(next: () => number, items: readonly T[]): T {
   const item = items[Math.floor(next() * items.length)];
   if (item === undefined) throw new Error("empty list");
@@ -105,7 +95,7 @@ const randomHex = (next: () => number) => srgbToHex([next(), next(), next()]);
 
 /** A random source within every control's limits. */
 function randomSource(seed: number): ThemeSource {
-  const next = random(seed);
+  const next = seededRandom(seed);
   const keys: ThemeSource["keys"] = {};
   if (next() < 0.6) keys.action = randomHex(next);
   if (next() < 0.4) keys.accent = randomHex(next);

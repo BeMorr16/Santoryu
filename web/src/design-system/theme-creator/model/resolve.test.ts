@@ -202,7 +202,7 @@ describe("resolveTheme: backdrop colors (site-backdrop R3.4)", () => {
   );
 
   it.each([
-    ["dark", 0.24, 0.4],
+    ["dark", 0.24, 0.24],
     ["light", 0.3, 0.3],
   ] as const)("keeps the glows' alpha under a custom accent (%s)", (base, glow, frame) => {
     const theme = resolveTheme(source(base, { accent: "#b25a12" }));

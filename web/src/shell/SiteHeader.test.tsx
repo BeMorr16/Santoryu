@@ -157,6 +157,28 @@ describe("SiteHeader: content (site-refresh R6, R7)", () => {
       "menu",
     );
   });
+
+  it("puts the sphere's pause toggle in the panel, just before the theme switcher, when asked (site-backdrop R6.7)", () => {
+    render(
+      <MemoryRouter>
+        <SiteHeader showBackdropPause />
+      </MemoryRouter>,
+    );
+
+    const utilities = within(openPanel());
+    const pause = utilities.getByRole("button", { name: "Pause background animation" });
+    const theme = utilities.getByRole("button", { name: "Theme: Light" });
+    expect(pause).toHaveAttribute("aria-pressed", "false");
+    expect(pause.compareDocumentPosition(theme)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("has no pause toggle by default (site-backdrop R6.7)", () => {
+    renderAt("/");
+
+    expect(
+      within(openPanel()).queryByRole("button", { name: "Pause background animation" }),
+    ).toBeNull();
+  });
 });
 
 describe("SiteHeader: the menu button and panel (site-refresh R8)", () => {

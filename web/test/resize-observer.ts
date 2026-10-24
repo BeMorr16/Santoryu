@@ -24,14 +24,14 @@ class FakeResizeObserver implements ResizeObserver {
     observers.delete(this);
   }
 
-  notify(target: Element, blockSize: number): void {
-    const size: ResizeObserverSize = { blockSize, inlineSize: 0 };
+  notify(target: Element, blockSize: number, inlineSize: number): void {
+    const size: ResizeObserverSize = { blockSize, inlineSize };
     const entry = {
       target,
       borderBoxSize: [size],
       contentBoxSize: [size],
       devicePixelContentBoxSize: [size],
-      contentRect: DOMRectReadOnly.fromRect({ height: blockSize }),
+      contentRect: DOMRectReadOnly.fromRect({ width: inlineSize, height: blockSize }),
     } satisfies ResizeObserverEntry;
     this.#callback([entry], this);
   }
@@ -43,9 +43,9 @@ export function installResizeObserver(): void {
   if (!("ResizeObserver" in globalThis)) globalThis.ResizeObserver = FakeResizeObserver;
 }
 
-/** Reports a new border-box block size for `target` to every observer watching it. */
-export function resize(target: Element, blockSize: number): void {
+/** Reports a new box size for `target` to every observer watching it. */
+export function resize(target: Element, blockSize: number, inlineSize = 0): void {
   for (const observer of observers) {
-    if (observer.targets.has(target)) observer.notify(target, blockSize);
+    if (observer.targets.has(target)) observer.notify(target, blockSize, inlineSize);
   }
 }

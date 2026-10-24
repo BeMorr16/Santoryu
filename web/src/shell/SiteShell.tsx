@@ -62,7 +62,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       >
         Skip to main content
       </VisuallyHidden>
-      <SiteHeader ref={headerRef} />
+      <SiteHeader ref={headerRef} showBackdropPause={backdrop === "striking"} />
       <div className={cx(styles.body, Aside && styles.withAside)}>
         {/* Before main, so the skip link bypasses it; the key remounts it collapsed after every navigation. */}
         {Aside && <Aside key={pathname} />}
