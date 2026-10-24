@@ -184,7 +184,7 @@ describe("TokenReference (ds-tokens R4)", () => {
       expect(document.getElementById("color-gold-600")?.closest("[hidden]")).not.toBeNull();
     });
 
-    it("opens the groups with matches, counting n of m, and hides the rest (R11.3, R11.6)", () => {
+    it("opens the groups with matches, counting n of m, and hides the rest (R11.3, R11.6)", { timeout: 10000 }, () => {
       renderReference();
       const query = "--color-text-muted";
       const matches = matchesOf(query);

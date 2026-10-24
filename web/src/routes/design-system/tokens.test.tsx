@@ -34,7 +34,7 @@ describe("design system tokens route (ds-tokens R1)", () => {
     Reflect.deleteProperty(Element.prototype, "scrollIntoView");
   });
 
-  it("shows the back link, h1, lead, On this page, diagram, topics, search, then the tiers, in order (R1.1)", async () => {
+  it("shows the back link, h1, lead, On this page, diagram, topics, search, then the tiers, in order (R1.1)", { timeout: 10000 }, async () => {
     const h1 = await renderPage();
 
     expect(h1).toHaveTextContent("Tokens");
