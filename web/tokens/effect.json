@@ -205,7 +205,7 @@
       "$type": "dimension",
       "width": {
         "$value": "{effect.line.1}",
-        "$description": "Width of the backdrop grid lines: kept faint, thinner than borders."
+        "$description": "Width of the decorative grid pattern's lines (Card showcase media, color-ramp checkerboard): kept faint, thinner than borders."
       }
     },
     "underline": {

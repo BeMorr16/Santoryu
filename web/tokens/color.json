@@ -565,7 +565,7 @@
       }
     },
     "overlay": {
-      "$description": "Translucent primitives. Only color.surface.glass, color.grid.line, color.fill.none and color.fill.scrim may alias them.",
+      "$description": "Translucent primitives. Only color.surface.glass, color.grid.line, color.backdrop.glow, color.backdrop.frame, color.fill.none and color.fill.scrim may alias them.",
       "sand-50-85": {
         "$value": {
           "colorSpace": "srgb",
@@ -601,6 +601,33 @@
           "hex": "#bac5d9"
         },
         "$description": "A light slate (#bac5d9) at 10% opacity. Dark-theme grid lines."
+      },
+      "cyan-300-24": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.3294, 0.8471, 0.9569],
+          "alpha": 0.24,
+          "hex": "#54d8f4"
+        },
+        "$description": "cyan.300 at 24% opacity. Dark-theme glow behind the backdrop sphere."
+      },
+      "violet-600-40": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.3569, 0.2471, 0.651],
+          "alpha": 0.4,
+          "hex": "#5b3fa6"
+        },
+        "$description": "violet.600 at 40% opacity. Dark-theme frame glow."
+      },
+      "cyan-300-30": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [0.3294, 0.8471, 0.9569],
+          "alpha": 0.3,
+          "hex": "#54d8f4"
+        },
+        "$description": "cyan.300 at 30% opacity. Light-theme glow behind the backdrop sphere, and frame glow."
       },
       "gray-950-40": {
         "$value": {

@@ -6,6 +6,7 @@ import { focusWithoutScroll, pageFocusTarget } from "../components/shared/focus.
 import { Stack } from "../components/Stack/Stack.tsx";
 import { VisuallyHidden } from "../components/VisuallyHidden/VisuallyHidden.tsx";
 import { footerText } from "../site.config.ts";
+import { Backdrop } from "./backdrop/Backdrop.tsx";
 import { useRouteHandle } from "./route-handle.ts";
 import { SiteHeader } from "./SiteHeader.tsx";
 import styles from "./SiteShell.module.css";
@@ -14,7 +15,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const headerRef = useRef<HTMLElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
-  const { Aside, backToTop = true } = useRouteHandle();
+  const { Aside, backToTop = true, backdrop = "quiet" } = useRouteHandle();
   // Comparing paths (rather than skipping the first run) stays correct when StrictMode re-runs effects.
   const previousPathname = useRef(pathname);
 
@@ -48,6 +49,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   return (
     <div className={styles.page}>
+      {/* Fixed at layer.backdrop (-1), so its place in the order doesn't matter (site-backdrop R1.1). */}
+      <Backdrop kind={backdrop} />
       <VisuallyHidden
         as="a"
         focusable

@@ -1,6 +1,9 @@
 import { Link } from "../components/Link/Link.tsx";
+import type { RouteHandle } from "../shell/route-handle.ts";
 import { siteName } from "../site.config.ts";
 import type { Route } from "./+types/not-found";
+
+export const handle = { backdrop: "striking" } satisfies RouteHandle;
 
 export function meta(): Route.MetaDescriptors {
   return [

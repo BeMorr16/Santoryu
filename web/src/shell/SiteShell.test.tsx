@@ -5,6 +5,7 @@ import { Link, Meta, Outlet, createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import { resize } from "../../test/resize-observer.ts";
 import stackStyles from "../components/Stack/Stack.module.css";
+import backdropStyles from "./backdrop/Backdrop.module.css";
 import { SiteShell } from "./SiteShell.tsx";
 
 /** A stateful aside, so a test can tell a remount (state reset) from a re-render. */
@@ -77,6 +78,16 @@ function renderAt(path: string, { strict = false } = {}) {
           path: "with-aside/other",
           handle: { Aside: TestAside },
           Component: () => <h1>Other aside page</h1>,
+        },
+        {
+          path: "striking",
+          handle: { backdrop: "striking" },
+          Component: () => (
+            <>
+              <h1>Striking page</h1>
+              <Link to="/design-system">Go to Design System</Link>
+            </>
+          ),
         },
       ],
     },
@@ -245,5 +256,32 @@ describe("SiteShell", () => {
 
     expect(await screen.findByRole("heading", { name: "No Back to top" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Back to top", hidden: true })).toBeNull();
+  });
+
+  it("renders the quiet backdrop by default (site-backdrop R1.1)", () => {
+    const { container } = renderAt("/");
+
+    expect(container.getElementsByClassName(backdropStyles.quiet ?? "")).toHaveLength(1);
+    expect(container.querySelector("canvas")).toBeNull();
+  });
+
+  it("renders the striking backdrop for a route whose handle asks for it (site-backdrop R1.1)", async () => {
+    const { container } = renderAt("/striking");
+
+    expect(await screen.findByRole("heading", { name: "Striking page" })).toBeInTheDocument();
+    expect(container.querySelectorAll("canvas")).toHaveLength(1);
+    expect(container.getElementsByClassName(backdropStyles.quiet ?? "")).toHaveLength(0);
+  });
+
+  it("swaps the sphere for the frame glow on navigating to a quiet page (site-backdrop R1.4)", async () => {
+    const user = userEvent.setup();
+    const { container } = renderAt("/striking");
+    await screen.findByRole("heading", { name: "Striking page" });
+
+    await user.click(screen.getByRole("link", { name: "Go to Design System" }));
+
+    expect(await screen.findByRole("heading", { name: "Design System page" })).toBeInTheDocument();
+    expect(container.querySelector("canvas")).toBeNull();
+    expect(container.getElementsByClassName(backdropStyles.quiet ?? "")).toHaveLength(1);
   });
 });

@@ -36,7 +36,7 @@
   --_border-hover: var(--component-card-flat-border-hover);
 }
 
-/* Glass only over a varied backdrop (decision 0006). */
+/* Glass only over a varied backdrop (decision 0015). */
 .glass {
   --_background: var(--component-card-glass-background);
   --_border: var(--component-card-glass-border);

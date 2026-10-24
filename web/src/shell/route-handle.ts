@@ -1,12 +1,18 @@
 import type { ComponentType } from "react";
 import { useMatches } from "react-router";
 
+/** The backdrop behind a page (site-backdrop R1): the dot sphere, or the frame glow. */
+export type BackdropKind = "striking" | "quiet";
+const backdropKinds: readonly BackdropKind[] = ["striking", "quiet"];
+
 /** What a route module's `handle` export can ask of the site shell (ds-components design §4). */
 export interface RouteHandle {
   /** Rendered before `main`, outside it, as a side column on wide screens. */
   Aside?: ComponentType;
   /** False hides the site's Back to top button on this route. */
   backToTop?: boolean;
+  /** The page's backdrop (site-backdrop R1). Default "quiet". */
+  backdrop?: BackdropKind;
 }
 
 /** An object whose shell fields, where present, have the right types. */
@@ -14,9 +20,11 @@ export function isRouteHandle(handle: unknown): handle is RouteHandle {
   if (typeof handle !== "object" || handle === null) return false;
   const Aside = "Aside" in handle ? handle.Aside : undefined;
   const backToTop = "backToTop" in handle ? handle.backToTop : undefined;
+  const backdrop = "backdrop" in handle ? handle.backdrop : undefined;
   return (
     (Aside === undefined || typeof Aside === "function") &&
-    (backToTop === undefined || typeof backToTop === "boolean")
+    (backToTop === undefined || typeof backToTop === "boolean") &&
+    (backdrop === undefined || backdropKinds.some((kind) => kind === backdrop))
   );
 }
 
@@ -27,6 +35,7 @@ export function useRouteHandle(): RouteHandle {
     if (!isRouteHandle(handle)) continue;
     if (handle.Aside !== undefined) merged.Aside = handle.Aside;
     if (handle.backToTop !== undefined) merged.backToTop = handle.backToTop;
+    if (handle.backdrop !== undefined) merged.backdrop = handle.backdrop;
   }
   return merged;
 }

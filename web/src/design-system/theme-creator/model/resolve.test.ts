@@ -176,6 +176,42 @@ describe("resolveTheme: color families (R5.1–R5.3)", () => {
   });
 });
 
+describe("resolveTheme: backdrop colors (site-backdrop R3.4)", () => {
+  const hue = (theme: ReturnType<typeof resolveTheme>, token: string) => {
+    const srgb = theme.semantic[token]?.srgb;
+    if (!srgb) throw new Error(`${token} has no color`);
+    return srgbToOklch(srgb).h;
+  };
+
+  it.each(["light", "dark"] as const)(
+    "carries the sphere and frame colors to a custom accent's hue (%s)",
+    (base) => {
+      const accent = "#b25a12";
+      const theme = resolveTheme(source(base, { accent }));
+
+      for (const token of [
+        "color.backdrop.dot-near",
+        "color.backdrop.dot-far",
+        "color.backdrop.glow",
+        "color.backdrop.frame",
+      ]) {
+        expect(theme.sources[token], token).toBe("key:accent");
+        expectHue(hue(theme, token), hexToOklch(accent).h);
+      }
+    },
+  );
+
+  it.each([
+    ["dark", 0.24, 0.4],
+    ["light", 0.3, 0.3],
+  ] as const)("keeps the glows' alpha under a custom accent (%s)", (base, glow, frame) => {
+    const theme = resolveTheme(source(base, { accent: "#b25a12" }));
+
+    expect(theme.semantic["color.backdrop.glow"]?.alpha).toBe(glow);
+    expect(theme.semantic["color.backdrop.frame"]?.alpha).toBe(frame);
+  });
+});
+
 describe("resolveTheme: background and scheme (R2.5, R5.3)", () => {
   it("flips a light base to dark for a dark background, mirroring the text", () => {
     const theme = resolveTheme(source("light", { background: "#0b2338" }));

@@ -591,10 +591,28 @@
         }
       }
     },
+    "backdrop": {
+      "dot-near": {
+        "$value": "{color.cyan.700}",
+        "$description": "Nearest, brightest dot of the page backdrop layer's sphere. Decorative; not contrast-checked."
+      },
+      "dot-far": {
+        "$value": "{color.cyan.500}",
+        "$description": "Farthest, faintest dot of the page backdrop layer's sphere. Decorative; not contrast-checked."
+      },
+      "glow": {
+        "$value": "{color.overlay.cyan-300-30}",
+        "$description": "Translucent glow of the page backdrop layer, behind the sphere. Decorative; not contrast-checked."
+      },
+      "frame": {
+        "$value": "{color.overlay.cyan-300-30}",
+        "$description": "Translucent glow of the page backdrop layer's frame: an even band along every edge of quiet pages. Decorative; not contrast-checked."
+      }
+    },
     "grid": {
       "line": {
         "$value": "{color.overlay.cyan-700-8}",
-        "$description": "Faint blueprint grid lines on the page backdrop. Decorative; not contrast-checked."
+        "$description": "Faint lines of the decorative grid pattern (Card showcase media, color-ramp checkerboard). Decorative; not contrast-checked."
       }
     },
     "fill": {

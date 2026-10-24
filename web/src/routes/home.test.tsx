@@ -4,8 +4,9 @@ import { describe, expect, it } from "vitest";
 import linkStyles from "../components/Link/Link.module.css";
 import typographyStyles from "../components/Typography/Typography.module.css";
 import { homeContent } from "../content/home.ts";
+import { isRouteHandle } from "../shell/route-handle.ts";
 import { siteUrl } from "../site.config.ts";
-import Home, { links, meta } from "./home.tsx";
+import Home, { handle, links, meta } from "./home.tsx";
 
 function renderHome() {
   const Stub = createRoutesStub([{ path: "/", Component: Home }]);
@@ -62,5 +63,10 @@ describe("home route", () => {
 
   it("links the canonical URL to the site root", () => {
     expect(links()).toEqual([{ rel: "canonical", href: `${siteUrl}/` }]);
+  });
+
+  it("asks for the striking backdrop (site-backdrop R1.3)", () => {
+    expect(isRouteHandle(handle)).toBe(true);
+    expect(handle.backdrop).toBe("striking");
   });
 });

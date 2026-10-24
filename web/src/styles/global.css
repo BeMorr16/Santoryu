@@ -28,22 +28,10 @@ html {
   }
 }
 
-/* The blueprint backdrop: a faint drafting grid drawn with two gradients, no images. */
+/* The page color; the backdrop layer (shell/backdrop) draws over it. */
 body {
   margin: 0;
   background-color: var(--color-surface-base);
-  background-image:
-    linear-gradient(
-      to right,
-      var(--color-grid-line) var(--effect-grid-width),
-      transparent var(--effect-grid-width)
-    ),
-    linear-gradient(
-      to bottom,
-      var(--color-grid-line) var(--effect-grid-width),
-      transparent var(--effect-grid-width)
-    );
-  background-size: var(--size-pattern-cell) var(--size-pattern-cell);
   color: var(--color-text-default);
   font-family: var(--type-family-body);
   font-size: var(--type-size-body);

@@ -95,8 +95,8 @@
 }
 
 /*
- * Behind the Card section's variants (refinement R8.14): only glass's checked backdrops, the
- * blueprint grid on surface.base (as on body) and a band of action.background. The band stays in
+ * Behind the Card section's variants (refinement R8.14): only glass's checked backdrops, this
+ * showcase's own blueprint grid on surface.base and a band of action.background. The band stays in
  * the right half, 60–85% down, so at any column count it misses the transparent outlined card.
  */
 .glassBackdrop {

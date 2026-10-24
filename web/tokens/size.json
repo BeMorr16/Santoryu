@@ -120,7 +120,7 @@
     "pattern": {
       "cell": {
         "$value": "{size.6}",
-        "$description": "Cell size of the blueprint backdrop grid."
+        "$description": "Cell size of the decorative grid pattern (Card showcase media, color-ramp checkerboard)."
       }
     },
     "viewport-height": {

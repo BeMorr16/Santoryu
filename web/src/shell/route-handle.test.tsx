@@ -13,11 +13,12 @@ function LeafAside() {
 
 /** Renders what the merged handle holds, so the tests read it as a user would. */
 function HandleReport() {
-  const { Aside, backToTop } = useRouteHandle();
+  const { Aside, backToTop, backdrop } = useRouteHandle();
   return (
     <>
       {Aside ? <Aside /> : <p>No aside</p>}
       <p>{`Back to top: ${String(backToTop)}`}</p>
+      <p>{`Backdrop: ${String(backdrop)}`}</p>
     </>
   );
 }
@@ -45,6 +46,7 @@ describe("useRouteHandle", () => {
 
     expect(await screen.findByText("No aside")).toBeInTheDocument();
     expect(screen.getByText("Back to top: undefined")).toBeInTheDocument();
+    expect(screen.getByText("Backdrop: undefined")).toBeInTheDocument();
   });
 
   it("merges handles root to leaf, so the deepest route wins", async () => {
@@ -53,6 +55,12 @@ describe("useRouteHandle", () => {
     expect(await screen.findByText("Leaf aside")).toBeInTheDocument();
     expect(screen.queryByText("Root aside")).not.toBeInTheDocument();
     expect(screen.getByText("Back to top: false")).toBeInTheDocument();
+  });
+
+  it("lets the leaf's backdrop win over the root's (site-backdrop R1.2)", async () => {
+    renderWith({ backdrop: "quiet" }, { backdrop: "striking" });
+
+    expect(await screen.findByText("Backdrop: striking")).toBeInTheDocument();
   });
 
   it("keeps a parent's field the leaf doesn't set", async () => {
@@ -67,6 +75,7 @@ describe("useRouteHandle", () => {
     ["a number", 1],
     ["null", null],
     ["a wrongly typed field", { backToTop: "no" }],
+    ["an unknown backdrop", { backdrop: "loud" }],
   ])("ignores a handle that is %s", async (_kind, leafHandle) => {
     renderWith({ Aside: RootAside, backToTop: true }, leafHandle);
 
@@ -76,17 +85,27 @@ describe("useRouteHandle", () => {
 });
 
 describe("isRouteHandle", () => {
-  it.each([{}, { Aside: RootAside }, { backToTop: false }, { other: 1 }])(
-    "accepts %o",
-    (handle) => {
-      expect(isRouteHandle(handle)).toBe(true);
-    },
-  );
+  it.each([
+    {},
+    { Aside: RootAside },
+    { backToTop: false },
+    { backdrop: "striking" },
+    { backdrop: "quiet" },
+    { other: 1 },
+  ])("accepts %o", (handle) => {
+    expect(isRouteHandle(handle)).toBe(true);
+  });
 
-  it.each([undefined, null, "aside", 1, { Aside: "RootAside" }, { backToTop: "false" }])(
-    "rejects %o",
-    (handle) => {
-      expect(isRouteHandle(handle)).toBe(false);
-    },
-  );
+  it.each([
+    undefined,
+    null,
+    "aside",
+    1,
+    { Aside: "RootAside" },
+    { backToTop: "false" },
+    { backdrop: "loud" },
+    { backdrop: 1 },
+  ])("rejects %o", (handle) => {
+    expect(isRouteHandle(handle)).toBe(false);
+  });
 });

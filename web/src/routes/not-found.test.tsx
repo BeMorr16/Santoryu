@@ -2,9 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { Outlet, createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import linkStyles from "../components/Link/Link.module.css";
+import { isRouteHandle } from "../shell/route-handle.ts";
 import * as notFoundModule from "./not-found.tsx";
 
-const { default: NotFound, meta } = notFoundModule;
+const { default: NotFound, handle, meta } = notFoundModule;
 
 function renderAt(path: string) {
   const Stub = createRoutesStub([
@@ -46,6 +47,11 @@ describe("not-found route", () => {
       { name: "description", content: expect.any(String) as string },
       { name: "robots", content: "noindex" },
     ]);
+  });
+
+  it("asks for the striking backdrop (site-backdrop R1.3)", () => {
+    expect(isRouteHandle(handle)).toBe(true);
+    expect(handle.backdrop).toBe("striking");
   });
 
   it("has no canonical link", () => {

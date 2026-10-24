@@ -1,8 +1,11 @@
 import { Link } from "../components/Link/Link.tsx";
 import { Typography } from "../components/Typography/Typography.tsx";
 import { homeContent } from "../content/home.ts";
+import type { RouteHandle } from "../shell/route-handle.ts";
 import { siteUrl } from "../site.config.ts";
 import type { Route } from "./+types/home";
+
+export const handle = { backdrop: "striking" } satisfies RouteHandle;
 
 export function meta(): Route.MetaDescriptors {
   return [{ title: homeContent.title }, { name: "description", content: homeContent.description }];

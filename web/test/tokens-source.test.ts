@@ -53,6 +53,7 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
       "border",
       "focus",
       "grid",
+      "backdrop",
       "fill",
     ],
   },
@@ -84,7 +85,10 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
     primitive: ["shadow", "line", "blur-radius"],
     semantic: ["elevation", "focus-ring", "backdrop", "border", "grid", "underline"],
   },
-  layer: { primitive: ["1", "2", "3"], semantic: ["raised", "sticky", "overlay"] },
+  layer: {
+    primitive: ["below", "1", "2", "3"],
+    semantic: ["backdrop", "raised", "sticky", "overlay"],
+  },
 };
 
 // Every semantic token, per site-foundation design §4.3, component-library design §4.1,
@@ -133,6 +137,10 @@ const expectedSemantic = [
   "color.border.strong",
   "color.focus.ring",
   "color.grid.line",
+  "color.backdrop.dot-near",
+  "color.backdrop.dot-far",
+  "color.backdrop.glow",
+  "color.backdrop.frame",
   "color.fill.none",
   "color.fill.scrim",
   "type.family.body",
@@ -211,6 +219,7 @@ const expectedSemantic = [
   "effect.underline.thickness",
   "effect.underline.thickness-hover",
   "effect.underline.offset",
+  "layer.backdrop",
   "layer.raised",
   "layer.sticky",
   "layer.overlay",
@@ -220,6 +229,8 @@ const expectedSemantic = [
 const overlayAliases = [
   "color.surface.glass",
   "color.grid.line",
+  "color.backdrop.glow",
+  "color.backdrop.frame",
   "color.fill.none",
   "color.fill.scrim",
 ];
@@ -340,7 +351,7 @@ describe("token source files", () => {
     expect([...semanticPaths].sort()).toEqual([...expectedSemantic].sort());
   });
 
-  it("aliases color.overlay.* primitives only from glass, grid lines, the empty fill and the scrim", () => {
+  it("aliases color.overlay.* primitives only from glass, grid lines, backdrop glows, the empty fill and the scrim", () => {
     const aliasing = allTokens.filter((t) => aliasTarget(t.value)?.startsWith("color.overlay."));
     expect(aliasing.length).toBeGreaterThan(0);
     for (const token of aliasing) {
