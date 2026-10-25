@@ -1,6 +1,6 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { chooseInMenu, example, main, storeTheme, tokenColor } from "./support.ts";
+import { chooseInMenu, example, gotoSettled, main, storeTheme, tokenColor } from "./support.ts";
 
 // surface.base per theme, from the token metadata.
 const pageBackground = {
@@ -107,7 +107,7 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto("/");
+    await gotoSettled(page, "/");
 
     const { element, popup, trigger } = await openPopup(page, switcher(page));
 
@@ -120,7 +120,7 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
 
   test("the header popup stays inside a 320px viewport", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
-    await page.goto("/");
+    await gotoSettled(page, "/");
     await openHeaderPanel(page);
 
     const { popup } = await openPopup(page, switcher(page));
@@ -150,7 +150,7 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 320, height: 640 });
-    await page.goto("/");
+    await gotoSettled(page, "/");
     await openHeaderPanel(page);
     await expect(visibleLabel(switcher(page))).toHaveCount(0);
     await expect(switcher(page)).toHaveAccessibleName(/^Theme: (Light|Dark)$/);
@@ -186,7 +186,7 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
     page,
   }) => {
     await page.emulateMedia({ colorScheme: "light" });
-    await page.goto("/");
+    await gotoSettled(page, "/");
     const trigger = switcher(page);
     const popup = page.locator(`[id="${(await trigger.getAttribute("aria-controls")) ?? ""}"]`);
     await trigger.click();
@@ -203,7 +203,7 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
   });
 
   test("the header chevron flips while the menu is open", async ({ page }) => {
-    await page.goto("/");
+    await gotoSettled(page, "/");
     const chevron = switcher(page).locator("svg").last();
     await expect(chevron).toBeVisible();
     await expect(chevron).toHaveCSS("rotate", "none");
@@ -219,7 +219,7 @@ test.describe("placement, label and chevron (refinement R10.1–R10.3)", () => {
 test.describe("preference across pages (R13.3, R16.4)", () => {
   test("survives reload and client-side navigation", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "light" });
-    await page.goto("/");
+    await gotoSettled(page, "/");
 
     await chooseInMenu(page, switcher(page), "Dark");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -238,7 +238,7 @@ test.describe("preference across pages (R13.3, R16.4)", () => {
 
   test("with no choice, shows and follows the OS scheme live (R13.6)", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "light" });
-    await page.goto("/");
+    await gotoSettled(page, "/");
 
     await expect(switcher(page)).toHaveAccessibleName("Theme: Light");
     await expect(page.locator("html")).not.toHaveAttribute("data-theme");
@@ -252,7 +252,7 @@ test.describe("preference across pages (R13.3, R16.4)", () => {
 
   test("a choice wins over a later OS change", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "light" });
-    await page.goto("/");
+    await gotoSettled(page, "/");
 
     await chooseInMenu(page, switcher(page), "Light");
     await page.emulateMedia({ colorScheme: "dark" });
@@ -265,7 +265,7 @@ test.describe("preference across pages (R13.3, R16.4)", () => {
   test("follows a change made in another tab (R13.7)", async ({ context }) => {
     const first = await context.newPage();
     const second = await context.newPage();
-    await first.goto("/");
+    await gotoSettled(first, "/");
     await second.goto("/design-system");
 
     await chooseInMenu(first, switcher(first), "Dark");
@@ -294,7 +294,7 @@ test.describe("fallbacks (R13.5, R13.9)", () => {
         },
       });
     });
-    await page.goto("/");
+    await gotoSettled(page, "/");
 
     await expect(switcher(page)).toHaveAccessibleName("Theme: Light");
     await expect(page.locator("html")).not.toHaveAttribute("data-theme");

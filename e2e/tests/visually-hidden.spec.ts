@@ -1,6 +1,6 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator } from "@playwright/test";
-import { main, tabKey, tokenColor } from "./support.ts";
+import { gotoSettled, main, tabKey, tokenColor } from "./support.ts";
 
 /** The element's box in page coordinates, so scrolling to a focused element doesn't move it. */
 async function pageBox(locator: Locator) {
@@ -65,7 +65,7 @@ test.describe("VisuallyHidden (refinement R2)", () => {
     page,
     browserName,
   }) => {
-    await page.goto("/");
+    await gotoSettled(page, "/");
 
     await page.keyboard.press(tabKey(browserName));
 

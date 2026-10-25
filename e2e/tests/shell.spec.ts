@@ -1,6 +1,6 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Page } from "@playwright/test";
-import { tabKey, tokenColor } from "./support.ts";
+import { gotoSettled, tabKey, tokenColor } from "./support.ts";
 
 const nav = (page: Page) => page.getByRole("navigation", { name: "Primary" });
 const home = (page: Page) =>
@@ -14,7 +14,7 @@ const rootStyle = (page: Page, property: string) =>
 test("focuses the new page's h1 after navigation, with a ring after the keyboard (refinement R11.1, R11.2)", async ({
   page,
 }) => {
-  await page.goto("/");
+  await gotoSettled(page, "/");
 
   await nav(page).getByRole("link", { name: "Design System" }).focus();
   await page.keyboard.press("Enter");
@@ -170,7 +170,7 @@ test("keeps BM text-colored and never underlined, on hover or as the current pag
 test("never underlines the nav's links, and recolors one on hover (site-refresh, owner's review)", async ({
   page,
 }) => {
-  await page.goto("/");
+  await gotoSettled(page, "/");
   const designSystem = nav(page).getByRole("link", { name: "Design System" });
 
   await expect(designSystem).toHaveCSS("text-decoration-line", "none");

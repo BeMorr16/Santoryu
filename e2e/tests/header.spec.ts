@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { chooseInMenu, tabKey, tokenColor } from "./support.ts";
+import { chooseInMenu, gotoSettled, tabKey, tokenColor } from "./support.ts";
 
 const bar = (page: Page) => page.getByRole("banner");
 const home = (page: Page) => bar(page).getByRole("link", { name: "BM, Ben Morrison, home" });
@@ -46,7 +46,7 @@ test.describe("at 1280×800 (site-refresh R6)", () => {
     page,
     browserName,
   }) => {
-    await page.goto("/");
+    await gotoSettled(page, "/");
 
     await page.keyboard.press(tabKey(browserName));
     await expect(page.getByRole("link", { name: "Skip to main content" })).toBeFocused();
@@ -84,7 +84,7 @@ test.describe("at 375×740 (site-refresh R8)", () => {
   });
 
   test("shows only BM and Menu until Menu opens the panel", async ({ page }) => {
-    await page.goto("/");
+    await gotoSettled(page, "/");
     await expect(home(page)).toBeVisible();
     await expect(menuButton(page)).toHaveAttribute("aria-expanded", "false");
     for (const control of [designSystem, theme, linkedin, contact]) {
@@ -103,7 +103,7 @@ test.describe("at 375×740 (site-refresh R8)", () => {
   });
 
   test("closes on Escape and returns focus to Menu (R8.3)", async ({ page, browserName }) => {
-    await page.goto("/");
+    await gotoSettled(page, "/");
     // From the keyboard: WebKit, like Safari, doesn't focus a button on a click.
     await menuButton(page).focus();
     await page.keyboard.press("Enter");
@@ -118,7 +118,7 @@ test.describe("at 375×740 (site-refresh R8)", () => {
   });
 
   test("closes when a link in it is followed (R8.3)", async ({ page }) => {
-    await page.goto("/");
+    await gotoSettled(page, "/");
     await menuButton(page).click();
 
     await designSystem(page).click();
@@ -132,7 +132,7 @@ test.describe("at 375×740 (site-refresh R8)", () => {
     page,
   }) => {
     await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
-    await page.goto("/");
+    await gotoSettled(page, "/");
     await menuButton(page).click();
 
     await chooseInMenu(page, theme(page), "Dark");

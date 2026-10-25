@@ -1,6 +1,6 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { example, main, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
+import { example, gotoSettled, main, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
 
 const tooltipSection = (page: Page) => main(page);
 
@@ -302,7 +302,7 @@ test.describe("Tooltip at 320px wide (refinement R14.7, R14.9, R14.13)", () => {
     page,
     browserName,
   }) => {
-    await page.goto("/");
+    await gotoSettled(page, "/");
     // At 320px the switcher is in the header's Menu panel (site-refresh R8.2), opened from the keyboard.
     const menu = page.getByRole("banner").getByRole("button", { name: "Menu" });
     await menu.focus();

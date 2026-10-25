@@ -9,7 +9,12 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
-  use: { baseURL, ignoreHTTPSErrors: true },
+  use: {
+    baseURL,
+    ignoreHTTPSErrors: true,
+    // A failure on CI keeps its trace in the uploaded report, so CI-only failures can be diagnosed.
+    trace: process.env.CI ? "retain-on-failure" : "off",
+  },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "webkit", use: { ...devices["Desktop Safari"] } },

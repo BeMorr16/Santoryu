@@ -97,6 +97,22 @@ export async function probe(scope: Locator, property: string, value: string) {
 }
 
 /**
+ * Opens `path` and waits until the page has settled before a test presses keys or clicks
+ * (site-backdrop task 14): the network is quiet, and on Home and the 404 the sphere has drawn its
+ * first frame. That frame only comes after hydration and after the engine's chunk has loaded, so
+ * input never lands mid-hydration (when the header's mount effect would close a panel it opened)
+ * or while the import is in flight (where WebKit under load can stall). The network alone isn't
+ * enough on a slow runner: the chunk is only requested once hydration ends.
+ */
+export async function gotoSettled(page: Page, path: string) {
+  await page.goto(path, { waitUntil: "networkidle" });
+  const sphere = page.locator('canvas[aria-hidden="true"]');
+  // Forced colors hide the sphere and never draw it, so there's no first frame to wait for.
+  const drawn = await page.evaluate(() => !matchMedia("(forced-colors: active)").matches);
+  if (drawn && (await sphere.count()) > 0) await expect(sphere).toHaveCSS("opacity", "1");
+}
+
+/**
  * Waits until no CSS transition or animation is running, so layout is measured as it settles: a
  * resize across size.breakpoint.md, for one, runs the header panel's display transition.
  */
