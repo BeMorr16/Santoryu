@@ -44,8 +44,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       # Runs on a cache hit too: --with-deps installs the OS libraries, which aren't cached.
-      - run: pnpm --filter e2e exec playwright install --with-deps chromium webkit
-      - run: pnpm run test:e2e
+      # Chromium only (decision 0016): Linux WebKit renders in software on these GPU-less runners and
+      # times out on heavy tests; WebKit runs locally on macOS before merging.
+      - run: pnpm --filter e2e exec playwright install --with-deps chromium
+      - run: pnpm --filter e2e exec playwright test --project chromium
       - if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
