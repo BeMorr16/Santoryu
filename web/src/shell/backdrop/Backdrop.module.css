@@ -11,7 +11,11 @@
  * 2026-10-24). The vmin depths keep the band in proportion on phones and wide screens.
  */
 .quiet {
-  box-shadow: inset 0 0 32vmin 4vmin var(--color-backdrop-frame);
+  background-image:
+    linear-gradient(to bottom, var(--color-backdrop-frame), 5vmin, transparent 26vmin),
+    linear-gradient(to top, var(--color-backdrop-frame), 5vmin, transparent 26vmin),
+    linear-gradient(to right, var(--color-backdrop-frame), 5vmin, transparent 26vmin),
+    linear-gradient(to left, var(--color-backdrop-frame), 5vmin, transparent 26vmin);
 }
 
 /* Transparent until the first frame, then faded in; motion.duration.slow is 0 under reduced motion (R2.9). */

@@ -197,11 +197,14 @@ for (const theme of themes) {
     await expect(frameGlow(page)).toHaveCount(1);
     await expect(frameGlow(page)).toHaveCSS("position", "fixed");
     await expect(frameGlow(page)).toHaveCSS("z-index", "-1");
-    const shadow = await frameGlow(page).evaluate((element) => getComputedStyle(element).boxShadow);
+    const glow = await frameGlow(page).evaluate(
+      (element) => getComputedStyle(element).backgroundImage,
+    );
     // The frame color is translucent; tokenColor gives its opaque channels.
     const channels = tokenColor("color.backdrop.frame", theme).slice("rgb(".length, -1);
-    expect(shadow).toContain(`rgba(${channels},`);
-    expect(shadow).toContain("inset");
+    // One gradient in from each edge, in the frame color (owner trial, 2026-10-25).
+    expect(glow.match(/linear-gradient\(/g)).toHaveLength(4);
+    expect(glow).toContain(`rgba(${channels},`);
     await expect(sphere(page)).toHaveCount(0);
   });
 }
