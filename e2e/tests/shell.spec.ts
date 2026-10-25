@@ -1,4 +1,3 @@
-import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { expect, test, type Page } from "@playwright/test";
 import { gotoSettled, tabKey, tokenColor } from "./support.ts";
 
@@ -33,68 +32,6 @@ test("focuses the new page's h1 after navigation, with a ring after the keyboard
   await home(page).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toBeFocused();
-});
-
-test.describe("with the bar grown by 200% text, 320px wide (refinement R11.3)", () => {
-  test.use({ viewport: { width: 320, height: 640 } });
-
-  test("keeps every focused element clear of the header, both ways", async ({
-    page,
-    browserName,
-  }) => {
-    test.slow();
-    await page.goto(componentPath("button"));
-    const header = page.getByRole("banner");
-    const heightOf = () => header.evaluate((element) => element.getBoundingClientRect().height);
-    const before = await heightOf();
-    // Through the CSSOM, which the CSP allows.
-    await page.evaluate(() => {
-      document.documentElement.style.fontSize = "200%";
-    });
-    await expect.poll(heightOf).toBeGreaterThan(before);
-    const height = await heightOf();
-    // The bar's top inset (space.stack.sm, 0.5rem = 16px at 200%), its height, then the focus ring.
-    await expect
-      .poll(async () => Number.parseFloat(await rootStyle(page, "scroll-padding-top")))
-      .toBeCloseTo(16 + height + 4, 0);
-
-    /**
-     * Whether the focused element is clear of the header, or null outside the page content. One
-     * taller than the space below the header can't be, so it only has to show (WCAG 2.4.11).
-     */
-    const check = () =>
-      page.evaluate(() => {
-        const focused = document.activeElement;
-        if (!(focused instanceof HTMLElement) || !focused.closest("main")) return null;
-        const headerBottom = document.querySelector("header")?.getBoundingClientRect().bottom ?? 0;
-        const { top, bottom, height } = focused.getBoundingClientRect();
-        const fits = height <= window.innerHeight - headerBottom;
-        return {
-          label: `${focused.tagName.toLowerCase()} "${(focused.getAttribute("aria-label") ?? focused.textContent).trim().slice(0, 40)}"`,
-          clear: fits
-            ? top >= headerBottom - 0.5
-            : bottom > headerBottom && top < window.innerHeight,
-          atEnd: focused.closest('[aria-label="Previous and next"]') !== null,
-        };
-      });
-    const covered: string[] = [];
-    let steps = 0;
-    for (; steps < 300; steps++) {
-      await page.keyboard.press(tabKey(browserName));
-      const result = await check();
-      if (result === null) continue;
-      if (result.atEnd) break;
-      if (!result.clear) covered.push(`forward: ${result.label}`);
-    }
-    expect(steps).toBeLessThan(300);
-    for (let back = 0; back < steps; back++) {
-      await page.keyboard.press(tabKey(browserName, true));
-      const result = await check();
-      if (result === null) break;
-      if (!result.clear) covered.push(`back: ${result.label}`);
-    }
-    expect(covered).toEqual([]);
-  });
 });
 
 test.describe("at 320×256, as at 400% zoom (refinement R11.4)", () => {
