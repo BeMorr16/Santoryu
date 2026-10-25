@@ -1,0 +1,51 @@
+{
+  "component": {
+    "visually-hidden": {
+      "focusable": {
+        "background": {
+          "$value": "{color.surface.raised}",
+          "$description": "Background while focused (the skip-link look).",
+          "$type": "color"
+        },
+        "text": {
+          "$value": "{color.text.default}",
+          "$description": "Text while focused.",
+          "$type": "color",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.visually-hidden.focusable.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "padding-block": {
+          "$value": "{space.inset.sm}",
+          "$description": "Block padding while focused.",
+          "$type": "dimension"
+        },
+        "padding-inline": {
+          "$value": "{space.inset.md}",
+          "$description": "Inline padding while focused.",
+          "$type": "dimension"
+        },
+        "radius": {
+          "$value": "{radius.control}",
+          "$description": "Corner radius while focused.",
+          "$type": "dimension"
+        },
+        "elevation": {
+          "$value": "{effect.elevation.overlay}",
+          "$description": "Shadow while focused, so it reads above the page.",
+          "$type": "shadow"
+        },
+        "layer": {
+          "$value": "{layer.overlay}",
+          "$description": "Stacking order while focused, above sticky page chrome.",
+          "$type": "number"
+        }
+      }
+    }
+  }
+}

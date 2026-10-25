@@ -1,6 +1,7 @@
 packages:
   - web
   - infra
+  - e2e
 
 minimumReleaseAgeExclude:
   - "@asamuzakjp/dom-selector@10.0.3"

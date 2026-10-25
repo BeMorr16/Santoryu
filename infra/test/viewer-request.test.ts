@@ -1,11 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { renderViewerRequest } from "../src/edge-functions.ts";
 import { SECURITY_HEADERS } from "../src/security-headers.ts";
-import { loadHandler, querystring, type QueryString } from "./edge-harness.ts";
+import { loadHandler } from "../src/edge-runtime.ts";
+import { querystring, type QueryString } from "./edge-harness.ts";
 
 const testConfig = {
   apex: "example.test",
-  files: ["/404.html", "/index.html", "/lab/index.html", "/robots.txt", "/sitemap.xml"],
+  files: [
+    "/404.html",
+    "/index.html",
+    "/design-system/components/index.html",
+    "/design-system/index.html",
+    "/design-system/tokens/index.html",
+    "/robots.txt",
+    "/sitemap.xml",
+  ],
 };
 
 interface Request {
@@ -55,9 +64,14 @@ function expectRewrite(result: Request | Response, uri: string) {
 
 describe("viewer-request: alternate hosts (R1.4)", () => {
   it.each([
-    ["www.example.test", "/lab", "a=1", "https://example.test/lab?a=1"],
+    ["www.example.test", "/design-system", "a=1", "https://example.test/design-system?a=1"],
     ["d123.cloudfront.net", "/", undefined, "https://example.test/"],
-    ["WWW.Example.TEST", "/lab/index.html", undefined, "https://example.test/lab/index.html"],
+    [
+      "WWW.Example.TEST",
+      "/design-system/index.html",
+      undefined,
+      "https://example.test/design-system/index.html",
+    ],
     [
       "www.example.test",
       "/assets/app-1a2b.js",
@@ -69,18 +83,22 @@ describe("viewer-request: alternate hosts (R1.4)", () => {
   });
 
   it("treats the apex in mixed case as the apex", () => {
-    expectRewrite(run("/lab", { host: "Example.TEST" }), "/lab/index.html");
+    expectRewrite(run("/design-system", { host: "Example.TEST" }), "/design-system/index.html");
   });
 });
 
 describe("viewer-request: canonical paths (R2.3, R2.4)", () => {
   it.each([
-    ["/lab/", "https://example.test/lab"],
-    ["/lab//", "https://example.test/lab"],
+    ["/design-system/", "https://example.test/design-system"],
+    ["/design-system//", "https://example.test/design-system"],
     ["//", "https://example.test/"],
     ["/index.html", "https://example.test/"],
-    ["/lab/index.html", "https://example.test/lab"],
-    ["/lab//index.html", "https://example.test/lab"],
+    ["/design-system/index.html", "https://example.test/design-system"],
+    ["/design-system//index.html", "https://example.test/design-system"],
+    ["/design-system/tokens/", "https://example.test/design-system/tokens"],
+    ["/design-system/components/", "https://example.test/design-system/components"],
+    ["/design-system/tokens/index.html", "https://example.test/design-system/tokens"],
+    ["/design-system/components/index.html", "https://example.test/design-system/components"],
   ])("%s → %s", (uri, location) => {
     expectRedirect(run(uri), location);
   });
@@ -98,8 +116,8 @@ describe("viewer-request: query strings on redirects", () => {
   ];
 
   describe.each([
-    ["alternate host", "/lab", "www.example.test", "https://example.test/lab"],
-    ["trailing slash", "/lab/", "example.test", "https://example.test/lab"],
+    ["alternate host", "/design-system", "www.example.test", "https://example.test/design-system"],
+    ["trailing slash", "/design-system/", "example.test", "https://example.test/design-system"],
     ["index.html", "/index.html", "example.test", "https://example.test/"],
   ])("%s redirect", (_, uri, host, base) => {
     it.each(cases)("%s", (__, query, suffix) => {
@@ -111,7 +129,9 @@ describe("viewer-request: query strings on redirects", () => {
 describe("viewer-request: routing (R2.1, R2.2, R2.5, R2.8)", () => {
   it.each([
     ["/", "/index.html"],
-    ["/lab", "/lab/index.html"],
+    ["/design-system", "/design-system/index.html"],
+    ["/design-system/tokens", "/design-system/tokens/index.html"],
+    ["/design-system/components", "/design-system/components/index.html"],
     ["/robots.txt", "/robots.txt"],
     ["/sitemap.xml", "/sitemap.xml"],
     ["/404.html", "/404.html"],
@@ -119,7 +139,7 @@ describe("viewer-request: routing (R2.1, R2.2, R2.5, R2.8)", () => {
     ["/assets/missing.js", "/assets/missing.js"],
     ["/assets", "/404.html"],
     ["/nope", "/404.html"],
-    ["/lab/nope", "/404.html"],
+    ["/design-system/nope", "/404.html"],
     ["/404", "/404.html"],
     ["/__spa-fallback.html", "/404.html"],
     ["/nope.txt", "/404.html"],
@@ -128,7 +148,7 @@ describe("viewer-request: routing (R2.1, R2.2, R2.5, R2.8)", () => {
   });
 
   it("leaves the query string of a rewritten request alone", () => {
-    const result = run("/lab", { query: "a=1" }) as Request;
+    const result = run("/design-system", { query: "a=1" }) as Request;
     expect(result.querystring).toEqual({ a: { value: "1" } });
   });
 });

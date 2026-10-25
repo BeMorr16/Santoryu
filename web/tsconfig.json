@@ -4,7 +4,8 @@
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "types": ["node", "vite/client", "@testing-library/jest-dom/vitest"],
     "jsx": "react-jsx",
-    "rootDirs": [".", "./.react-router/types"]
+    "rootDirs": [".", "./.react-router/types"],
+    "paths": { "@/components/*": ["./src/components/*/index.ts"] }
   },
   "include": ["src", "scripts", "test", "*.ts", ".react-router/types/**/*"]
 }

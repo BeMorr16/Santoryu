@@ -1,0 +1,25 @@
+{
+  "component": {
+    "figure": {
+      "image": {
+        "radius": {
+          "$value": "{radius.surface}",
+          "$type": "dimension",
+          "$description": "Corner radius of the image."
+        },
+        "max-block-size": {
+          "$value": "{size.viewport.image}",
+          "$type": "number",
+          "$description": "Tallest the image gets; it shrinks with its aspect ratio kept."
+        }
+      },
+      "caption": {
+        "gap": {
+          "$value": "{space.stack.xs}",
+          "$type": "dimension",
+          "$description": "Space between the image and the caption below it."
+        }
+      }
+    }
+  }
+}

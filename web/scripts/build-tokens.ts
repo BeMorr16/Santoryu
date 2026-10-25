@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { mkdir, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -6,10 +7,15 @@ import { transformTypes } from "style-dictionary/enums";
 import type { TransformedToken, ValueTransform } from "style-dictionary/types";
 import {
   tokenCategories,
+  type ComponentTokenMeta,
   type ContrastPairing,
+  type DtcgValue,
+  type PrimitiveTokenMeta,
+  type SemanticTokenMeta,
   type TokenCategory,
   type TokenMeta,
   type TokenValue,
+  type UnthemedTokenMeta,
 } from "../src/tokens/types.ts";
 
 interface DtcgDuration {
@@ -45,6 +51,46 @@ export const durationTransform = {
   },
 } satisfies ValueTransform;
 
+/**
+ * Tracking has to scale with font size, but DTCG dimensions allow only px/rem, so
+ * `type.letter-spacing.*` primitives are numbers and get `em` here (decision 0004 amendment).
+ */
+export const letterSpacingTransform = {
+  name: "letter-spacing/em",
+  type: transformTypes.value,
+  filter: (token: TransformedToken) =>
+    token.path[0] === "type" &&
+    token.path[1] === "letter-spacing" &&
+    typeof token.$value === "number",
+  transform: (token: TransformedToken) => `${String(token.$value as number)}em`,
+} satisfies ValueTransform;
+
+/**
+ * A text measure has to follow each element's own font, so `type.line-length.*` primitives are
+ * numbers and get `ch` here, as letter spacing gets `em` (refinement R12.6).
+ */
+export const lineLengthTransform = {
+  name: "line-length/ch",
+  type: transformTypes.value,
+  filter: (token: TransformedToken) =>
+    token.path[0] === "type" && token.path[1] === "line-length" && typeof token.$value === "number",
+  transform: (token: TransformedToken) => `${String(token.$value as number)}ch`,
+} satisfies ValueTransform;
+
+/**
+ * An image cap has to follow the dynamic viewport, which DTCG dimensions (px/rem) can't say, so
+ * `size.viewport-height.*` primitives are numbers and get `dvh` here (refinement R18.7).
+ */
+export const viewportHeightTransform = {
+  name: "viewport-height/dvh",
+  type: transformTypes.value,
+  filter: (token: TransformedToken) =>
+    token.path[0] === "size" &&
+    token.path[1] === "viewport-height" &&
+    typeof token.$value === "number",
+  transform: (token: TransformedToken) => `${String(token.$value as number)}dvh`,
+} satisfies ValueTransform;
+
 const aliasPattern = /^\{([^{}]+)\}$/;
 
 function aliasTarget(value: unknown): string | undefined {
@@ -53,16 +99,34 @@ function aliasTarget(value: unknown): string | undefined {
 
 const tokenPath = (token: TransformedToken) => token.path.join(".");
 
-async function runPass(tokensDir: string, overrideFile: string): Promise<TransformedToken[]> {
-  const include = (await readdir(tokensDir))
+async function jsonFiles(dir: string): Promise<string[]> {
+  if (!existsSync(dir)) return [];
+  return (await readdir(dir))
     .filter((file) => file.endsWith(".json"))
-    .map((file) => join(tokensDir, file));
+    .map((file) => join(dir, file));
+}
+
+async function runPass(tokensDir: string, overrideFile: string): Promise<TransformedToken[]> {
+  // Component tokens alias themed semantics, so every pass needs a full themed set. The light set
+  // is the base; the pass's own override file replaces whatever it redefines.
+  const lightTheme = join(tokensDir, "themes", "light.json");
+  const include = [
+    ...(await jsonFiles(tokensDir)),
+    ...(await jsonFiles(join(tokensDir, "components"))),
+    ...(overrideFile === "light.json" ? [] : [lightTheme]),
+  ];
+  const transforms = [
+    durationTransform,
+    letterSpacingTransform,
+    lineLengthTransform,
+    viewportHeightTransform,
+  ];
   const sd = new StyleDictionary({
     include,
     source: [join(tokensDir, "themes", overrideFile)],
-    hooks: { transforms: { [durationTransform.name]: durationTransform } },
+    hooks: { transforms: Object.fromEntries(transforms.map((t) => [t.name, t])) },
     log: { verbosity: "verbose", warnings: "error", errors: { brokenReferences: "throw" } },
-    platforms: { css: { transformGroup: "css", transforms: [durationTransform.name] } },
+    platforms: { css: { transformGroup: "css", transforms: transforms.map((t) => t.name) } },
   });
   const { allTokens } = await sd.getPlatformTokens("css");
   for (const token of allTokens) {
@@ -85,60 +149,134 @@ function cssValue(token: TransformedToken): string {
   return String(value);
 }
 
+function colorOf(token: TransformedToken, primitive: unknown): Pick<TokenValue, "srgb" | "alpha"> {
+  return token.$type === "color" && isColor(primitive)
+    ? { srgb: primitive.components, alpha: primitive.alpha ?? 1 }
+    : {};
+}
+
 function tokenValue(token: TransformedToken, byPath: Map<string, TransformedToken>): TokenValue {
   const ref = aliasTarget(token.original.$value) ?? tokenPath(token);
-  const value: TokenValue = { css: cssValue(token), ref };
-  const primitive: unknown = byPath.get(ref)?.original.$value;
-  if (token.$type === "color" && isColor(primitive)) {
-    value.srgb = primitive.components;
-    value.alpha = primitive.alpha ?? 1;
-  }
-  return value;
+  return { css: cssValue(token), ref, ...colorOf(token, byPath.get(ref)?.original.$value) };
 }
 
-function contrastOf(token: TransformedToken): ContrastPairing[] {
+function extension(token: TransformedToken, key: string): unknown[] {
   const extensions: unknown = token.$extensions;
-  const pairings = isRecord(extensions) ? extensions["personal-site.contrast"] : undefined;
-  return Array.isArray(pairings) ? (pairings as ContrastPairing[]) : [];
+  const value = isRecord(extensions) ? extensions[key] : undefined;
+  return Array.isArray(value) ? value : [];
 }
 
-const isSemantic = (token: TransformedToken) => aliasTarget(token.original.$value) !== undefined;
+const contrastOf = (token: TransformedToken) =>
+  extension(token, "personal-site.contrast") as ContrastPairing[];
+
+function contrastBackdropOf(token: TransformedToken): { contrastBackdrop?: string[] } {
+  const backdrop = extension(token, "personal-site.contrast-backdrop") as string[];
+  return backdrop.length > 0 ? { contrastBackdrop: backdrop } : {};
+}
+
+const isComponent = (token: TransformedToken) => token.path[0] === "component";
+const isSemantic = (token: TransformedToken) =>
+  !isComponent(token) && aliasTarget(token.original.$value) !== undefined;
+const isPrimitive = (token: TransformedToken) =>
+  !isComponent(token) && aliasTarget(token.original.$value) === undefined;
 const cssVar = (path: string): `--${string}` => `--${path.replaceAll(".", "-")}`;
 
-function declarations(entries: [TokenMeta, TokenValue][], indent: string): string {
+function declarations(entries: [{ cssVar: string }, { css: string }][], indent: string): string {
   return entries.map(([meta, value]) => `${indent}${meta.cssVar}: ${value.css};`).join("\n");
 }
 
-function renderCss(tokens: TokenMeta[]): string {
-  const base = tokens.map((t): [TokenMeta, TokenValue] => [
-    t,
-    t.themed ? t.values.light : t.values.all,
-  ]);
-  const dark = tokens.flatMap((t): [TokenMeta, TokenValue][] =>
-    t.themed ? [[t, t.values.dark]] : [],
-  );
-  const reduced = tokens.flatMap((t): [TokenMeta, TokenValue][] =>
+/**
+ * Unthemed semantics a custom theme can change (theme-creator R5.4–R5.6): type, space, radius and
+ * the border width. Motion is left out, so its reduced-motion values on :root still apply.
+ */
+export const isScopedReset = (token: SemanticTokenMeta): token is UnthemedTokenMeta =>
+  !token.themed &&
+  (["type", "space", "radius"].includes(token.category) || token.name === "effect.border.width");
+
+/** Block structure and order: design §4.4. */
+function renderCss(semantic: SemanticTokenMeta[], component: ComponentTokenMeta[]): string {
+  type Entry = [SemanticTokenMeta, TokenValue];
+  const themed = semantic.filter((t) => t.themed);
+  const base = semantic.map((t): Entry => [t, t.themed ? t.values.light : t.values.all]);
+  // A scoped [data-theme] element is a whole built-in theme, even inside a page whose custom
+  // theme set these on <html> (decision 0012 amendment, 2026-10-23).
+  const reset = semantic.filter(isScopedReset).map((t): Entry => [t, t.values.all]);
+  const light = [...themed.map((t): Entry => [t, t.values.light]), ...reset];
+  const dark = themed.map((t): Entry => [t, t.values.dark]);
+  const scopedDark = [...dark, ...reset];
+  const reduced = semantic.flatMap((t): Entry[] =>
     !t.themed && t.values.reduced ? [[t, t.values.reduced]] : [],
   );
+  const components = component.map((t): [ComponentTokenMeta, { css: string }] => [t, t]);
   return [
     "/* Generated by web/scripts/build-tokens.ts from web/tokens/. Do not edit. */",
     `:root {\n  color-scheme: light;\n${declarations(base, "  ")}\n}`,
     `@media (prefers-color-scheme: dark) {\n  :root:not([data-theme="light"]) {\n    color-scheme: dark;\n${declarations(dark, "    ")}\n  }\n}`,
-    `:root[data-theme="dark"] {\n  color-scheme: dark;\n${declarations(dark, "  ")}\n}`,
-    `:root[data-theme="light"] {\n  color-scheme: light;\n}`,
+    "/* Any element, so a preview panel can scope a theme (R15.7). */",
+    `[data-theme="dark"] {\n  color-scheme: dark;\n${declarations(scopedDark, "  ")}\n}`,
+    `[data-theme="light"] {\n  color-scheme: light;\n${declarations(light, "  ")}\n}`,
+    "/* Re-declared on every [data-theme] element so var() re-resolves against that theme (R2.3). */",
+    `:root,\n[data-theme] {\n${declarations(components, "  ")}\n}`,
     `@media (prefers-reduced-motion: reduce) {\n  :root {\n${declarations(reduced, "    ")}\n  }\n}`,
     "",
   ].join("\n");
 }
 
-function renderTs(tokens: TokenMeta[]): string {
+function renderTs(name: string, type: string, data: unknown[]): string {
   return [
     "// Generated by web/scripts/build-tokens.ts from web/tokens/. Do not edit.",
-    'import type { TokenMeta } from "../tokens/types.ts";',
+    `import type { ${type} } from "../tokens/types.ts";`,
     "",
-    `export const tokens = ${JSON.stringify(tokens, null, 2)} as const satisfies readonly TokenMeta[];`,
+    `export const ${name} = ${JSON.stringify(data, null, 2)} as const satisfies readonly ${type}[];`,
     "",
   ].join("\n");
+}
+
+/** Every custom property tokens.css declares: what a stored custom theme may set (theme-creator §3.4). */
+function renderNames(tokens: TokenMeta[]): string {
+  return [
+    "// Generated by web/scripts/build-tokens.ts from web/tokens/. Do not edit.",
+    "",
+    `export const tokenNames: readonly string[] = ${JSON.stringify(
+      tokens.map((token) => token.cssVar),
+      null,
+      2,
+    )};`,
+    "",
+  ].join("\n");
+}
+
+/** Docs-only metadata for every primitive, with the semantic tokens that alias it (0011). */
+function primitiveMeta(
+  base: TransformedToken[],
+  semantic: SemanticTokenMeta[],
+  categoryOf: (name: string) => TokenCategory,
+): PrimitiveTokenMeta[] {
+  const usedBy = new Map<string, Set<string>>();
+  for (const token of semantic) {
+    for (const value of Object.values(token.values)) {
+      const users = usedBy.get(value.ref) ?? new Set<string>();
+      usedBy.set(value.ref, users.add(token.name));
+    }
+  }
+  const primitives = base.filter(isPrimitive).map((token): PrimitiveTokenMeta => {
+    const name = tokenPath(token);
+    return {
+      tier: "primitive",
+      name,
+      category: categoryOf(name),
+      group: token.path[1] ?? "",
+      type: String(token.$type),
+      description: token.$description ?? "",
+      css: cssValue(token),
+      dtcg: token.original.$value as DtcgValue,
+      ...colorOf(token, token.original.$value),
+      usedBy: [...(usedBy.get(name) ?? [])],
+    };
+  });
+  return primitives.sort(
+    (a, b) => tokenCategories.indexOf(a.category) - tokenCategories.indexOf(b.category),
+  );
 }
 
 export async function buildTokens({
@@ -147,7 +285,7 @@ export async function buildTokens({
 }: {
   tokensDir: string;
   outDir: string;
-}): Promise<TokenMeta[]> {
+}): Promise<{ tokens: TokenMeta[]; primitives: PrimitiveTokenMeta[] }> {
   const base = await runPass(tokensDir, "light.json");
   const dark = await runPass(tokensDir, "dark.json");
   const reduced = await runPass(tokensDir, "reduced-motion.json");
@@ -157,19 +295,25 @@ export async function buildTokens({
   const darkPaths = byPath(dark);
   const reducedPaths = byPath(reduced);
 
-  const tokens = base.filter(isSemantic).map((token): TokenMeta => {
-    const name = tokenPath(token);
-    const category = token.path[0] as TokenCategory;
+  const categoryOf = (name: string): TokenCategory => {
+    const category = name.split(".")[0] as TokenCategory;
     if (!tokenCategories.includes(category)) {
       throw new Error(`Token ${name} is not in a known category (${tokenCategories.join(", ")}).`);
     }
+    return category;
+  };
+
+  const semantic = base.filter(isSemantic).map((token): SemanticTokenMeta => {
+    const name = tokenPath(token);
     const common = {
+      tier: "semantic" as const,
       name,
       cssVar: cssVar(name),
-      category,
+      category: categoryOf(name),
       type: String(token.$type),
       description: token.$description ?? "",
       contrast: contrastOf(token),
+      ...contrastBackdropOf(token),
     };
     const darkToken = darkPaths.get(name);
     if (token.isSource) {
@@ -197,20 +341,65 @@ export async function buildTokens({
       },
     };
   });
+  semantic.sort(
+    (a, b) => tokenCategories.indexOf(a.category) - tokenCategories.indexOf(b.category),
+  );
 
-  tokens.sort((a, b) => tokenCategories.indexOf(a.category) - tokenCategories.indexOf(b.category));
+  const semanticByName = new Map(semantic.map((t) => [t.name, t]));
+  const component = base.filter(isComponent).map((token): ComponentTokenMeta => {
+    const name = tokenPath(token);
+    const aliases = aliasTarget(token.original.$value);
+    const target = semanticByName.get(aliases ?? "");
+    if (aliases === undefined || target === undefined) {
+      throw new Error(
+        `Component token ${name} must be exactly one alias to a semantic token, got ` +
+          JSON.stringify(token.original.$value),
+      );
+    }
+    const values = target.themed
+      ? target.values
+      : {
+          light: target.values.all,
+          dark: target.values.all,
+          ...(target.values.reduced ? { reduced: target.values.reduced } : {}),
+        };
+    return {
+      tier: "component",
+      name,
+      cssVar: cssVar(name),
+      category: target.category,
+      type: String(token.$type),
+      description: token.$description ?? "",
+      contrast: contrastOf(token),
+      component: token.path[1] ?? "",
+      aliases,
+      css: `var(${target.cssVar})`,
+      values,
+    };
+  });
+
+  const tokens: TokenMeta[] = [...semantic, ...component];
+  const primitives = primitiveMeta(base, semantic, categoryOf);
 
   await mkdir(outDir, { recursive: true });
-  await writeFile(join(outDir, "tokens.css"), renderCss(tokens));
-  await writeFile(join(outDir, "tokens.ts"), renderTs(tokens));
-  return tokens;
+  await writeFile(join(outDir, "tokens.css"), renderCss(semantic, component));
+  await writeFile(join(outDir, "tokens.ts"), renderTs("tokens", "TokenMeta", tokens));
+  await writeFile(
+    join(outDir, "primitives.ts"),
+    renderTs("primitives", "PrimitiveTokenMeta", primitives),
+  );
+  await writeFile(join(outDir, "token-names.ts"), renderNames(tokens));
+  return { tokens, primitives };
 }
 
 if (import.meta.main) {
   const webDir = fileURLToPath(new URL("..", import.meta.url));
-  const tokens = await buildTokens({
+  const { tokens, primitives } = await buildTokens({
     tokensDir: join(webDir, "tokens"),
     outDir: join(webDir, "src", "generated"),
   });
-  console.log(`Generated ${String(tokens.length)} semantic tokens into src/generated/.`);
+  const count = (tier: TokenMeta["tier"]) => String(tokens.filter((t) => t.tier === tier).length);
+  console.log(
+    `Generated ${String(primitives.length)} primitive, ${count("semantic")} semantic and ${count("component")} component tokens into src/generated/.`,
+  );
 }

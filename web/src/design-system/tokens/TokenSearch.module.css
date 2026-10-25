@@ -1,0 +1,25 @@
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+}
+
+/* The field and its count, at a readable width. */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-xs);
+  max-inline-size: var(--size-column-md);
+}
+
+.status {
+  min-block-size: 1lh;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--type-size-small);
+}
+
+/* Without scripts it would do nothing, so it isn't shown; prerendered, so nothing shifts (R11.9). */
+:global(:root:not([data-js])) .search {
+  display: none;
+}

@@ -1,0 +1,159 @@
+import { render, screen, within } from "@testing-library/react";
+import { createRef } from "react";
+import { describe, expect, it } from "vitest";
+import { expectNoAxeViolations } from "../../../test/axe.ts";
+import { expectHydratesCleanly } from "../../../test/component.tsx";
+import layout from "../shared/layout.module.css";
+import { Grid } from "./Grid.tsx";
+import styles from "./Grid.module.css";
+
+const cls = (name: string) => styles[name] ?? `missing:${name}`;
+const shared = (name: string) => layout[name] ?? `missing:${name}`;
+
+describe("Grid", () => {
+  it("is a div with md columns and the md gap by default (R9.1)", () => {
+    render(<Grid data-testid="grid" />);
+
+    const grid = screen.getByTestId("grid");
+    expect(grid.tagName).toBe("DIV");
+    expect(grid).toHaveClass(
+      cls("grid"),
+      cls("min-md"),
+      shared("row-gap-md"),
+      shared("column-gap-md"),
+    );
+  });
+
+  it.each(["sm", "md", "lg"] as const)(
+    "sets the column minimum %s through its class (R9.1)",
+    (min) => {
+      render(<Grid data-testid="grid" min={min} />);
+
+      expect(screen.getByTestId("grid")).toHaveClass(cls(`min-${min}`));
+    },
+  );
+
+  it.each(["none", "xs", "sm", "md", "lg", "xl"] as const)(
+    "sets gap %s through the shared row and column classes (refinement R6.5)",
+    (gap) => {
+      render(<Grid data-testid="grid" gap={gap} />);
+
+      expect(screen.getByTestId("grid")).toHaveClass(
+        shared(`row-gap-${gap}`),
+        shared(`column-gap-${gap}`),
+      );
+    },
+  );
+
+  it("lets rowGap and columnGap override gap on their own axis (refinement R7.1)", () => {
+    render(
+      <>
+        <Grid data-testid="row" gap="sm" rowGap="xl" />
+        <Grid data-testid="column" gap="sm" columnGap="none" />
+      </>,
+    );
+
+    const row = screen.getByTestId("row");
+    expect(row).toHaveClass(shared("row-gap-xl"), shared("column-gap-sm"));
+    expect(row).not.toHaveClass(shared("row-gap-sm"));
+    const column = screen.getByTestId("column");
+    expect(column).toHaveClass(shared("row-gap-sm"), shared("column-gap-none"));
+    expect(column).not.toHaveClass(shared("column-gap-sm"));
+  });
+
+  it("stretches few items by default and keeps empty columns with stretch={false} (refinement R7.2)", () => {
+    render(
+      <>
+        <Grid data-testid="default" />
+        <Grid data-testid="fill" stretch={false} />
+      </>,
+    );
+
+    expect(screen.getByTestId("default")).not.toHaveClass(cls("fill"));
+    expect(screen.getByTestId("fill")).toHaveClass(cls("fill"));
+  });
+
+  it("has no column cap by default", () => {
+    render(<Grid data-testid="grid" />);
+
+    const grid = screen.getByTestId("grid");
+    for (const max of [2, 3, 4]) expect(grid).not.toHaveClass(cls(`max-${String(max)}`));
+  });
+
+  it.each([2, 3, 4] as const)("caps columns at %i through its class (refinement R7.3)", (max) => {
+    render(<Grid data-testid="grid" maxColumns={max} />);
+
+    expect(screen.getByTestId("grid")).toHaveClass(cls(`max-${String(max)}`));
+  });
+
+  it.each(["ul", "ol"] as const)("keeps list semantics as %s, without markers (R9.3)", (as) => {
+    render(
+      <Grid as={as}>
+        <li>One</li>
+        <li>Two</li>
+      </Grid>,
+    );
+
+    const list = screen.getByRole("list");
+    expect(list.tagName).toBe(as.toUpperCase());
+    expect(list).toHaveClass(shared("list"));
+    expect(within(list).getAllByRole("listitem")).toHaveLength(2);
+  });
+
+  it("resets a fieldset with the shared class, and the legend names its group (refinement R6.4)", () => {
+    render(
+      <Grid as="fieldset" gap="sm">
+        <legend>Projects to show</legend>
+        <label>
+          <input type="checkbox" defaultChecked /> Personal site
+        </label>
+      </Grid>,
+    );
+
+    expect(screen.getByRole("group", { name: "Projects to show" })).toHaveClass(
+      shared("fieldset"),
+      shared("row-gap-sm"),
+    );
+  });
+
+  it("renders as section (R9.3)", () => {
+    render(<Grid as="section" aria-label="Projects" />);
+
+    expect(screen.getByRole("region", { name: "Projects" }).tagName).toBe("SECTION");
+  });
+
+  it("puts ref, rest props and className on the root (R3.2, R3.3)", () => {
+    const ref = createRef<HTMLDivElement>();
+    render(<Grid ref={ref} data-testid="grid" id="g" className="extra" />);
+
+    const root = screen.getByTestId("grid");
+    expect(ref.current).toBe(root);
+    expect(root).toHaveAttribute("id", "g");
+    expect(root).toHaveClass("extra", cls("grid"));
+  });
+
+  it("renders no style attribute (R3.5)", () => {
+    const { container } = render(<Grid min="lg" gap="xs" />);
+
+    expect(container.querySelector("[style]")).toBeNull();
+  });
+
+  it("hydrates prerendered markup with no mismatch (R3.6)", () => {
+    expectHydratesCleanly(
+      <Grid as="ul" min="sm">
+        <li>One</li>
+      </Grid>,
+    );
+  });
+
+  it("has no axe violations (R3.9)", async () => {
+    const { container } = render(
+      <Grid as="ul">
+        <li>One</li>
+        <li>Two</li>
+      </Grid>,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+});

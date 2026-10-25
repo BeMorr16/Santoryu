@@ -1,0 +1,27 @@
+/*
+ * No margin: the parent's gap spaces it. As wide as its image: the image's width attribute, its
+ * container, or the width at which the image is max-block-size tall, whichever is least
+ * (refinement R18.3, R18.5). Grid places an image at the start, so it's never stretched.
+ */
+.figure {
+  display: grid;
+  /* A track that never outgrows the figure: a failed image is a plain box at its width attribute. */
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--component-figure-caption-gap);
+  inline-size: fit-content;
+  max-inline-size: min(100%, calc(var(--component-figure-image-max-block-size) * var(--_ratio)));
+  margin: 0;
+}
+
+/* Fills the figure, keeping its ratio from width/height, so its box is set before it loads. */
+.image {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--component-figure-image-radius);
+}
+
+/* Adds nothing to the figure's width, so a long caption wraps at the image's (refinement R18.5, R18.6). */
+.caption {
+  contain: inline-size;
+}

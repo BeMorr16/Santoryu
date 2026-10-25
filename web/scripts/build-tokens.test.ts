@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { JSDOM } from "jsdom";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildTokens, durationTransform } from "./build-tokens.ts";
 
@@ -25,6 +26,43 @@ const validTheme = {
   },
 };
 
+/** Whether a top-level style rule matching `element` declares `name`. (@media rules are skipped.) */
+function declares(element: Element, name: string): boolean {
+  return [...element.ownerDocument.styleSheets].some((sheet) =>
+    [...sheet.cssRules].some(
+      (rule) =>
+        rule instanceof CSSStyleRuleOf(element) &&
+        rule.style.getPropertyValue(name) !== "" &&
+        element.matches(rule.selectorText),
+    ),
+  );
+}
+
+/**
+ * A custom property's computed value. jsdom cascades and inherits custom properties but never
+ * substitutes var(). Per CSS Variables, substitution happens on the element that declares the
+ * property and the result is inherited, so resolve each var() on the nearest declaring element.
+ */
+function computedCustomProperty(element: Element, name: string): string {
+  let declaring: Element | null = element;
+  while (declaring && !declares(declaring, name)) declaring = declaring.parentElement;
+  if (!declaring) return "";
+  const at = declaring;
+  const raw = getComputedStyleOf(at).getPropertyValue(name).trim();
+  return raw.replace(/var\(\s*(--[\w-]+)\s*\)/g, (_match, ref: string) =>
+    computedCustomProperty(at, ref),
+  );
+}
+
+function windowOf(element: Element): Window & typeof globalThis {
+  const view = element.ownerDocument.defaultView;
+  if (!view) throw new Error("element has no window");
+  return view;
+}
+
+const getComputedStyleOf = (element: Element) => windowOf(element).getComputedStyle(element);
+const CSSStyleRuleOf = (element: Element) => windowOf(element).CSSStyleRule;
+
 const tempDirs: string[] = [];
 
 async function fixture(
@@ -41,6 +79,7 @@ async function fixture(
     "themes/reduced-motion.json": {},
   };
   for (const [name, content] of Object.entries({ ...defaults, ...files })) {
+    await mkdir(dirname(join(tokensDir, name)), { recursive: true });
     await writeFile(join(tokensDir, name), JSON.stringify(content));
   }
   return { tokensDir, outDir: join(root, "generated") };
@@ -81,6 +120,385 @@ describe("buildTokens", () => {
     });
 
     await expect(buildTokens(dirs)).rejects.toThrow(/space\.4.*\$type|\$type.*space\.4/);
+  });
+});
+
+describe("buildTokens: component tier and scoped themes (design §4.4)", () => {
+  const twoGrays = {
+    color: {
+      $type: "color",
+      gray: {
+        0: { $value: color("#000000"), $description: "Black." },
+        1: {
+          $value: { colorSpace: "srgb", components: [1, 1, 1], alpha: 1, hex: "#ffffff" },
+          $description: "White.",
+        },
+      },
+    },
+  };
+  const textTheme = (primitive: string) => ({
+    color: {
+      $type: "color",
+      text: { default: { $value: `{color.gray.${primitive}}`, $description: "Text." } },
+    },
+  });
+  const typeTokens = {
+    type: {
+      "letter-spacing": {
+        $type: "number",
+        16: { $value: 0.16, $description: "Wide tracking." },
+      },
+      "line-height": {
+        $type: "number",
+        tight: { $value: 1.2, $description: "Tight leading." },
+      },
+      "line-length": {
+        $type: "number",
+        65: { $value: 65, $description: "65ch." },
+      },
+      tracking: {
+        $type: "number",
+        label: { $value: "{type.letter-spacing.16}", $description: "Label tracking." },
+      },
+      leading: {
+        $type: "number",
+        heading: { $value: "{type.line-height.tight}", $description: "Heading leading." },
+      },
+      measure: {
+        $type: "number",
+        text: { $value: "{type.line-length.65}", $description: "Text measure." },
+      },
+    },
+  };
+  const buttonTokens = {
+    component: {
+      button: {
+        $type: "color",
+        text: {
+          $value: "{color.text.default}",
+          $description: "Button text.",
+          $extensions: {
+            "personal-site.contrast": [{ against: "color.text.default", min: "text" }],
+          },
+        },
+      },
+    },
+  };
+
+  async function build(extra: Record<string, unknown> = {}) {
+    const dirs = await fixture({
+      "color.json": twoGrays,
+      "type.json": typeTokens,
+      "themes/light.json": textTheme("0"),
+      "themes/dark.json": textTheme("1"),
+      "components/button.json": buttonTokens,
+      ...extra,
+    });
+    const { tokens, primitives } = await buildTokens(dirs);
+    const css = await readFile(join(dirs.outDir, "tokens.css"), "utf8");
+    return { tokens, primitives, css };
+  }
+
+  /** Top-level rule preludes in order, with `@media` blocks flattened to "@media … inner". */
+  function selectors(css: string): string[] {
+    const result: string[] = [];
+    const pattern = /([^{}]+)\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g;
+    for (const match of css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(pattern)) {
+      const selector = (match[1] ?? "").trim().replace(/\s+/g, " ");
+      const inner = /([^{}]+)\{/.exec(match[2] ?? "");
+      result.push(
+        selector.startsWith("@media") && inner
+          ? `${selector} ${(inner[1] ?? "").trim().replace(/\s+/g, " ")}`
+          : selector,
+      );
+    }
+    return result;
+  }
+
+  function block(css: string, selector: string): string {
+    const start = css.indexOf(`${selector} {`);
+    if (start === -1) throw new Error(`No ${selector} block`);
+    return css.slice(start, css.indexOf("}", start));
+  }
+
+  it("reads tokens/components/*.json", async () => {
+    const { tokens } = await build();
+
+    expect(tokens.map((t) => t.name)).toContain("component.button.text");
+  });
+
+  it("gives component tokens tier, component, aliases and resolved light/dark values", async () => {
+    const { tokens } = await build();
+
+    const button = tokens.find((t) => t.name === "component.button.text");
+    expect(button).toMatchObject({
+      tier: "component",
+      component: "button",
+      aliases: "color.text.default",
+      cssVar: "--component-button-text",
+      css: "var(--color-text-default)",
+      category: "color",
+      description: "Button text.",
+      contrast: [{ against: "color.text.default", min: "text" }],
+      values: {
+        light: { css: "#000000", ref: "color.gray.0", srgb: [0, 0, 0], alpha: 1 },
+        dark: { css: "#ffffff", ref: "color.gray.1" },
+      },
+    });
+    expect(tokens.find((t) => t.name === "color.text.default")).toMatchObject({
+      tier: "semantic",
+    });
+  });
+
+  describe("primitive metadata (ds-tokens design §3.2)", () => {
+    const motion = {
+      "motion.json": {
+        motion: {
+          time: {
+            $type: "duration",
+            0: { $value: { value: 0, unit: "ms" }, $description: "None." },
+            150: { $value: { value: 150, unit: "ms" }, $description: "Fast." },
+          },
+          duration: {
+            $type: "duration",
+            fast: { $value: "{motion.time.150}", $description: "Fast duration." },
+          },
+        },
+      },
+      "themes/reduced-motion.json": {
+        motion: {
+          duration: {
+            $type: "duration",
+            fast: { $value: "{motion.time.0}", $description: "Off." },
+          },
+        },
+      },
+    };
+
+    it("lists every primitive and no semantic or component token", async () => {
+      const { primitives } = await build(motion);
+
+      expect(primitives.map((p) => p.name)).toEqual([
+        "color.gray.0",
+        "color.gray.1",
+        "type.letter-spacing.16",
+        "type.line-height.tight",
+        "type.line-length.65",
+        "motion.time.0",
+        "motion.time.150",
+      ]);
+      expect(primitives.find((p) => p.name === "color.gray.1")).toEqual({
+        tier: "primitive",
+        name: "color.gray.1",
+        category: "color",
+        group: "gray",
+        type: "color",
+        description: "White.",
+        css: "#ffffff",
+        dtcg: { colorSpace: "srgb", components: [1, 1, 1], alpha: 1, hex: "#ffffff" },
+        srgb: [1, 1, 1],
+        alpha: 1,
+        usedBy: ["color.text.default"],
+      });
+    });
+
+    it("carries each primitive's source $value as dtcg (theme-creator §9.1)", async () => {
+      const shadow = {
+        color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.08, hex: "#000000" },
+        offsetX: { value: 0, unit: "px" },
+        offsetY: { value: 1, unit: "px" },
+        blur: { value: 2, unit: "px" },
+        spread: { value: 0, unit: "px" },
+      };
+      const { primitives } = await build({
+        ...motion,
+        "space.json": {
+          space: {
+            $type: "dimension",
+            4: { $value: { value: 1, unit: "rem" }, $description: "1rem." },
+          },
+        },
+        "curve.json": {
+          motion: {
+            curve: { $type: "cubicBezier", out: { $value: [0, 0, 0.2, 1], $description: "Out." } },
+          },
+        },
+        "effect.json": {
+          effect: { shadow: { $type: "shadow", sm: { $value: shadow, $description: "Small." } } },
+        },
+      });
+      const dtcg = (name: string) => primitives.find((p) => p.name === name)?.dtcg;
+
+      expect(dtcg("color.gray.0")).toEqual(color("#000000"));
+      expect(dtcg("space.4")).toEqual({ value: 1, unit: "rem" });
+      expect(dtcg("motion.time.150")).toEqual({ value: 150, unit: "ms" });
+      expect(dtcg("motion.curve.out")).toEqual([0, 0, 0.2, 1]);
+      expect(dtcg("effect.shadow.sm")).toEqual(shadow);
+      expect(dtcg("type.letter-spacing.16")).toBe(0.16);
+    });
+
+    it("applies the CSS value transforms", async () => {
+      const { primitives } = await build(motion);
+      const css = (name: string) => primitives.find((p) => p.name === name)?.css;
+
+      expect(css("type.letter-spacing.16")).toBe("0.16em");
+      expect(css("type.line-length.65")).toBe("65ch");
+      expect(css("motion.time.150")).toBe("150ms");
+    });
+
+    it("lists the semantic tokens aliasing each primitive, in every theme and under reduced motion", async () => {
+      const { primitives } = await build(motion);
+      const usedBy = (name: string) => primitives.find((p) => p.name === name)?.usedBy;
+
+      expect(usedBy("color.gray.0")).toEqual(["color.text.default"]);
+      expect(usedBy("color.gray.1")).toEqual(["color.text.default"]);
+      expect(usedBy("motion.time.150")).toEqual(["motion.duration.fast"]);
+      expect(usedBy("motion.time.0")).toEqual(["motion.duration.fast"]);
+      expect(usedBy("type.line-height.tight")).toEqual(["type.leading.heading"]);
+    });
+
+    it("writes primitives.ts and never emits a primitive as a custom property", async () => {
+      const dirs = await fixture({ "color.json": twoGrays, ...motion });
+      const { primitives } = await buildTokens(dirs);
+      const css = await readFile(join(dirs.outDir, "tokens.css"), "utf8");
+      const ts = await readFile(join(dirs.outDir, "primitives.ts"), "utf8");
+
+      expect(ts).toContain("satisfies readonly PrimitiveTokenMeta[]");
+      for (const { name } of primitives) {
+        expect(ts).toContain(`"name": "${name}"`);
+        expect(css).not.toContain(`--${name.replaceAll(".", "-")}:`);
+      }
+    });
+  });
+
+  it("writes token-names.ts: every custom property tokens.css declares (theme-creator §3.4)", async () => {
+    const dirs = await fixture({
+      "color.json": twoGrays,
+      "type.json": typeTokens,
+      "components/button.json": buttonTokens,
+    });
+    await buildTokens(dirs);
+    const css = await readFile(join(dirs.outDir, "tokens.css"), "utf8");
+    const { tokenNames } = (await import(join(dirs.outDir, "token-names.ts"))) as {
+      tokenNames: readonly string[];
+    };
+
+    const declared = new Set([...css.matchAll(/^\s*(--[a-z0-9-]+):/gm)].map((match) => match[1]));
+    expect(new Set(tokenNames)).toEqual(declared);
+    expect(tokenNames).toHaveLength(declared.size);
+    expect(tokenNames).toContain("--component-button-text");
+  });
+
+  it("emits the blocks of §4.4, in order", async () => {
+    const { css } = await build();
+
+    expect(selectors(css)).toEqual([
+      ":root",
+      '@media (prefers-color-scheme: dark) :root:not([data-theme="light"])',
+      '[data-theme="dark"]',
+      '[data-theme="light"]',
+      ":root, [data-theme]",
+      "@media (prefers-reduced-motion: reduce) :root",
+    ]);
+  });
+
+  it("puts the dark set under [data-theme=dark] and the full light set under [data-theme=light]", async () => {
+    const { css } = await build();
+
+    expect(block(css, '[data-theme="dark"]')).toContain("--color-text-default: #ffffff;");
+    const light = block(css, '[data-theme="light"]');
+    expect(light).toContain("color-scheme: light;");
+    expect(light).toContain("--color-text-default: #000000;");
+  });
+
+  it("re-declares unthemed type, space, radius and border width in each scoped theme, but not motion (decision 0012)", async () => {
+    const { css } = await build({
+      "space.json": {
+        space: {
+          $type: "dimension",
+          4: { $value: { value: 1, unit: "rem" }, $description: "1rem." },
+          inset: { md: { $value: "{space.4}", $description: "Inset." } },
+        },
+      },
+      "motion.json": {
+        motion: {
+          time: {
+            $type: "duration",
+            150: { $value: { value: 150, unit: "ms" }, $description: "Fast." },
+          },
+          duration: {
+            $type: "duration",
+            fast: { $value: "{motion.time.150}", $description: "Fast." },
+          },
+        },
+      },
+    });
+
+    for (const selector of ['[data-theme="dark"]', '[data-theme="light"]']) {
+      const scoped = block(css, selector);
+      expect(scoped).toContain("--space-inset-md: 1rem;");
+      expect(scoped).toContain("--type-leading-heading: 1.2;");
+      expect(scoped).not.toContain("--motion-duration-fast");
+    }
+    expect(block(css, ':root:not([data-theme="light"])')).not.toContain("--space-inset-md");
+  });
+
+  it("emits component tokens as var() references, only in the `:root, [data-theme]` block", async () => {
+    const { css } = await build();
+
+    expect(block(css, ":root,\n[data-theme]")).toContain(
+      "--component-button-text: var(--color-text-default);",
+    );
+    expect(css.match(/--component-button-text:/g)).toHaveLength(1);
+  });
+
+  it("emits type.letter-spacing numbers with em, type.line-length with ch, size.viewport-height with dvh, and no other numbers", async () => {
+    const { css } = await build({
+      "size.json": {
+        size: {
+          "viewport-height": {
+            $type: "number",
+            80: { $value: 80, $description: "80dvh." },
+          },
+          viewport: {
+            $type: "number",
+            image: { $value: "{size.viewport-height.80}", $description: "Image cap." },
+          },
+        },
+      },
+    });
+
+    expect(css).toContain("--type-tracking-label: 0.16em;");
+    expect(css).toContain("--type-measure-text: 65ch;");
+    expect(css).toContain("--size-viewport-image: 80dvh;");
+    expect(css).toContain("--type-leading-heading: 1.2;");
+  });
+
+  it("re-resolves component tokens inside a scoped data-theme=light element in a dark page", async () => {
+    const { css } = await build();
+    const { document } = new JSDOM(
+      `<html data-theme="dark"><head><style>${css}</style></head><body>` +
+        `<div data-theme="light"><span id="inside"></span></div><span id="outside"></span>` +
+        `</body></html>`,
+    ).window;
+
+    const inside = document.getElementById("inside");
+    const outside = document.getElementById("outside");
+    if (!inside || !outside) throw new Error("fixture elements missing");
+    expect(computedCustomProperty(inside, "--component-button-text")).toBe("#000000");
+    expect(computedCustomProperty(outside, "--component-button-text")).toBe("#ffffff");
+  });
+
+  it("rejects a component token that is not exactly one alias, naming the token", async () => {
+    await expect(
+      build({
+        "components/button.json": {
+          component: {
+            button: { $type: "color", text: { $value: color("#000000"), $description: "Raw." } },
+          },
+        },
+      }),
+    ).rejects.toThrow(/component\.button\.text/);
   });
 });
 

@@ -1,0 +1,132 @@
+{
+  "component": {
+    "table": {
+      "background": {
+        "$value": "{color.surface.raised}",
+        "$type": "color",
+        "$description": "Panel fill, and the first body row and every other one after it."
+      },
+      "stripe-background": {
+        "$value": "{color.surface.base}",
+        "$type": "color",
+        "$description": "Fill of the body rows between them (decorative: the table's semantics carry its rows)."
+      },
+      "text": {
+        "$value": "{color.text.default}",
+        "$type": "color",
+        "$description": "Cell text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "component.table.background",
+              "min": "text"
+            },
+            {
+              "against": "component.table.stripe-background",
+              "min": "text"
+            },
+            {
+              "against": "component.table.header.background",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "border": {
+        "$value": "{color.border.subtle}",
+        "$type": "color",
+        "$description": "Panel border and the lines under the head and above the foot (decorative)."
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Line thickness."
+      },
+      "radius": {
+        "$value": "{radius.surface}",
+        "$type": "dimension",
+        "$description": "Panel corner radius."
+      },
+      "header": {
+        "background": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Fill of the head and foot rows."
+        },
+        "font-weight": {
+          "$value": "{type.weight.strong}",
+          "$type": "fontWeight",
+          "$description": "Column header weight, in the head."
+        }
+      },
+      "row-header": {
+        "font-weight": {
+          "$value": "{type.weight.body}",
+          "$type": "fontWeight",
+          "$description": "Row header weight, in the body and foot."
+        }
+      },
+      "cell": {
+        "padding-block": {
+          "$value": "{space.inset.sm}",
+          "$type": "dimension",
+          "$description": "Block padding of every cell."
+        },
+        "padding-inline": {
+          "$value": "{space.inset.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of every cell."
+        }
+      },
+      "caption": {
+        "color": {
+          "$value": "{color.text.muted}",
+          "$type": "color",
+          "$description": "Visible caption text, above the panel.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "color.surface.base",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.raised",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.sunken",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "gap": {
+          "$value": "{space.stack.sm}",
+          "$type": "dimension",
+          "$description": "Space between the caption and the panel."
+        }
+      },
+      "focus-ring-color": {
+        "$value": "{color.focus.ring}",
+        "$type": "color",
+        "$description": "Focus indicator of an overflowing table, around the caption and the panel.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

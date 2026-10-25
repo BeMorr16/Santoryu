@@ -1,0 +1,215 @@
+{
+  "component": {
+    "badge": {
+      "font-family": {
+        "$value": "{type.family.label}",
+        "$type": "fontFamily",
+        "$description": "Badge font (mono)."
+      },
+      "font-size": {
+        "sm": {
+          "$value": "{type.size.label}",
+          "$type": "dimension",
+          "$description": "Small badge text."
+        },
+        "md": {
+          "$value": "{type.size.small}",
+          "$type": "dimension",
+          "$description": "Standard badge text."
+        }
+      },
+      "tracking": {
+        "$value": "{type.tracking.label}",
+        "$type": "number",
+        "$description": "Letter spacing of the uppercase label."
+      },
+      "font-weight": {
+        "$value": "{type.weight.body}",
+        "$type": "fontWeight",
+        "$description": "Badge text weight, the same inside headings and bold text."
+      },
+      "line-height": {
+        "$value": "{type.leading.body}",
+        "$type": "number",
+        "$description": "Badge line height."
+      },
+      "radius": {
+        "$value": "{radius.pill}",
+        "$type": "dimension",
+        "$description": "Badge corners: a pill, unlike the buttons."
+      },
+      "padding-inline": {
+        "sm": {
+          "$value": "{space.inline.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of small badges."
+        },
+        "md": {
+          "$value": "{space.inline.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of standard badges."
+        }
+      },
+      "gap": {
+        "$value": "{space.inline.xs}",
+        "$type": "dimension",
+        "$description": "Space between a badge's icon and its text."
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Badge outline width."
+      },
+      "neutral": {
+        "background": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Neutral badge fill."
+        },
+        "text": {
+          "$value": "{color.text.muted}",
+          "$type": "color",
+          "$description": "Neutral badge text.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.badge.neutral.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.border.subtle}",
+          "$type": "color",
+          "$description": "Neutral badge outline (decorative)."
+        }
+      },
+      "accent": {
+        "background": {
+          "$value": "{color.accent.background}",
+          "$type": "color",
+          "$description": "Accent badge fill."
+        },
+        "text": {
+          "$value": "{color.accent.text}",
+          "$type": "color",
+          "$description": "Accent badge text.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.badge.accent.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.accent.border}",
+          "$type": "color",
+          "$description": "Accent badge outline (decorative)."
+        }
+      },
+      "accent-2": {
+        "background": {
+          "$value": "{color.accent-2.background}",
+          "$type": "color",
+          "$description": "Second accent (violet) badge fill."
+        },
+        "text": {
+          "$value": "{color.accent-2.text}",
+          "$type": "color",
+          "$description": "Second accent (violet) badge text.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.badge.accent-2.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.accent-2.border}",
+          "$type": "color",
+          "$description": "Second accent (violet) badge outline (decorative)."
+        }
+      },
+      "success": {
+        "background": {
+          "$value": "{color.success.background}",
+          "$type": "color",
+          "$description": "Success badge fill. Never the only cue: the wording must state the status (WCAG 1.4.1)."
+        },
+        "text": {
+          "$value": "{color.success.text}",
+          "$type": "color",
+          "$description": "Success badge text. Never the only cue: the wording must state the status (WCAG 1.4.1).",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.badge.success.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.success.border}",
+          "$type": "color",
+          "$description": "Success badge outline (decorative)."
+        }
+      },
+      "warning": {
+        "background": {
+          "$value": "{color.warning.background}",
+          "$type": "color",
+          "$description": "Warning badge fill. Never the only cue: the wording must state the status (WCAG 1.4.1)."
+        },
+        "text": {
+          "$value": "{color.warning.text}",
+          "$type": "color",
+          "$description": "Warning badge text. Never the only cue: the wording must state the status (WCAG 1.4.1).",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.badge.warning.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.warning.border}",
+          "$type": "color",
+          "$description": "Warning badge outline (decorative)."
+        }
+      },
+      "error": {
+        "background": {
+          "$value": "{color.error.background}",
+          "$type": "color",
+          "$description": "Error badge fill. Never the only cue: the wording must state the status (WCAG 1.4.1)."
+        },
+        "text": {
+          "$value": "{color.error.text}",
+          "$type": "color",
+          "$description": "Error badge text. Never the only cue: the wording must state the status (WCAG 1.4.1).",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.badge.error.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.error.border}",
+          "$type": "color",
+          "$description": "Error badge outline (decorative)."
+        }
+      }
+    }
+  }
+}

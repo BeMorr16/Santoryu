@@ -2,6 +2,33 @@
   "effect": {
     "shadow": {
       "$type": "shadow",
+      "none": {
+        "$value": {
+          "color": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0,
+            "hex": "#000000"
+          },
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 0,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "unit": "px"
+          },
+          "spread": {
+            "value": 0,
+            "unit": "px"
+          }
+        },
+        "$description": "No shadow."
+      },
       "sm": {
         "$value": {
           "color": {
@@ -61,7 +88,7 @@
           "color": {
             "colorSpace": "srgb",
             "components": [0, 0, 0],
-            "alpha": 0.5,
+            "alpha": 0.3,
             "hex": "#000000"
           },
           "offsetX": {
@@ -88,7 +115,7 @@
           "color": {
             "colorSpace": "srgb",
             "components": [0, 0, 0],
-            "alpha": 0.6,
+            "alpha": 0.4,
             "hex": "#000000"
           },
           "offsetX": {
@@ -135,6 +162,16 @@
       },
       "$type": "dimension"
     },
+    "blur-radius": {
+      "$type": "dimension",
+      "12": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        },
+        "$description": "12px blur radius."
+      }
+    },
     "focus-ring": {
       "$type": "dimension",
       "width": {
@@ -144,6 +181,46 @@
       "offset": {
         "$value": "{effect.line.2}",
         "$description": "Gap between an element and its focus indicator."
+      }
+    },
+    "backdrop": {
+      "$type": "dimension",
+      "glass": {
+        "$value": "{effect.blur-radius.12}",
+        "$description": "Backdrop blur behind glass surfaces."
+      }
+    },
+    "border": {
+      "$type": "dimension",
+      "width": {
+        "$value": "{effect.line.2}",
+        "$description": "Border width of controls and surfaces."
+      },
+      "width-thick": {
+        "$value": "{effect.line.3}",
+        "$description": "Width of a thick rule, such as a Separator's thick variant: heavier than a border."
+      }
+    },
+    "grid": {
+      "$type": "dimension",
+      "width": {
+        "$value": "{effect.line.1}",
+        "$description": "Width of the decorative grid pattern's lines (Card showcase media, color-ramp checkerboard): kept faint, thinner than borders."
+      }
+    },
+    "underline": {
+      "$type": "dimension",
+      "thickness": {
+        "$value": "{effect.line.1}",
+        "$description": "Thickness of link underlines."
+      },
+      "offset": {
+        "$value": "{effect.line.2}",
+        "$description": "Gap between link text and its underline."
+      },
+      "thickness-hover": {
+        "$value": "{effect.line.2}",
+        "$description": "Thickness of a hovered link underline."
       }
     }
   }

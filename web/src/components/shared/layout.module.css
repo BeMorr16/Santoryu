@@ -1,0 +1,75 @@
+/*
+ * Gap steps for Stack and Grid: rows from space.stack.*, columns from space.inline.* (refinement
+ * R6.2). None is 0px, not 0: a unitless 0 is invalid in Grid's max-* calc (refinement R7.3).
+ */
+.row-gap-none {
+  --_row: 0px;
+}
+
+.row-gap-xs {
+  --_row: var(--space-stack-xs);
+}
+
+.row-gap-sm {
+  --_row: var(--space-stack-sm);
+}
+
+.row-gap-md {
+  --_row: var(--space-stack-md);
+}
+
+.row-gap-lg {
+  --_row: var(--space-stack-lg);
+}
+
+.row-gap-xl {
+  --_row: var(--space-stack-xl);
+}
+
+.column-gap-none {
+  --_column: 0px;
+}
+
+.column-gap-xs {
+  --_column: var(--space-inline-xs);
+}
+
+.column-gap-sm {
+  --_column: var(--space-inline-sm);
+}
+
+.column-gap-md {
+  --_column: var(--space-inline-md);
+}
+
+.column-gap-lg {
+  --_column: var(--space-inline-lg);
+}
+
+.column-gap-xl {
+  --_column: var(--space-inline-xl);
+}
+
+/* Lists keep their semantics; only markers and default spacing go (R8.2). */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fieldset {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/*
+ * A rendered legend sits outside the fieldset's flex or grid box, so gap never reaches it
+ * (refinement R6.4). Padding keeps the space inside the legend's own box, so it doesn't depend on
+ * how an engine handles a rendered legend's margins. :where() keeps the rule at element
+ * specificity, so a class on the legend (a visually hidden one, say) overrides it.
+ */
+:where(.fieldset) > legend {
+  padding: 0 0 var(--_row);
+}

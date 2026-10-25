@@ -12,9 +12,9 @@ function locs(xml: string): string[] {
 
 describe("renderSitemap", () => {
   it("lists the canonical URL of every prerendered route except /404", () => {
-    const xml = renderSitemap(["/", "/lab", "/404"], siteUrl);
+    const xml = renderSitemap(["/", "/design-system", "/404"], siteUrl);
 
-    expect(locs(xml)).toEqual(["https://example.test/", "https://example.test/lab"]);
+    expect(locs(xml)).toEqual(["https://example.test/", "https://example.test/design-system"]);
   });
 
   it("starts with an XML declaration and uses the sitemaps.org 0.9 namespace", () => {
@@ -26,7 +26,7 @@ describe("renderSitemap", () => {
   });
 
   it("includes a newly prerendered route with no other change", () => {
-    const xml = renderSitemap(["/", "/lab", "/projects", "/404"], siteUrl);
+    const xml = renderSitemap(["/", "/design-system", "/projects", "/404"], siteUrl);
 
     expect(locs(xml)).toContain("https://example.test/projects");
   });

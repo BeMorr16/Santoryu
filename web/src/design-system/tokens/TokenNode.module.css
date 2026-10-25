@@ -1,0 +1,24 @@
+/* One token in a chain: shared by the flow diagram and the theme creator's chain panel. */
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-stack-xs);
+  padding: var(--space-inset-sm);
+  border: var(--effect-border-width) solid var(--color-border-default);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-raised);
+}
+
+.path,
+.value {
+  font-size: var(--type-size-small);
+}
+
+.path {
+  font-family: var(--type-family-code);
+}
+
+.value {
+  color: var(--color-text-muted);
+}

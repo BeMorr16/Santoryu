@@ -1,0 +1,74 @@
+{
+  "component": {
+    "dialog": {
+      "background": {
+        "$value": "{color.surface.raised}",
+        "$type": "color",
+        "$description": "Dialog surface."
+      },
+      "text": {
+        "$value": "{color.text.default}",
+        "$type": "color",
+        "$description": "Dialog text.",
+        "$extensions": {
+          "personal-site.contrast": [{ "against": "component.dialog.background", "min": "text" }]
+        }
+      },
+      "border": {
+        "$value": "{color.border.default}",
+        "$type": "color",
+        "$description": "Surface outline. Decorative: the scrim and shadow already set the dialog apart."
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Surface outline width."
+      },
+      "radius": {
+        "$value": "{radius.surface}",
+        "$type": "dimension",
+        "$description": "Surface corner radius (square when a full dialog fills a narrow viewport)."
+      },
+      "shadow": {
+        "$value": "{effect.elevation.overlay}",
+        "$type": "shadow",
+        "$description": "Surface shadow: the dialog floats above the page."
+      },
+      "padding": {
+        "$value": "{space.inset.lg}",
+        "$type": "dimension",
+        "$description": "Padding around the header, body and actions."
+      },
+      "gap": {
+        "$value": "{space.stack.md}",
+        "$type": "dimension",
+        "$description": "Space between the header, body and actions, and between actions."
+      },
+      "backdrop": {
+        "$value": "{color.fill.scrim}",
+        "$type": "color",
+        "$description": "Scrim over the page behind a modal dialog."
+      },
+      "max-width": {
+        "$value": "{type.measure.text}",
+        "$type": "number",
+        "$description": "Widest default dialog: a readable line length for its text."
+      },
+      "duration": {
+        "$value": "{motion.duration.base}",
+        "$type": "duration",
+        "$description": "Fade in and out (0ms under reduced motion)."
+      },
+      "easing-enter": {
+        "$value": "{motion.easing.enter}",
+        "$type": "cubicBezier",
+        "$description": "Easing while opening."
+      },
+      "easing-exit": {
+        "$value": "{motion.easing.exit}",
+        "$type": "cubicBezier",
+        "$description": "Easing while closing."
+      }
+    }
+  }
+}

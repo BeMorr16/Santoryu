@@ -1,0 +1,457 @@
+{
+  "component": {
+    "button": {
+      "radius": {
+        "$value": "{radius.control}",
+        "$type": "dimension",
+        "$description": "Corner radius."
+      },
+      "font-family": {
+        "$value": "{type.family.body}",
+        "$type": "fontFamily",
+        "$description": "Label font."
+      },
+      "font-weight": {
+        "$value": "{type.weight.strong}",
+        "$type": "fontWeight",
+        "$description": "Label weight."
+      },
+      "gap": {
+        "$value": "{space.inline.sm}",
+        "$type": "dimension",
+        "$description": "Gap between the label and its icons."
+      },
+      "line-height": {
+        "$value": "{type.leading.heading}",
+        "$type": "number",
+        "$description": "Line height of the label."
+      },
+      "padding-block": {
+        "$value": "{space.stack.xs}",
+        "$type": "dimension",
+        "$description": "Block padding. It only shows once a label wraps; a single line stays exactly the height token."
+      },
+      "height": {
+        "sm": {
+          "$value": "{size.control.sm}",
+          "$type": "dimension",
+          "$description": "Block size of small buttons (32px, above the 24px target minimum)."
+        },
+        "md": {
+          "$value": "{size.control.md}",
+          "$type": "dimension",
+          "$description": "Block size of standard buttons (40px)."
+        }
+      },
+      "padding-inline": {
+        "sm": {
+          "$value": "{space.inline.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of small buttons."
+        },
+        "md": {
+          "$value": "{space.inline.md}",
+          "$type": "dimension",
+          "$description": "Inline padding of standard buttons."
+        }
+      },
+      "font-size": {
+        "sm": {
+          "$value": "{type.size.small}",
+          "$type": "dimension",
+          "$description": "Label size of small buttons."
+        },
+        "md": {
+          "$value": "{type.size.body}",
+          "$type": "dimension",
+          "$description": "Label size of standard buttons."
+        }
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Border width."
+      },
+      "focus-ring-color": {
+        "$value": "{color.focus.ring}",
+        "$type": "color",
+        "$description": "Focus indicator. It's drawn outside the button, so it's checked against the surfaces.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.code",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "transition-duration": {
+        "$value": "{motion.duration.instant}",
+        "$type": "duration",
+        "$description": "Duration of hover color changes (0ms under reduced motion)."
+      },
+      "transition-easing": {
+        "$value": "{motion.easing.standard}",
+        "$type": "cubicBezier",
+        "$description": "Easing of hover color changes."
+      },
+      "primary": {
+        "background": {
+          "$value": "{color.action.background}",
+          "$type": "color",
+          "$description": "Primary background."
+        },
+        "background-hover": {
+          "$value": "{color.action.background-hover}",
+          "$type": "color",
+          "$description": "Primary background on hover."
+        },
+        "background-active": {
+          "$value": "{color.action.background-pressed}",
+          "$type": "color",
+          "$description": "Primary background while pressed (:active): a darker gold than the resting fill."
+        },
+        "text": {
+          "$value": "{color.action.text}",
+          "$type": "color",
+          "$description": "Primary text and icon color.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.button.primary.background",
+                "min": "text"
+              },
+              {
+                "against": "component.button.primary.background-hover",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "text-active": {
+          "$value": "{color.action.text-pressed}",
+          "$type": "color",
+          "$description": "Primary text and icon color while pressed (:active), on the darker fill.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.button.primary.background-active",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.action.background}",
+          "$type": "color",
+          "$description": "Primary border color."
+        },
+        "pressed": {
+          "background": {
+            "$value": "{color.action.background-pressed}",
+            "$type": "color",
+            "$description": "Primary toggle background while pressed (aria-pressed=\"true\"): the darker gold of a pressed primary. It differs from the resting fill by lightness only, so a toggle whose state must read clearly also changes its label or shows a check icon."
+          },
+          "background-hover": {
+            "$value": "{color.action.background-pressed}",
+            "$type": "color",
+            "$description": "Primary pressed toggle background on hover and while pressing: it stays the darker gold."
+          },
+          "text": {
+            "$value": "{color.action.text-pressed}",
+            "$type": "color",
+            "$description": "Primary pressed toggle text and icon color.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "component.button.primary.pressed.background",
+                  "min": "text"
+                },
+                {
+                  "against": "component.button.primary.pressed.background-hover",
+                  "min": "text"
+                }
+              ]
+            }
+          },
+          "border": {
+            "$value": "{color.action.background-pressed}",
+            "$type": "color",
+            "$description": "Primary pressed toggle border color: the pressed fill, which is the toggle's boundary (3:1 against the surfaces).",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.surface.base",
+                  "min": "non-text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "non-text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "non-text"
+                },
+                {
+                  "against": "color.surface.glass",
+                  "min": "non-text"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "secondary": {
+        "background": {
+          "$value": "{color.surface.raised}",
+          "$type": "color",
+          "$description": "Secondary background."
+        },
+        "background-hover": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Secondary background on hover."
+        },
+        "background-active": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Secondary background while pressed (:active)."
+        },
+        "text": {
+          "$value": "{color.text.default}",
+          "$type": "color",
+          "$description": "Secondary text and icon color.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.button.secondary.background",
+                "min": "text"
+              },
+              {
+                "against": "component.button.secondary.background-hover",
+                "min": "text"
+              },
+              {
+                "against": "component.button.secondary.background-active",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.border.strong}",
+          "$type": "color",
+          "$description": "Secondary border color."
+        },
+        "pressed": {
+          "background": {
+            "$value": "{color.action.background}",
+            "$type": "color",
+            "$description": "Secondary toggle background while pressed (aria-pressed=\"true\").",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.surface.base",
+                  "min": "non-text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "non-text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "non-text"
+                },
+                {
+                  "against": "color.surface.glass",
+                  "min": "non-text"
+                }
+              ]
+            }
+          },
+          "background-hover": {
+            "$value": "{color.action.background-hover}",
+            "$type": "color",
+            "$description": "Secondary pressed toggle background on hover and while pressing."
+          },
+          "text": {
+            "$value": "{color.action.text}",
+            "$type": "color",
+            "$description": "Secondary pressed toggle text and icon color.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "component.button.secondary.pressed.background",
+                  "min": "text"
+                },
+                {
+                  "against": "component.button.secondary.pressed.background-hover",
+                  "min": "text"
+                }
+              ]
+            }
+          },
+          "border": {
+            "$value": "{color.action.background}",
+            "$type": "color",
+            "$description": "Secondary pressed toggle border color."
+          }
+        }
+      },
+      "ghost": {
+        "background": {
+          "$value": "{color.fill.none}",
+          "$type": "color",
+          "$description": "Ghost background."
+        },
+        "background-hover": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Ghost background on hover."
+        },
+        "background-active": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Ghost background while pressed (:active)."
+        },
+        "text": {
+          "$value": "{color.text.default}",
+          "$type": "color",
+          "$description": "Ghost text and icon color.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.button.ghost.background-hover",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.base",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.raised",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.sunken",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.glass",
+                "min": "text"
+              },
+              {
+                "against": "component.button.ghost.background-active",
+                "min": "text"
+              },
+              {
+                "against": "color.surface.code",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.fill.none}",
+          "$type": "color",
+          "$description": "Ghost border color."
+        },
+        "pressed": {
+          "background": {
+            "$value": "{color.action.background}",
+            "$type": "color",
+            "$description": "Ghost toggle background while pressed (aria-pressed=\"true\").",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "color.surface.base",
+                  "min": "non-text"
+                },
+                {
+                  "against": "color.surface.raised",
+                  "min": "non-text"
+                },
+                {
+                  "against": "color.surface.sunken",
+                  "min": "non-text"
+                },
+                {
+                  "against": "color.surface.glass",
+                  "min": "non-text"
+                }
+              ]
+            }
+          },
+          "background-hover": {
+            "$value": "{color.action.background-hover}",
+            "$type": "color",
+            "$description": "Ghost pressed toggle background on hover and while pressing."
+          },
+          "text": {
+            "$value": "{color.action.text}",
+            "$type": "color",
+            "$description": "Ghost pressed toggle text and icon color.",
+            "$extensions": {
+              "personal-site.contrast": [
+                {
+                  "against": "component.button.ghost.pressed.background",
+                  "min": "text"
+                },
+                {
+                  "against": "component.button.ghost.pressed.background-hover",
+                  "min": "text"
+                }
+              ]
+            }
+          },
+          "border": {
+            "$value": "{color.action.background}",
+            "$type": "color",
+            "$description": "Ghost pressed toggle border color."
+          }
+        }
+      },
+      "disabled": {
+        "background": {
+          "$value": "{color.surface.sunken}",
+          "$type": "color",
+          "$description": "Background while disabled."
+        },
+        "text": {
+          "$value": "{color.text.subtle}",
+          "$type": "color",
+          "$description": "Text while disabled. Exempt from contrast minimums (WCAG 1.4.3), but kept at 4.5:1 anyway.",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.button.disabled.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "border": {
+          "$value": "{color.border.subtle}",
+          "$type": "color",
+          "$description": "Border while disabled."
+        }
+      }
+    }
+  }
+}

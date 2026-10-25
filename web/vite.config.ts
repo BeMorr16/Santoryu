@@ -37,4 +37,8 @@ function previewLikeStaticHost(): Plugin {
 
 export default defineConfig({
   plugins: [reactRouter(), previewLikeStaticHost()],
+  // Resolves the `@/components/*` alias from web/tsconfig.json (ds-components design §11).
+  resolve: { tsconfigPaths: true },
+  // The CSP (img-src 'self', font-src 'self') blocks data: URIs, so never inline an asset (refinement R18.8).
+  build: { assetsInlineLimit: 0 },
 });

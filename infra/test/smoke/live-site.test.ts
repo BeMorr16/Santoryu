@@ -136,42 +136,49 @@ describe("R1 domain, TLS and canonical host", () => {
     "R1.3: http://%s redirects to https on the same host, keeping path and query",
     async (host) => {
       expectRedirect(
-        await request("/lab?x=1", { host, scheme: "http" }),
-        `https://${host}/lab?x=1`,
+        await request("/design-system?x=1", { host, scheme: "http" }),
+        `https://${host}/design-system?x=1`,
       );
     },
   );
 
   it("R1.4: https://www redirects to the apex, keeping path and query, with security headers", async () => {
-    const response = await request("/lab?x=1&y=2", { host: www });
-    expectRedirect(response, `https://${apex}/lab?x=1&y=2`);
+    const response = await request("/design-system?x=1&y=2", { host: www });
+    expectRedirect(response, `https://${apex}/design-system?x=1&y=2`);
     expectSecurityHeaders(response);
   });
 });
 
 describe("R2 URL handling and status codes", () => {
-  it.each(["/", "/lab"])("R2.1/R2.2: %s is 200 HTML for that page", async (path) => {
-    const response = await request(path);
-    expect(response.status).toBe(200);
-    expect(response.headers.get("content-type")).toBe(HTML);
-    const document = new JSDOM(await response.text()).window.document;
-    const canonical = [...document.querySelectorAll('link[rel="canonical"]')].map((link) =>
-      link.getAttribute("href"),
-    );
-    expect(canonical).toEqual([`https://${apex}${path}`]);
-  });
+  it.each(["/", "/design-system", "/design-system/tokens", "/design-system/components"])(
+    "R2.1/R2.2: %s is 200 HTML for that page",
+    async (path) => {
+      const response = await request(path);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toBe(HTML);
+      const document = new JSDOM(await response.text()).window.document;
+      const canonical = [...document.querySelectorAll('link[rel="canonical"]')].map((link) =>
+        link.getAttribute("href"),
+      );
+      expect(canonical).toEqual([`https://${apex}${path}`]);
+    },
+  );
 
   it.each([
-    ["/lab/", "/lab"],
+    ["/design-system/", "/design-system"],
+    ["/design-system/tokens/", "/design-system/tokens"],
+    ["/design-system/components/", "/design-system/components"],
+    ["/design-system/tokens/index.html", "/design-system/tokens"],
+    ["/design-system/components/index.html", "/design-system/components"],
     ["/index.html", "/"],
-    ["/lab/index.html", "/lab"],
+    ["/design-system/index.html", "/design-system"],
   ])("R2.3/R2.4: %s redirects to %s with security headers", async (path, canonical) => {
     const response = await request(path);
     expectRedirect(response, `https://${apex}${canonical}`);
     expectSecurityHeaders(response);
   });
 
-  it.each(["/nope", "/404.html", "/__spa-fallback.html"])(
+  it.each(["/nope", "/design-system/nope", "/404.html", "/__spa-fallback.html"])(
     "R2.5/R2.8: %s is a 404 with the not-found page",
     async (path) => {
       const response = await request(path);
@@ -202,7 +209,13 @@ describe("R2 URL handling and status codes", () => {
 
 describe("R3 caching and content types", () => {
   it("R3.1/R3.5: pages and the 404 revalidate and are UTF-8 HTML", async () => {
-    for (const path of ["/", "/lab", "/nope"]) {
+    for (const path of [
+      "/",
+      "/design-system",
+      "/design-system/tokens",
+      "/design-system/components",
+      "/nope",
+    ]) {
       const response = await request(path);
       expect(response.headers.get("cache-control"), path).toBe(REVALIDATE);
       expect(response.headers.get("content-type"), path).toBe(HTML);
@@ -232,19 +245,22 @@ describe("R3 caching and content types", () => {
 });
 
 describe("R4 security headers", () => {
-  it.each(["/", "/lab", "/nope", "/robots.txt"])(
+  it.each(["/", "/design-system", "/nope", "/robots.txt"])(
     "R4.1/R4.4/R4.5: %s has every security header",
     async (path) => {
       expectSecurityHeaders(await request(path));
     },
   );
 
-  it.each(["/", "/lab", "/nope"])("R4.2: %s exposes no S3 x-amz-meta-* headers", async (path) => {
-    const response = await request(path);
-    expect([...response.headers.keys()].filter((name) => name.startsWith("x-amz-meta-"))).toEqual(
-      [],
-    );
-  });
+  it.each(["/", "/design-system", "/nope"])(
+    "R4.2: %s exposes no S3 x-amz-meta-* headers",
+    async (path) => {
+      const response = await request(path);
+      expect([...response.headers.keys()].filter((name) => name.startsWith("x-amz-meta-"))).toEqual(
+        [],
+      );
+    },
+  );
 
   it("R4.1/R4.4/R4.5: a hashed asset has every security header", async () => {
     const { entry } = await homeAssets();

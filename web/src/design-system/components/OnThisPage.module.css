@@ -1,0 +1,11 @@
+.onThisPage {
+  overflow-wrap: anywhere;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-xs);
+}
+
+.list .list {
+  margin-block-start: var(--space-stack-xs);
+  padding-inline-start: var(--space-inline-md);
+}

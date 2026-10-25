@@ -1,0 +1,157 @@
+/*
+ * Button's look, shared by Button, Link appearance="button" and MenuTrigger (design §4.3), so it
+ * belongs to the button component's tokens. Variants and sizes set private --_* properties.
+ */
+.button {
+  display: inline-flex;
+  gap: var(--component-button-gap);
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--_height);
+  min-block-size: var(--_height);
+  padding-block: var(--component-button-padding-block); /* only shows once a label wraps (R3.9) */
+  padding-inline: var(--_padding-inline);
+  border: var(--component-button-border-width) solid var(--_border);
+  border-radius: var(--component-button-radius);
+  background-color: var(--_background);
+  color: var(--_text);
+  font-family: var(--component-button-font-family);
+  font-size: var(--_font-size);
+  font-weight: var(--component-button-font-weight);
+  line-height: var(--component-button-line-height);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition-property: background-color, border-color, color;
+  transition-duration: var(--component-button-transition-duration);
+  transition-timing-function: var(--component-button-transition-easing);
+}
+
+/* Resets the global a:hover color for Link-as-button. It's not a hover style, so it isn't gated. */
+.button:hover {
+  color: var(--_text);
+}
+
+/* No hover color on touch screens, where it would stick after a tap (refinement R3.4). */
+@media (hover: hover) {
+  .button:hover:not([aria-disabled="true"]) {
+    background-color: var(--_background-hover);
+  }
+}
+
+/* After the hover rule, at the same specificity, so it wins while pressing (refinement R3.3). */
+.button:active:not([aria-disabled="true"]) {
+  background-color: var(--_background-active);
+  color: var(--_text-active);
+}
+
+.button:focus-visible {
+  outline: var(--effect-focus-ring-width) solid var(--component-button-focus-ring-color);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+.primary {
+  --_background: var(--component-button-primary-background);
+  --_background-hover: var(--component-button-primary-background-hover);
+  --_background-active: var(--component-button-primary-background-active);
+  --_text: var(--component-button-primary-text);
+  --_text-active: var(--component-button-primary-text-active);
+  --_border: var(--component-button-primary-border);
+}
+
+.secondary {
+  --_background: var(--component-button-secondary-background);
+  --_background-hover: var(--component-button-secondary-background-hover);
+  --_background-active: var(--component-button-secondary-background-active);
+  --_text: var(--component-button-secondary-text);
+  --_text-active: var(--component-button-secondary-text);
+  --_border: var(--component-button-secondary-border);
+}
+
+.ghost {
+  --_background: var(--component-button-ghost-background);
+  --_background-hover: var(--component-button-ghost-background-hover);
+  --_background-active: var(--component-button-ghost-background-active);
+  --_text: var(--component-button-ghost-text);
+  --_text-active: var(--component-button-ghost-text);
+  --_border: var(--component-button-ghost-border);
+}
+
+.sm {
+  --_height: var(--component-button-height-sm);
+  --_padding-inline: var(--component-button-padding-inline-sm);
+  --_font-size: var(--component-button-font-size-sm);
+}
+
+.md {
+  --_height: var(--component-button-height-md);
+  --_padding-inline: var(--component-button-padding-inline-md);
+  --_font-size: var(--component-button-font-size-md);
+}
+
+/* Square: min-inline-size is the height, and the icon fits inside it (refinement R3.5). */
+.iconOnly {
+  padding-inline: 0;
+}
+
+/* Toggle buttons (refinement R3.1; palette-expansion R3.1). */
+.primary[aria-pressed="true"] {
+  --_background: var(--component-button-primary-pressed-background);
+  --_background-hover: var(--component-button-primary-pressed-background-hover);
+  --_background-active: var(--component-button-primary-pressed-background-hover);
+  --_text: var(--component-button-primary-pressed-text);
+  --_text-active: var(--component-button-primary-pressed-text);
+  --_border: var(--component-button-primary-pressed-border);
+}
+
+.secondary[aria-pressed="true"] {
+  --_background: var(--component-button-secondary-pressed-background);
+  --_background-hover: var(--component-button-secondary-pressed-background-hover);
+  --_background-active: var(--component-button-secondary-pressed-background-hover);
+  --_text: var(--component-button-secondary-pressed-text);
+  --_text-active: var(--component-button-secondary-pressed-text);
+  --_border: var(--component-button-secondary-pressed-border);
+}
+
+.ghost[aria-pressed="true"] {
+  --_background: var(--component-button-ghost-pressed-background);
+  --_background-hover: var(--component-button-ghost-pressed-background-hover);
+  --_background-active: var(--component-button-ghost-pressed-background-hover);
+  --_text: var(--component-button-ghost-pressed-text);
+  --_text-active: var(--component-button-ghost-pressed-text);
+  --_border: var(--component-button-ghost-pressed-border);
+}
+
+/*
+ * Our own disabled state (decision 0007 G): focusable, announced, never activated. It comes after
+ * the pressed rules at the same specificity, so a disabled toggle looks disabled.
+ */
+.button[aria-disabled="true"] {
+  --_background: var(--component-button-disabled-background);
+  --_text: var(--component-button-disabled-text);
+  --_border: var(--component-button-disabled-border);
+  cursor: not-allowed;
+}
+
+/*
+ * The forced palette drops background and border colors, so states use system colors (R3.10).
+ * Pressed sets the private properties, so hover and :active stay Highlight too.
+ */
+@media (forced-colors: active) {
+  .primary[aria-pressed="true"],
+  .secondary[aria-pressed="true"],
+  .ghost[aria-pressed="true"] {
+    --_background: Highlight;
+    --_background-hover: Highlight;
+    --_background-active: Highlight;
+    --_text: HighlightText;
+    --_text-active: HighlightText;
+    --_border: Highlight;
+  }
+
+  .button[aria-disabled="true"] {
+    border-color: GrayText;
+    background-color: ButtonFace;
+    color: GrayText;
+  }
+}

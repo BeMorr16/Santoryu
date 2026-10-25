@@ -1,0 +1,152 @@
+/*
+ * The <dialog> is only a frame, with no padding or border, and the surface fills it. So a click
+ * whose target is the dialog itself can only be on its ::backdrop (design §11.2).
+ */
+.dialog {
+  box-sizing: border-box;
+  inline-size: min(100% - 2 * var(--space-inset-md), var(--component-dialog-max-width));
+  max-inline-size: none;
+  max-block-size: calc(100dvh - 2 * var(--space-inset-md));
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--component-dialog-text);
+  overflow: visible;
+  opacity: 1;
+  transition-property: opacity, overlay, display;
+  transition-duration: var(--component-dialog-duration);
+  transition-timing-function: var(--component-dialog-easing-exit);
+  transition-behavior: allow-discrete;
+}
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+  transition-timing-function: var(--component-dialog-easing-enter);
+}
+
+/* Fades in and out (0ms under reduced motion, R12.6). */
+@starting-style {
+  .dialog[open],
+  .dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.dialog:not([open]),
+.dialog:not([open])::backdrop {
+  opacity: 0;
+}
+
+.dialog::backdrop {
+  background-color: var(--component-dialog-backdrop);
+  opacity: 1;
+  transition-property: opacity, overlay, display;
+  transition-duration: var(--component-dialog-duration);
+  transition-timing-function: var(--component-dialog-easing-exit);
+  transition-behavior: allow-discrete;
+}
+
+/* The page behind a modal doesn't scroll (R12.3). */
+:root:has(.dialog:modal) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+.surface {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--component-dialog-gap);
+  min-block-size: 0;
+  padding: var(--component-dialog-padding);
+  border: var(--component-dialog-border-width) solid var(--component-dialog-border);
+  border-radius: var(--component-dialog-radius);
+  background-color: var(--component-dialog-background);
+  box-shadow: var(--component-dialog-shadow);
+  overflow: auto;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--component-dialog-gap);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-inline-sm);
+  margin: 0;
+  /* Aligns a one-line title with the Close button's center. */
+  min-block-size: var(--size-control-sm);
+}
+
+.titleIcon {
+  flex: none;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+}
+
+.body:focus-visible {
+  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--component-dialog-gap);
+}
+
+.start {
+  justify-content: flex-start;
+}
+
+.end {
+  justify-content: flex-end;
+}
+
+.center {
+  justify-content: center;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+/* Fills a narrow viewport; from 48em it leaves a margin all round (R12.7). */
+.full {
+  inline-size: 100%;
+  block-size: 100dvh;
+  max-block-size: none;
+}
+
+.full .surface {
+  border-radius: 0;
+}
+
+@media (min-width: 48em) {
+  .full {
+    inline-size: calc(100% - 2 * var(--space-layout-sm));
+    block-size: calc(100dvh - 2 * var(--space-layout-sm));
+  }
+
+  .full .surface {
+    border-radius: var(--component-dialog-radius);
+  }
+}
+
+/* The surface keeps its outline; the backdrop falls back to the system's (R12.7). */
+@media (forced-colors: active) {
+  .surface {
+    border-color: CanvasText;
+  }
+}

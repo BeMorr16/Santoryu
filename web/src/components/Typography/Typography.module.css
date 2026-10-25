@@ -1,0 +1,148 @@
+/* The look comes from the variant; the element (and heading level) from `as` (refinement R12.2). */
+.typography {
+  margin: 0;
+  /* Long words break instead of scrolling the page sideways (WCAG 1.4.10). */
+  overflow-wrap: break-word;
+}
+
+.heading {
+  text-wrap: balance;
+  font-variant-ligatures: none;
+}
+
+/* Ignored where unsupported. */
+.running {
+  text-wrap: pretty;
+}
+
+.display {
+  font-family: var(--component-typography-display-font-family);
+  font-size: var(--component-typography-display-font-size);
+  font-weight: var(--component-typography-display-font-weight);
+  line-height: var(--component-typography-display-line-height);
+  letter-spacing: var(--component-typography-display-tracking);
+}
+
+.h1 {
+  font-family: var(--component-typography-h1-font-family);
+  font-size: var(--component-typography-h1-font-size);
+  font-weight: var(--component-typography-h1-font-weight);
+  line-height: var(--component-typography-h1-line-height);
+  letter-spacing: var(--component-typography-h1-tracking);
+}
+
+.h2 {
+  font-family: var(--component-typography-h2-font-family);
+  font-size: var(--component-typography-h2-font-size);
+  font-weight: var(--component-typography-h2-font-weight);
+  line-height: var(--component-typography-h2-line-height);
+  letter-spacing: var(--component-typography-h2-tracking);
+}
+
+.h3 {
+  font-family: var(--component-typography-h3-font-family);
+  font-size: var(--component-typography-h3-font-size);
+  font-weight: var(--component-typography-h3-font-weight);
+  line-height: var(--component-typography-h3-line-height);
+  letter-spacing: var(--component-typography-h3-tracking);
+}
+
+.h4 {
+  font-family: var(--component-typography-h4-font-family);
+  font-size: var(--component-typography-h4-font-size);
+  font-weight: var(--component-typography-h4-font-weight);
+  line-height: var(--component-typography-h4-line-height);
+  letter-spacing: var(--component-typography-h4-tracking);
+}
+
+.h5 {
+  font-family: var(--component-typography-h5-font-family);
+  font-size: var(--component-typography-h5-font-size);
+  font-weight: var(--component-typography-h5-font-weight);
+  line-height: var(--component-typography-h5-line-height);
+  letter-spacing: var(--component-typography-h5-tracking);
+}
+
+.h6 {
+  font-family: var(--component-typography-h6-font-family);
+  font-size: var(--component-typography-h6-font-size);
+  font-weight: var(--component-typography-h6-font-weight);
+  line-height: var(--component-typography-h6-line-height);
+  letter-spacing: var(--component-typography-h6-tracking);
+}
+
+.lead {
+  font-family: var(--component-typography-lead-font-family);
+  font-size: var(--component-typography-lead-font-size);
+  font-weight: var(--component-typography-lead-font-weight);
+  line-height: var(--component-typography-lead-line-height);
+  letter-spacing: var(--component-typography-lead-tracking);
+}
+
+.body {
+  font-family: var(--component-typography-body-font-family);
+  font-size: var(--component-typography-body-font-size);
+  font-weight: var(--component-typography-body-font-weight);
+  line-height: var(--component-typography-body-line-height);
+  letter-spacing: var(--component-typography-body-tracking);
+}
+
+.small {
+  font-family: var(--component-typography-small-font-family);
+  font-size: var(--component-typography-small-font-size);
+  font-weight: var(--component-typography-small-font-weight);
+  line-height: var(--component-typography-small-line-height);
+  letter-spacing: var(--component-typography-small-tracking);
+}
+
+.label {
+  font-family: var(--component-typography-label-font-family);
+  font-size: var(--component-typography-label-font-size);
+  font-weight: var(--component-typography-label-font-weight);
+  line-height: var(--component-typography-label-line-height);
+  letter-spacing: var(--component-typography-label-tracking);
+  text-transform: uppercase;
+  font-variant-ligatures: none;
+}
+
+/* Size, weight and line height come from the surrounding text. */
+.code {
+  font-family: var(--component-typography-code-font-family);
+  font-variant-ligatures: normal;
+}
+
+.tone-default {
+  color: var(--component-typography-tone-default-color);
+}
+
+.tone-muted {
+  color: var(--component-typography-tone-muted-color);
+}
+
+.tone-subtle {
+  color: var(--component-typography-tone-subtle-color);
+}
+
+.tone-accent {
+  color: var(--component-typography-tone-accent-color);
+}
+
+.tone-accent-2 {
+  color: var(--component-typography-tone-accent-2-color);
+}
+
+.tone-success {
+  color: var(--component-typography-tone-success-color);
+}
+
+.tone-warning {
+  color: var(--component-typography-tone-warning-color);
+}
+
+.tone-error {
+  color: var(--component-typography-tone-error-color);
+}
+
+.measure {
+  max-inline-size: var(--component-typography-measure);
+}

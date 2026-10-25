@@ -48,7 +48,7 @@
       "$description": "Corners of interactive controls."
     },
     "surface": {
-      "$value": "{radius.8}",
+      "$value": "{radius.4}",
       "$description": "Corners of cards and raised surfaces."
     },
     "pill": {

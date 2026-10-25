@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: { tsconfigPaths: true },
   oxc: {
     jsx: { runtime: "automatic" },
   },
@@ -11,7 +12,7 @@ export default defineConfig({
         test: {
           name: "dom",
           environment: "jsdom",
-          include: ["src/**/*.test.tsx"],
+          include: ["src/**/*.test.tsx", "test/*.test.tsx"],
           setupFiles: ["./test/setup-dom.ts"],
         },
       },

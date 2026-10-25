@@ -1,0 +1,124 @@
+/* A hub card's decorative preview, filling the card's media (ds-hub design §5.4). */
+.frame {
+  min-block-size: var(--size-column-sm);
+  padding: var(--space-inset-md);
+  background-color: var(--color-surface-sunken);
+}
+
+/* Tokens preview: swatches, type sizes, then radius and space steps (ds-hub R3.1). */
+.tokens {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-inline-xs);
+}
+
+.swatch {
+  inline-size: var(--size-icon-lg);
+  block-size: var(--size-icon-lg);
+  border: var(--effect-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+}
+
+.swatchAction {
+  background-color: var(--color-action-background);
+}
+
+.swatchAccent2 {
+  background-color: var(--color-accent-2-fill);
+}
+
+.swatchAccent {
+  background-color: var(--color-accent-border);
+}
+
+.swatchSuccess {
+  background-color: var(--color-success-border);
+}
+
+.swatchWarning {
+  background-color: var(--color-warning-border);
+}
+
+.swatchError {
+  background-color: var(--color-error-border);
+}
+
+.type {
+  color: var(--color-text-default);
+}
+
+.typeSmall {
+  font-size: var(--type-size-small);
+}
+
+.typeBody {
+  font-size: var(--type-size-body);
+}
+
+.typeH3 {
+  font-size: var(--type-size-h3);
+}
+
+.shape {
+  inline-size: var(--size-icon-lg);
+  block-size: var(--size-icon-lg);
+  border: var(--effect-border-width) solid var(--color-border-strong);
+  background-color: var(--color-surface-raised);
+}
+
+.radiusControl {
+  border-radius: var(--radius-control);
+}
+
+.radiusSurface {
+  border-radius: var(--radius-surface);
+}
+
+.radiusPill {
+  border-radius: var(--radius-pill);
+}
+
+.bar {
+  block-size: var(--size-icon-sm);
+  background-color: var(--color-accent-border);
+}
+
+.spaceSm {
+  inline-size: var(--space-inline-sm);
+}
+
+.spaceMd {
+  inline-size: var(--space-inline-md);
+}
+
+.spaceLg {
+  inline-size: var(--space-inline-lg);
+}
+
+/* Theme Creator preview: one sample per theme, each scoped by data-theme (ds-hub R3.3). */
+.panels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-inline-xs);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--space-stack-xs);
+  min-inline-size: 0;
+  padding: var(--space-inset-sm);
+  border: var(--effect-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-base);
+  color: var(--color-text-default);
+  overflow: clip;
+}

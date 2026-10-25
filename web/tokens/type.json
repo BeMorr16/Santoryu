@@ -2,21 +2,41 @@
   "type": {
     "font-stack": {
       "$type": "fontFamily",
-      "system": {
+      "sans": {
         "$value": [
+          "Inter Variable",
+          "Inter Fallback",
           "system-ui",
           "-apple-system",
           "Segoe UI",
           "Roboto",
-          "sans-serif",
-          "Apple Color Emoji",
-          "Segoe UI Emoji"
+          "sans-serif"
         ],
-        "$description": "Platform UI font stack with emoji fallbacks."
+        "$description": "Inter (self-hosted variable font), its metric-matched fallback, then the platform UI stack."
+      },
+      "display": {
+        "$value": [
+          "Space Grotesk Variable",
+          "Space Grotesk Fallback",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif"
+        ],
+        "$description": "Space Grotesk (self-hosted variable font), its metric-matched fallback, then the platform UI stack."
       },
       "mono": {
-        "$value": ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
-        "$description": "Platform monospace font stack."
+        "$value": [
+          "Fira Code Variable",
+          "Fira Code Fallback",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Consolas",
+          "monospace"
+        ],
+        "$description": "Fira Code (self-hosted variable font), its metric-matched fallback, then platform monospace fonts."
       }
     },
     "font-size": {
@@ -69,6 +89,13 @@
           "unit": "rem"
         },
         "$description": "Font size 3xl (40px at the default root size)."
+      },
+      "4xl": {
+        "$value": {
+          "value": 3,
+          "unit": "rem"
+        },
+        "$description": "Font size 4xl (48px at the default root size)."
       }
     },
     "font-weight": {
@@ -97,15 +124,47 @@
         "$description": "Comfortable line height for running text."
       }
     },
+    "letter-spacing": {
+      "$type": "number",
+      "$description": "Letter spacing in em, as numbers. The letter-spacing/em transform appends em (decision 0004 amendment).",
+      "neg-2": {
+        "$value": -0.02,
+        "$description": "-0.02em."
+      },
+      "0": {
+        "$value": 0,
+        "$description": "0em."
+      },
+      "16": {
+        "$value": 0.16,
+        "$description": "0.16em."
+      }
+    },
+    "line-length": {
+      "$type": "number",
+      "$description": "Line lengths in ch, as numbers. The line-length/ch transform appends ch (refinement R12.6).",
+      "65": {
+        "$value": 65,
+        "$description": "65ch."
+      }
+    },
     "family": {
       "$type": "fontFamily",
       "body": {
-        "$value": "{type.font-stack.system}",
-        "$description": "Font family for all body and UI text."
+        "$value": "{type.font-stack.sans}",
+        "$description": "Font family for body and UI text."
+      },
+      "heading": {
+        "$value": "{type.font-stack.display}",
+        "$description": "Font family for headings."
       },
       "code": {
         "$value": "{type.font-stack.mono}",
         "$description": "Font family for code and token names."
+      },
+      "label": {
+        "$value": "{type.font-stack.mono}",
+        "$description": "Font family for small uppercase annotation labels and badges."
       }
     },
     "size": {
@@ -122,6 +181,10 @@
         "$value": "{type.font-size.lg}",
         "$description": "Introductory paragraph text."
       },
+      "display": {
+        "$value": "{type.font-size.4xl}",
+        "$description": "Display text, such as a hero name."
+      },
       "h1": {
         "$value": "{type.font-size.3xl}",
         "$description": "Page title (h1)."
@@ -133,6 +196,22 @@
       "h3": {
         "$value": "{type.font-size.xl}",
         "$description": "Subsection heading (h3)."
+      },
+      "h4": {
+        "$value": "{type.font-size.lg}",
+        "$description": "Minor heading (h4)."
+      },
+      "h5": {
+        "$value": "{type.font-size.md}",
+        "$description": "Minor heading (h5)."
+      },
+      "h6": {
+        "$value": "{type.font-size.sm}",
+        "$description": "Minor heading (h6)."
+      },
+      "label": {
+        "$value": "{type.font-size.xs}",
+        "$description": "Small uppercase annotation labels."
       }
     },
     "weight": {
@@ -159,6 +238,28 @@
       "heading": {
         "$value": "{type.line-height.tight}",
         "$description": "Line height for headings."
+      }
+    },
+    "tracking": {
+      "$type": "number",
+      "display": {
+        "$value": "{type.letter-spacing.neg-2}",
+        "$description": "Letter spacing for large display headings."
+      },
+      "body": {
+        "$value": "{type.letter-spacing.0}",
+        "$description": "Letter spacing for running text."
+      },
+      "label": {
+        "$value": "{type.letter-spacing.16}",
+        "$description": "Letter spacing for small uppercase mono labels."
+      }
+    },
+    "measure": {
+      "$type": "number",
+      "text": {
+        "$value": "{type.line-length.65}",
+        "$description": "Readable line length for running text (about 65 characters)."
       }
     }
   }

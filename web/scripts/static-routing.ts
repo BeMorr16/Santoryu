@@ -1,6 +1,6 @@
 /**
  * Maps a request path to a file in the client build the way static hosting will (decision 0003):
- * `/lab` serves `lab/index.html`, and unknown paths get `404.html` with a 404 status.
+ * `/design-system` serves `design-system/index.html`, and unknown paths get `404.html` with a 404 status.
  */
 export function resolveStaticPath(
   pathname: string,

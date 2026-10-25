@@ -13,6 +13,8 @@ export default defineConfig(
     "web/src/generated/",
     "**/coverage/",
     "**/cdk.out/",
+    "e2e/playwright-report/",
+    "e2e/test-results/",
   ]),
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
@@ -39,7 +41,7 @@ export default defineConfig(
     languageOptions: jsxA11y.flatConfigs.strict.languageOptions,
     rules: {
       ...jsxA11y.flatConfigs.strict.rules,
-      // Scrollable regions (e.g. wide /lab tables) must be keyboard-focusable. Decision 0002.
+      // Scrollable regions (e.g. wide /design-system tables) must be keyboard-focusable. Decision 0002.
       "jsx-a11y/no-noninteractive-tabindex": [
         "error",
         { tags: [], roles: ["tabpanel", "region"], allowExpressionValues: true },

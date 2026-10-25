@@ -1,0 +1,166 @@
+{
+  "component": {
+    "link": {
+      "color": {
+        "$value": "{color.link.default}",
+        "$type": "color",
+        "$description": "Inline link text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "color-hover": {
+        "$value": "{color.link.hover}",
+        "$type": "color",
+        "$description": "Inline link text on hover.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "color-current": {
+        "$value": "{color.text.default}",
+        "$type": "color",
+        "$description": "Text of a link to the current page (aria-current).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "color-visited": {
+        "$value": "{color.link.visited}",
+        "$type": "color",
+        "$description": "Text of a visited link, where showVisited is set.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "underline-thickness": {
+        "$value": "{effect.underline.thickness}",
+        "$type": "dimension",
+        "$description": "Underline thickness."
+      },
+      "underline-thickness-hover": {
+        "$value": "{effect.underline.thickness-hover}",
+        "$type": "dimension",
+        "$description": "Underline thickness on hover."
+      },
+      "underline-offset": {
+        "$value": "{effect.underline.offset}",
+        "$type": "dimension",
+        "$description": "Gap between the text and its underline."
+      },
+      "font-weight-current": {
+        "$value": "{type.weight.strong}",
+        "$type": "fontWeight",
+        "$description": "Weight of a link to the current page, so it's marked by more than color."
+      },
+      "focus-ring-color": {
+        "$value": "{color.focus.ring}",
+        "$type": "color",
+        "$description": "Focus indicator. It's drawn outside the link, so it's checked against the surfaces.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "color.surface.base",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.raised",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.sunken",
+              "min": "non-text"
+            },
+            {
+              "against": "color.surface.glass",
+              "min": "non-text"
+            }
+          ]
+        }
+      },
+      "new-tab-gap": {
+        "$value": "{space.inline.xs}",
+        "$type": "dimension",
+        "$description": "Gap between an inline link's text and its new-tab icon."
+      },
+      "transition-duration": {
+        "$value": "{motion.duration.instant}",
+        "$type": "duration",
+        "$description": "Duration of hover color changes (0ms under reduced motion)."
+      },
+      "transition-easing": {
+        "$value": "{motion.easing.standard}",
+        "$type": "cubicBezier",
+        "$description": "Easing of hover color changes."
+      }
+    }
+  }
+}

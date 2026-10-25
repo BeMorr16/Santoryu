@@ -1,0 +1,135 @@
+{
+  "component": {
+    "code-block": {
+      "background": {
+        "$value": "{color.surface.code}",
+        "$type": "color",
+        "$description": "Block fill, behind the header and the code."
+      },
+      "text": {
+        "$value": "{color.text.default}",
+        "$type": "color",
+        "$description": "Code text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "component.code-block.background",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "border": {
+        "$value": "{color.border.subtle}",
+        "$type": "color",
+        "$description": "Line around the block and under the header (decorative: the fill and the label mark the block)."
+      },
+      "border-width": {
+        "$value": "{effect.border.width}",
+        "$type": "dimension",
+        "$description": "Line thickness."
+      },
+      "radius": {
+        "$value": "{radius.control}",
+        "$type": "dimension",
+        "$description": "Block corner radius."
+      },
+      "header": {
+        "padding-block": {
+          "$value": "{space.stack.xs}",
+          "$type": "dimension",
+          "$description": "Block padding of the header; clears the copy button's focus ring."
+        },
+        "padding-inline": {
+          "$value": "{space.inset.sm}",
+          "$type": "dimension",
+          "$description": "Inline padding of the header, lining the label up with the code."
+        },
+        "gap": {
+          "$value": "{space.inline.md}",
+          "$type": "dimension",
+          "$description": "Space between the label and the copy button."
+        }
+      },
+      "label-color": {
+        "$value": "{color.text.muted}",
+        "$type": "color",
+        "$description": "Header label text.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "component.code-block.background",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "failure-color": {
+        "$value": "{color.error.text}",
+        "$type": "color",
+        "$description": "The visible \"Couldn't copy\" text beside the copy button (its wording states the failure, not only its color).",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "component.code-block.background",
+              "min": "text"
+            }
+          ]
+        }
+      },
+      "line-number": {
+        "color": {
+          "$value": "{color.text.subtle}",
+          "$type": "color",
+          "$description": "Line numbers (decorative: never copied or announced, but still readable).",
+          "$extensions": {
+            "personal-site.contrast": [
+              {
+                "against": "component.code-block.background",
+                "min": "text"
+              }
+            ]
+          }
+        },
+        "gap": {
+          "$value": "{space.inline.md}",
+          "$type": "dimension",
+          "$description": "Space between the line numbers and the code."
+        }
+      },
+      "padding": {
+        "$value": "{space.inset.sm}",
+        "$type": "dimension",
+        "$description": "Space around the code."
+      },
+      "font-family": {
+        "$value": "{type.family.code}",
+        "$type": "fontFamily",
+        "$description": "Code font."
+      },
+      "font-size": {
+        "$value": "{type.size.small}",
+        "$type": "dimension",
+        "$description": "Code text size."
+      },
+      "line-height": {
+        "$value": "{type.leading.body}",
+        "$type": "number",
+        "$description": "Code line height."
+      },
+      "focus-ring-color": {
+        "$value": "{color.focus.ring}",
+        "$type": "color",
+        "$description": "Focus indicator of an overflowing block, drawn inside it so it stays clear of the border and the header line.",
+        "$extensions": {
+          "personal-site.contrast": [
+            {
+              "against": "component.code-block.background",
+              "min": "non-text"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+/* Shared by both kinds: fixed behind all content, below the header (layer.backdrop). */
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-backdrop);
+  pointer-events: none;
+}
+
+/*
+ * An even band of accent cyan along every edge, in both themes (owner: frame, not vignette,
+ * 2026-10-24). The vmin depths keep the band in proportion on phones and wide screens.
+ */
+.quiet {
+  background-image:
+    linear-gradient(to bottom, var(--color-backdrop-frame), 5vmin, transparent 26vmin),
+    linear-gradient(to top, var(--color-backdrop-frame), 5vmin, transparent 26vmin),
+    linear-gradient(to right, var(--color-backdrop-frame), 5vmin, transparent 26vmin),
+    linear-gradient(to left, var(--color-backdrop-frame), 5vmin, transparent 26vmin);
+}
+
+/* Transparent until the first frame, then faded in; motion.duration.slow is 0 under reduced motion (R2.9). */
+.sphere {
+  inline-size: 100%;
+  block-size: 100%;
+  opacity: 0;
+  transition: opacity var(--motion-duration-slow) var(--motion-easing-standard);
+}
+
+.ready {
+  opacity: 1;
+}
+
+/* The pause toggle does nothing without JavaScript (nor does the sphere), so it's hidden until scripts run. */
+:global(:root:not([data-js])) .pause {
+  display: none;
+}
+
+@media (forced-colors: active) {
+  .layer {
+    display: none;
+  }
+}
+
+@media print {
+  .layer {
+    display: none;
+  }
+}

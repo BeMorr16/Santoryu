@@ -1,0 +1,35 @@
+/* The rule and its spacing sit on a wrapper, so they don't contend with the list's reset. */
+.prevNext {
+  padding-block-start: var(--space-inset-md);
+  border-block-start: var(--effect-border-width) solid var(--color-border-subtle);
+}
+
+/* At the inline end, even alone. */
+.next {
+  margin-inline-start: auto;
+  text-align: end;
+}
+
+.link {
+  display: inline-flex;
+  gap: var(--space-inline-sm);
+  align-items: center;
+}
+
+.text {
+  overflow-wrap: anywhere;
+  display: flex;
+  flex-direction: column;
+}
+
+.direction {
+  color: var(--color-text-muted);
+  font-size: var(--type-size-small);
+}
+
+/* size.breakpoint.sm: one above the other. */
+@media (max-width: 30em) {
+  .prevNext .list {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,87 @@
+/*
+ * Self-hosted webfonts (decision 0006, component-library design §5). Only the latin variable
+ * files are referenced, so only they are emitted. Fontsource's own CSS is never imported.
+ * unicode-range is Fontsource 5.3.0's latin range, copied verbatim.
+ */
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/inter/files/inter-latin-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Space Grotesk Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url("@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Fira Code Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url("@fontsource-variable/fira-code/files/fira-code-latin-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/*
+ * Metric-matched fallbacks (R1.5), so the swap to the webfont barely shifts layout.
+ *
+ * Formula (as in Next.js next/font and Capsize):
+ *   size-adjust      = (font.xWidthAvg / font.unitsPerEm) / (fallback.xWidthAvg / fallback.unitsPerEm)
+ *   ascent-override  = font.ascent / (font.unitsPerEm × size-adjust)
+ *   descent-override = |font.descent| / (font.unitsPerEm × size-adjust)
+ *   line-gap-override = font.lineGap / (font.unitsPerEm × size-adjust)
+ * ascent/descent/lineGap are the hhea values. xWidthAvg is the advance width of Capsize's latin
+ * character sample weighted by English frequency (@capsizecss/unpack 4.0.1 weightings), read
+ * from each font's default instance.
+ *
+ * Source data, read 2026-10-17 from the pinned Fontsource 5.3.0 woff2 files and macOS system fonts:
+ *   Inter Variable         upm 2048, ascent 1984, descent -494, lineGap 0, xWidthAvg 978 (default wght 400)
+ *   Space Grotesk Variable upm 1000, ascent 984,  descent -292, lineGap 0, xWidthAvg 488 (default wght 300)
+ *   Fira Code Variable     upm 2000, ascent 1980, descent -644, lineGap 0, xWidthAvg 1200 (default wght 300)
+ *   Arial                  upm 2048, ascent 1854, descent -434, lineGap 67, xWidthAvg 913
+ *   Courier New            upm 2048, ascent 1705, descent -615, lineGap 0, xWidthAvg 1229
+ * The font versions are pinned, so these can't drift.
+ */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial");
+  size-adjust: 107.12%;
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Space Grotesk Fallback";
+  src: local("Arial");
+  size-adjust: 109.47%;
+  ascent-override: 89.89%;
+  descent-override: 26.67%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Fira Code Fallback";
+  src: local("Courier New");
+  size-adjust: 99.98%;
+  ascent-override: 99.02%;
+  descent-override: 32.21%;
+  line-gap-override: 0%;
+}

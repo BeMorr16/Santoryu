@@ -26,9 +26,17 @@ afterEach(async () => {
 describe("readSiteManifest", () => {
   it("returns the manifest when it matches the site files", () => {
     expect(readSiteManifest(manifestPath, siteDir)).toEqual({
-      files: ["/404.html", "/index.html", "/lab/index.html", "/robots.txt", "/sitemap.xml"],
+      files: [
+        "/404.html",
+        "/design-system/components/index.html",
+        "/design-system/index.html",
+        "/design-system/tokens/index.html",
+        "/index.html",
+        "/robots.txt",
+        "/sitemap.xml",
+      ],
       scriptHashes: [
-        "sha256-g290CCT6iOo7t4EprHRAEMH61Ke8qjF4QjbdV6MALDY=",
+        "sha256-OSR+YjyboAoO+CpHBAWVYrFe/ToY6iSXk6LGV+Al7YU=",
         "sha256-trFr8w1a/9B5jvmHNRMMlExl0/RsiC38OsiSeBAFUWc=",
       ],
     });
@@ -63,7 +71,15 @@ describe("readSiteManifest", () => {
     await writeFile(
       manifestPath,
       JSON.stringify({
-        files: ["/404.html", "/index.html", "/lab/index.html", "/robots.txt", "/sitemap.xml"],
+        files: [
+          "/404.html",
+          "/design-system/components/index.html",
+          "/design-system/index.html",
+          "/design-system/tokens/index.html",
+          "/index.html",
+          "/robots.txt",
+          "/sitemap.xml",
+        ],
         scriptHashes: ["sha256-abc'; script-src *"],
       }),
     );

@@ -1,0 +1,6 @@
+.count {
+  color: var(--color-text-muted);
+  font-family: var(--type-family-body);
+  font-size: var(--type-size-small);
+  font-weight: var(--type-weight-body);
+}

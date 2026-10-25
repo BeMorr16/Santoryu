@@ -10,7 +10,8 @@ async function ruleIdsFor(code: string, fileName: string): Promise<string[]> {
   return result?.messages.map((message) => message.ruleId ?? message.message) ?? [];
 }
 
-describe("ESLint config canary", () => {
+// The first lintText loads type information for the whole repo, which can take several seconds.
+describe("ESLint config canary", { timeout: 30_000 }, () => {
   it("reports jsx-a11y/alt-text for an image without alt text", async () => {
     const code = `export function Fixture() {\n  return <img src="x.png" />;\n}\n`;
 

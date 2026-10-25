@@ -1,0 +1,16 @@
+/* The shared docs layout (DocLayout.module.css), under this module's class names. */
+.docPage {
+  composes: page from "../DocLayout.module.css";
+}
+
+.intro {
+  composes: intro from "../DocLayout.module.css";
+}
+
+.toc {
+  composes: toc from "../DocLayout.module.css";
+}
+
+.content {
+  composes: content from "../DocLayout.module.css";
+}

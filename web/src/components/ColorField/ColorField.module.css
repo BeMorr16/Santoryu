@@ -1,0 +1,124 @@
+/* A fieldset without the browser's frame: the legend reads as a label (theme-creator R14.2). */
+.root {
+  display: grid;
+  gap: var(--component-color-field-gap);
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.legend {
+  padding: 0;
+  color: var(--component-color-field-legend-text);
+  font-weight: var(--type-weight-strong);
+}
+
+/* A legend sits outside the grid, so the gap below it comes from its own margin. */
+.legend + * {
+  margin-block-start: var(--component-color-field-gap);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--type-size-small);
+}
+
+.controls {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--component-color-field-gap);
+}
+
+.picker {
+  flex: none;
+  box-sizing: border-box;
+  inline-size: var(--component-color-field-picker-size);
+  block-size: var(--component-color-field-picker-size);
+  padding: 0;
+  border: var(--effect-border-width) solid var(--component-color-field-picker-border);
+  border-radius: var(--component-color-field-picker-radius);
+  background: none;
+  cursor: pointer;
+  /* The picked color is content: forced colors leaves it alone. */
+  forced-color-adjust: none;
+}
+
+.picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.picker::-webkit-color-swatch {
+  border: none;
+  border-radius: var(--component-color-field-picker-radius);
+}
+
+.picker::-moz-color-swatch {
+  border: none;
+  border-radius: var(--component-color-field-picker-radius);
+}
+
+.picker:focus-visible,
+.swatch:focus-visible {
+  outline: var(--effect-focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+.picker:disabled,
+.swatch:disabled {
+  cursor: not-allowed;
+}
+
+.hex {
+  flex: 0 1 var(--size-column-sm);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--component-color-field-gap);
+}
+
+.swatch {
+  box-sizing: border-box;
+  inline-size: var(--component-color-field-swatch-size);
+  block-size: var(--component-color-field-swatch-size);
+  padding: 0;
+  border: var(--effect-border-width) solid var(--component-color-field-swatch-border);
+  border-radius: var(--component-color-field-swatch-radius);
+  background-color: var(--_swatch);
+  cursor: pointer;
+  forced-color-adjust: none;
+}
+
+/*
+ * Pressed: a ring outside the swatch, past a surface-colored gap, so it shows the same on any
+ * swatch, light or dark (R14.4). Focus is drawn outside the ring.
+ */
+.swatch[aria-pressed="true"] {
+  box-shadow:
+    0 0 0 var(--effect-border-width-thick) var(--color-surface-raised),
+    0 0 0 calc(2 * var(--effect-border-width-thick)) var(--color-text-default);
+}
+
+.swatch[aria-pressed="true"]:focus-visible {
+  outline-offset: calc(2 * var(--effect-border-width-thick) + var(--effect-focus-ring-offset));
+}
+
+/* Box shadows are dropped here: pressed is a thick border instead, apart from focus's outline. */
+@media (forced-colors: active) {
+  .picker,
+  .swatch {
+    border-color: CanvasText;
+  }
+
+  .swatch[aria-pressed="true"] {
+    border: var(--effect-border-width-thick) solid Highlight;
+  }
+
+  .picker:focus-visible,
+  .swatch:focus-visible {
+    outline-color: CanvasText;
+  }
+}

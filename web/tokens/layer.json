@@ -1,0 +1,38 @@
+{
+  "layer": {
+    "$type": "number",
+    "$description": "Stacking order (z-index). Popovers use the top layer and need no token.",
+    "below": {
+      "$value": -1,
+      "$description": "Stacking step below the page's content (z-index -1)."
+    },
+    "1": {
+      "$value": 1,
+      "$description": "Stacking step 1."
+    },
+    "2": {
+      "$value": 2,
+      "$description": "Stacking step 2."
+    },
+    "3": {
+      "$value": 3,
+      "$description": "Stacking step 3."
+    },
+    "backdrop": {
+      "$value": "{layer.below}",
+      "$description": "The page backdrop: behind all content."
+    },
+    "raised": {
+      "$value": "{layer.1}",
+      "$description": "Above a sibling overlay in the same component (Card's children)."
+    },
+    "sticky": {
+      "$value": "{layer.2}",
+      "$description": "Sticky page chrome (the site header)."
+    },
+    "overlay": {
+      "$value": "{layer.3}",
+      "$description": "Revealed overlays that must sit above sticky chrome (skip link)."
+    }
+  }
+}

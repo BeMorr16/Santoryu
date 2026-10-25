@@ -1,0 +1,65 @@
+/* Long one-word names ("VisuallyHidden") break rather than widen the page at large text (R2.7). */
+.sideMenu {
+  overflow-wrap: anywhere;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+  padding: var(--space-inset-md) var(--space-layout-xs) 0;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+}
+
+/* The disclosure's chevron points up while open. */
+.toggle {
+  align-self: start;
+}
+
+.toggle svg {
+  transition: rotate var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.toggle[aria-expanded="true"] svg {
+  rotate: 180deg;
+}
+
+/* Collapsed until opened, once scripts run. Without them the lists show and the toggle hides. */
+:global(:root[data-js]) .lists:not([data-open]) {
+  display: none;
+}
+
+:global(:root:not([data-js])) .toggle {
+  display: none;
+}
+
+/* size.breakpoint.md: a column at the inline start, sticky below the header, scrolling on its own. */
+@media (min-width: 48em) {
+  .sideMenu {
+    position: sticky;
+    inset-block-start: var(--shell-header-block-size, 0px);
+    align-self: start;
+    max-block-size: calc(100dvh - var(--shell-header-block-size, 0px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block-end: var(--space-inset-md);
+    border-inline-end: var(--effect-border-width) solid var(--color-border-subtle);
+  }
+
+  .toggle {
+    display: none;
+  }
+
+  :global(:root[data-js]) .lists:not([data-open]) {
+    display: flex;
+  }
+}
+
+/* size.breakpoint.sm: on short screens the header scrolls away, so the column does too. */
+@media (min-width: 48em) and (max-height: 30em) {
+  .sideMenu {
+    position: static;
+    max-block-size: none;
+  }
+}

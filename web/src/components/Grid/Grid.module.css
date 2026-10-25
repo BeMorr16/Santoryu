@@ -1,0 +1,47 @@
+/*
+ * Auto-fit columns with no media queries (R9.1). min(…, 100%) gives one full-width column when
+ * the container is narrower than the minimum, so nothing overflows (R9.2). Every private value is
+ * set on each Grid, so a nested Grid never inherits its parent's (refinement R7.4); .fill and
+ * .max-* override them by coming later at the same specificity.
+ */
+.grid {
+  --_fit: auto-fit;
+  --_track: var(--_min);
+
+  display: grid;
+  grid-template-columns: repeat(var(--_fit), minmax(min(var(--_track), 100%), 1fr));
+  gap: var(--_row) var(--_column);
+}
+
+.min-sm {
+  --_min: var(--size-column-sm);
+}
+
+.min-md {
+  --_min: var(--size-column-md);
+}
+
+.min-lg {
+  --_min: var(--size-column-lg);
+}
+
+/* Keeps empty columns when there are fewer items than columns, so the items don't stretch (refinement R7.2). */
+.fill {
+  --_fit: auto-fill;
+}
+
+/*
+ * At most N columns (refinement R7.3): a track is never narrower than the width N columns and
+ * their gaps share, so no more than N fit. max() keeps the min-* floor.
+ */
+.max-2 {
+  --_track: max(var(--_min), (100% - var(--_column)) / 2);
+}
+
+.max-3 {
+  --_track: max(var(--_min), (100% - 2 * var(--_column)) / 3);
+}
+
+.max-4 {
+  --_track: max(var(--_min), (100% - 3 * var(--_column)) / 4);
+}

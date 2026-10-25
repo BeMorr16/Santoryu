@@ -1,0 +1,168 @@
+/* Each variant sets these private values; .card reads them (refinement R8.5). */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--component-card-gap);
+  padding: var(--component-card-padding);
+  border: var(--component-card-border-width) solid var(--_border);
+  border-radius: var(--component-card-radius);
+  background-color: var(--_background);
+  box-shadow: var(--_elevation);
+  color: var(--component-card-body-color);
+}
+
+.raised {
+  --_background: var(--component-card-raised-background);
+  --_border: var(--component-card-raised-border);
+  --_elevation: var(--component-card-raised-elevation);
+  --_background-hover: var(--component-card-raised-background-hover);
+  --_border-hover: var(--component-card-raised-border-hover);
+}
+
+.outlined {
+  --_background: var(--component-card-outlined-background);
+  --_border: var(--component-card-outlined-border);
+  --_elevation: var(--component-card-outlined-elevation);
+  --_background-hover: var(--component-card-outlined-background-hover);
+  --_border-hover: var(--component-card-outlined-border-hover);
+}
+
+.flat {
+  --_background: var(--component-card-flat-background);
+  --_border: var(--component-card-flat-border);
+  --_elevation: var(--component-card-flat-elevation);
+  --_background-hover: var(--component-card-flat-background-hover);
+  --_border-hover: var(--component-card-flat-border-hover);
+}
+
+/* Glass only over a varied backdrop (decision 0015). */
+.glass {
+  --_background: var(--component-card-glass-background);
+  --_border: var(--component-card-glass-border);
+  --_elevation: var(--component-card-glass-elevation);
+  --_background-hover: var(--component-card-glass-background-hover);
+  --_border-hover: var(--component-card-glass-border-hover);
+
+  backdrop-filter: blur(var(--component-card-glass-backdrop-blur));
+}
+
+/* As the header does; as far as known, only Chromium supports this query (refinement R8.6). */
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    --_background: var(--component-card-glass-background-opaque);
+    --_background-hover: var(--component-card-glass-background-opaque);
+
+    backdrop-filter: none;
+  }
+}
+
+/* The look comes from Typography's headingVariant, the same at every level (refinement R12.9). */
+.heading {
+  color: var(--component-card-heading-color);
+}
+
+/* Shown first, edge to edge inside the border; after the heading in the DOM (R4.2). */
+.media {
+  order: -1;
+  margin-block-start: calc(-1 * var(--component-card-padding));
+  margin-inline: calc(-1 * var(--component-card-padding));
+  border-block-end: var(--component-card-border-width) solid var(--component-card-media-border);
+  border-start-start-radius: calc(
+    var(--component-card-radius) - var(--component-card-border-width)
+  );
+  border-start-end-radius: calc(var(--component-card-radius) - var(--component-card-border-width));
+  overflow: clip;
+}
+
+/* Images and video fill the media's width. */
+.media > :is(img, picture, video, svg) {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+/* At the bottom edge when the card is taller than its content (refinement R8.2). */
+.footer {
+  margin-block-start: auto;
+}
+
+/*
+ * Spans one parent row per part and shares the parent's tracks (refinement R8.3). Outside a grid,
+ * subgrid computes as none and the span is ignored, so the parts stack as in the column layout.
+ * Its row-gap overrides the parent's inside the card.
+ */
+.subgrid {
+  display: grid;
+  grid-template-rows: subgrid;
+  row-gap: var(--component-card-gap);
+}
+
+.rows-1 {
+  grid-row: span 1;
+}
+
+.rows-2 {
+  grid-row: span 2;
+}
+
+.rows-3 {
+  grid-row: span 3;
+}
+
+.rows-4 {
+  grid-row: span 4;
+}
+
+.interactive {
+  transition-property: background-color, border-color;
+  transition-duration: var(--component-card-transition-duration);
+  transition-timing-function: var(--component-card-transition-easing);
+}
+
+/*
+ * Only while the card's own link (its overlay included) is hovered, so a nested control, or a link
+ * card nested inside, shows no hover here; and only where the device can hover (refinement R8.9).
+ * Without :has() there's no hover look, as with the focus ring below.
+ */
+@media (hover: hover) {
+  .card:has(> .heading > .link:hover) {
+    border-color: var(--_border-hover);
+    background-color: var(--_background-hover);
+  }
+}
+
+/*
+ * The heading's look, whatever Link's hover, current or visited rules say (refinement R8.10).
+ * :any-link matches every <a href>, so (0,4,0) beats Link's strongest rule, (0,3,0).
+ */
+.card .heading .link:any-link {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration-line: none;
+}
+
+/* The heading link is the card's one link; its overlay makes the whole surface clickable (R10.3). */
+.card .link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* The focus ring goes around the whole card instead of the heading (R10.4), where :has() works. */
+@supports selector(:has(*)) {
+  .card .link:focus-visible {
+    outline: none;
+  }
+}
+
+.card:has(.link:focus-visible) {
+  outline: var(--effect-focus-ring-width) solid var(--component-card-focus-ring-color);
+  outline-offset: var(--effect-focus-ring-offset);
+}
+
+/* Other controls sit above the overlay and get their own clicks (R10.5, refinement R8.12). */
+.interactive :is(a, button, input, select, textarea, summary, [tabindex]):not(.link) {
+  position: relative;
+  z-index: var(--layer-raised);
+}
