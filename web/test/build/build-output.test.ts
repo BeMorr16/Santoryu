@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { within } from "@testing-library/dom";
 import { JSDOM } from "jsdom";
 import { beforeAll, describe, expect, it } from "vitest";
-import { homeContent } from "../../src/content/home.ts";
+import { homeContent, homeTitle } from "../../src/content/home.ts";
 import { siteUrl } from "../../src/site.config.ts";
 
 const clientDir = fileURLToPath(new URL("../../build/client/", import.meta.url));
@@ -11,28 +11,28 @@ const clientDir = fileURLToPath(new URL("../../build/client/", import.meta.url))
 const pages = [
   {
     file: "index.html",
-    title: homeContent.title,
+    title: homeTitle,
     canonical: `${siteUrl}/`,
     h1: homeContent.name,
     bodyText: homeContent.intro,
   },
   {
     file: "design-system/index.html",
-    title: "Design System · Ben",
+    title: "Design System · Ben Morrison",
     canonical: `${siteUrl}/design-system`,
     h1: "Design System",
     bodyText: "Components",
   },
   {
     file: "design-system/tokens/index.html",
-    title: "Tokens · Design System · Ben",
+    title: "Tokens · Design System · Ben Morrison",
     canonical: `${siteUrl}/design-system/tokens`,
     h1: "Tokens",
     bodyText: "--component-button-primary-background",
   },
   {
     file: "design-system/components/index.html",
-    title: "Components · Design System · Ben",
+    title: "Components · Design System · Ben Morrison",
     canonical: `${siteUrl}/design-system/components`,
     h1: "Components",
     bodyText: "Principles",
@@ -40,7 +40,7 @@ const pages = [
   },
   {
     file: "404.html",
-    title: "Page not found · Ben",
+    title: "Page not found · Ben Morrison",
     canonical: undefined,
     h1: "Page not found",
     bodyText: "Go to the home page",

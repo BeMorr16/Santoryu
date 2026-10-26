@@ -5,7 +5,7 @@ import { Typography } from "../../components/Typography/Typography.tsx";
 import { componentTokensOf } from "../../tokens/metadata.ts";
 import { ComponentTokenTable } from "../ComponentTokenTable.tsx";
 import { DocSection } from "../DocSection.tsx";
-import { pageMeta } from "../page-meta.ts";
+import { pageMeta } from "../../shell/page-meta.ts";
 import styles from "./ComponentPage.module.css";
 import { ExampleGroup } from "./ExampleGroup.tsx";
 import { KeyboardTable } from "./KeyboardTable.tsx";
@@ -90,7 +90,7 @@ export function ComponentPage({ showcase }: { showcase: Showcase }) {
   );
 }
 
-/** A component page's title, "<Name> · Components · Design System · Ben", description and URL. */
+/** A component page's title, "<Name> · Components · Design System · Ben Morrison", description and URL. */
 function componentPageHead(showcase: Showcase) {
   const { name } = componentPage(showcase.id);
   return pageMeta(

@@ -1,7 +1,7 @@
 /** The site origin, with no trailing slash. */
 export const siteUrl = "https://ben-morrison.com";
 
-export const siteName = "Ben";
+export const siteName = "Ben Morrison";
 
 /** The owner's full name, as the "BM" home link names it (site-refresh R7.1). */
 export const ownerName = "Ben Morrison";

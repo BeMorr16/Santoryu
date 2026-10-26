@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "playwright test",
+    "og-image": "node og-image.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -171,10 +171,12 @@ describe("ComponentPage (ds-components R4)", () => {
   );
 
   it("titles the page, describes it with its purpose and links its canonical URL (R1.1, R1.5)", () => {
-    expect(componentPageMeta(showcases["back-to-top"])).toEqual([
-      { title: "BackToTop · Components · Design System · Ben" },
-      { name: "description", content: showcases["back-to-top"].purpose },
-    ]);
+    expect(componentPageMeta(showcases["back-to-top"])).toEqual(
+      expect.arrayContaining([
+        { title: "BackToTop · Components · Design System · Ben Morrison" },
+        { name: "description", content: showcases["back-to-top"].purpose },
+      ]),
+    );
     expect(componentPageLinks(showcases["back-to-top"])).toEqual([
       { rel: "canonical", href: `https://ben-morrison.com${componentPath("back-to-top")}` },
     ]);

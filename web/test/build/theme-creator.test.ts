@@ -37,7 +37,7 @@ describe("/design-system/theme-creator, prerendered (theme-creator R16.2)", () =
     expect(main?.querySelector("h1")?.textContent).toBe("Theme Creator");
     expect(main?.textContent).toContain("The theme creator needs JavaScript.");
     expect(main?.querySelectorAll("input, select, textarea, button")).toHaveLength(0);
-    expect(document.title).toBe("Theme Creator · Design System · Ben");
+    expect(document.title).toBe("Theme Creator · Design System · Ben Morrison");
     expect(document.querySelector("link[rel='canonical']")?.getAttribute("href")).toBe(
       `${siteUrl}${themeCreatorPath}`,
     );

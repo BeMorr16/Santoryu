@@ -13,11 +13,13 @@ afterEach(() => {
 });
 
 describe("theme creator route (theme-creator R1)", () => {
-  it("is titled Theme Creator · Design System · Ben, with a description (R1.1)", () => {
-    expect(meta()).toEqual([
-      { title: "Theme Creator · Design System · Ben" },
-      { name: "description", content: expect.stringMatching(/theme/i) as string },
-    ]);
+  it("is titled Theme Creator · Design System · Ben Morrison, with a description (R1.1)", () => {
+    expect(meta()).toEqual(
+      expect.arrayContaining([
+        { title: "Theme Creator · Design System · Ben Morrison" },
+        { name: "description", content: expect.stringMatching(/theme/i) as string },
+      ]),
+    );
   });
 
   it("links the canonical URL (R1.1)", () => {

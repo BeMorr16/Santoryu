@@ -1,7 +1,7 @@
 import { docsHandle } from "../../../design-system/components/docs-handle.ts";
 import { Overview } from "../../../design-system/components/Overview.tsx";
 import { componentsPath } from "../../../design-system/components/pages.ts";
-import { pageMeta } from "../../../design-system/page-meta.ts";
+import { pageMeta } from "../../../shell/page-meta.ts";
 
 const page = pageMeta(
   componentsPath,

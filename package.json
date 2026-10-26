@@ -19,7 +19,8 @@
     "test": "pnpm run tokens && pnpm --filter web run test && pnpm --filter infra run test",
     "test:build": "pnpm --filter web run test:build",
     "test:smoke": "pnpm --filter infra run test:smoke",
-    "test:e2e": "pnpm --filter e2e run test"
+    "test:e2e": "pnpm --filter e2e run test",
+    "og-image": "pnpm --filter e2e run og-image"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.1",

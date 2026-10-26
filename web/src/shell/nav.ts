@@ -13,4 +13,4 @@ export const navLinks = [
 ] as const satisfies readonly NavLink[];
 
 /** Where "Contact" goes. "/" until the contact page exists (roadmap row 5 repoints it; R7.4). */
-export const contactHref = "/";
+export const contactHref: string = "/";
