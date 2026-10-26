@@ -27,10 +27,10 @@ const quietFiles = [
 const documentOf = (file: string) =>
   new JSDOM(readFileSync(`${clientDir}${file}`, "utf8")).window.document;
 
-/** CSS-module class names keep their local name (`_quiet_<hash>_<line>`). */
-const quietLayers = (document: Document) =>
+/** CSS-module class names keep their local name (`_frameGlow_<hash>_<line>`). */
+const frameLayers = (document: Document) =>
   [...document.querySelectorAll('div[aria-hidden="true"]')].filter((element) =>
-    [...element.classList].some((name) => name.startsWith("_quiet_")),
+    [...element.classList].some((name) => name.startsWith("_frameGlow_")),
   );
 
 /** The sphere engine's chunk, named after its module (R5.7). */
@@ -44,18 +44,23 @@ beforeAll(() => {
 });
 
 describe("backdrop in the build (site-backdrop R1.3, R4.2, R5.7)", () => {
-  it.each(strikingFiles)("%s prerenders one hidden canvas and no frame glow", (file) => {
-    const document = documentOf(file);
+  it.each(strikingFiles)(
+    "%s prerenders the frame glow, then one hidden canvas (backdrop-layers R2.1)",
+    (file) => {
+      const document = documentOf(file);
 
-    expect(document.querySelectorAll("canvas")).toHaveLength(1);
-    expect(document.querySelectorAll('canvas[aria-hidden="true"]')).toHaveLength(1);
-    expect(quietLayers(document)).toHaveLength(0);
-  });
+      expect(document.querySelectorAll("canvas")).toHaveLength(1);
+      expect(document.querySelectorAll('canvas[aria-hidden="true"]')).toHaveLength(1);
+      const [frame] = frameLayers(document);
+      expect(frameLayers(document)).toHaveLength(1);
+      expect(frame?.nextElementSibling?.localName).toBe("canvas");
+    },
+  );
 
   it.each(quietFiles)("%s prerenders the frame glow and no canvas", (file) => {
     const document = documentOf(file);
 
-    expect(quietLayers(document)).toHaveLength(1);
+    expect(frameLayers(document)).toHaveLength(1);
     expect(document.querySelector("canvas")).toBeNull();
   });
 

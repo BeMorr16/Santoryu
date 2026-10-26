@@ -261,16 +261,16 @@ describe("SiteShell", () => {
   it("renders the quiet backdrop by default (site-backdrop R1.1)", () => {
     const { container } = renderAt("/");
 
-    expect(container.getElementsByClassName(backdropStyles.quiet ?? "")).toHaveLength(1);
+    expect(container.getElementsByClassName(backdropStyles.frameGlow ?? "")).toHaveLength(1);
     expect(container.querySelector("canvas")).toBeNull();
   });
 
-  it("renders the striking backdrop for a route whose handle asks for it (site-backdrop R1.1)", async () => {
+  it("renders the frame and the sphere for a route whose handle asks for striking (backdrop-layers R1.1)", async () => {
     const { container } = renderAt("/striking");
 
     expect(await screen.findByRole("heading", { name: "Striking page" })).toBeInTheDocument();
     expect(container.querySelectorAll("canvas")).toHaveLength(1);
-    expect(container.getElementsByClassName(backdropStyles.quiet ?? "")).toHaveLength(0);
+    expect(container.getElementsByClassName(backdropStyles.frameGlow ?? "")).toHaveLength(1);
   });
 
   it("offers the sphere's pause toggle on striking pages only (site-backdrop R6.7)", async () => {
@@ -290,15 +290,18 @@ describe("SiteShell", () => {
     expect(pause()).toBeNull();
   });
 
-  it("swaps the sphere for the frame glow on navigating to a quiet page (site-backdrop R1.4)", async () => {
+  it("removes the sphere and keeps the frame on navigating to a quiet page (site-backdrop R1.4, backdrop-layers R1.5)", async () => {
     const user = userEvent.setup();
     const { container } = renderAt("/striking");
     await screen.findByRole("heading", { name: "Striking page" });
+    const frame = container.getElementsByClassName(backdropStyles.frameGlow ?? "")[0];
 
     await user.click(screen.getByRole("link", { name: "Go to Design System" }));
 
     expect(await screen.findByRole("heading", { name: "Design System page" })).toBeInTheDocument();
     expect(container.querySelector("canvas")).toBeNull();
-    expect(container.getElementsByClassName(backdropStyles.quiet ?? "")).toHaveLength(1);
+    const frames = container.getElementsByClassName(backdropStyles.frameGlow ?? "");
+    expect(frames).toHaveLength(1);
+    expect(frames[0]).toBe(frame);
   });
 });

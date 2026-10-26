@@ -26,7 +26,7 @@ export function SphereCanvas() {
           });
         }
       })
-      // A chunk that fails to load (offline, or a stale page after a deploy) leaves the page color (R6.4).
+      // A chunk that fails to load (offline, or a stale page after a deploy) leaves the canvas clear, so the frame glow shows (R6.4, decision 0018).
       .catch(() => undefined);
     return () => {
       active = false;

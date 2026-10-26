@@ -97,7 +97,7 @@ describe("SphereCanvas", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it("leaves the page color, and throws nothing, when the engine fails to load (R6.4)", async () => {
+  it("stays transparent, and throws nothing, when the engine fails to load (R6.4, decision 0018)", async () => {
     // The chunk download is the boundary here: a failed fetch rejects the dynamic import.
     vi.resetModules();
     vi.doMock("./sphere/start-sphere.ts", () => {

@@ -1,6 +1,7 @@
 /**
  * Renders the link-preview image, web/public/og-image.png (home R7.5, design §7): the built Home
- * page's still sphere in Dark, with the name, the role and the domain over it, at 1200×630.
+ * page's still sphere in Dark (without the frame glow), with the name, the role and the domain over
+ * it, at 1200×630.
  *
  * When: after changing the name, the role, the dark palette or the sphere.
  * How:  pnpm run build && pnpm run og-image && pnpm run build, then commit the PNG. To refresh
@@ -25,6 +26,8 @@ const origin = "https://127.0.0.1:4173";
 /** The card over the sphere. Every value is a token custom property; the text is set below. */
 const cardStyles = `
   header, footer, [data-og-hidden] { display: none !important; }
+  /* The frame glow (decision 0018): Chrome dithers its gradients, and the noise takes the PNG past 300 KB. */
+  div[aria-hidden="true"][class*="_frameGlow_"] { display: none !important; }
   .og-card {
     position: fixed;
     inset-block: 0;
