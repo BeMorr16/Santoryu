@@ -565,7 +565,7 @@
       }
     },
     "overlay": {
-      "$description": "Translucent primitives. Only color.surface.glass, color.grid.line, color.backdrop.glow, color.backdrop.frame, color.fill.none and color.fill.scrim may alias them.",
+      "$description": "Translucent primitives. Only color.surface.glass, color.surface.glass-sheer, color.border.glass-highlight, color.grid.line, color.backdrop.glow, color.backdrop.frame, color.fill.none and color.fill.scrim may alias them.",
       "sand-50-85": {
         "$value": {
           "colorSpace": "srgb",
@@ -583,6 +583,33 @@
           "hex": "#000000"
         },
         "$description": "Black at 85% opacity. Dark-theme glass."
+      },
+      "white-8": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [1, 1, 1],
+          "alpha": 0.08,
+          "hex": "#ffffff"
+        },
+        "$description": "White at 8% opacity. Dark-theme sheer glass."
+      },
+      "white-20": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [1, 1, 1],
+          "alpha": 0.2,
+          "hex": "#ffffff"
+        },
+        "$description": "White at 20% opacity. Light-theme sheer glass, and the dark theme's glass highlight."
+      },
+      "white-80": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [1, 1, 1],
+          "alpha": 0.8,
+          "hex": "#ffffff"
+        },
+        "$description": "White at 80% opacity. Light-theme glass highlight."
       },
       "cyan-700-8": {
         "$value": {

@@ -145,6 +145,12 @@ test.describe("Card (refinement R8)", () => {
         has: page.getByRole("link", { name: variant, exact: false }),
       });
       const token = (name: string) => `var(--component-card-${variant}-${name})`;
+      // Glass adds its lit top and left edges to the elevation (home decision 0017).
+      const edge = "var(--component-card-border-width)";
+      const shadow =
+        variant === "glass"
+          ? `${token("elevation")}, inset 0 ${edge} 0 ${token("highlight")}, inset ${edge} 0 0 ${token("highlight")}`
+          : token("elevation");
       await expect(card).toHaveCSS(
         "background-color",
         await probe(card, "background-color", token("background")),
@@ -153,10 +159,7 @@ test.describe("Card (refinement R8)", () => {
         "border-top-color",
         await probe(card, "border-top-color", token("border")),
       );
-      await expect(card).toHaveCSS(
-        "box-shadow",
-        await probe(card, "box-shadow", token("elevation")),
-      );
+      await expect(card).toHaveCSS("box-shadow", await probe(card, "box-shadow", shadow));
     }
 
     const glass = scope

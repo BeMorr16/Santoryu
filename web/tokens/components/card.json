@@ -66,6 +66,10 @@
             {
               "against": "color.surface.glass",
               "min": "text"
+            },
+            {
+              "against": "color.surface.glass-sheer",
+              "min": "text"
             }
           ]
         }
@@ -114,6 +118,10 @@
             },
             {
               "against": "color.surface.glass",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass-sheer",
               "min": "text"
             }
           ]
@@ -217,7 +225,7 @@
       },
       "glass": {
         "background": {
-          "$value": "{color.surface.glass}",
+          "$value": "{color.surface.glass-sheer}",
           "$type": "color",
           "$description": "Glass card surface."
         },
@@ -232,7 +240,7 @@
           "$description": "Glass card shadow."
         },
         "background-hover": {
-          "$value": "{color.surface.glass}",
+          "$value": "{color.surface.glass-sheer}",
           "$type": "color",
           "$description": "Glass card surface while its link is hovered."
         },
@@ -241,15 +249,20 @@
           "$type": "color",
           "$description": "Glass card outline while its link is hovered."
         },
+        "highlight": {
+          "$value": "{color.border.glass-highlight}",
+          "$type": "color",
+          "$description": "Glass card's lit top and left edges, drawn inside the outline."
+        },
         "backdrop-blur": {
-          "$value": "{effect.backdrop.glass}",
+          "$value": "{effect.backdrop.glass-sheer}",
           "$type": "dimension",
           "$description": "Blur behind a glass card."
         },
         "background-opaque": {
           "$value": "{color.surface.raised}",
           "$type": "color",
-          "$description": "Glass card surface, at rest and on hover, under reduced transparency."
+          "$description": "Glass card surface, at rest and on hover, under reduced transparency and in custom themes."
         }
       },
       "focus-ring-color": {

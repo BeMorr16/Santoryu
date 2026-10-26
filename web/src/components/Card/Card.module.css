@@ -44,7 +44,23 @@
   --_background-hover: var(--component-card-glass-background-hover);
   --_border-hover: var(--component-card-glass-border-hover);
 
+  /* Lit top and left edges, inside the outline; inset shadows follow the corner radius. */
+  box-shadow:
+    var(--_elevation),
+    inset 0 var(--component-card-border-width) 0 var(--component-card-glass-highlight),
+    inset var(--component-card-border-width) 0 0 var(--component-card-glass-highlight);
   backdrop-filter: blur(var(--component-card-glass-backdrop-blur));
+}
+
+/*
+ * Custom themes (data-custom-theme, set on <html> by the theme switcher and the pre-paint script)
+ * get opaque glass cards: only the built-in themes' glass is reviewed over the sphere (decision 0017).
+ */
+:global(:root[data-custom-theme]) .glass {
+  --_background: var(--component-card-glass-background-opaque);
+  --_background-hover: var(--component-card-glass-background-opaque);
+
+  backdrop-filter: none;
 }
 
 /* As the header does; as far as known, only Chromium supports this query (refinement R8.6). */

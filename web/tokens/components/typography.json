@@ -328,6 +328,10 @@
                 {
                   "against": "color.surface.glass",
                   "min": "text"
+                },
+                {
+                  "against": "color.surface.glass-sheer",
+                  "min": "text"
                 }
               ]
             }
@@ -354,6 +358,10 @@
                 },
                 {
                   "against": "color.surface.glass",
+                  "min": "text"
+                },
+                {
+                  "against": "color.surface.glass-sheer",
                   "min": "text"
                 }
               ]

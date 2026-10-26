@@ -158,9 +158,9 @@ describe("Card page examples", () => {
       /Media is shown above the heading but read after it, so the heading always comes first/,
       /Card doesn't hide media: mark decorative media aria-hidden, and make a decorative preview of controls inert too. Give a meaningful image alt text/,
       /A control in media is shown above the heading but focused after the heading link. Keep it inset from the media's edges by the focus ring's width plus offset, or its ring is clipped/,
-      /Glass turns opaque when reduced transparency is requested/,
+      /Glass turns opaque when reduced transparency is requested, and in custom themes/,
       /Outlined is transparent, so use it only on surface.base, raised or sunken/,
-      /Glass needs a varied backdrop made only of those surfaces and action.background, or the dot sphere behind Home and the 404, where glass panels carry text over the dots/,
+      /Glass needs a varied backdrop made only of those surfaces, or the dot sphere behind Home and the 404, where glass panels carry text over the dots/,
       /keep link cards of every variant off action.background/,
     ]) {
       expect(within(section).getByText(note)).toBeInTheDocument();

@@ -43,6 +43,7 @@ export const colorFamilies: readonly ColorFamily[] = [
       member("surface.code", "neutral"),
       member("surface.inverse", "neutral"),
       member("surface.glass", "neutral"),
+      member("surface.glass-sheer", "neutral"),
       member("text.default", "neutral", true),
       member("text.muted", "neutral", true),
       member("text.subtle", "neutral", true),
