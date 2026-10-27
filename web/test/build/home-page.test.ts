@@ -23,7 +23,7 @@ describe("Home, prerendered (home R8.2)", () => {
     expect(main().getByText(homeContent.role)).toBeDefined();
     expect(main().getByText(homeContent.intro)).toBeDefined();
     for (const area of homeContent.focusAreas) expect(main().getByText(area)).toBeDefined();
-    expect(main().getByRole("link", { name: homeContent.linkedinLabel })).toBeDefined();
+    expect(main().getByRole("link", { name: homeContent.contactLabel })).toBeDefined();
   });
 
   it("has both sections, each named by its h2", () => {

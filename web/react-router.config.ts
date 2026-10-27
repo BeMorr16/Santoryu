@@ -8,10 +8,12 @@ import {
   componentPath,
   themeCreatorPath,
 } from "./src/design-system/components/pages.ts";
+import { contactHref } from "./src/shell/nav.ts";
 import { siteUrl } from "./src/site.config.ts";
 
 const prerender = [
   "/",
+  contactHref,
   "/design-system",
   "/design-system/tokens",
   themeCreatorPath,

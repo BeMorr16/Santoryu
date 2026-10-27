@@ -1,5 +1,5 @@
 import { homeContent } from "../content/home.ts";
-import { linkedinUrl, ownerName, siteName, siteUrl } from "../site.config.ts";
+import { githubUrl, linkedinUrl, ownerName, siteName, siteUrl } from "../site.config.ts";
 
 /** Home's JSON-LD: the site and its owner, in one @graph (R6.4). */
 export const homeStructuredData = {
@@ -12,7 +12,7 @@ export const homeStructuredData = {
       name: ownerName,
       jobTitle: homeContent.role,
       url: `${siteUrl}/`,
-      sameAs: [linkedinUrl],
+      sameAs: [linkedinUrl, githubUrl],
     },
   ],
 };

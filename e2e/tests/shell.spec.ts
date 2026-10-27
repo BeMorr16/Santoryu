@@ -210,3 +210,28 @@ test.describe("the nav's Design System link (ds-components R1.6)", () => {
     await expect(home(page)).toHaveAttribute("aria-current", "page");
   });
 });
+
+test.describe("the nav's Contact link (contact R3.2, R3.3)", () => {
+  test('is aria-current="page" on /contact, framed by brackets rather than underlined, and BM is not marked', async ({
+    page,
+  }) => {
+    await page.goto("/contact");
+    const contact = nav(page).getByRole("link", { name: "Contact" });
+
+    await expect(contact).toHaveAttribute("aria-current", "page");
+    await expect(contact).toHaveCSS("text-decoration-line", "none");
+    expect(await contact.evaluate((element) => getComputedStyle(element, "::before").content)).toBe(
+      '""',
+    );
+    await expect(home(page)).not.toHaveAttribute("aria-current");
+  });
+
+  test("is not marked on the home page, where BM is", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(nav(page).getByRole("link", { name: "Contact" })).not.toHaveAttribute(
+      "aria-current",
+    );
+    await expect(home(page)).toHaveAttribute("aria-current", "page");
+  });
+});

@@ -1,29 +1,24 @@
 import { render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Icon } from "../components/Icon/Icon.tsx";
 import buttonStyles from "../components/shared/button-styles.module.css";
 import typographyStyles from "../components/Typography/Typography.module.css";
 import { homeContent } from "../content/home.ts";
-import { linkedinUrl } from "../site.config.ts";
 import { Hero } from "./Hero.tsx";
 
-const iconMarkup = (name: "linkedin" | "arrow-right") =>
+const iconMarkup = (name: "arrow-right") =>
   render(<Icon name={name} />).container.querySelector("svg")?.innerHTML;
 
-function renderHero(Component = Hero) {
+function renderHero() {
   render(
     <MemoryRouter>
-      <Component />
+      <Hero />
     </MemoryRouter>,
   );
 }
 
 describe("Hero (home R2)", () => {
-  afterEach(() => {
-    vi.doUnmock("../shell/nav.ts");
-  });
-
   it("shows the name as the h1, then the role as a paragraph (R2.1)", () => {
     renderHero();
 
@@ -55,42 +50,15 @@ describe("Hero (home R2)", () => {
     }
   });
 
-  it("links LinkedIn in the same tab, named by its text, with its icon (R2.3)", () => {
+  it("has one call to action: a primary link to /contact, with an arrow (R2.4; contact R4.1)", () => {
     renderHero();
-
-    const linkedin = screen.getByRole("link", { name: homeContent.linkedinLabel });
-    expect(linkedin).toHaveAccessibleName("LinkedIn");
-    expect(linkedin).toHaveAttribute("href", linkedinUrl);
-    expect(linkedin).not.toHaveAttribute("target");
-    expect(linkedin).toHaveClass(buttonStyles.button ?? "", buttonStyles.secondary ?? "");
-    expect(linkedin.firstElementChild?.innerHTML).toBe(iconMarkup("linkedin"));
-  });
-
-  it("has no contact link while contactHref is / (R2.5)", () => {
-    renderHero();
-
-    expect(screen.queryByRole("link", { name: homeContent.contactLabel })).toBeNull();
-    expect(screen.getAllByRole("link")).toHaveLength(1);
-  });
-
-  it("puts a primary contact link first, with an arrow, once contactHref isn't / (R2.4)", async () => {
-    vi.resetModules();
-    vi.doMock("../shell/nav.ts", () => ({ contactHref: "/about#contact" }));
-    const { Hero: Fresh } = await import("./Hero.tsx");
-    const freshButtonStyles = (await import("../components/shared/button-styles.module.css"))
-      .default;
-    renderHero(Fresh);
 
     const links = screen.getAllByRole("link");
-    expect(links.map((link) => link.textContent)).toEqual([
-      homeContent.contactLabel,
-      homeContent.linkedinLabel,
-    ]);
-    const [contact, linkedin] = links;
-    expect(contact).toHaveAttribute("href", "/about#contact");
-    expect(contact).toHaveClass(freshButtonStyles.primary ?? "");
+    expect(links.map((link) => link.textContent)).toEqual([homeContent.contactLabel]);
+    const [contact] = links;
+    expect(contact).toHaveAccessibleName(homeContent.contactLabel);
+    expect(contact).toHaveAttribute("href", "/contact");
+    expect(contact).toHaveClass(buttonStyles.button ?? "", buttonStyles.primary ?? "");
     expect(contact?.lastElementChild?.innerHTML).toBe(iconMarkup("arrow-right"));
-    expect(linkedin).toHaveClass(freshButtonStyles.secondary ?? "");
-    expect(linkedin).not.toHaveClass(freshButtonStyles.primary ?? "");
   });
 });

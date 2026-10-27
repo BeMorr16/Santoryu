@@ -24,6 +24,7 @@ function renderAt(path: string) {
         { index: true, Component: () => <Link to="/design-system/tokens">Tokens</Link> },
         { path: "design-system", Component: () => <h1>Design System</h1> },
         { path: "design-system/tokens", Component: () => <h1>Tokens</h1> },
+        { path: "contact", Component: () => <h1>Contact</h1> },
       ],
     },
   ]);
@@ -56,7 +57,7 @@ afterEach(() => {
 });
 
 describe("SiteHeader: content (site-refresh R6, R7)", () => {
-  it("is the banner landmark: BM, Menu, then the panel with the Primary nav and the utilities (R9.1)", () => {
+  it("is the banner landmark: BM, Menu, then the panel with the Primary nav, LinkedIn and Theme (R9.1; contact R3.5)", () => {
     renderAt("/");
     const header = banner();
     const element = openPanel();
@@ -65,9 +66,8 @@ describe("SiteHeader: content (site-refresh R6, R7)", () => {
       within(header).getByRole("link", { name: "BM, Ben Morrison, home" }),
       menuButton(),
       within(element).getByRole("navigation", { name: "Primary" }),
-      within(element).getByRole("button", { name: "Theme: Light" }),
       within(element).getByRole("link", { name: "LinkedIn" }),
-      within(element).getByRole("link", { name: "Contact" }),
+      within(element).getByRole("button", { name: "Theme: Light" }),
     ];
     sequence.slice(1).forEach((later, index) => {
       const earlier = sequence[index];
@@ -86,9 +86,9 @@ describe("SiteHeader: content (site-refresh R6, R7)", () => {
       screen.getByRole("link", { name: "BM, Ben Morrison, home" }),
       menuButton(),
       screen.getByRole("link", { name: "Design System" }),
-      screen.getByRole("button", { name: "Theme: Light" }),
-      screen.getByRole("link", { name: "LinkedIn" }),
       screen.getByRole("link", { name: "Contact" }),
+      screen.getByRole("link", { name: "LinkedIn" }),
+      screen.getByRole("button", { name: "Theme: Light" }),
     ];
     for (const element of order) {
       await user.tab();
@@ -141,12 +141,32 @@ describe("SiteHeader: content (site-refresh R6, R7)", () => {
     expect(linkedin).not.toHaveAttribute("target");
   });
 
-  it("links Contact to contactHref, never marked current, even on / (R7.4)", () => {
+  it("links Contact once, in the Primary nav after Design System (contact R3.1, R3.4)", () => {
     renderAt("/");
+    const nav = within(openPanel()).getByRole("navigation", { name: "Primary" });
 
-    const contact = within(openPanel()).getByRole("link", { name: "Contact" });
+    const contacts = within(banner()).getAllByRole("link", { name: "Contact" });
+    expect(contacts).toHaveLength(1);
+    const [contact] = contacts;
+    expect(nav).toContainElement(contact ?? null);
     expect(contact).toHaveAttribute("href", contactHref);
-    expect(contact).not.toHaveAttribute("aria-current");
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Design System", "Contact"]);
+  });
+
+  it.each([
+    ["/contact", "page"],
+    ["/", null],
+    ["/design-system", null],
+  ])("marks Contact current on %s as %s (contact R3.2, R3.3)", (path, current) => {
+    renderAt(path);
+
+    const link = within(openPanel()).getByRole("link", { name: "Contact" });
+    if (current) expect(link).toHaveAttribute("aria-current", current);
+    else expect(link).not.toHaveAttribute("aria-current");
   });
 
   it("holds the theme switcher, icon-only (R6.1)", () => {
@@ -158,7 +178,7 @@ describe("SiteHeader: content (site-refresh R6, R7)", () => {
     );
   });
 
-  it("puts the sphere's pause toggle in the panel, just before the theme switcher, when asked (site-backdrop R6.7)", () => {
+  it("puts the sphere's pause toggle first in the end group, before LinkedIn, when asked (site-backdrop R6.7; contact R3.5)", () => {
     render(
       <MemoryRouter>
         <SiteHeader showBackdropPause />
@@ -166,10 +186,14 @@ describe("SiteHeader: content (site-refresh R6, R7)", () => {
     );
 
     const utilities = within(openPanel());
+    const nav = utilities.getByRole("navigation", { name: "Primary" });
     const pause = utilities.getByRole("button", { name: "Pause background animation" });
+    const linkedin = utilities.getByRole("link", { name: "LinkedIn" });
     const theme = utilities.getByRole("button", { name: "Theme: Light" });
     expect(pause).toHaveAttribute("aria-pressed", "false");
-    expect(pause.compareDocumentPosition(theme)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(nav.compareDocumentPosition(pause)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(pause.compareDocumentPosition(linkedin)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(linkedin.compareDocumentPosition(theme)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it("has no pause toggle by default (site-backdrop R6.7)", () => {
@@ -216,6 +240,17 @@ describe("SiteHeader: the menu button and panel (site-refresh R8)", () => {
 
     expect(isOpen(element)).toBe(false);
     expect(menuButton()).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("closes when Contact is followed from it (contact R3.6)", async () => {
+    const user = userEvent.setup();
+    renderAt("/");
+    const element = openPanel();
+
+    await user.click(within(element).getByRole("link", { name: "Contact" }));
+
+    expect(await screen.findByRole("heading", { name: "Contact" })).toBeInTheDocument();
+    expect(isOpen(element)).toBe(false);
   });
 
   it("closes when focus leaves it and its button, and stays open while focus is on either (R8.3)", () => {

@@ -12,7 +12,10 @@ export const initials = "BM";
 /** The owner's LinkedIn profile, with no trailing slash (site-refresh R7.3). */
 export const linkedinUrl = "https://www.linkedin.com/in/morrison-ben";
 
+/** The owner's GitHub profile, with no trailing slash (contact R2.4). */
+export const githubUrl = "https://github.com/BeMorr16";
+
 /** The site's source repository on GitHub, with no trailing slash. */
-export const repoUrl = "https://github.com/BeMorr16/Santoryu";
+export const repoUrl = `${githubUrl}/Santoryu`;
 
 export const footerText = "© Ben";

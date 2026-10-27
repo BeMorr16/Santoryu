@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { chooseInMenu, gotoSettled, tabKey, tokenColor } from "./support.ts";
 
 const bar = (page: Page) => page.getByRole("banner");
@@ -33,7 +33,7 @@ test.describe("at 1280×800 (site-refresh R6)", () => {
     expect(Math.abs(box.width / width - 0.8)).toBeLessThanOrEqual(0.02);
     await expect(menuButton(page)).toBeHidden();
     const centers: number[] = [];
-    for (const control of [home, designSystem, theme, linkedin, contact]) {
+    for (const control of [home, designSystem, contact, linkedin, theme]) {
       await expect(control(page)).toBeVisible();
       const controlBox = await control(page).boundingBox();
       if (!controlBox) throw new Error("no control box");
@@ -42,7 +42,7 @@ test.describe("at 1280×800 (site-refresh R6)", () => {
     expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(2);
   });
 
-  test("tabs BM, Design System, the backdrop's pause toggle, Theme, LinkedIn, then Contact on Home (R9.2, site-backdrop R6.7)", async ({
+  test("tabs BM, Design System, Contact, the backdrop's pause toggle, LinkedIn, then Theme on Home (R9.2, site-backdrop R6.7, contact R3.5)", async ({
     page,
     browserName,
   }) => {
@@ -50,28 +50,37 @@ test.describe("at 1280×800 (site-refresh R6)", () => {
 
     await page.keyboard.press(tabKey(browserName));
     await expect(page.getByRole("link", { name: "Skip to main content" })).toBeFocused();
-    for (const control of [home, designSystem, pauseBackdrop, theme, linkedin, contact]) {
+    for (const control of [home, designSystem, contact, pauseBackdrop, linkedin, theme]) {
       await page.keyboard.press(tabKey(browserName));
       await expect(control(page)).toBeFocused();
     }
   });
 
-  test("frames the current page's link in gold, and no other link (R6.4)", async ({ page }) => {
-    const before = (page: Page) =>
-      designSystem(page).evaluate((element) => {
+  test("frames the current page's link in gold, and no other link (R6.4, contact R3.2)", async ({
+    page,
+  }) => {
+    const before = (link: (page: Page) => Locator) =>
+      link(page).evaluate((element) => {
         const style = getComputedStyle(element, "::before");
         return { content: style.content, width: style.borderTopWidth, color: style.borderTopColor };
       });
-
-    await page.goto("/design-system");
-    expect(await before(page)).toEqual({
+    const gold = {
       content: '""',
       width: "3px",
       color: tokenColor("color.action.background", "light"),
-    });
+    };
+
+    await page.goto("/design-system");
+    expect(await before(designSystem)).toEqual(gold);
+    expect((await before(contact)).content).toBe("none");
+
+    await page.goto("/contact");
+    expect(await before(contact)).toEqual(gold);
+    expect((await before(designSystem)).content).toBe("none");
 
     await page.goto("/");
-    expect((await before(page)).content).toBe("none");
+    expect((await before(designSystem)).content).toBe("none");
+    expect((await before(contact)).content).toBe("none");
   });
 });
 
@@ -87,14 +96,14 @@ test.describe("at 375×740 (site-refresh R8)", () => {
     await gotoSettled(page, "/");
     await expect(home(page)).toBeVisible();
     await expect(menuButton(page)).toHaveAttribute("aria-expanded", "false");
-    for (const control of [designSystem, theme, linkedin, contact]) {
+    for (const control of [designSystem, contact, linkedin, theme]) {
       await expect(control(page)).toBeHidden();
     }
 
     await menuButton(page).click();
 
     await expect(menuButton(page)).toHaveAttribute("aria-expanded", "true");
-    for (const control of [designSystem, theme, linkedin, contact]) {
+    for (const control of [designSystem, contact, linkedin, theme]) {
       await expect(control(page)).toBeVisible();
     }
     const barBottom = (await bar(page).boundingBox())?.y ?? 0;

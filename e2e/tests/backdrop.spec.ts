@@ -1,8 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { chooseInMenu, storeTheme, themes, tokenColor, type Theme } from "./support.ts";
 
-/** Home and the 404 draw the sphere over the frame glow; every other page has the frame alone (R1.3, decision 0018). */
-const strikingPages = ["/", "/nope"];
+/** Home, Contact and the 404 draw the sphere over the frame glow; every other page has the frame alone (R1.3, decision 0018). */
+const strikingPages = ["/", "/contact", "/nope"];
 const quietPage = "/design-system";
 
 const sphere = (page: Page) => page.locator('canvas[aria-hidden="true"]');

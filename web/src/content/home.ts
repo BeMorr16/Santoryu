@@ -28,7 +28,6 @@ export const homeContent = {
     "Accessible, responsive interfaces",
     "AI developer tooling",
   ],
-  linkedinLabel: "LinkedIn",
   contactLabel: "Want to connect?",
   workHeading: "What I build",
   placeholderBadge: "Coming soon",

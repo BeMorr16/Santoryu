@@ -10,7 +10,7 @@ const designSystemCard = (page: Page) =>
 const backgroundOf = (page: Page) =>
   designSystemCard(page).evaluate((card) => getComputedStyle(card).backgroundColor);
 
-test("tabs LinkedIn, then the Design System card, then leaves main (home R8.3)", async ({
+test("tabs Want to connect?, then the Design System card, then leaves main (home R8.3, contact R4.1)", async ({
   page,
   browserName,
 }) => {
@@ -18,7 +18,7 @@ test("tabs LinkedIn, then the Design System card, then leaves main (home R8.3)",
   await main(page).focus();
 
   await page.keyboard.press(tabKey(browserName));
-  await expect(main(page).getByRole("link", { name: homeContent.linkedinLabel })).toBeFocused();
+  await expect(main(page).getByRole("link", { name: homeContent.contactLabel })).toBeFocused();
   await page.keyboard.press(tabKey(browserName));
   await expect(main(page).getByRole("link", { name: "Design System" })).toBeFocused();
   await page.keyboard.press(tabKey(browserName));

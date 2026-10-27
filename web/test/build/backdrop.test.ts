@@ -12,8 +12,8 @@ import {
 
 const clientDir = fileURLToPath(new URL("../../build/client/", import.meta.url));
 
-/** Home and the 404 ask for the sphere (site-backdrop R1.3). */
-const strikingFiles = ["index.html", "404.html"];
+/** Home, Contact and the 404 ask for the sphere (site-backdrop R1.3; contact R1.4). */
+const strikingFiles = ["index.html", "contact/index.html", "404.html"];
 
 /** Every Design System page gets the frame glow (R1.3). */
 const quietFiles = [

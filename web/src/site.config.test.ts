@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initials, linkedinUrl, ownerName, repoUrl, siteUrl } from "./site.config.ts";
+import { githubUrl, initials, linkedinUrl, ownerName, repoUrl, siteUrl } from "./site.config.ts";
 
 describe("siteUrl", () => {
   it("is an https origin with no trailing slash", () => {
@@ -10,6 +10,13 @@ describe("siteUrl", () => {
 
   it("is the production domain", () => {
     expect(siteUrl).toBe("https://ben-morrison.com");
+  });
+});
+
+describe("githubUrl", () => {
+  it("is the owner's GitHub profile, with no trailing slash (contact R2.4)", () => {
+    expect(githubUrl).toBe("https://github.com/BeMorr16");
+    expect(githubUrl.endsWith("/")).toBe(false);
   });
 });
 

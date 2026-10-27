@@ -102,15 +102,6 @@
   align-items: center;
 }
 
-/* A ghost action in the label type (R7.4, owner's review), through Button's own tokens. */
-.contact {
-  --component-button-font-family: var(--type-family-label);
-  --component-button-font-size-sm: var(--type-size-label);
-
-  letter-spacing: var(--type-tracking-label);
-  text-transform: uppercase;
-}
-
 /*
  * Narrow: a real popover in the top layer, under the bar and across the gutters (design §4.3). Its
  * UA look is replaced with the bar's glass. It sits a gap below the space the bar takes (its inset
