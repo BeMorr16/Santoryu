@@ -1,14 +1,16 @@
 import { Link } from "../components/Link/Link.tsx";
+import { cx } from "../components/shared/cx.ts";
 import { Stack } from "../components/Stack/Stack.tsx";
 import { Typography } from "../components/Typography/Typography.tsx";
 import { homeContent } from "../content/home.ts";
 import { contactHref } from "../shell/nav.ts";
+import page from "../shell/page.module.css";
 import styles from "./Home.module.css";
 
 /** Home's top: the name, the role, the intro and its focus areas, then the calls to action (R2). */
 export function Hero() {
   return (
-    <div className={styles.hero}>
+    <div className={cx(page.column, styles.hero)}>
       <Typography as="h1" variant="display">
         {homeContent.name}
       </Typography>
@@ -23,7 +25,7 @@ export function Hero() {
           </Typography>
         ))}
       </ul>
-      <Stack direction="horizontal" gap="sm" wrap className={styles.actions}>
+      <Stack direction="horizontal" gap="sm" wrap className={page.actions}>
         <Link href={contactHref} appearance="button" variant="primary" iconEnd="arrow-right">
           {homeContent.contactLabel}
         </Link>

@@ -5,7 +5,7 @@ import { Link, MemoryRouter, Outlet, createRoutesStub } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "../../test/axe.ts";
 import { linkedinUrl } from "../site.config.ts";
-import { contactHref, navLinks } from "./nav.ts";
+import { contactHref, experienceHref, navLinks } from "./nav.ts";
 import { SiteHeader } from "./SiteHeader.tsx";
 
 function renderAt(path: string) {
@@ -22,6 +22,7 @@ function renderAt(path: string) {
       ),
       children: [
         { index: true, Component: () => <Link to="/design-system/tokens">Tokens</Link> },
+        { path: "experience", Component: () => <h1>Experience</h1> },
         { path: "design-system", Component: () => <h1>Design System</h1> },
         { path: "design-system/tokens", Component: () => <h1>Tokens</h1> },
         { path: "contact", Component: () => <h1>Contact</h1> },
@@ -85,6 +86,7 @@ describe("SiteHeader: content (site-refresh R6, R7)", () => {
     const order = [
       screen.getByRole("link", { name: "BM, Ben Morrison, home" }),
       menuButton(),
+      screen.getByRole("link", { name: "Experience" }),
       screen.getByRole("link", { name: "Design System" }),
       screen.getByRole("link", { name: "Contact" }),
       screen.getByRole("link", { name: "LinkedIn" }),
@@ -154,7 +156,29 @@ describe("SiteHeader: content (site-refresh R6, R7)", () => {
       within(nav)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["Design System", "Contact"]);
+    ).toEqual(["Experience", "Design System", "Contact"]);
+  });
+
+  it("lists Experience first: Experience, Design System, Contact (resume R2.1)", () => {
+    renderAt("/");
+    const nav = within(openPanel()).getByRole("navigation", { name: "Primary" });
+
+    const [experience, ...rest] = within(nav).getAllByRole("link");
+    expect(experience).toHaveTextContent("Experience");
+    expect(experience).toHaveAttribute("href", experienceHref);
+    expect(rest.map((link) => link.textContent)).toEqual(["Design System", "Contact"]);
+  });
+
+  it.each([
+    ["/experience", "page"],
+    ["/", null],
+    ["/contact", null],
+  ])("marks Experience current on %s as %s (resume R2.2)", (path, current) => {
+    renderAt(path);
+
+    const link = within(openPanel()).getByRole("link", { name: "Experience" });
+    if (current) expect(link).toHaveAttribute("aria-current", current);
+    else expect(link).not.toHaveAttribute("aria-current");
   });
 
   it.each([
@@ -240,6 +264,17 @@ describe("SiteHeader: the menu button and panel (site-refresh R8)", () => {
 
     expect(isOpen(element)).toBe(false);
     expect(menuButton()).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("closes when Experience is followed from it (resume R2.3)", async () => {
+    const user = userEvent.setup();
+    renderAt("/");
+    const element = openPanel();
+
+    await user.click(within(element).getByRole("link", { name: "Experience" }));
+
+    expect(await screen.findByRole("heading", { name: "Experience" })).toBeInTheDocument();
+    expect(isOpen(element)).toBe(false);
   });
 
   it("closes when Contact is followed from it (contact R3.6)", async () => {

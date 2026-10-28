@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { githubUrl, initials, linkedinUrl, ownerName, repoUrl, siteUrl } from "./site.config.ts";
+import {
+  githubUrl,
+  initials,
+  linkedinUrl,
+  ownerName,
+  repoUrl,
+  resumePdfPath,
+  siteUrl,
+} from "./site.config.ts";
 
 describe("siteUrl", () => {
   it("is an https origin with no trailing slash", () => {
@@ -40,5 +48,11 @@ describe("owner (site-refresh R7.1, R7.3)", () => {
   it("links the LinkedIn profile over https, with no trailing slash", () => {
     expect(linkedinUrl).toBe("https://www.linkedin.com/in/morrison-ben");
     expect(new URL(linkedinUrl).protocol).toBe("https:");
+  });
+});
+
+describe("resumePdfPath (resume R10.1)", () => {
+  it("is the root-relative path of the PDF in web/public/", () => {
+    expect(resumePdfPath).toBe("/ben-morrison-resume.pdf");
   });
 });

@@ -211,6 +211,31 @@ test.describe("the nav's Design System link (ds-components R1.6)", () => {
   });
 });
 
+test.describe("the nav's Experience link (resume R2.2)", () => {
+  test('is aria-current="page" on /experience, framed by brackets rather than underlined, and BM is not marked', async ({
+    page,
+  }) => {
+    await page.goto("/experience");
+    const experience = nav(page).getByRole("link", { name: "Experience" });
+
+    await expect(experience).toHaveAttribute("aria-current", "page");
+    await expect(experience).toHaveCSS("text-decoration-line", "none");
+    expect(
+      await experience.evaluate((element) => getComputedStyle(element, "::before").content),
+    ).toBe('""');
+    await expect(home(page)).not.toHaveAttribute("aria-current");
+  });
+
+  test("is not marked on the home page, where BM is", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(nav(page).getByRole("link", { name: "Experience" })).not.toHaveAttribute(
+      "aria-current",
+    );
+    await expect(home(page)).toHaveAttribute("aria-current", "page");
+  });
+});
+
 test.describe("the nav's Contact link (contact R3.2, R3.3)", () => {
   test('is aria-current="page" on /contact, framed by brackets rather than underlined, and BM is not marked', async ({
     page,

@@ -1,12 +1,12 @@
 import { designSystemPath } from "../design-system/components/pages.ts";
+import { experienceHref } from "../shell/nav.ts";
 import { ownerName } from "../site.config.ts";
 
 export interface WorkCard {
   id: string;
   title: string;
   description: string;
-  /** Absent: a placeholder for a page that doesn't exist yet (R3.4). Row 7 adds Experience's. */
-  href?: string;
+  href: string;
 }
 
 export interface Principle {
@@ -21,7 +21,7 @@ export const homeContent = {
   name: ownerName,
   role: "Full Stack Software Engineer",
   intro:
-    "I'm a software engineer who left a pharmaceutical sciences PhD to build software, and I still bring a researcher's rigor to everything I ship. I work across the stack in TypeScript, React and Node, with a focus on:",
+    "I left a pharmaceutical sciences PhD to build software, and I still bring a researcher's rigor to everything I ship. I typically work in TypeScript, React and Node, or whatever stack the team uses, with a focus on:",
   focusAreas: [
     "ETL pipelines",
     "Design systems and components",
@@ -30,7 +30,6 @@ export const homeContent = {
   ],
   contactLabel: "Want to connect?",
   workHeading: "What I build",
-  placeholderBadge: "Coming soon",
   principlesHeading: "How I develop",
   exampleLabel: "In practice",
   description:
@@ -41,16 +40,17 @@ export const homeTitle = `${homeContent.name} · ${homeContent.role}`;
 
 export const workCards = [
   {
+    id: "experience",
+    title: "Experience",
+    description: "My professional experience and highlights of the work I've shipped.",
+    href: experienceHref,
+  },
+  {
     id: "design-system",
     title: "Design System",
     description:
       "An example component library built on design tokens: easy to use, strict by design and fully themeable, with live docs and a theme creator.",
     href: designSystemPath,
-  },
-  {
-    id: "experience",
-    title: "Experience",
-    description: "My professional experience and highlights of the work I've shipped.",
   },
 ] as const satisfies readonly WorkCard[];
 

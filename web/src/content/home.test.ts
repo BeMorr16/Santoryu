@@ -15,8 +15,7 @@ describe("home content (home R1.4)", () => {
     expect(new Set(principles.map((principle) => principle.id)).size).toBe(principles.length);
   });
 
-  it("has exactly one placeholder work card, Experience (R3.2)", () => {
-    const placeholders = workCards.filter((card) => !("href" in card));
-    expect(placeholders.map((card) => card.title)).toEqual(["Experience"]);
+  it("links every work card somewhere (resume R2.4)", () => {
+    for (const card of workCards) expect(card.href, card.id).toMatch(/^\//);
   });
 });

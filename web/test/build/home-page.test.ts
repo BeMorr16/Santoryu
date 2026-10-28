@@ -4,6 +4,7 @@ import { within } from "@testing-library/dom";
 import { JSDOM } from "jsdom";
 import { beforeAll, describe, expect, it } from "vitest";
 import { homeContent, principles, workCards } from "../../src/content/home.ts";
+import { experienceHref } from "../../src/shell/nav.ts";
 
 const indexHtml = fileURLToPath(new URL("../../build/client/index.html", import.meta.url));
 
@@ -32,12 +33,14 @@ describe("Home, prerendered (home R8.2)", () => {
     }
   });
 
-  it("has every work card, the Coming soon badge and every principle with its example", () => {
+  it("has every work card, each a link, and every principle with its example", () => {
     for (const card of workCards) {
       expect(main().getByRole("heading", { level: 3, name: card.title })).toBeDefined();
       expect(main().getByText(card.description)).toBeDefined();
     }
-    expect(main().getByText(homeContent.placeholderBadge)).toBeDefined();
+    expect(main().getByRole("link", { name: "Experience" }).getAttribute("href")).toBe(
+      experienceHref,
+    );
     for (const principle of principles) {
       expect(main().getByRole("heading", { level: 3, name: principle.name })).toBeDefined();
       expect(main().getByText(principle.description)).toBeDefined();

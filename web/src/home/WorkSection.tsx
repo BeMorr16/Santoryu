@@ -1,18 +1,14 @@
-import { Badge } from "../components/Badge/Badge.tsx";
 import { Card } from "../components/Card/Card.tsx";
 import { Grid } from "../components/Grid/Grid.tsx";
+import { cx } from "../components/shared/cx.ts";
 import { Typography } from "../components/Typography/Typography.tsx";
 import { homeContent, workCards, type WorkCard } from "../content/home.ts";
+import page from "../shell/page.module.css";
 import styles from "./Home.module.css";
 
-/** A link card, or a placeholder (no link, nothing focusable) when the page doesn't exist yet (R3.3, R3.4). */
+/** A link card, named by its title (R3.3). */
 function WorkCardItem({ card }: { card: WorkCard }) {
-  return card.href === undefined ? (
-    <Card as="li" variant="glass" heading={card.title} subgrid>
-      <Badge size="sm">{homeContent.placeholderBadge}</Badge>
-      <p>{card.description}</p>
-    </Card>
-  ) : (
+  return (
     <Card as="li" variant="glass" href={card.href} heading={card.title} subgrid>
       {card.description}
     </Card>
@@ -22,7 +18,7 @@ function WorkCardItem({ card }: { card: WorkCard }) {
 /** "What I build": one card per entry in workCards (R3). */
 export function WorkSection() {
   return (
-    <section aria-labelledby="home-work" className={styles.section}>
+    <section aria-labelledby="home-work" className={cx(page.column, styles.section)}>
       <Typography as="h2" id="home-work">
         {homeContent.workHeading}
       </Typography>

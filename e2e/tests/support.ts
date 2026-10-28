@@ -11,6 +11,7 @@ import { tokens } from "../../web/src/generated/tokens.ts";
 /** Every page, docs pages from the side menu's list (ds-components R7.3), and a missing one. */
 export const pages = [
   "/",
+  "/experience",
   "/contact",
   "/design-system",
   "/design-system/tokens",

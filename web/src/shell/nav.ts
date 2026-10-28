@@ -7,14 +7,18 @@ export interface NavLink {
   currentMatch: "exact" | "section";
 }
 
+/** The Experience page (resume R2.5). The nav entry, Home's card and the prerender list use it. */
+export const experienceHref = "/experience";
+
 /** The contact page (contact R1). The nav entry, Home's call to action and the prerender list use it. */
 export const contactHref = "/contact";
 
 /**
- * The bar's page links, in order (R6.5; contact R3.1). Each later page spec adds its entry here;
- * row 6 inserts Experience first.
+ * The bar's page links, in order (R6.5; contact R3.1; resume R2.1). Each later page spec adds its
+ * entry here.
  */
 export const navLinks = [
+  { href: experienceHref, label: "Experience", currentMatch: "exact" },
   { href: designSystemPath, label: "Design System", currentMatch: "section" },
   { href: contactHref, label: "Contact", currentMatch: "exact" },
 ] as const satisfies readonly NavLink[];

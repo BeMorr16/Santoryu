@@ -48,6 +48,7 @@ describe.each(indexPages)("%s link preview (home R7.1, R7.2)", (file) => {
 describe("link previews", () => {
   it("covers every indexable page", () => {
     expect(indexPages).toContain("index.html");
+    expect(indexPages).toContain("experience/index.html");
     expect(indexPages).toContain("contact/index.html");
     expect(indexPages).toContain("design-system/index.html");
   });

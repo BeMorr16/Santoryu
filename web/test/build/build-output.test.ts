@@ -69,6 +69,7 @@ beforeAll(() => {
 describe("build output files", () => {
   it("emits each route as <route>/index.html and the not-found page as a root 404.html (R14.2)", () => {
     expect(existsSync(`${clientDir}index.html`)).toBe(true);
+    expect(existsSync(`${clientDir}experience/index.html`)).toBe(true);
     expect(existsSync(`${clientDir}contact/index.html`)).toBe(true);
     expect(existsSync(`${clientDir}design-system/index.html`)).toBe(true);
     expect(existsSync(`${clientDir}design-system/tokens/index.html`)).toBe(true);

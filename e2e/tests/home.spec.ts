@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { homeContent } from "../../web/src/content/home.ts";
-import { main, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
+import { gotoSettled, main, storeTheme, tabKey, themes, tokenColor } from "./support.ts";
 
 const designSystemCard = (page: Page) =>
   main(page)
@@ -10,7 +10,7 @@ const designSystemCard = (page: Page) =>
 const backgroundOf = (page: Page) =>
   designSystemCard(page).evaluate((card) => getComputedStyle(card).backgroundColor);
 
-test("tabs Want to connect?, then the Design System card, then leaves main (home R8.3, contact R4.1)", async ({
+test("tabs Want to connect?, then the Experience and Design System cards, then leaves main (home R8.3, contact R4.1, resume R2.4)", async ({
   page,
   browserName,
 }) => {
@@ -20,11 +20,21 @@ test("tabs Want to connect?, then the Design System card, then leaves main (home
   await page.keyboard.press(tabKey(browserName));
   await expect(main(page).getByRole("link", { name: homeContent.contactLabel })).toBeFocused();
   await page.keyboard.press(tabKey(browserName));
+  await expect(main(page).getByRole("link", { name: "Experience" })).toBeFocused();
+  await page.keyboard.press(tabKey(browserName));
   await expect(main(page).getByRole("link", { name: "Design System" })).toBeFocused();
   await page.keyboard.press(tabKey(browserName));
   expect(await main(page).evaluate((element) => element.contains(document.activeElement))).toBe(
     false,
   );
+});
+
+test("links the Experience card to /experience (resume R2.4)", async ({ page }) => {
+  await gotoSettled(page, "/");
+
+  await main(page).getByRole("link", { name: "Experience" }).click();
+
+  await expect(page).toHaveURL(/\/experience$/);
 });
 
 test.describe("glass cards (decision 0017)", () => {

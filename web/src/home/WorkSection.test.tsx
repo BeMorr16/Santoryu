@@ -5,8 +5,6 @@ import { describe, expect, it } from "vitest";
 import { homeContent, workCards } from "../content/home.ts";
 import { WorkSection } from "./WorkSection.tsx";
 
-const focusable = "a[href], button, input, select, textarea, [tabindex]";
-
 function renderSection() {
   render(
     <MemoryRouter>
@@ -34,25 +32,24 @@ describe("WorkSection (home R3)", () => {
 
     const link = within(section).getByRole("link", { name: "Design System" });
     expect(link).toHaveAttribute("href", "/design-system");
-    expect(within(section).getByText(workCards[0].description)).toBeVisible();
+    expect(within(section).getByText(workCards[1].description)).toBeVisible();
   });
 
-  it("shows the Experience placeholder with a Coming soon badge, no link and nothing focusable (R3.4)", () => {
+  it("links the Experience card to /experience, with no Coming soon badge (resume R2.4)", () => {
     const section = renderSection();
 
-    const heading = within(section).getByRole("heading", { level: 3, name: "Experience" });
-    const card = heading.closest("li");
-    if (!card) throw new Error("the placeholder is not a list item");
-    expect(within(card).getByText(homeContent.placeholderBadge)).toBeVisible();
-    expect(within(card).getByText(workCards[1].description)).toBeVisible();
-    expect(within(card).queryByRole("link")).toBeNull();
-    expect(card.querySelectorAll(focusable)).toHaveLength(0);
+    const link = within(section).getByRole("link", { name: "Experience" });
+    expect(link).toHaveAttribute("href", "/experience");
+    expect(within(section).getByText(workCards[0].description)).toBeVisible();
+    expect(within(section).queryByText("Coming soon")).toBeNull();
   });
 
-  it("stops Tab once, on the Design System card (R3.5)", async () => {
+  it("stops Tab once per card, in order (R3.5)", async () => {
     const user = userEvent.setup();
     const section = renderSection();
 
+    await user.tab();
+    expect(within(section).getByRole("link", { name: "Experience" })).toHaveFocus();
     await user.tab();
     expect(within(section).getByRole("link", { name: "Design System" })).toHaveFocus();
     await user.tab();

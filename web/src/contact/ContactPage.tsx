@@ -2,13 +2,13 @@ import { Link } from "../components/Link/Link.tsx";
 import { Stack } from "../components/Stack/Stack.tsx";
 import { Typography } from "../components/Typography/Typography.tsx";
 import { contactContent } from "../content/contact.ts";
+import page from "../shell/page.module.css";
 import { githubUrl, linkedinUrl } from "../site.config.ts";
-import styles from "./Contact.module.css";
 
 /** The contact page: heading, where the owner is based, the invitation, then the links (R2.1). */
 export function ContactPage() {
   return (
-    <Stack gap="md" className={styles.page}>
+    <Stack gap="md" className={page.column}>
       <Typography as="h1" variant="display">
         {contactContent.heading}
       </Typography>
@@ -16,7 +16,7 @@ export function ContactPage() {
       <Typography variant="lead" tone="muted" measure>
         {contactContent.invitation}
       </Typography>
-      <Stack direction="horizontal" gap="sm" className={styles.links}>
+      <Stack direction="horizontal" gap="sm" className={page.actions}>
         <Link href={linkedinUrl} appearance="button" variant="secondary" iconStart="linkedin">
           {contactContent.linkedinLabel}
         </Link>

@@ -80,8 +80,8 @@ test.describe("focus after navigation (contact R5.2)", () => {
       // From the keyboard: WebKit, like Safari, doesn't focus a button on a click.
       await banner.getByRole("button", { name: "Menu" }).focus();
       await page.keyboard.press("Enter");
-      await page.keyboard.press(tabKey(browserName));
-      await page.keyboard.press(tabKey(browserName));
+      // Experience, Design System, then Contact (resume R2.1).
+      for (let step = 0; step < 3; step++) await page.keyboard.press(tabKey(browserName));
       await expect(banner.getByRole("link", { name: "Contact" })).toBeFocused();
 
       await page.keyboard.press("Enter");

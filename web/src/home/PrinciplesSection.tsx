@@ -1,7 +1,9 @@
 import { Card } from "../components/Card/Card.tsx";
 import { Grid } from "../components/Grid/Grid.tsx";
+import { cx } from "../components/shared/cx.ts";
 import { Typography } from "../components/Typography/Typography.tsx";
 import { homeContent, principles } from "../content/home.ts";
+import page from "../shell/page.module.css";
 import styles from "./Home.module.css";
 
 /**
@@ -10,7 +12,7 @@ import styles from "./Home.module.css";
  */
 export function PrinciplesSection() {
   return (
-    <section aria-labelledby="home-principles" className={styles.section}>
+    <section aria-labelledby="home-principles" className={cx(page.column, styles.section)}>
       <Typography as="h2" id="home-principles">
         {homeContent.principlesHeading}
       </Typography>
