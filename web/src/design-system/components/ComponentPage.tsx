@@ -1,7 +1,9 @@
 import { CodeBlock } from "../../components/CodeBlock/CodeBlock.tsx";
 import { Link } from "../../components/Link/Link.tsx";
+import { cx } from "../../components/shared/cx.ts";
 import { Stack } from "../../components/Stack/Stack.tsx";
 import { Typography } from "../../components/Typography/Typography.tsx";
+import page from "../../shell/page.module.css";
 import { componentTokensOf } from "../../tokens/metadata.ts";
 import { ComponentTokenTable } from "../ComponentTokenTable.tsx";
 import { DocSection } from "../DocSection.tsx";
@@ -29,7 +31,7 @@ export function ComponentPage({ showcase }: { showcase: Showcase }) {
   const { main } = showcase;
   const [examples, props, tokens, accessibility] = sections;
   return (
-    <div className={styles.docPage}>
+    <div className={cx(page.wideColumn, styles.docPage)}>
       <div className={styles.intro}>
         <h1>{name}</h1>
         <Typography variant="lead">{showcase.purpose}</Typography>
