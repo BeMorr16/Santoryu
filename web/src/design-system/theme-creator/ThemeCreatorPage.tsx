@@ -1,4 +1,6 @@
+import { cx } from "../../components/shared/cx.ts";
 import { Typography } from "../../components/Typography/Typography.tsx";
+import page from "../../shell/page.module.css";
 import { BackToDesignSystem } from "../BackToDesignSystem.tsx";
 import { ThemeCreator } from "./ThemeCreator.tsx";
 import styles from "./ThemeCreatorPage.module.css";
@@ -11,7 +13,7 @@ import { useHydrated } from "./useHydrated.ts";
 export function ThemeCreatorPage() {
   const hydrated = useHydrated();
   return (
-    <div className={styles.page}>
+    <div className={cx(page.wideColumn, styles.page)}>
       <div className={styles.intro}>
         <BackToDesignSystem />
         <h1>Theme Creator</h1>

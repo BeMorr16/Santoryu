@@ -17,11 +17,13 @@ describe("design system components route (ds-components R3)", () => {
     expect(handle).toBe(docsHandle);
   });
 
-  it("is titled Components · Design System · Ben (R1.5), with a description", () => {
-    expect(meta()).toEqual([
-      { title: "Components · Design System · Ben" },
-      { name: "description", content: expect.any(String) as string },
-    ]);
+  it("is titled Components · Design System · Ben Morrison (R1.5), with a description", () => {
+    expect(meta()).toEqual(
+      expect.arrayContaining([
+        { title: "Components · Design System · Ben Morrison" },
+        { name: "description", content: expect.any(String) as string },
+      ]),
+    );
   });
 
   it("links the canonical URL to /design-system/components (R1.1)", () => {

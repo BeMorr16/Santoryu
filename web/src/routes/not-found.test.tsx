@@ -41,9 +41,9 @@ describe("not-found route", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
   });
 
-  it("is noindex, titled Page not found · Ben, with a description", () => {
+  it("is noindex, titled Page not found · Ben Morrison, with a description", () => {
     expect(meta()).toEqual([
-      { title: "Page not found · Ben" },
+      { title: "Page not found · Ben Morrison" },
       { name: "description", content: expect.any(String) as string },
       { name: "robots", content: "noindex" },
     ]);

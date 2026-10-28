@@ -1,5 +1,5 @@
 import { themeCreatorPath } from "../../design-system/components/pages.ts";
-import { pageMeta } from "../../design-system/page-meta.ts";
+import { pageMeta } from "../../shell/page-meta.ts";
 import { ThemeCreatorPage } from "../../design-system/theme-creator/ThemeCreatorPage.tsx";
 
 const page = pageMeta(

@@ -1,4 +1,4 @@
-import { pageMeta } from "../../design-system/page-meta.ts";
+import { pageMeta } from "../../shell/page-meta.ts";
 import { TokensPage } from "../../design-system/tokens/TokensPage.tsx";
 
 const page = pageMeta(

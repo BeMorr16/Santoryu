@@ -1,13 +1,28 @@
 import { expect, test, type Page } from "@playwright/test";
-import { chooseInMenu, storeTheme, themes, tokenColor } from "./support.ts";
+import { chooseInMenu, storeTheme, themes, tokenColor, type Theme } from "./support.ts";
 
-/** Home and the 404 draw the sphere; every Design System page has the frame glow (R1.3). */
-const strikingPages = ["/", "/nope"];
+/** Home, Contact and the 404 draw the sphere over the frame glow; every other page has the frame alone (R1.3, decision 0018). */
+const strikingPages = ["/", "/contact", "/nope"];
 const quietPage = "/design-system";
 
 const sphere = (page: Page) => page.locator('canvas[aria-hidden="true"]');
-const frameGlow = (page: Page) => page.locator('div[aria-hidden="true"][class*="_quiet_"]');
+const frameGlow = (page: Page) => page.locator('div[aria-hidden="true"][class*="_frameGlow_"]');
 const switcher = (page: Page) => page.getByRole("banner").getByRole("button", { name: /^Theme: / });
+
+/** The frame glow: fixed behind the content, one gradient in from each edge in the frame color. */
+async function expectFrameGlow(page: Page, theme: Theme) {
+  await expect(frameGlow(page)).toHaveCount(1);
+  await expect(frameGlow(page)).toHaveCSS("position", "fixed");
+  await expect(frameGlow(page)).toHaveCSS("z-index", "-1");
+  const glow = await frameGlow(page).evaluate(
+    (element) => getComputedStyle(element).backgroundImage,
+  );
+  // The frame color is translucent; tokenColor gives its opaque channels.
+  const channels = tokenColor("color.backdrop.frame", theme).slice("rgb(".length, -1);
+  // One gradient in from each edge, in the frame color (owner trial, 2026-10-25).
+  expect(glow.match(/linear-gradient\(/g)).toHaveLength(4);
+  expect(glow).toContain(`rgba(${channels},`);
+}
 
 /** Waits until the sphere has drawn its first frame and faded in (R2.9). */
 async function sphereShown(page: Page) {
@@ -54,7 +69,8 @@ async function watchBackdropShifts(page: Page) {
         const fromBackdrop = (entry.sources ?? []).some(
           ({ node }) =>
             node instanceof Element &&
-            (node.localName === "canvas" || (node.getAttribute("class") ?? "").includes("_quiet_")),
+            (node.localName === "canvas" ||
+              (node.getAttribute("class") ?? "").includes("_frameGlow_")),
         );
         if (fromBackdrop) shifts.push(entry.value);
       }
@@ -80,7 +96,39 @@ for (const path of strikingPages) {
         return element?.localName;
       });
       expect(hit).not.toBe("canvas");
-      await expect(frameGlow(page)).toHaveCount(0);
+    });
+
+    for (const theme of themes) {
+      test(`draws the frame glow under the sphere in ${theme} (backdrop-layers R1.1–R1.3)`, async ({
+        page,
+      }) => {
+        await storeTheme(page, theme);
+        await page.goto(path);
+        await sphereShown(page);
+
+        await expectFrameGlow(page, theme);
+        await expect(sphere(page)).toHaveCSS("z-index", "-1");
+        // Same z-index, so DOM order stacks them: the later canvas paints over the frame.
+        const frameFirst = await frameGlow(page).evaluate((frame) => {
+          const canvas = document.querySelector('canvas[aria-hidden="true"]');
+          return canvas !== null && (frame.compareDocumentPosition(canvas) & 4) !== 0;
+        });
+        expect(frameFirst).toBe(true);
+      });
+    }
+
+    test("shows the frame glow when the sphere's script can't load (backdrop-layers R2.1)", async ({
+      page,
+    }) => {
+      const errors: string[] = [];
+      page.on("pageerror", (error) => errors.push(error.message));
+      await page.route(/\/assets\/start-sphere-[\w-]+\.js$/, (route) => route.abort());
+      await page.goto(path);
+
+      await expect(frameGlow(page)).toHaveCount(1);
+      await page.waitForLoadState("networkidle");
+      await expect(sphere(page)).toHaveCSS("opacity", "0");
+      expect(errors).toEqual([]);
     });
 
     for (const theme of themes) {
@@ -194,17 +242,7 @@ for (const theme of themes) {
     await storeTheme(page, theme);
     await page.goto(quietPage);
 
-    await expect(frameGlow(page)).toHaveCount(1);
-    await expect(frameGlow(page)).toHaveCSS("position", "fixed");
-    await expect(frameGlow(page)).toHaveCSS("z-index", "-1");
-    const glow = await frameGlow(page).evaluate(
-      (element) => getComputedStyle(element).backgroundImage,
-    );
-    // The frame color is translucent; tokenColor gives its opaque channels.
-    const channels = tokenColor("color.backdrop.frame", theme).slice("rgb(".length, -1);
-    // One gradient in from each edge, in the frame color (owner trial, 2026-10-25).
-    expect(glow.match(/linear-gradient\(/g)).toHaveLength(4);
-    expect(glow).toContain(`rgba(${channels},`);
+    await expectFrameGlow(page, theme);
     await expect(sphere(page)).toHaveCount(0);
   });
 }
@@ -217,6 +255,7 @@ test("swaps the backdrops on client-side navigation, with no errors (R1.4)", asy
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
   await sphereShown(page);
+  await expect(frameGlow(page)).toHaveCount(1);
 
   await page.getByRole("banner").getByRole("link", { name: "Design System" }).click();
   await expect(page).toHaveURL(quietPage);
@@ -226,7 +265,8 @@ test("swaps the backdrops on client-side navigation, with no errors (R1.4)", asy
   await page.goBack();
   await expect(page).toHaveURL("/");
   await sphereShown(page);
-  await expect(frameGlow(page)).toHaveCount(0);
+  // The frame stays through both swaps; only the sphere comes and goes (backdrop-layers R1.5).
+  await expect(frameGlow(page)).toHaveCount(1);
   const drawn = await sample(page);
   expect(drawn.painted).toBeGreaterThan(0);
   expect(errors).toEqual([]);
@@ -240,8 +280,11 @@ test.describe("hidden where the backdrop would get in the way (R6.2, R6.3)", () 
     test(`hides both backdrops for ${label}`, async ({ page }) => {
       await page.emulateMedia(media);
 
-      await page.goto("/");
-      await expect(sphere(page)).toHaveCSS("display", "none");
+      for (const path of strikingPages) {
+        await page.goto(path);
+        await expect(sphere(page)).toHaveCSS("display", "none");
+        await expect(frameGlow(page)).toHaveCSS("display", "none");
+      }
       await page.goto(quietPage);
       await expect(frameGlow(page)).toHaveCSS("display", "none");
     });
@@ -257,7 +300,9 @@ test("adds no layout shift on load, resize or navigation (R5.6)", async ({ page,
   await page.setViewportSize({ width: 600, height: 800 });
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.getByRole("banner").getByRole("link", { name: "Design System" }).click();
-  await expect(frameGlow(page)).toHaveCount(1);
+  // Every page has the frame now (decision 0018), so wait on the URL and the sphere leaving.
+  await expect(page).toHaveURL(quietPage);
+  await expect(sphere(page)).toHaveCount(0);
   await page.goBack();
   await sphereShown(page);
 

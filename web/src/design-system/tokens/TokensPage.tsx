@@ -1,4 +1,6 @@
+import { cx } from "../../components/shared/cx.ts";
 import { Typography } from "../../components/Typography/Typography.tsx";
+import page from "../../shell/page.module.css";
 import { BackToDesignSystem } from "../BackToDesignSystem.tsx";
 import styles from "../DocLayout.module.css";
 import { OnThisPage } from "../components/OnThisPage.tsx";
@@ -18,7 +20,7 @@ const chain = flowChain(workedExample);
  */
 export function TokensPage() {
   return (
-    <div className={styles.page}>
+    <div className={cx(page.wideColumn, styles.page)}>
       <div className={styles.intro}>
         <BackToDesignSystem />
         <h1>Tokens</h1>

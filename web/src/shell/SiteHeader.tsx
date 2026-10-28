@@ -5,7 +5,7 @@ import { Link } from "../components/Link/Link.tsx";
 import { ThemeSwitcher } from "../components/ThemeSwitcher/ThemeSwitcher.tsx";
 import { initials, linkedinUrl, ownerName } from "../site.config.ts";
 import { BackdropPauseToggle } from "./backdrop/BackdropPauseToggle.tsx";
-import { contactHref, navLinks } from "./nav.ts";
+import { navLinks } from "./nav.ts";
 import styles from "./SiteHeader.module.css";
 
 /** size.breakpoint.md: the panel is part of the bar from here up (design §4.3). */
@@ -74,7 +74,7 @@ export function SiteHeader({
   showBackdropPause = false,
 }: {
   ref?: Ref<HTMLElement>;
-  /** Shows the sphere's pause toggle, before the theme switcher (site-backdrop R6.7). */
+  /** Shows the sphere's pause toggle, first in the end group (site-backdrop R6.7; contact R3.5). */
   showBackdropPause?: boolean;
 }) {
   const panelId = useId();
@@ -129,7 +129,6 @@ export function SiteHeader({
         </nav>
         <div className={styles.end}>
           {showBackdropPause && <BackdropPauseToggle />}
-          <ThemeSwitcher variant="ghost" size="sm" showLabel={false} />
           <Link
             href={linkedinUrl}
             appearance="button"
@@ -139,17 +138,7 @@ export function SiteHeader({
             aria-label="LinkedIn"
             onClick={closePanel}
           />
-          <Link
-            href={contactHref}
-            appearance="button"
-            variant="ghost"
-            size="sm"
-            iconEnd="arrow-right"
-            className={styles.contact}
-            onClick={closePanel}
-          >
-            Contact
-          </Link>
+          <ThemeSwitcher variant="ghost" size="sm" showLabel={false} />
         </div>
       </div>
     </header>

@@ -1,6 +1,8 @@
 import { CodeBlock } from "../../components/CodeBlock/CodeBlock.tsx";
 import { Link } from "../../components/Link/Link.tsx";
+import { cx } from "../../components/shared/cx.ts";
 import { Typography } from "../../components/Typography/Typography.tsx";
+import page from "../../shell/page.module.css";
 import { repoUrl } from "../../site.config.ts";
 import { DocSection } from "../DocSection.tsx";
 import styles from "./ComponentPage.module.css";
@@ -20,7 +22,7 @@ const [principles, usage, testing, source] = [
 /** The components overview (ds-components R3): what the library is, how to use it and how it's tested. */
 export function Overview() {
   return (
-    <div className={styles.docPage}>
+    <div className={cx(page.wideColumn, styles.docPage)}>
       <div className={styles.intro}>
         <h1>Components</h1>
         <Typography variant="lead">

@@ -164,6 +164,13 @@
     },
     "blur-radius": {
       "$type": "dimension",
+      "6": {
+        "$value": {
+          "value": 6,
+          "unit": "px"
+        },
+        "$description": "6px blur radius."
+      },
       "12": {
         "$value": {
           "value": 12,
@@ -188,6 +195,10 @@
       "glass": {
         "$value": "{effect.blur-radius.12}",
         "$description": "Backdrop blur behind glass surfaces."
+      },
+      "glass-sheer": {
+        "$value": "{effect.blur-radius.6}",
+        "$description": "Light backdrop blur behind glass cards, so the sphere shows through as a soft haze."
       }
     },
     "border": {

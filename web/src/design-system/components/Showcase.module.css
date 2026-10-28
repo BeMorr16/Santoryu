@@ -96,8 +96,9 @@
 
 /*
  * Behind the Card section's variants (refinement R8.14): only glass's checked backdrops, this
- * showcase's own blueprint grid on surface.base and a band of action.background. The band stays in
- * the right half, 60–85% down, so at any column count it misses the transparent outlined card.
+ * showcase's own blueprint grid on surface.base and a band of surface.sunken (glass cards are
+ * checked over the page surfaces; home, 2026-10-26). The band stays in the right half, 60–85% down,
+ * so at any column count it misses the transparent outlined card.
  */
 .glassBackdrop {
   padding: var(--space-inset-lg);
@@ -107,7 +108,7 @@
     linear-gradient(
       to bottom,
       transparent 60%,
-      var(--color-action-background) 60% 85%,
+      var(--color-surface-sunken) 60% 85%,
       transparent 85%
     ),
     linear-gradient(

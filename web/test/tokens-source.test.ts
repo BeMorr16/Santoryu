@@ -100,6 +100,7 @@ const expectedSemantic = [
   "color.surface.raised",
   "color.surface.sunken",
   "color.surface.glass",
+  "color.surface.glass-sheer",
   "color.surface.inverse",
   "color.surface.code",
   "color.text.default",
@@ -135,6 +136,7 @@ const expectedSemantic = [
   "color.border.subtle",
   "color.border.default",
   "color.border.strong",
+  "color.border.glass-highlight",
   "color.focus.ring",
   "color.grid.line",
   "color.backdrop.dot-near",
@@ -213,6 +215,7 @@ const expectedSemantic = [
   "effect.focus-ring.width",
   "effect.focus-ring.offset",
   "effect.backdrop.glass",
+  "effect.backdrop.glass-sheer",
   "effect.border.width",
   "effect.border.width-thick",
   "effect.grid.width",
@@ -228,6 +231,8 @@ const expectedSemantic = [
 // Translucent primitives and the only semantic tokens allowed to alias them (decision 0004 amendment).
 const overlayAliases = [
   "color.surface.glass",
+  "color.surface.glass-sheer",
+  "color.border.glass-highlight",
   "color.grid.line",
   "color.backdrop.glow",
   "color.backdrop.frame",

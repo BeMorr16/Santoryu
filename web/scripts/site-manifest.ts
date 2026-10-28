@@ -6,7 +6,7 @@ import { JSDOM } from "jsdom";
 export interface SiteManifest {
   /** Every published file outside assets/, as a root-relative path. Drives the edge router. */
   files: string[];
-  /** CSP sources for every inline script in every page, applied via S3 object metadata. */
+  /** CSP sources for every executable inline script in every page, applied via S3 object metadata. */
   scriptHashes: string[];
 }
 
@@ -17,10 +17,13 @@ export interface SiteManifest {
 const S3_USER_METADATA_LIMIT_BYTES = 2048;
 const notFoundMetadata = { "csp-script-hashes": "", "site-status": "404" };
 
-/** `sha256-<base64>` of the exact text of each `<script>` without `src`, in document order. */
+/**
+ * `sha256-<base64>` of the exact text of each executable inline script (no `src`, not a JSON-LD
+ * data block), in document order.
+ */
 export function inlineScriptHashes(html: string): string[] {
   const { document } = new JSDOM(html).window;
-  return [...document.querySelectorAll("script:not([src])")].map(
+  return [...document.querySelectorAll('script:not([src]):not([type="application/ld+json"])')].map(
     (script) =>
       `sha256-${createHash("sha256").update(script.textContent, "utf8").digest("base64")}`,
   );

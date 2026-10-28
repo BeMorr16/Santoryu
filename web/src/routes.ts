@@ -3,6 +3,8 @@ import { componentPages } from "./design-system/components/pages.ts";
 
 export default [
   index("routes/home.tsx"),
+  route("experience", "routes/experience.tsx"),
+  route("contact", "routes/contact.tsx"),
   route("design-system", "routes/design-system/index.tsx"),
   route("design-system/tokens", "routes/design-system/tokens.tsx"),
   route("design-system/theme-creator", "routes/design-system/theme-creator.tsx"),

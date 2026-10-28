@@ -1,0 +1,30 @@
+/* The hero: name, role, intro, then the calls to action (home R2). */
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+}
+
+/* The intro's focus areas: a bulleted list in the lead look, spaced by the hero's gap alone. */
+.focusAreas {
+  margin: 0;
+  padding-inline-start: var(--space-inline-lg);
+}
+
+/* "What I build" and "How I develop" (home R5). */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-md);
+  margin-block-start: var(--space-layout-sm);
+}
+
+/* Two work cards' width, so they don't stretch across wide screens; a third still fits (min="sm"). */
+.workGrid {
+  max-inline-size: calc(2 * var(--size-column-lg) + var(--space-inline-md));
+}
+
+/* "In practice", above each principle's example (home R4.3). */
+.exampleLabel {
+  margin-block-end: var(--space-stack-xs);
+}

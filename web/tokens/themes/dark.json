@@ -26,6 +26,17 @@
           ]
         }
       },
+      "glass-sheer": {
+        "$value": "{color.overlay.white-8}",
+        "$description": "Sheer translucent background for glass cards over the page and its backdrop (lightly blurred), so the backdrop shows through. Built-in themes only: custom themes give cards their opaque surface. Checked over the page surfaces; text over the sphere is checked in visual review (decision 0015). Only default and muted text may sit on it.",
+        "$extensions": {
+          "personal-site.contrast-backdrop": [
+            "color.surface.base",
+            "color.surface.raised",
+            "color.surface.sunken"
+          ]
+        }
+      },
       "inverse": {
         "$value": "{color.slate.50}",
         "$description": "Background of inverse bubbles, such as tooltips: the default text color, so the page reads inverted."
@@ -58,6 +69,10 @@
               "min": "text"
             },
             {
+              "against": "color.surface.glass-sheer",
+              "min": "text"
+            },
+            {
               "against": "color.surface.code",
               "min": "text"
             },
@@ -87,6 +102,10 @@
             },
             {
               "against": "color.surface.glass",
+              "min": "text"
+            },
+            {
+              "against": "color.surface.glass-sheer",
               "min": "text"
             },
             {
@@ -559,6 +578,10 @@
             }
           ]
         }
+      },
+      "glass-highlight": {
+        "$value": "{color.overlay.white-20}",
+        "$description": "Decorative lit edge on glass cards (top and left). Never carries meaning, so it declares no contrast pairing."
       }
     },
     "focus": {

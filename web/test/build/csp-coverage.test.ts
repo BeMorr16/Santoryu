@@ -30,11 +30,11 @@ const builtFiles = () =>
     .map((entry) => relative(clientDir, join(entry.parentPath, entry.name)));
 const pages = () => builtFiles().filter((path) => path.endsWith(".html"));
 
-/** Recomputed here, independently of scripts/site-manifest.ts. */
+/** Recomputed here, independently of scripts/site-manifest.ts. JSON-LD data blocks never execute. */
 function inlineScriptHashes(page: string): string[] {
   const { document } = new JSDOM(readFileSync(`${clientDir}${page}`, "utf8")).window;
   return [...document.querySelectorAll("script")]
-    .filter((script) => !script.hasAttribute("src"))
+    .filter((script) => !script.hasAttribute("src") && script.type !== "application/ld+json")
     .map((script) => {
       const digest = createHash("sha256").update(script.textContent, "utf8").digest("base64");
       return `sha256-${digest}`;

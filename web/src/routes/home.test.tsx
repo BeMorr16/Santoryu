@@ -1,67 +1,40 @@
-import { render, screen } from "@testing-library/react";
-import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
-import linkStyles from "../components/Link/Link.module.css";
-import typographyStyles from "../components/Typography/Typography.module.css";
-import { homeContent } from "../content/home.ts";
+import { homeContent, homeTitle } from "../content/home.ts";
+import { homeStructuredData } from "../home/structured-data.ts";
 import { isRouteHandle } from "../shell/route-handle.ts";
 import { siteUrl } from "../site.config.ts";
-import Home, { handle, links, meta } from "./home.tsx";
-
-function renderHome() {
-  const Stub = createRoutesStub([{ path: "/", Component: Home }]);
-  render(<Stub initialEntries={["/"]} />);
-}
+import { handle, links, meta } from "./home.tsx";
 
 describe("home route", () => {
-  it("renders the name as the only h1", async () => {
-    renderHome();
-
-    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent(homeContent.name);
-    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+  it("sets the title, description and every link-preview tag (R6.2, R6.3, R7.1)", () => {
+    const tags = meta();
+    expect(tags).toContainEqual({ title: homeTitle });
+    expect(tags).toContainEqual({ name: "description", content: homeContent.description });
+    for (const property of [
+      "og:type",
+      "og:site_name",
+      "og:title",
+      "og:description",
+      "og:url",
+      "og:image",
+      "og:image:width",
+      "og:image:height",
+      "og:image:alt",
+    ]) {
+      expect(tags, property).toContainEqual(expect.objectContaining({ property }));
+    }
+    expect(tags).toContainEqual({ property: "og:title", content: homeTitle });
+    expect(tags).toContainEqual({ property: "og:url", content: `${siteUrl}/` });
+    expect(tags).toContainEqual({ name: "twitter:card", content: "summary_large_image" });
   });
 
-  it("renders the intro", async () => {
-    renderHome();
-
-    expect(await screen.findByText(homeContent.intro)).toBeVisible();
-  });
-
-  it("renders the name with the display look and the intro as a muted lead (refinement R12.12)", async () => {
-    renderHome();
-
-    expect(await screen.findByRole("heading", { level: 1 })).toHaveClass(
-      typographyStyles.display ?? "",
-    );
-    expect(screen.getByText(homeContent.intro)).toHaveClass(
-      typographyStyles.lead ?? "",
-      typographyStyles["tone-muted"] ?? "",
-    );
-  });
-
-  it("links to /design-system with the content's descriptive accessible name", async () => {
-    renderHome();
-
-    const link = await screen.findByRole("link", { name: homeContent.designSystemLinkText });
-    expect(link).toHaveAttribute("href", "/design-system");
-  });
-
-  it("uses the library Link for the design system link (refinement R4.10)", async () => {
-    renderHome();
-
-    expect(await screen.findByRole("link", { name: homeContent.designSystemLinkText })).toHaveClass(
-      linkStyles.link ?? "",
-    );
-  });
-
-  it("sets the title and description from the content module", () => {
-    expect(meta()).toEqual([
-      { title: homeContent.title },
-      { name: "description", content: homeContent.description },
+  it("adds the structured data as one JSON-LD entry (R6.4)", () => {
+    expect(meta().filter((tag) => "script:ld+json" in tag)).toEqual([
+      { "script:ld+json": homeStructuredData },
     ]);
   });
 
-  it("links the canonical URL to the site root", () => {
+  it("links the canonical URL to the site root (R1.5)", () => {
     expect(links()).toEqual([{ rel: "canonical", href: `${siteUrl}/` }]);
   });
 

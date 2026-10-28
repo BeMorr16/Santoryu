@@ -96,15 +96,17 @@ describe("design system tokens route (ds-tokens R1)", () => {
     expect(screen.queryAllByRole("button", { expanded: true })).toEqual([]);
   });
 
-  it("is titled Tokens · Design System · Ben, with the new description (R1.3)", () => {
-    expect(meta()).toEqual([
-      { title: "Tokens · Design System · Ben" },
-      {
-        name: "description",
-        content:
-          "Every design token behind this site: a diagram of how they flow, then every primitive, semantic and component token.",
-      },
-    ]);
+  it("is titled Tokens · Design System · Ben Morrison, with the new description (R1.3)", () => {
+    expect(meta()).toEqual(
+      expect.arrayContaining([
+        { title: "Tokens · Design System · Ben Morrison" },
+        {
+          name: "description",
+          content:
+            "Every design token behind this site: a diagram of how they flow, then every primitive, semantic and component token.",
+        },
+      ]),
+    );
   });
 
   it("links the canonical URL to /design-system/tokens (R1.3)", () => {

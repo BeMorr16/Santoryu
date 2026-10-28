@@ -1,7 +1,9 @@
 import type { ComponentType } from "react";
 import { Card } from "../../components/Card/Card.tsx";
 import { Grid } from "../../components/Grid/Grid.tsx";
+import { Stack } from "../../components/Stack/Stack.tsx";
 import { Typography } from "../../components/Typography/Typography.tsx";
+import page from "../../shell/page.module.css";
 import { hubCards, type HubCardId } from "./cards.ts";
 import { ComponentsPreview } from "./ComponentsPreview.tsx";
 import { cardCounts } from "./counts.ts";
@@ -17,7 +19,7 @@ const previews: Record<HubCardId, ComponentType> = {
 /** The /design-system hub: a lead, then one link card per part (ds-hub R1, R2). */
 export function HubPage() {
   return (
-    <>
+    <Stack gap="lg" className={page.wideColumn}>
       <h1>Design System</h1>
       <Typography variant="lead" tone="muted">
         The system this site is built from: tokens that set every color, size and motion, components
@@ -42,6 +44,6 @@ export function HubPage() {
           );
         })}
       </Grid>
-    </>
+    </Stack>
   );
 }

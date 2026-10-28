@@ -36,6 +36,21 @@ describe("inlineScriptHashes", () => {
     ).toEqual([sha256(inline)]);
   });
 
+  it("skips JSON-LD data blocks, which never execute (home design §6.2)", () => {
+    const classic = "window.__ctx = {};";
+    const module = 'import "/assets/entry.js";';
+
+    expect(
+      inlineScriptHashes(
+        page(
+          `<script>${classic}</script>`,
+          `<script type="module">${module}</script>`,
+          '<script type="application/ld+json">{"@context":"https://schema.org"}</script>',
+        ),
+      ),
+    ).toEqual([sha256(classic), sha256(module)]);
+  });
+
   it("returns nothing for a page without inline scripts", () => {
     expect(inlineScriptHashes(page())).toEqual([]);
   });

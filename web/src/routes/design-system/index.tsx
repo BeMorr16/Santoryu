@@ -1,5 +1,5 @@
 import { HubPage } from "../../design-system/hub/HubPage.tsx";
-import { pageMeta } from "../../design-system/page-meta.ts";
+import { pageMeta } from "../../shell/page-meta.ts";
 
 const page = pageMeta(
   "/design-system",

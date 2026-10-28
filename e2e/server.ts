@@ -56,6 +56,7 @@ const contentTypes: Record<string, string> = {
   ".png": "image/png",
   ".webp": "image/webp",
   ".avif": "image/avif",
+  ".pdf": "application/pdf",
 };
 
 function edgeRequest(req: IncomingMessage): EdgeRequest {

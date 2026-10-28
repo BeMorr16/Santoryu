@@ -16,10 +16,10 @@ const clientDir = fileURLToPath(new URL("../../build/client/", import.meta.url))
 
 /** The overview, then every component page (ds-components R1.1). */
 const docsPages = [
-  { path: componentsPath, title: "Components · Design System · Ben", h1: "Components" },
+  { path: componentsPath, title: "Components · Design System · Ben Morrison", h1: "Components" },
   ...componentPages.map(({ id, name }) => ({
     path: componentPath(id),
-    title: `${name} · Components · Design System · Ben`,
+    title: `${name} · Components · Design System · Ben Morrison`,
     h1: name,
   })),
 ];
