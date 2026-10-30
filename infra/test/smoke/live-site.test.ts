@@ -47,9 +47,13 @@ async function documentAt(path: string) {
   return new JSDOM(await response.text()).window.document;
 }
 
+/** Executable inline scripts only: JSON-LD data blocks never execute, so the CSP doesn't list them. */
 function inlineScriptHashes(document: Awaited<ReturnType<typeof documentAt>>): string[] {
   return [...document.querySelectorAll("script")]
-    .filter((script) => !script.hasAttribute("src"))
+    .filter(
+      (script) =>
+        !script.hasAttribute("src") && script.getAttribute("type") !== "application/ld+json",
+    )
     .map(
       (script) =>
         `sha256-${createHash("sha256").update(script.textContent, "utf8").digest("base64")}`,
