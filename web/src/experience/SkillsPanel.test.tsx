@@ -176,18 +176,27 @@ describe("category toggles (resume R7.4, R7.5)", () => {
 });
 
 describe("also worked with (resume R6.2)", () => {
-  it("lists a category's unused skills as plain text after the label", () => {
+  it("lists each category's unused skills as plain text after the label, and no label without any", () => {
     const { panel } = renderPanel();
 
-    const languages = within(panel).getByRole("group", {
-      name: experienceContent.categories.languages,
-    });
-    const other = categorySkills("languages", used).other.map((skill) => skill.label);
-    expect(
-      within(languages).getByText(`${experienceContent.alsoLabel}: ${other.join(", ")}`),
-    ).toBeVisible();
-    for (const label of other) {
-      expect(within(languages).queryByRole("button", { name: label })).toBeNull();
+    for (const category of skillCategories) {
+      const group = within(panel).getByRole("group", {
+        name: experienceContent.categories[category],
+      });
+      const other = categorySkills(category, used).other.map((skill) => skill.label);
+      if (other.length === 0) {
+        expect(
+          within(group).queryByText(new RegExp(experienceContent.alsoLabel)),
+          category,
+        ).toBeNull();
+        continue;
+      }
+      expect(
+        within(group).getByText(`${experienceContent.alsoLabel}: ${other.join(", ")}`),
+      ).toBeVisible();
+      for (const label of other) {
+        expect(within(group).queryByRole("button", { name: label })).toBeNull();
+      }
     }
   });
 

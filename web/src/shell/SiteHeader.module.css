@@ -4,14 +4,18 @@
  */
 .bar {
   position: sticky;
-  inset-block-start: var(--space-stack-sm);
+  /*
+   * Below the status bar, which the page draws under (viewport-fit=cover). The top margin matches
+   * this inset; SiteShell measures it as part of the space the bar takes.
+   */
+  inset-block-start: calc(var(--space-stack-sm) + env(safe-area-inset-top));
   /* Below revealed overlays such as the skip link (layer.overlay). */
   z-index: var(--layer-sticky);
   display: flex;
   gap: var(--space-inline-md);
   align-items: center;
   justify-content: space-between;
-  margin: var(--space-stack-sm) var(--space-layout-xs) 0;
+  margin: calc(var(--space-stack-sm) + env(safe-area-inset-top)) var(--space-layout-xs) 0;
   padding: var(--space-inset-sm) var(--space-inset-md);
   border: var(--effect-border-width) solid var(--color-border-subtle);
   border-radius: var(--radius-surface);
@@ -111,8 +115,8 @@
   inset: calc(
       var(
           --shell-header-block-size,
-          var(--space-stack-sm) + var(--size-control-sm) + 2 * var(--space-inset-sm) + 2 *
-            var(--effect-border-width)
+          env(safe-area-inset-top) + var(--space-stack-sm) + var(--size-control-sm) + 2 *
+            var(--space-inset-sm) + 2 * var(--effect-border-width)
         ) +
         var(--space-stack-sm)
     )

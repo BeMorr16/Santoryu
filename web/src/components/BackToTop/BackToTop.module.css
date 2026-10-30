@@ -27,13 +27,19 @@
 
 .corner {
   position: fixed;
-  inset-block-end: var(--component-back-to-top-offset);
-  inset-inline-end: var(--component-back-to-top-offset);
+  /*
+   * Clear of the home indicator and notch, which the page draws under (viewport-fit=cover). The
+   * site is left-to-right, so inline-end is the right.
+   */
+  inset-block-end: calc(var(--component-back-to-top-offset) + env(safe-area-inset-bottom));
+  inset-inline-end: calc(var(--component-back-to-top-offset) + env(safe-area-inset-right));
   z-index: var(--component-back-to-top-layer);
   box-shadow: var(--component-back-to-top-shadow);
 }
 
 /* Keeps focused content clear of the visible corner button (WCAG 2.4.11, ds-components R5.6). */
 :global(html):has(.corner[data-visible]) {
-  scroll-padding-block-end: calc(var(--size-control-md) + 2 * var(--component-back-to-top-offset));
+  scroll-padding-block-end: calc(
+    var(--size-control-md) + 2 * var(--component-back-to-top-offset) + env(safe-area-inset-bottom)
+  );
 }

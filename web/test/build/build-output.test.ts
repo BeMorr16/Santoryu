@@ -106,15 +106,16 @@ describe.each(pages)("$file", (page) => {
   const head = () => documentFor(page.file).head;
   const body = () => within(documentFor(page.file).body);
 
-  it('has <html lang="en">, a charset, and a responsive viewport', () => {
+  it('has <html lang="en">, a charset, and a responsive viewport that draws edge to edge', () => {
     const document = documentFor(page.file);
     expect(document.documentElement.getAttribute("lang")).toBe("en");
     expect(head().querySelector("meta[charset]")?.getAttribute("charset")?.toLowerCase()).toBe(
       "utf-8",
     );
-    expect(head().querySelector('meta[name="viewport"]')?.getAttribute("content")).toContain(
-      "width=device-width",
-    );
+    const viewport = head().querySelector('meta[name="viewport"]')?.getAttribute("content");
+    expect(viewport).toContain("width=device-width");
+    // So the backdrop reaches under iOS Safari's status bar and toolbar.
+    expect(viewport).toContain("viewport-fit=cover");
   });
 
   it(`is titled "${page.title}" with a description`, () => {

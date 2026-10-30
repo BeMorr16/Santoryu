@@ -6,7 +6,7 @@ import typographyStyles from "../../components/Typography/Typography.module.css"
 import { hubData } from "../../generated/hub-data.ts";
 import { hubCards } from "./cards.ts";
 import { cardCounts } from "./counts.ts";
-import { HubPage } from "./HubPage.tsx";
+import { buildNote, HubPage } from "./HubPage.tsx";
 
 async function renderPage() {
   const Stub = createRoutesStub([
@@ -38,6 +38,19 @@ describe("HubPage (ds-hub R1, R2)", () => {
     expect(lead.tagName).toBe("P");
     expect(h1.nextElementSibling).toBe(lead);
     expect(lead).toHaveClass(typographyStyles.lead ?? "", typographyStyles["tone-muted"] ?? "");
+  });
+
+  it("shows the owner's note on how it was built, small and muted, after the lead", async () => {
+    await renderPage();
+
+    const lead = screen.getByText(/^The system this site is built from/);
+    const note = screen.getByText(buildNote);
+    expect(buildNote).toBe(
+      "Built alongside agentic coding. Most components were ported from libraries and projects I built before; for the rest, I provided the direction, specs and designs, and then reviewed the result. Every component was integrated with this site's tokens, so all of them are fully customizable. The docs were written by AI and verified by automated tests and accessibility checks.",
+    );
+    expect(note.tagName).toBe("P");
+    expect(lead.nextElementSibling).toBe(note);
+    expect(note).toHaveClass(typographyStyles.small ?? "", typographyStyles["tone-muted"] ?? "");
   });
 
   it("lists three link cards in order, each named by its heading alone (R1.2, R2.1)", async () => {

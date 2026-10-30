@@ -98,6 +98,20 @@ for (const path of strikingPages) {
       expect(hit).not.toBe("canvas");
     });
 
+    test("covers the whole viewport with both layers (iOS Safari toolbars)", async ({ page }) => {
+      await page.goto(path);
+      await sphereShown(page);
+
+      const viewport = await page.evaluate(() => ({
+        width: document.documentElement.clientWidth,
+        height: innerHeight,
+      }));
+      for (const layer of [frameGlow(page), sphere(page)]) {
+        // Sized to the large viewport, which a desktop browser's viewport equals.
+        expect(await layer.boundingBox()).toEqual({ x: 0, y: 0, ...viewport });
+      }
+    });
+
     for (const theme of themes) {
       test(`draws the frame glow under the sphere in ${theme} (backdrop-layers R1.1–R1.3)`, async ({
         page,
