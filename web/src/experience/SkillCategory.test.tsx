@@ -11,7 +11,7 @@ const skill = (id: SkillId, label: string): ListedSkill => ({ id, label, categor
 const group: SkillGroup = {
   category: "languages",
   used: [skill("typescript", "TypeScript"), skill("python", "Python")],
-  other: [skill("rust", "Rust")],
+  other: [skill("cypher", "Cypher")],
 };
 const label = experienceContent.categories.languages;
 
@@ -42,7 +42,7 @@ describe("SkillCategory (resume R6.2, R7.4–R7.6)", () => {
 
     const toggles = within(screen.getByRole("list")).getAllByRole("button");
     expect(toggles.map((toggle) => toggle.textContent)).toEqual(["TypeScript", "Python"]);
-    expect(screen.getByText(`${experienceContent.alsoLabel}: Rust`)).toBeVisible();
+    expect(screen.getByText(`${experienceContent.alsoLabel}: Cypher`)).toBeVisible();
   });
 
   it("calls back with a skill toggled, and with the whole group toggled", async () => {
@@ -88,7 +88,7 @@ describe("SkillCategory (resume R6.2, R7.4–R7.6)", () => {
   });
 
   it("matches a group when any skill, used or not, matches the query (R8.2)", () => {
-    expect(groupMatches(group, "rust")).toBe(true);
+    expect(groupMatches(group, "cypher")).toBe(true);
     expect(groupMatches(group, "type")).toBe(true);
     expect(groupMatches(group, "zzz")).toBe(false);
   });
