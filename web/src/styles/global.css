@@ -14,8 +14,8 @@ html {
   scroll-padding-block-start: calc(
     var(
         --shell-header-block-size,
-        var(--space-stack-sm) + 2 * var(--space-inset-sm) + var(--size-control-sm) + 2 *
-          var(--effect-border-width)
+        env(safe-area-inset-top) + var(--space-stack-sm) + 2 * var(--space-inset-sm) +
+          var(--size-control-sm) + 2 * var(--effect-border-width)
       ) +
       var(--effect-focus-ring-width) + var(--effect-focus-ring-offset)
   );
@@ -28,9 +28,14 @@ html {
   }
 }
 
-/* The page color; the backdrop layer (shell/backdrop) draws over it. */
+/*
+ * The page color; the backdrop layer (shell/backdrop) draws over it. The page draws under the
+ * notch (viewport-fit=cover), so content keeps clear of the side safe areas in landscape; the
+ * header and footer keep clear of the top and bottom ones.
+ */
 body {
   margin: 0;
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
   background-color: var(--color-surface-base);
   color: var(--color-text-default);
   font-family: var(--type-family-body);

@@ -1,7 +1,13 @@
-/* Shared by both layers: fixed behind all content, below the header (layer.backdrop). */
+/*
+ * Shared by both layers: fixed behind all content, below the header (layer.backdrop). As tall as
+ * the large viewport, not inset to the bottom edge: iOS Safari sizes an inset layer to the small
+ * viewport, which stops short of the area behind its toolbars. It also keeps the size steady as
+ * the toolbars collapse, so the sphere isn't redrawn mid-scroll.
+ */
 .layer {
   position: fixed;
-  inset: 0;
+  inset: 0 0 auto;
+  block-size: 100lvh;
   z-index: var(--layer-backdrop);
   pointer-events: none;
 }

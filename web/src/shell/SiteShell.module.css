@@ -44,8 +44,10 @@
   outline: none;
 }
 
+/* Clear of the home indicator and toolbar, which the page draws under (viewport-fit=cover). */
 .footer {
   padding: var(--space-inset-md) var(--space-layout-xs);
+  padding-block-end: calc(var(--space-inset-md) + env(safe-area-inset-bottom));
   color: var(--color-text-muted);
   font-size: var(--type-size-small);
 }
