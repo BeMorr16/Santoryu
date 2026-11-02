@@ -6,49 +6,49 @@
   min-inline-size: 0;
 }
 
-/* ---- Theme bar (design §8.3) ---- */
+/* ---- Your themes (theme-creator-controls design §4) ---- */
 
-.bar {
+.library {
   display: flex;
   flex-direction: column;
   gap: var(--space-stack-sm);
-  padding: var(--space-inset-md);
-  border: var(--effect-border-width) solid var(--color-border-default);
-  border-radius: var(--radius-surface);
-  background-color: var(--color-surface-raised);
 }
 
-.barRow {
+.libraryHeader {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-stack-sm) var(--space-inline-md);
+  align-items: center;
+  gap: var(--space-stack-xs) var(--space-inline-md);
 }
 
-.name {
-  flex: 1 1 var(--size-column-md);
+.libraryHeader h2,
+.count,
+.empty {
+  margin: 0;
 }
 
-.barActions {
+.newTheme {
+  margin-inline-start: auto;
+}
+
+/* The sample sits in the hub's preview frame, sized to its content here. */
+.card .cardSample {
+  min-block-size: auto;
+}
+
+/* In forced colors every card border is the same color, so the editing card's is outlined (R6.6). */
+@media (forced-colors: active) {
+  .editingCard {
+    outline: var(--effect-border-width) solid CanvasText;
+  }
+}
+
+.cardMeta,
+.cardActions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-stack-xs) var(--space-inline-sm);
-}
-
-.copy {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-inline-xs);
-}
-
-.status,
-.notice {
-  margin: 0;
-}
-
-.status {
-  font-weight: var(--type-weight-strong);
 }
 
 .importErrors {
@@ -62,6 +62,91 @@
 .importErrors p,
 .importErrors ul {
   margin: 0;
+}
+
+/* ---- The draft toolbar and section links (design §5) ---- */
+
+/* Glass, like the site header: pinned, it reads as a second floating bar below it. */
+.toolbar {
+  padding: var(--space-inset-sm) var(--space-inset-md);
+  border: var(--effect-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+  background-color: var(--color-surface-glass);
+  backdrop-filter: blur(var(--effect-backdrop-glass));
+}
+
+/* As the header does; as far as known, only Chromium supports this query. */
+@media (prefers-reduced-transparency: reduce) {
+  .toolbar {
+    background-color: var(--color-surface-raised);
+    backdrop-filter: none;
+  }
+}
+
+.toolbarRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-stack-sm) var(--space-inline-md);
+}
+
+.toolbarActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-stack-xs) var(--space-inline-sm);
+}
+
+.status,
+.notice {
+  margin: 0;
+}
+
+.status {
+  min-inline-size: 0;
+  font-weight: var(--type-weight-strong);
+}
+
+/* A 30-character name has no break of its own (R6.4, WCAG 1.4.10). */
+.status,
+.notice {
+  overflow-wrap: anywhere;
+}
+
+/* Takes space only while it has text; always rendered, so it's announced (R6.3). */
+.notice:not(:empty) {
+  margin-block-start: var(--space-stack-xs);
+}
+
+.sectionLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-stack-xs) var(--space-inline-md);
+  margin: var(--space-stack-sm) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * From 48em, unless the screen is short: the toolbar stays below the site header, and focused
+ * controls and section targets stay clear of both (R5.2, R5.4; WCAG 2.4.11).
+ */
+@media (min-width: 48em) and (not (max-height: 30em)) {
+  /* A gap below the header, as the header keeps from the top (space.stack.sm). */
+  .toolbar {
+    position: sticky;
+    inset-block-start: calc(var(--shell-header-block-size, 0px) + var(--space-stack-sm));
+    z-index: var(--layer-sticky);
+  }
+
+  :global(:root):has(.toolbar) {
+    scroll-padding-block-start: calc(
+      var(--shell-header-block-size, 0px) + var(--space-stack-sm) +
+        var(--theme-creator-toolbar-block-size, 0px) + var(--effect-focus-ring-width) +
+        var(--effect-focus-ring-offset)
+    );
+  }
 }
 
 /* ---- Workspace: the editor, then the preview and chain (design §8.5, R7.3, R7.4) ---- */
@@ -126,6 +211,7 @@
 
 .asideBar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-inline-sm);
@@ -135,6 +221,10 @@
 .asideTitle {
   margin: 0;
   font-weight: var(--type-weight-strong);
+}
+
+.asideSave {
+  margin-inline-start: auto;
 }
 
 .asidePanel {
@@ -180,6 +270,20 @@
     display: flex;
     max-block-size: none;
     padding-block-end: 0;
+  }
+}
+
+/* Below the pinned toolbar too, unless the screen is short and nothing is pinned (R5.4, R5.6). */
+@media (min-width: 48em) and (not (max-height: 30em)) {
+  .aside {
+    inset-block-start: calc(
+      var(--shell-header-block-size, 0px) + var(--space-stack-sm) +
+        var(--theme-creator-toolbar-block-size, 0px) + var(--space-stack-md)
+    );
+    max-block-size: calc(
+      100dvh - var(--shell-header-block-size, 0px) - var(--space-stack-sm) -
+        var(--theme-creator-toolbar-block-size, 0px) - 2 * var(--space-stack-md)
+    );
   }
 }
 

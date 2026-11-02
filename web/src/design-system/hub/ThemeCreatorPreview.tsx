@@ -1,9 +1,8 @@
-import { Button } from "../../components/Button/Button.tsx";
-import { Typography } from "../../components/Typography/Typography.tsx";
 import { hubData } from "../../generated/hub-data.ts";
-import { themeStyle, type BuiltInTheme, type CustomProperty } from "../../theme/apply-theme.ts";
+import type { BuiltInTheme, CustomProperty } from "../../theme/apply-theme.ts";
 import { Preview } from "./Preview.tsx";
 import styles from "./Hub.module.css";
+import { ThemeSample } from "./ThemeSample.tsx";
 
 interface Panel {
   name: string;
@@ -26,20 +25,7 @@ export function ThemeCreatorPreview() {
   return (
     <Preview className={styles.panels}>
       {panels.map(({ name, scheme, vars }) => (
-        <div
-          key={name}
-          data-theme={scheme}
-          style={vars && themeStyle(vars)}
-          className={styles.panel}
-        >
-          <Typography as="span" variant="small">
-            {name}
-          </Typography>
-          <span className={styles.typeH3}>Aa</span>
-          <Button variant="primary" size="sm">
-            Save
-          </Button>
-        </div>
+        <ThemeSample key={name} scheme={scheme} vars={vars} label={name} />
       ))}
     </Preview>
   );

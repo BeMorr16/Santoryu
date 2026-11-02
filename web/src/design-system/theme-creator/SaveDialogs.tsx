@@ -15,12 +15,30 @@ import { nameProblem } from "./model/save.ts";
 import type { ThemeSource } from "./model/types.ts";
 import styles from "./ThemeCreator.module.css";
 
-/** The theme bar's dialogs (theme-creator R2.2, R2.4, R2.9, R3.3, R11.2; design §8.3, §8.7). */
+/**
+ * A save that a dialog interrupted: the saved theme it updates (null for a new one) and the name
+ * it saves under (theme-creator-controls design §3).
+ */
+export interface PendingSave {
+  target: string | null;
+  name: string;
+}
+
+/**
+ * The theme creator's dialogs (theme-creator R2.2, R2.4, R2.9, R3.3, R11.2; design §8.3, §8.7;
+ * theme-creator-controls R4.5).
+ */
 export type BarDialog =
-  | { kind: "contrast"; failures: readonly PairingResult[]; editing: string | null }
-  | { kind: "limit" }
+  | { kind: "contrast"; failures: readonly PairingResult[]; save: PendingSave }
+  | { kind: "limit"; save: PendingSave }
   | { kind: "rename"; theme: StoredTheme }
-  | { kind: "delete"; theme: StoredTheme; thenSave: boolean }
+  /** `then` is the save to finish once it's deleted, when the limit dialog asked. */
+  | { kind: "delete"; theme: StoredTheme; then: PendingSave | null }
+  /**
+   * A theme's name, asked before saving it as a new theme (theme-creator-controls R4.1, R4.5):
+   * from Save while it isn't saved yet, or from Save as new. `error` is a name problem found since.
+   */
+  | { kind: "name"; save: PendingSave; asNew: boolean; error?: string | undefined }
   | { kind: "discard" }
   | { kind: "start"; start: DraftStart }
   | { kind: "import"; name: string; source: ThemeSource; ignored: number };
@@ -214,20 +232,27 @@ function LimitDialog({
   );
 }
 
-/** Its own name state, reset for each theme by a key. */
-function RenameForm({
-  theme,
+/** A theme name in a dialog, checked before it's submitted (theme-creator R2.6). */
+function NameForm({
+  initialName,
+  initialError,
+  submitLabel,
+  exclude,
   saved,
-  onRename,
+  onSubmit,
   onDone,
 }: {
-  theme: StoredTheme;
+  initialName: string;
+  initialError?: string | undefined;
+  submitLabel: string;
+  /** The saved theme whose own name doesn't count as taken: the one being renamed. */
+  exclude: string | null;
   saved: readonly StoredTheme[];
-  onRename: (id: string, name: string) => void;
+  onSubmit: (name: string) => void;
   onDone: () => void;
 }) {
-  const [name, setName] = useState(theme.name);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [name, setName] = useState(initialName);
+  const [error, setError] = useState(initialError);
   const field = useRef<HTMLInputElement>(null);
   return (
     <form
@@ -235,14 +260,15 @@ function RenameForm({
       className={styles.renameForm}
       onSubmit={(event) => {
         event.preventDefault();
-        const problem = nameProblem(name, saved, theme.id);
+        const problem = nameProblem(name, saved, exclude);
         if (problem !== undefined) {
           setError(problem);
           field.current?.focus();
           return;
         }
-        onRename(theme.id, name.trim());
+        // Closed first: what the submit does may open another dialog of this kind.
         onDone();
+        onSubmit(name.trim());
       }}
     >
       <TextField
@@ -259,11 +285,31 @@ function RenameForm({
       <DialogActions>
         <DialogButton>Cancel</DialogButton>
         <Button type="submit" variant="primary">
-          Rename
+          {submitLabel}
         </Button>
       </DialogActions>
     </form>
   );
+}
+
+export interface SaveDialogsProps {
+  dialog: BarDialog | null;
+  saved: readonly StoredTheme[];
+  /** The custom theme the site is using, if any. */
+  activeId: string | undefined;
+  /** Closes this kind of dialog, if it's still the one open: another may have replaced it. */
+  onClose: (kind: BarDialog["kind"]) => void;
+  /** Runs a save's checks: from the name dialog, or Overwrite in the limit dialog. */
+  onSave: (pending: PendingSave) => void;
+  /** Saves without the contrast check: Save anyway. */
+  onSaveAnyway: (pending: PendingSave) => void;
+  onEditToken: (token: string) => void;
+  onRename: (id: string, name: string) => void;
+  onDelete: (theme: StoredTheme, then: PendingSave | null) => void;
+  onDiscard: () => void;
+  onStart: (start: DraftStart) => void;
+  onImport: (name: string, source: ThemeSource, ignored: number) => void;
+  onShowDialog: (dialog: BarDialog) => void;
 }
 
 export function SaveDialogs({
@@ -271,40 +317,53 @@ export function SaveDialogs({
   saved,
   activeId,
   onClose,
+  onSave,
   onSaveAnyway,
   onEditToken,
-  onOverwrite,
   onRename,
   onDelete,
   onDiscard,
   onStart,
   onImport,
   onShowDialog,
-}: {
-  dialog: BarDialog | null;
-  saved: readonly StoredTheme[];
-  /** The custom theme the site is using, if any. */
-  activeId: string | undefined;
-  /** Closes this kind of dialog, if it's still the one open: another may have replaced it. */
-  onClose: (kind: BarDialog["kind"]) => void;
-  onSaveAnyway: (editing: string | null) => void;
-  onEditToken: (token: string) => void;
-  onOverwrite: (id: string) => void;
-  onRename: (id: string, name: string) => void;
-  onDelete: (theme: StoredTheme, thenSave: boolean) => void;
-  onDiscard: () => void;
-  onStart: (start: DraftStart) => void;
-  onImport: (name: string, source: ThemeSource, ignored: number) => void;
-  onShowDialog: (dialog: BarDialog) => void;
-}) {
+}: SaveDialogsProps) {
   const kind = dialog?.kind;
   return (
     <>
+      {/*
+        First: a save it starts may open the contrast or limit dialog in the same render. Effects
+        run in order, so this one closes, returning focus to its opener, before that one opens
+        and records its opener (WCAG 2.4.3).
+      */}
+      <Dialog
+        open={kind === "name"}
+        onClose={() => {
+          onClose("name");
+        }}
+        title={dialog?.kind === "name" && dialog.asNew ? "Save as new theme" : "Save theme"}
+      >
+        {dialog?.kind === "name" && (
+          <NameForm
+            key={dialog.error}
+            initialName={dialog.save.name}
+            initialError={dialog.error}
+            submitLabel="Save"
+            exclude={dialog.save.target}
+            saved={saved}
+            onSubmit={(name) => {
+              onSave({ ...dialog.save, name });
+            }}
+            onDone={() => {
+              onClose("name");
+            }}
+          />
+        )}
+      </Dialog>
       <ContrastDialog
         open={kind === "contrast"}
         failures={dialog?.kind === "contrast" ? dialog.failures : []}
         onSaveAnyway={() => {
-          if (dialog?.kind === "contrast") onSaveAnyway(dialog.editing);
+          if (dialog?.kind === "contrast") onSaveAnyway(dialog.save);
         }}
         onEditToken={onEditToken}
         onClose={() => {
@@ -314,9 +373,11 @@ export function SaveDialogs({
       <LimitDialog
         open={kind === "limit"}
         saved={saved}
-        onOverwrite={onOverwrite}
+        onOverwrite={(id) => {
+          if (dialog?.kind === "limit") onSave({ target: id, name: dialog.save.name });
+        }}
         onDelete={(theme) => {
-          onShowDialog({ kind: "delete", theme, thenSave: true });
+          if (dialog?.kind === "limit") onShowDialog({ kind: "delete", theme, then: dialog.save });
         }}
         onClose={() => {
           onClose("limit");
@@ -330,11 +391,15 @@ export function SaveDialogs({
         title="Rename theme"
       >
         {dialog?.kind === "rename" && (
-          <RenameForm
+          <NameForm
             key={dialog.theme.id}
-            theme={dialog.theme}
+            initialName={dialog.theme.name}
+            submitLabel="Rename"
+            exclude={dialog.theme.id}
             saved={saved}
-            onRename={onRename}
+            onSubmit={(name) => {
+              onRename(dialog.theme.id, name);
+            }}
             onDone={() => {
               onClose("rename");
             }}
@@ -352,7 +417,7 @@ export function SaveDialogs({
         confirm="Delete"
         cancel="Cancel"
         onConfirm={() => {
-          if (dialog?.kind === "delete") onDelete(dialog.theme, dialog.thenSave);
+          if (dialog?.kind === "delete") onDelete(dialog.theme, dialog.then);
         }}
         onClose={() => {
           onClose("delete");

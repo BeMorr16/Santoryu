@@ -9,6 +9,7 @@ import {
 import { categorySkills, countHighlights, usedSkillIds } from "../../web/src/experience/model.ts";
 import { resumePdfPath } from "../../web/src/site.config.ts";
 import {
+  animationsSettled,
   gotoSettled,
   main,
   storeTheme,
@@ -85,6 +86,8 @@ test.describe("filtering (resume R7.2, R7.3, R12.1)", () => {
       await gotoSettled(page, path);
       await skill(page, "React").click();
       await expect(skill(page, "React")).toHaveAttribute("aria-pressed", "true");
+      // Buttons transition their colors: axe measures them once they've settled.
+      await animationsSettled(page);
 
       expect(await violations(page)).toEqual([]);
     });

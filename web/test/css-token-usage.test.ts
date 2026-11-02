@@ -4,8 +4,13 @@ import { describe, expect, it } from "vitest";
 import { componentTokens, semanticTokens } from "../src/tokens/metadata.ts";
 import { namedColors } from "./named-colors.ts";
 
-// --shell-header-block-size is a runtime measurement set by the shell, not a token (refinement R11.3).
-const allowedCustomProperties = new Set(["--specimen", "--shell-header-block-size"]);
+// Runtime measurements, not tokens: the shell's header (refinement R11.3) and the theme creator's
+// sticky toolbar (theme-creator-controls design §5.3).
+const allowedCustomProperties = new Set([
+  "--specimen",
+  "--shell-header-block-size",
+  "--theme-creator-toolbar-block-size",
+]);
 
 interface TokenSets {
   semantic: ReadonlySet<string>;
@@ -339,6 +344,17 @@ describe("scanCss self-test", () => {
     expect(scanCss(fixture, "src/styles/global.css", fixtureTokens)).toEqual([]);
     expect(scanCss(fixture, "src/components/Menu/Menu.module.css", fixtureTokens)).toEqual([
       "src/components/Menu/Menu.module.css:1: --shell-header-block-size is not a semantic token, a menu component token or a private --_* property",
+    ]);
+  });
+
+  it("allows --theme-creator-toolbar-block-size outside components only", () => {
+    const fixture = ".a { padding: var(--theme-creator-toolbar-block-size); }\n";
+
+    expect(
+      scanCss(fixture, "src/design-system/theme-creator/ThemeCreator.module.css", fixtureTokens),
+    ).toEqual([]);
+    expect(scanCss(fixture, "src/components/Menu/Menu.module.css", fixtureTokens)).toEqual([
+      "src/components/Menu/Menu.module.css:1: --theme-creator-toolbar-block-size is not a semantic token, a menu component token or a private --_* property",
     ]);
   });
 
