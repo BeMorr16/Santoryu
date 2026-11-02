@@ -1,0 +1,40 @@
+/*
+ * iOS 26 Safari clips fixed layers to the band between its status bar and toolbar, so the backdrop
+ * can't reach under them, while scrolling content still shows through. Safari paints each bar
+ * solid in the background color of a fixed element at that edge, so these two strips make the bars
+ * the page color, and content is hidden where the backdrop ends. Each sits where Safari samples it
+ * and clips it from view: the top one at the very top, the bottom one partly below the screen.
+ * Checked in the iOS 26.3 Simulator (2026-11-02): a height from env(safe-area-inset-*) isn't
+ * sampled, and the strips must paint above the page content.
+ *
+ * iOS only (its touch callout), so no other browser shows them.
+ */
+.edge {
+  display: none;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .edge {
+    position: fixed;
+    inset-inline: 0;
+    z-index: var(--layer-sticky);
+    display: block;
+    block-size: var(--space-stack-sm);
+    background-color: var(--color-surface-base);
+    pointer-events: none;
+  }
+
+  .top {
+    inset-block-start: 0;
+  }
+
+  .bottom {
+    inset-block-end: calc(-1 * var(--space-stack-sm) / 2);
+  }
+}
+
+@media print {
+  .edge {
+    display: none;
+  }
+}

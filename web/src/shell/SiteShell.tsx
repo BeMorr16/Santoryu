@@ -8,6 +8,7 @@ import { VisuallyHidden } from "../components/VisuallyHidden/VisuallyHidden.tsx"
 import { footerText } from "../site.config.ts";
 import { Backdrop } from "./backdrop/Backdrop.tsx";
 import { useRouteHandle } from "./route-handle.ts";
+import { SafariBars } from "./SafariBars.tsx";
 import { SiteHeader } from "./SiteHeader.tsx";
 import styles from "./SiteShell.module.css";
 
@@ -51,6 +52,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
     <div className={styles.page}>
       {/* Fixed at layer.backdrop (-1), so its place in the order doesn't matter (site-backdrop R1.1). */}
       <Backdrop kind={backdrop} />
+      <SafariBars />
       <VisuallyHidden
         as="a"
         focusable
