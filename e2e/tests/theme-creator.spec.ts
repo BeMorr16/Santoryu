@@ -35,6 +35,33 @@ test.describe("theme creator (theme-creator R16.3)", () => {
     ).not.toBe("#2a8556");
   });
 
+  test("pairs the four color controls on a wide screen, and stacks them on a narrow one", async ({
+    page,
+  }) => {
+    const box = async (name: string) => {
+      const found = await page.getByRole("group", { name, exact: true }).boundingBox();
+      if (!found) throw new Error(`No ${name} control`);
+      return found;
+    };
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const [action, accent, accent2, background] = [
+      await box("Action"),
+      await box("Accent"),
+      await box("Second accent"),
+      await box("Background"),
+    ];
+    expect(accent.y).toBe(action.y);
+    expect(accent.x).toBeGreaterThan(action.x + action.width);
+    expect(background.y).toBe(accent2.y);
+    expect(accent2.y).toBeGreaterThan(action.y + action.height);
+
+    await page.setViewportSize({ width: 768, height: 900 });
+    const [narrowAction, narrowAccent] = [await box("Action"), await box("Accent")];
+    expect(narrowAccent.x).toBe(narrowAction.x);
+    expect(narrowAccent.y).toBeGreaterThan(narrowAction.y + narrowAction.height);
+  });
+
   test("a saved theme chosen in the switcher applies on the next page before any app script runs (R9.3)", async ({
     page,
   }) => {

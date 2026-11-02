@@ -93,7 +93,7 @@ const layers: Record<Category, { primitive: string[]; semantic: string[] }> = {
 
 // Every semantic token, per site-foundation design §4.3, component-library design §4.1,
 // component-library-refinement design §3.3, §9.3, §13.3, §15.6 and §16.5, palette-expansion design §3,
-// and ds-components design §10.
+// ds-components design §10, and decision 0021 (color.border.rule).
 // Adding or renaming one is a one-way door.
 const expectedSemantic = [
   "color.surface.base",
@@ -137,6 +137,7 @@ const expectedSemantic = [
   "color.border.default",
   "color.border.strong",
   "color.border.glass-highlight",
+  "color.border.rule",
   "color.focus.ring",
   "color.grid.line",
   "color.backdrop.dot-near",
@@ -233,6 +234,7 @@ const overlayAliases = [
   "color.surface.glass",
   "color.surface.glass-sheer",
   "color.border.glass-highlight",
+  "color.border.rule",
   "color.grid.line",
   "color.backdrop.glow",
   "color.backdrop.frame",

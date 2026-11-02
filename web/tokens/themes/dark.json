@@ -582,6 +582,10 @@
       "glass-highlight": {
         "$value": "{color.overlay.white-20}",
         "$description": "Decorative lit edge on glass cards (top and left). Never carries meaning, so it declares no contrast pairing."
+      },
+      "rule": {
+        "$value": "{color.cyan.300}",
+        "$description": "Decorative rule marking a block, such as an Experience highlight: quiet in light, accent cyan in dark. Not contrast-checked."
       }
     },
     "focus": {

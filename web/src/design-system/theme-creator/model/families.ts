@@ -74,6 +74,7 @@ export const colorFamilies: readonly ColorFamily[] = [
       member("accent.border", "key"),
       member("accent.text", "text"),
       member("accent.background", "tint"),
+      member("border.rule", "tint"),
       member("backdrop.dot-near", "tint"),
       member("backdrop.dot-far", "tint"),
       member("backdrop.glow", "tint"),
