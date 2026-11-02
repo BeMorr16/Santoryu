@@ -59,17 +59,19 @@ describe.each(docsPages)("$path", ({ path, title, h1 }) => {
     );
   });
 
-  it("has a Primary and a Components navigation, uniquely labelled, with Components outside and before main (R2.1)", () => {
+  it("has a Primary, a Components and a Footer navigation, uniquely labelled, with Components outside and before main (R2.1; site-footer R3.1)", () => {
     const body = within(documentAt(path).body);
     // hidden: jsdom's UA sheet hides the closed [popover] panel that holds Primary; the site's CSS,
     // which shows it on wide screens, isn't loaded here (site-refresh design §4.3).
     const navs = body.getAllByRole("navigation", { hidden: true });
     const labels = navs.map((nav) => nav.getAttribute("aria-label"));
-    expect(labels).toEqual(["Primary", "Components"]);
+    expect(labels).toEqual(["Primary", "Components", "Footer"]);
     const components = body.getByRole("navigation", { name: "Components" });
     const main = body.getByRole("main");
     expect(main.contains(components)).toBe(false);
     expect(components.compareDocumentPosition(main) & 4 /* FOLLOWING */).toBe(4);
+    const footer = body.getByRole("navigation", { name: "Footer" });
+    expect(main.compareDocumentPosition(footer) & 4 /* FOLLOWING */).toBe(4);
   });
 
   it("lists On this page and previous/next as labelled lists, not landmarks (R4.2, R4.9)", () => {

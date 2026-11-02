@@ -106,6 +106,9 @@ describe("SiteShell", () => {
     ).toBeInTheDocument();
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
+    expect(screen.getByRole("main").compareDocumentPosition(screen.getByRole("contentinfo"))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
   });
 
   it("lays out main as a vertical Stack", () => {
