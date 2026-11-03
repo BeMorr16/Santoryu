@@ -1,10 +1,24 @@
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { gotoSettled, tabKey, tokenColor } from "./support.ts";
 
 const nav = (page: Page) => page.getByRole("navigation", { name: "Primary" });
 const home = (page: Page) =>
   page.getByRole("banner").getByRole("link", { name: "BM, Ben Morrison, home" });
+const footer = (page: Page) => page.getByRole("contentinfo");
+/** The footer's first column: the first item of its top row (site-footer design §4). */
+const personal = (page: Page) => footer(page).locator(":scope > div:first-child > :first-child");
+const footerNav = (page: Page) => footer(page).getByRole("navigation", { name: "Footer" });
+const builtWith = (page: Page) => footer(page).getByText(/^Built with React \d+ and Vite$/);
+const noHorizontalScroll = (page: Page) =>
+  page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+
+async function box(locator: Locator) {
+  const result = await locator.boundingBox();
+  if (!result) throw new Error("not rendered");
+  return result;
+}
+
 const rootStyle = (page: Page, property: string) =>
   page.evaluate(
     (name) => getComputedStyle(document.documentElement).getPropertyValue(name),
@@ -259,4 +273,126 @@ test.describe("the nav's Contact link (contact R3.2, R3.3)", () => {
     );
     await expect(home(page)).toHaveAttribute("aria-current", "page");
   });
+});
+
+test.describe("the footer at 1280×800 (site-footer R5.1–R5.3)", () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  test("draws one border.rule line above it and none inside it", async ({ page }) => {
+    await page.goto("/experience");
+
+    // The tokens as the browser resolves them, through a probe styled with the CSSOM.
+    const expected = await page.evaluate(() => {
+      const probe = document.createElement("div");
+      probe.style.borderTop = "var(--effect-border-width) solid var(--color-border-rule)";
+      document.body.append(probe);
+      const { borderTopColor, borderTopWidth } = getComputedStyle(probe);
+      probe.remove();
+      return { borderTopColor, borderTopWidth };
+    });
+    await expect(footer(page)).toHaveCSS("border-top-style", "solid");
+    await expect(footer(page)).toHaveCSS("border-top-color", expected.borderTopColor);
+    await expect(footer(page)).toHaveCSS("border-top-width", expected.borderTopWidth);
+
+    const bordered = await footer(page).evaluate((element) =>
+      [...element.querySelectorAll("*")]
+        .filter((descendant) => {
+          const style = getComputedStyle(descendant);
+          const transparent = /^rgba\(.*, 0\)$|^transparent$/.test(style.borderTopColor);
+          return (
+            style.borderTopStyle !== "none" &&
+            Number.parseFloat(style.borderTopWidth) > 0 &&
+            !transparent
+          );
+        })
+        .map((descendant) => descendant.outerHTML.slice(0, 80)),
+    );
+    expect(bordered).toEqual([]);
+  });
+
+  test("spans the line across the inset, and sets the columns space.inline.lg in from its ends", async ({
+    page,
+  }) => {
+    await page.goto("/experience");
+
+    const { rem, viewport } = await page.evaluate(() => ({
+      rem: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+      viewport: document.documentElement.clientWidth,
+    }));
+    const column = await box(personal(page));
+    const nav = await box(footerNav(page));
+    const line = await box(footer(page));
+    // The rule's inset (2.5rem), then the content's padding inside it (space.inline.lg, 1.5rem).
+    expect(line.x).toBeCloseTo(2.5 * rem, 0);
+    expect(viewport - (line.x + line.width)).toBeCloseTo(2.5 * rem, 0);
+    expect(column.x).toBeCloseTo(4 * rem, 0);
+    expect(viewport - (nav.x + nav.width)).toBeCloseTo(4 * rem, 0);
+    expect(column.x + column.width).toBeLessThanOrEqual(nav.x);
+    expect((await box(builtWith(page))).x).toBeCloseTo(4 * rem, 0);
+  });
+});
+
+test.describe("the footer at 768px (site-footer R5.3)", () => {
+  test.use({ viewport: { width: 768, height: 800 } });
+
+  test("keeps the two columns side by side", async ({ page }) => {
+    await page.goto("/experience");
+
+    const column = await box(personal(page));
+    const nav = await box(footerNav(page));
+    expect(column.x + column.width).toBeLessThanOrEqual(nav.x);
+    expect(nav.y).toBeCloseTo(column.y, 0);
+  });
+
+  test("never scrolls sideways with 200% text (R6.4)", async ({ page }) => {
+    await gotoSettled(page, "/experience");
+    const heightOf = () => footer(page).evaluate((element) => element.clientHeight);
+    const before = await heightOf();
+    // Through the CSSOM, which the CSP allows.
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%";
+    });
+    await expect.poll(heightOf).toBeGreaterThan(before);
+
+    expect(await noHorizontalScroll(page)).toBe(true);
+  });
+});
+
+test.describe("the footer at 375px (site-footer R5.4)", () => {
+  test.use({ viewport: { width: 375, height: 800 } });
+
+  test("stacks the personal column, nav, then the built-with note", async ({ page }) => {
+    await page.goto("/experience");
+
+    const parts = [personal(page), footerNav(page), builtWith(page)];
+    const boxes = await Promise.all(parts.map(box));
+    boxes.slice(1).forEach((later, index) => {
+      const earlier = boxes[index];
+      expect(later.y).toBeGreaterThanOrEqual((earlier?.y ?? 0) + (earlier?.height ?? 0) - 0.5);
+    });
+  });
+});
+
+test.describe("the footer at 320px (site-footer R6.4)", () => {
+  test.use({ viewport: { width: 320, height: 640 } });
+
+  test("never scrolls sideways", async ({ page }) => {
+    await page.goto("/experience");
+
+    await expect(footer(page)).toBeVisible();
+    expect(await noHorizontalScroll(page)).toBe(true);
+  });
+});
+
+test("keeps the footer's line in forced colors (site-footer R6.5)", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.goto("/experience");
+
+  const line = await footer(page).evaluate((element) => {
+    const { borderTopStyle, borderTopWidth, borderTopColor } = getComputedStyle(element);
+    return { borderTopStyle, borderTopWidth, borderTopColor };
+  });
+  expect(line.borderTopStyle).not.toBe("none");
+  expect(Number.parseFloat(line.borderTopWidth)).toBeGreaterThan(0);
+  expect(line.borderTopColor).not.toMatch(/^rgba\(.*, 0\)$|^transparent$/);
 });

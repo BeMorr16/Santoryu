@@ -80,6 +80,16 @@ async function watchBackdropShifts(page: Page) {
     page.evaluate(() => (window as unknown as { backdropShifts: number[] }).backdropShifts);
 }
 
+test("shows the iOS Safari bar strips in no other browser, so they never cover content", async ({
+  page,
+}) => {
+  await page.goto(quietPage);
+  const strips = page.locator('div[aria-hidden="true"][class*="_edge_"]');
+
+  await expect(strips).toHaveCount(2);
+  for (const strip of await strips.all()) await expect(strip).toBeHidden();
+});
+
 for (const path of strikingPages) {
   test.describe(`${path} (striking)`, () => {
     test("fixes the sphere behind the content, where it never takes the pointer (R2.1, R2.7)", async ({

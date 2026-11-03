@@ -1,6 +1,7 @@
 import { useContext, type ReactNode } from "react";
 import { Button } from "../../components/Button/Button.tsx";
 import { ColorField } from "../../components/ColorField/ColorField.tsx";
+import { Grid } from "../../components/Grid/Grid.tsx";
 import {
   Menu,
   MenuPopup,
@@ -170,19 +171,23 @@ export function KeyControls({
   keys: KeyValues;
   start: KeyValues;
 }) {
-  return (
-    <div className={styles.keys}>
-      {sectionKeys[section].map((id) => (
-        <KeyControl key={id} id={id} changed={keys[id] !== start[id]}>
-          {id === "action" || id === "accent" || id === "accent2" || id === "background" ? (
-            <ColorKey id={id} value={keys[id]} />
-          ) : id === "headingFont" || id === "bodyFont" ? (
-            <FontKey id={id} value={keys[id]} />
-          ) : (
-            <SliderKey id={id} value={keys[id]} />
-          )}
-        </KeyControl>
-      ))}
-    </div>
+  const controls = sectionKeys[section].map((id) => (
+    <KeyControl key={id} id={id} changed={keys[id] !== start[id]}>
+      {id === "action" || id === "accent" || id === "accent2" || id === "background" ? (
+        <ColorKey id={id} value={keys[id]} />
+      ) : id === "headingFont" || id === "bodyFont" ? (
+        <FontKey id={id} value={keys[id]} />
+      ) : (
+        <SliderKey id={id} value={keys[id]} />
+      )}
+    </KeyControl>
+  ));
+  // The four colors pair up where the editor column has room for two (owner, 2026-11-02).
+  return section === "color" ? (
+    <Grid min="md" maxColumns={2} rowGap="lg" columnGap="md">
+      {controls}
+    </Grid>
+  ) : (
+    <div className={styles.keys}>{controls}</div>
   );
 }

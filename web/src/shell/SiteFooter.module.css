@@ -1,0 +1,44 @@
+/*
+ * The rule spans the page column's inset (main's padding plus page.module.css's .column margin),
+ * and the content sits space.inline.lg in from its ends (site-footer R5.1, R5.2). The end padding
+ * keeps the last row clear of the home indicator and toolbar (viewport-fit=cover).
+ */
+.footer {
+  display: grid;
+  gap: var(--space-stack-xl);
+  margin-inline: calc(var(--space-layout-xs) + var(--space-inline-lg));
+  padding-block: var(--space-layout-sm) calc(var(--space-layout-sm) + env(safe-area-inset-bottom));
+  padding-inline: var(--space-inline-lg);
+  border-block-start: var(--effect-border-width) solid var(--color-border-rule);
+  font-size: var(--type-size-small);
+}
+
+/* One column below size.breakpoint.md: personal column, then navigation (R5.4). */
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-lg);
+}
+
+.linkIcon {
+  margin-inline-end: var(--space-inline-xs);
+}
+
+@media (min-width: 48em) {
+  /*
+   * Ends the last row above the corner Back to top button, which shows from here up (R5.7). Tracks
+   * the shell's BackToTop at its default size, md, and its offset (component.back-to-top.offset,
+   * which aliases space.layout.xs; app CSS reads semantic tokens only): change this with either.
+   */
+  .footer {
+    padding-block-end: calc(
+      var(--space-layout-xs) + var(--size-control-md) + var(--space-stack-md) +
+        env(safe-area-inset-bottom)
+    );
+  }
+
+  .top {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}

@@ -8,7 +8,17 @@ import {
 } from "../../web/src/content/experience.ts";
 import { categorySkills, countHighlights, usedSkillIds } from "../../web/src/experience/model.ts";
 import { resumePdfPath } from "../../web/src/site.config.ts";
-import { gotoSettled, main, storeTheme, tabKey, themes, walk, weakRings } from "./support.ts";
+import {
+  animationsSettled,
+  gotoSettled,
+  main,
+  storeTheme,
+  tabKey,
+  themes,
+  tokenColor,
+  walk,
+  weakRings,
+} from "./support.ts";
 
 const path = "/experience";
 const highlights = positions.flatMap<Highlight>((position) => position.highlights);
@@ -76,11 +86,25 @@ test.describe("filtering (resume R7.2, R7.3, R12.1)", () => {
       await gotoSettled(page, path);
       await skill(page, "React").click();
       await expect(skill(page, "React")).toHaveAttribute("aria-pressed", "true");
+      // Buttons transition their colors: axe measures them once they've settled.
+      await animationsSettled(page);
 
       expect(await violations(page)).toEqual([]);
     });
   }
 });
+
+for (const theme of themes) {
+  test(`marks each highlight with the block rule's ${theme} color (decision 0021)`, async ({
+    page,
+  }) => {
+    await storeTheme(page, theme);
+    await gotoSettled(page, path);
+
+    const highlight = work(page).getByRole("heading", { level: 4 }).first().locator("xpath=..");
+    await expect(highlight).toHaveCSS("border-left-color", tokenColor("color.border.rule", theme));
+  });
+}
 
 test("a category toggle fills its group, shows the partial count, then clears (resume R7.4, R7.5)", async ({
   page,

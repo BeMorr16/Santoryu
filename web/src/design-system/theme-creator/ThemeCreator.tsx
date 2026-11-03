@@ -5,6 +5,7 @@ import { TokenSearch } from "../tokens/TokenSearch.tsx";
 import { CategorySection } from "./CategorySection.tsx";
 import { ChainPanel } from "./ChainPanel.tsx";
 import { DraftDispatch, TraceTarget } from "./context.ts";
+import { DraftToolbar } from "./DraftToolbar.tsx";
 import { componentByName } from "./model/builtin.ts";
 import { traceChain, type TraceId } from "./model/chain.ts";
 import { sectionOf, sections } from "./model/controls.ts";
@@ -22,12 +23,17 @@ import {
 } from "./model/draft.ts";
 import { resolveTheme } from "./model/resolve.ts";
 import { disclosureId, editorMatches, type DisclosureId } from "./model/search.ts";
-import { ThemeBar } from "./ThemeBar.tsx";
+import { SaveDialogs } from "./SaveDialogs.tsx";
 import styles from "./ThemeCreator.module.css";
+import { ThemeLibrary } from "./ThemeLibrary.tsx";
 import { ThemePreview } from "./ThemePreview.tsx";
+import { useThemeActions } from "./useThemeActions.ts";
 
 /** The 3b worked example's semantic: traced before anything else is (R8.5). */
 const firstTrace = "color.action.background";
+
+/** The measured toolbar height, read by the sticky aside and the root's scroll padding. */
+const toolbarSizeProperty = "--theme-creator-toolbar-block-size";
 
 /** How long after the last change the draft is written (design §10). */
 const draftDelayMs = 300;
@@ -62,6 +68,16 @@ export function ThemeCreator() {
   // The row "Edit <token>" asked for, focused once it has rendered.
   const pendingFocus = useRef<string | null>(null);
   const [asideOpen, setAsideOpen] = useState(false);
+  const creatorRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const libraryHeadingRef = useRef<HTMLHeadingElement>(null);
+  const actions = useThemeActions({
+    draft,
+    theme,
+    deferredTheme: deferred,
+    dispatch,
+    libraryHeadingRef,
+  });
   const matches = editorMatches(query);
 
   const keys = { ...defaultKeys(draft.source.base), ...draft.source.keys };
@@ -76,6 +92,45 @@ export function ThemeCreator() {
       window.clearTimeout(timer);
     };
   }, [draft]);
+
+  // The toolbar's height, however its rows wrap (theme-creator-controls design §5.3). On the root,
+  // as SiteShell sets the header's: the root's scroll padding reads it, as well as the aside.
+  useEffect(() => {
+    const toolbar = toolbarRef.current;
+    if (!toolbar) return;
+    const root = document.documentElement;
+    const observer = new ResizeObserver(([entry]) => {
+      const blockSize = entry?.borderBoxSize[0]?.blockSize ?? toolbar.offsetHeight;
+      root.style.setProperty(toolbarSizeProperty, `${String(blockSize)}px`);
+    });
+    observer.observe(toolbar, { box: "border-box" });
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty(toolbarSizeProperty);
+    };
+  }, []);
+
+  // WebKit leaves a focused text field where it is when the pinned bars cover part of it, and
+  // doesn't always scroll one in from above: it skips the root's scroll padding, which buttons
+  // respect. scrollIntoView does respect it, so focus is kept clear (WCAG 2.4.11). The toolbar is
+  // pinned itself, and dialogs and menus sit in the top layer, so those are left alone.
+  useEffect(() => {
+    const creator = creatorRef.current;
+    if (!creator) return;
+    const keepClear = (event: FocusEvent) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (toolbarRef.current?.contains(target) || target.closest("dialog, [popover]")) return;
+      const line = Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop);
+      if (target.getBoundingClientRect().top < (Number.isNaN(line) ? 0 : line) - 0.5) {
+        target.scrollIntoView({ block: "nearest" });
+      }
+    };
+    creator.addEventListener("focusin", keepClear);
+    return () => {
+      creator.removeEventListener("focusin", keepClear);
+    };
+  }, []);
 
   // "Edit <token>" (R3.3): once its disclosure has rendered the row, focus its control.
   useEffect(() => {
@@ -118,8 +173,13 @@ export function ThemeCreator() {
   return (
     <DraftDispatch value={dispatch}>
       <TraceTarget value={setTraced}>
-        <div className={styles.creator}>
-          <ThemeBar draft={draft} theme={theme} deferredTheme={deferred} onEditToken={editToken} />
+        <div ref={creatorRef} className={styles.creator}>
+          <ThemeLibrary
+            actions={actions}
+            editingId={draft.editing}
+            headingRef={libraryHeadingRef}
+          />
+          <DraftToolbar ref={toolbarRef} actions={actions} startedFrom={draft.start.label} />
           <div className={styles.workspace}>
             <div className={styles.editor}>
               <TokenSearch
@@ -149,6 +209,15 @@ export function ThemeCreator() {
                 <p className={styles.asideTitle} aria-hidden="true">
                   Preview
                 </p>
+                {/* The toolbar scrolls away here, so Save stays in reach (theme-creator-controls R5.5). */}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className={styles.asideSave}
+                  onClick={actions.save}
+                >
+                  Save
+                </Button>
                 <Button
                   size="sm"
                   iconEnd="chevron-down"
@@ -168,6 +237,7 @@ export function ThemeCreator() {
               </div>
             </div>
           </div>
+          <SaveDialogs {...actions.dialogs} onEditToken={editToken} />
         </div>
       </TraceTarget>
     </DraftDispatch>

@@ -20,5 +20,3 @@ export const repoUrl = `${githubUrl}/Santoryu`;
 
 /** The owner's one-page résumé, from web/public/ (resume R10.1). The Experience page links it. */
 export const resumePdfPath = "/ben-morrison-resume.pdf";
-
-export const footerText = "© Ben";

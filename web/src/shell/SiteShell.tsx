@@ -5,9 +5,10 @@ import { cx } from "../components/shared/cx.ts";
 import { focusWithoutScroll, pageFocusTarget } from "../components/shared/focus.ts";
 import { Stack } from "../components/Stack/Stack.tsx";
 import { VisuallyHidden } from "../components/VisuallyHidden/VisuallyHidden.tsx";
-import { footerText } from "../site.config.ts";
 import { Backdrop } from "./backdrop/Backdrop.tsx";
 import { useRouteHandle } from "./route-handle.ts";
+import { SafariBars } from "./SafariBars.tsx";
+import { SiteFooter } from "./SiteFooter.tsx";
 import { SiteHeader } from "./SiteHeader.tsx";
 import styles from "./SiteShell.module.css";
 
@@ -51,6 +52,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
     <div className={styles.page}>
       {/* Fixed at layer.backdrop (-1), so its place in the order doesn't matter (site-backdrop R1.1). */}
       <Backdrop kind={backdrop} />
+      <SafariBars />
       <VisuallyHidden
         as="a"
         focusable
@@ -70,9 +72,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           {children}
         </Stack>
       </div>
-      <footer className={styles.footer}>
-        <p>{footerText}</p>
-      </footer>
+      <SiteFooter />
       {/* Once per page, after the footer; a route turns it off with handle.backToTop (R5.2, R5.8). */}
       {backToTop && <BackToTop />}
     </div>

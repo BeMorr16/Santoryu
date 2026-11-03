@@ -46,7 +46,7 @@ describe("theme creator route (theme-creator R1)", () => {
 
     render(<Stub initialEntries={[path]} />, { container, hydrate: true, onRecoverableError });
 
-    expect(await screen.findByRole("textbox", { name: "Theme name" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "New theme" })).toBeInTheDocument();
     expect(screen.queryByText(/needs JavaScript/)).toBeNull();
     expect(screen.getByRole("heading", { level: 2, name: "Color" })).toBeInTheDocument();
     expect(onRecoverableError).not.toHaveBeenCalled();

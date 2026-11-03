@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { within } from "@testing-library/dom";
 import { JSDOM } from "jsdom";
 import { beforeAll, describe, expect, it } from "vitest";
+import { footerContent } from "../../src/content/footer.ts";
 import { homeContent, homeTitle } from "../../src/content/home.ts";
 import { siteUrl } from "../../src/site.config.ts";
 
@@ -146,16 +147,28 @@ describe.each(pages)("$file", (page) => {
     expect(body().getByRole("main").textContent).toContain(page.bodyText);
   });
 
-  it("has exactly one banner, Primary navigation, main and contentinfo landmark (and on docs pages, a Components navigation)", () => {
+  it("has exactly one banner, Primary navigation, main, contentinfo and Footer navigation landmark (and on docs pages, a Components navigation)", () => {
     expect(body().getAllByRole("banner")).toHaveLength(1);
     // hidden: jsdom's UA sheet hides the closed [popover] panel that holds Primary; the site's CSS,
     // which shows it on wide screens, isn't loaded here (site-refresh design §4.3).
     expect(body().getAllByRole("navigation", { hidden: true })).toHaveLength(
-      "docs" in page ? 2 : 1,
+      "docs" in page ? 3 : 2,
     );
     expect(body().getByRole("navigation", { name: "Primary", hidden: true })).toBeTruthy();
     expect(body().getAllByRole("main")).toHaveLength(1);
     expect(body().getAllByRole("contentinfo")).toHaveLength(1);
+    // site-footer R3.1: the footer's own navigation, inside the contentinfo.
+    expect(
+      within(body().getByRole("contentinfo")).getByRole("navigation", { name: "Footer" }),
+    ).toBeTruthy();
+  });
+
+  it("ends with the footer after main, holding the built-with note (site-footer R1.1, R4.3)", () => {
+    const footer = body().getByRole("contentinfo");
+    expect(body().getByRole("main").compareDocumentPosition(footer)).toBe(
+      4 /* DOCUMENT_POSITION_FOLLOWING */,
+    );
+    expect(footer.textContent).toContain(footerContent.builtWith);
   });
 
   it("runs the pre-paint theme script before any stylesheet or body content (R13.4)", () => {

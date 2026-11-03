@@ -1,11 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
-import { componentPath } from "../../web/src/design-system/components/pages.ts";
+import { componentPath, designSystemPath } from "../../web/src/design-system/components/pages.ts";
 import { tabKey } from "./support.ts";
 
 /** The site's own Back to top button: the one after the footer, outside main. */
 const backToTop = (page: Page) =>
   page.locator("body > div > button").filter({ hasText: "Back to top" });
 const longPage = componentPath("table");
+/** The footer's last link (Résumé (PDF)): Back to top comes next in the Tab order (site-footer R6.1). */
+const lastLink = (page: Page) => page.getByRole("contentinfo").getByRole("link").last();
 
 async function scrollPage(page: Page, y: number) {
   await page.evaluate((top) => {
@@ -25,16 +27,12 @@ test.describe("at 1280×720", () => {
 
     await expect(backToTop(page)).toHaveCSS("visibility", "hidden");
     await expect(page.getByRole("button", { name: "Back to top" })).toHaveCount(0);
-    // Starts Tab from the footer without scrolling to it: a click would scroll the page past one
-    // viewport and show the button.
-    await page
-      .getByRole("contentinfo")
-      .getByText(/©/)
-      .evaluate((element) => {
-        if (!(element instanceof HTMLElement)) throw new Error("no footer text");
-        element.tabIndex = -1;
-        element.focus({ preventScroll: true });
-      });
+    // Starts Tab from the footer's last link without scrolling to it: scrolling there would pass
+    // one viewport and show the button.
+    await lastLink(page).evaluate((element) => {
+      if (!(element instanceof HTMLElement)) throw new Error("no last link");
+      element.focus({ preventScroll: true });
+    });
     expect(await page.evaluate(() => scrollY)).toBe(0);
     await page.keyboard.press(tabKey(browserName));
     await expect(backToTop(page)).not.toBeFocused();
@@ -63,7 +61,7 @@ test.describe("at 1280×720", () => {
     await scrollPage(page, 2000);
     await expect(backToTop(page)).toBeVisible();
 
-    await page.getByRole("contentinfo").getByText(/©/).click();
+    await lastLink(page).focus();
     await page.keyboard.press(tabKey(browserName));
 
     await expect(backToTop(page)).toBeFocused();
@@ -73,8 +71,38 @@ test.describe("at 1280×720", () => {
     await expect(tooltip).toHaveText("Back to top");
   });
 
+  test("covers no footer text or link at the end of the page (site-footer R5.7)", async ({
+    page,
+  }) => {
+    await page.goto(longPage);
+    await page.evaluate(() => {
+      scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" });
+    });
+    await expect(backToTop(page)).toBeVisible();
+    // Settled: the slide-in has finished.
+    await expect(backToTop(page)).toHaveCSS("opacity", "1");
+
+    const button = await backToTop(page).boundingBox();
+    if (!button) throw new Error("no button box");
+    const parts = page.getByRole("contentinfo").locator("a, p");
+    expect(await parts.count()).toBeGreaterThan(0);
+    for (const part of await parts.all()) {
+      const other = await part.boundingBox();
+      if (!other) throw new Error("no footer part box");
+      const intersects =
+        button.x < other.x + other.width &&
+        other.x < button.x + button.width &&
+        button.y < other.y + other.height &&
+        other.y < button.y + button.height;
+      expect(intersects, await part.evaluate((element) => element.outerHTML.slice(0, 80))).toBe(
+        false,
+      );
+    }
+  });
+
   test("never shows on a page too short to pass the threshold (R5.3)", async ({ page }) => {
-    await page.goto("/");
+    // Scrolls, but less than one viewport (Home passes it since the site footer).
+    await page.goto(designSystemPath);
     await page.evaluate(() => {
       scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" });
     });

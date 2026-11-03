@@ -122,3 +122,16 @@
   color: var(--color-text-default);
   overflow: clip;
 }
+
+/* A theme's two accent colors, as dots (theme-creator-controls R2.11). */
+.accents {
+  display: flex;
+  gap: var(--space-inline-xs);
+}
+
+.dot {
+  inline-size: var(--size-icon-sm);
+  block-size: var(--size-icon-sm);
+  border: var(--effect-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+}

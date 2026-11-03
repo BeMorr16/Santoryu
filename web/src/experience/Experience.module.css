@@ -69,10 +69,13 @@
   display: block;
 }
 
-/* Each highlight is a block marked by a thin rule along its inline start (owner, 2026-10-27). */
+/*
+ * Each highlight is a block marked by a thin rule along its inline start (owner, 2026-10-27):
+ * quiet in light, accent cyan in dark (decision 0021).
+ */
 .highlight {
   padding-inline-start: var(--space-inline-md);
-  border-inline-start: var(--effect-border-width) solid var(--color-border-subtle);
+  border-inline-start: var(--effect-border-width) solid var(--color-border-rule);
 }
 
 /* Details stay bullets, indented like Home's focus list. */
