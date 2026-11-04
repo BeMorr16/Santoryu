@@ -30,6 +30,13 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
 
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: corretto
+          java-version-file: services/contact/.java-version
+          cache: maven
+          cache-dependency-path: services/contact/pom.xml
+
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
       - run: pnpm run build

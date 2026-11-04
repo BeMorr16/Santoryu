@@ -3,6 +3,7 @@ dist/
 coverage/
 cdk.out/
 web/build/
+services/*/target/
 .react-router/
 web/src/generated/
 .env
