@@ -13,8 +13,16 @@ export const SECURITY_HEADERS = {
   "permissions-policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
 } as const;
 
+/**
+ * Cloudflare Turnstile's origin. It's on every page because client-side navigation keeps the policy
+ * a document loaded with, so a /contact-only policy would block the form for anyone arriving from
+ * another page. The script itself loads only after a visitor focuses the form (contact-form R5.1).
+ */
+export const CHALLENGE_ORIGIN = "https://challenges.cloudflare.com";
+
 /** Directives after script-src. `style-src-attr` is for the /design-system specimens' style attributes and Figure's `--_ratio` (refinement R18.5). */
 const AFTER_SCRIPT_SRC = [
+  `frame-src ${CHALLENGE_ORIGIN}`,
   "style-src 'self'",
   "style-src-attr 'unsafe-inline'",
   "img-src 'self'",
@@ -31,7 +39,7 @@ const AFTER_SCRIPT_SRC = [
 /** The policy around the point where `'sha256-…'` sources are inserted into script-src. */
 export function cspParts(): { prefix: string; suffix: string } {
   return {
-    prefix: "default-src 'none'; script-src 'self'",
+    prefix: `default-src 'none'; script-src 'self' ${CHALLENGE_ORIGIN}`,
     suffix: `; ${AFTER_SCRIPT_SRC.join("; ")}`,
   };
 }

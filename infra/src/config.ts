@@ -18,6 +18,13 @@ export interface SiteConfig {
   siteManifest: string;
   /** Never committed; passed with --context budgetEmail=… */
   budgetEmail: string;
+  /** Relative to infra/. The contact service's jar. */
+  contactArtifact: string;
+  contactRateLimitPer5Minutes: number;
+  /** The name of the SSM SecureString the owner creates. Its value is never in the template. */
+  turnstileSecretParameter: string;
+  /** Never committed; passed with --context contactEmail=… */
+  contactEmail: string;
 }
 
 /** Applied to every taggable resource (R5.6). */
@@ -32,6 +39,7 @@ const patterns = {
   githubRepository: /^([A-Za-z0-9-]+\/[A-Za-z0-9._-]+|[A-Za-z0-9-]+@\d+\/[A-Za-z0-9._-]+@\d+)$/,
   githubOidcSubject: /^(environment:[^:\s]+|ref:refs\/heads\/[^:\s]+)$/,
   email: /^[^@\s]+@([^@\s.]+\.)+[^@\s.]+$/,
+  ssmParameter: /^\/[a-zA-Z0-9_.\-/]+$/,
 };
 
 function invalid(key: string, expected: string): Error {
@@ -72,14 +80,17 @@ export function readConfig(node: Node): SiteConfig {
     return number;
   };
 
-  const budgetEmail: unknown = node.tryGetContext("budgetEmail");
-  if (budgetEmail === undefined) {
-    throw new Error('Missing CDK context value "budgetEmail" (pass --context budgetEmail=…).');
-  }
-  if (typeof budgetEmail !== "string" || !patterns.email.test(budgetEmail)) {
-    // The value is not echoed: synth errors in CI end up in public logs.
-    throw invalid("budgetEmail", "an email address");
-  }
+  const email = (key: string): string => {
+    const value: unknown = node.tryGetContext(key);
+    if (value === undefined) {
+      throw new Error(`Missing CDK context value "${key}" (pass --context ${key}=…).`);
+    }
+    if (typeof value !== "string" || !patterns.email.test(value)) {
+      // The value is not echoed: synth errors in CI end up in public logs.
+      throw invalid(key, "an email address");
+    }
+    return value;
+  };
 
   return {
     region: string("region", patterns.region, "an AWS region such as us-east-1"),
@@ -100,6 +111,14 @@ export function readConfig(node: Node): SiteConfig {
     monthlyBudgetUsd: positiveInteger("monthlyBudgetUsd"),
     siteDir: string("siteDir"),
     siteManifest: string("siteManifest"),
-    budgetEmail,
+    budgetEmail: email("budgetEmail"),
+    contactArtifact: string("contactArtifact"),
+    contactRateLimitPer5Minutes: positiveInteger("contactRateLimitPer5Minutes"),
+    turnstileSecretParameter: string(
+      "turnstileSecretParameter",
+      patterns.ssmParameter,
+      "an SSM parameter name such as /app/secret",
+    ),
+    contactEmail: email("contactEmail"),
   };
 }

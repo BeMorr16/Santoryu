@@ -93,6 +93,17 @@ class ContactHandlerTest {
   }
 
   @Test
+  void theWeeklyPingGets405AndLogsNoFailure() {
+    APIGatewayV2HTTPResponse response =
+        handler().handleRequest(event("GET", null, null, false), null);
+
+    assertEquals(405, response.getStatusCode());
+    assertEquals(List.of(), sent);
+    assertEquals(1, lines.size());
+    assertTrue(lines.getFirst().contains("\"outcome\":\"methodNotAllowed\""));
+  }
+
+  @Test
   void aJsonResponseSaysSo() {
     APIGatewayV2HTTPResponse response =
         handler().handleRequest(event("POST", jsonHeaders(), "{}", false), null);

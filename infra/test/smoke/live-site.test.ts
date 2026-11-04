@@ -280,7 +280,7 @@ describe("R4 security headers", () => {
         csp.split("; ").find((directive) => directive.startsWith("script-src ")) ?? "";
       const hashes = scriptSrc
         .split(" ")
-        .slice(2)
+        .filter((source) => source.startsWith("'sha256-"))
         .map((source) => source.replace(/^'(.*)'$/, "$1"));
       expect(csp, path).toBe(buildCsp(hashes));
       const document = new JSDOM(await response.text()).window.document;

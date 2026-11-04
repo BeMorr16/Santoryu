@@ -58,7 +58,7 @@ export class CiAccessStack extends Stack {
 
     new CfnOutput(this, "DeployRoleArn", {
       value: role.roleArn,
-      description: "Set as the GitHub production environment variable AWS_DEPLOY_ROLE_ARN.",
+      description: "Set as the GitHub production environment secret AWS_DEPLOY_ROLE_ARN.",
     });
   }
 }
