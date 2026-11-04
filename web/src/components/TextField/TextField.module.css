@@ -66,6 +66,13 @@
   font-size: var(--_font-size);
 }
 
+/* Its first line sits where a single-line field's text would. */
+.multiline {
+  display: block;
+  padding-block: calc((var(--_height) - 1lh) / 2 - var(--component-text-field-border-width));
+  resize: vertical;
+}
+
 .input::placeholder {
   color: var(--component-text-field-placeholder);
   opacity: 1;

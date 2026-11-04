@@ -16,7 +16,13 @@ const textFieldDocs = {
     type: "boolean",
     default: "false",
     description:
-      'Hides the label visually; it still names the field. Only where something else on screen says what the field is for. It can\'t be combined with required, since the visible "(required)" is in the label.',
+      "Hides the label visually; it still names the field. Only where something else on screen says what the field is for. It can't be combined with required or optional, since their visible cues are in the label.",
+  },
+  optional: {
+    type: "boolean",
+    default: "false",
+    description:
+      'Adds a visible "(optional)" to the label, for a form that marks its optional fields. It can\'t be combined with required or hideLabel.',
   },
   hint: {
     type: "ReactNode",
@@ -36,7 +42,19 @@ const textFieldDocs = {
   size: {
     type: '"sm" | "md"',
     default: '"md"',
-    description: "32px or 40px tall, matching Button.",
+    description:
+      "32px or 40px tall, matching Button. In a multiline field, this sets where the first line of text sits.",
+  },
+  multiline: {
+    type: "boolean",
+    default: "false",
+    description:
+      "Renders a <textarea> that resizes vertically. Native textarea props apply, and type, iconStart, clearable and clearLabel don't.",
+  },
+  rows: {
+    type: "number",
+    default: "6",
+    description: "A multiline field's visible lines. Only with multiline.",
   },
   iconStart: {
     type: "IconName",
@@ -63,6 +81,11 @@ const textFieldKeyboard: readonly KeyboardRow[] = [
     action:
       "Clears a clearable field that has a value, keeping focus in it. With no value, it does nothing, so a surrounding dialog can still close.",
   },
+  {
+    keys: "Enter",
+    action:
+      "In a multiline field, adds a line. In a single-line field inside a form, submits the form.",
+  },
 ];
 
 function HintExample() {
@@ -82,6 +105,14 @@ function ErrorExample() {
 
 function RequiredExample() {
   return <TextField label="Name" required autoComplete="name" />;
+}
+
+function OptionalExample() {
+  return <TextField label="Role or company" optional autoComplete="organization" />;
+}
+
+function MultilineExample() {
+  return <TextField label="Message" multiline hint="A few lines is plenty." />;
 }
 
 function SizesExample() {
@@ -116,12 +147,15 @@ function DisabledExample() {
 export const textFieldShowcase: Showcase = {
   id: "text-field",
   exports: ["TextField"],
-  purpose: "A labelled text input, with an optional hint, error, start icon and clear button.",
+  purpose:
+    "A labelled text input or textarea, with an optional hint and error. A single-line field can also have a start icon and clear button.",
   main: { Example: TextFieldExample, source: textFieldExampleSource, file: "TextFieldExample.tsx" },
   examples: [
     { title: "Hint", layout: "column", Content: HintExample },
     { title: "Error", layout: "column", Content: ErrorExample },
     { title: "Required", layout: "column", Content: RequiredExample },
+    { title: "Optional", layout: "column", Content: OptionalExample },
+    { title: "Multiline", layout: "column", Content: MultilineExample },
     { title: "Sizes", layout: "column", Content: SizesExample },
     { title: "Search", layout: "column", Content: SearchExample },
     { title: "Clearable", layout: "column", Content: ClearableExample },
@@ -131,7 +165,7 @@ export const textFieldShowcase: Showcase = {
   ],
   props: [{ part: "TextField", docs: textFieldDocs }],
   propsNote:
-    "Unlike the other components, TextField's native props (value, defaultValue, onChange, name, required, disabled, placeholder, autoComplete, ref and the rest) go to the <input>, since they belong to it. className and style go to the wrapper, so layout and token overrides cover the whole field. Clearing sets the value and fires an ordinary change, so onChange sees it as it sees typing.",
+    "Unlike the other components, TextField's native props (value, defaultValue, onChange, name, required, disabled, placeholder, autoComplete, ref and the rest) go to the <input>, or the <textarea> in a multiline field, since they belong to it. className and style go to the wrapper, so layout and token overrides cover the whole field. Clearing sets the value and fires an ordinary change, so onChange sees it as it sees typing.",
   nativePropsToRoot: false,
   tokens: "text-field",
   keyboard: textFieldKeyboard,
@@ -139,6 +173,8 @@ export const textFieldShowcase: Showcase = {
     "A native <input> with a visible <label> tied to it, so clicking the label focuses the field and the label is its name. A label is required by the type.",
     "The hint and the error are read as the field's description, hint first. An error also sets aria-invalid, and shows a warning icon beside its text, so it isn't shown by color alone.",
     'Required fields use native required, which screen readers announce. The visible "(required)" is hidden from them, so it isn\'t read twice.',
+    'Optional fields say so in the label. Nothing else announces "(optional)", so unlike "(required)" it stays in the accessible name.',
+    "A multiline field is a native <textarea> with the same label, hint and error behavior, and Enter adds a line. It has no clear button, so a stray Escape can't wipe a long message, and it can be resized vertically.",
     "Disabled fields use native disabled: they can't be focused and aren't submitted with a form.",
     "The start icon is decorative. A search field's icon is hidden while the field has focus, and the text moves into its space, so there's no gap before what's typed.",
     "The clear button is icon-only, named \"Clear\" and the label, with its name as a tooltip. It follows the field in Tab order and puts focus back in the field. The browser's own search clear button is hidden, so there's only one.",

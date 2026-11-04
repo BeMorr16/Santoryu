@@ -809,6 +809,32 @@ describe("library types", () => {
     expectTypeOf(invalid).toBeFunction();
   });
 
+  it("TextField's multiline and optional reject combinations that don't apply (contact-form R15)", () => {
+    function invalid() {
+      return [
+        // @ts-expect-error -- a textarea has no input type.
+        <TextField key="a" label="Message" multiline type="email" />,
+        // @ts-expect-error -- no start icon on a textarea.
+        <TextField key="b" label="Message" multiline iconStart="search" />,
+        // @ts-expect-error -- clearing doesn't apply to a textarea (R15.1).
+        <TextField key="c" label="Message" multiline clearable />,
+        // @ts-expect-error -- clearing doesn't apply to a textarea (R15.1).
+        <TextField key="d" label="Message" multiline clearLabel="Clear" />,
+        // @ts-expect-error -- rows only apply to a textarea.
+        <TextField key="e" label="Name" rows={3} />,
+        // @ts-expect-error -- min is an input prop, not a textarea prop.
+        <TextField key="f" label="Message" multiline min={1} />,
+        // @ts-expect-error -- a textarea's ref isn't an input's.
+        <TextField key="g" label="Message" multiline ref={createRef<HTMLInputElement>()} />,
+        // @ts-expect-error -- a field can't be both required and optional.
+        <TextField key="h" label="Name" required optional />,
+        // @ts-expect-error -- a hidden label would hide the visible optional cue.
+        <TextField key="i" label="Name" hideLabel optional />,
+      ];
+    }
+    expectTypeOf(invalid).toBeFunction();
+  });
+
   it("TextField requires a string label and takes only its own types and sizes (ds-tokens R10.2)", () => {
     function invalid() {
       return [
@@ -827,6 +853,22 @@ describe("library types", () => {
       ];
     }
     expectTypeOf(invalid).toBeFunction();
+    function valid() {
+      return [
+        <TextField
+          key="a"
+          label="Message"
+          multiline
+          rows={4}
+          ref={createRef<HTMLTextAreaElement>()}
+        />,
+        <TextField key="b" label="Role" optional clearable />,
+        <TextField key="c" label="Notes" multiline optional />,
+        <TextField key="d" label="Name" required optional={false} />,
+        <TextField key="e" label="Name" multiline={false} type="email" />,
+      ];
+    }
+    expectTypeOf(valid).toBeFunction();
   });
 
   it("Dialog requires a title and takes only its own sizes, roles and levels (theme-creator R12.2)", () => {
