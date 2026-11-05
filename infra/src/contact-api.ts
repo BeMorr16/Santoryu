@@ -48,7 +48,9 @@ export class ContactApi extends Construct {
       architecture: lambda.Architecture.ARM_64,
       handler: "com.benmorrison.contact.ContactHandler",
       code: lambda.Code.fromAsset(config.contactArtifact),
-      memorySize: 512,
+      // CPU scales with memory. At 512 MB the first send after a restore took 9.8 s of an 11 s
+      // budget (contact-form task 33), most of it one-time class loading and TLS setup.
+      memorySize: 1024,
       timeout: Duration.seconds(12),
       snapStart: lambda.SnapStartConf.ON_PUBLISHED_VERSIONS,
       role,
