@@ -34,6 +34,9 @@ const handlerReads = [
   "shield:ListProtections", // PricingPlanManager
 ];
 
+/** A fixed name, so SiteStack can name it without a cross-stack reference, which CI would deploy. */
+export const ROLE_BOUNDARY_NAME = "SiteStack-RoleBoundary";
+
 export const executionPolicyDescription =
   "What CloudFormation may do when deploying SiteStack, replacing bootstrap's AdministratorAccess.";
 
@@ -42,9 +45,10 @@ export interface CiAccessStackProps extends StackProps {
 }
 
 /**
- * GitHub Actions OIDC provider, the deploy role (static-hosting design §7.2) and the CDK execution
- * policy (contact-form design §12). Deployed by the owner; CI only deploys SiteStack, and once
- * bootstrap uses this policy, CI can't change this stack.
+ * GitHub Actions OIDC provider, the deploy role (static-hosting design §7.2), and the CDK execution
+ * policy and role boundary (contact-form design §12). Deployed by the owner. CI only deploys
+ * SiteStack, and once bootstrap uses the execution policy, a change reaching the pipeline can't
+ * create a role beyond the boundary, or change this stack.
  */
 export class CiAccessStack extends Stack {
   constructor(scope: Construct, id: string, props: CiAccessStackProps) {
@@ -93,6 +97,77 @@ export class CiAccessStack extends Stack {
       resource: "role",
       resourceName: "SiteStack-*",
     });
+    const boundaryArn = this.formatArn({
+      service: "iam",
+      region: "",
+      resource: "policy",
+      resourceName: ROLE_BOUNDARY_NAME,
+    });
+
+    // A ceiling, not a grant: a SiteStack role's real permissions are what it's granted within this.
+    // Without it, a role named SiteStack-x could still be given AdministratorAccess.
+    new iam.ManagedPolicy(this, "SiteStackRoleBoundary", {
+      managedPolicyName: ROLE_BOUNDARY_NAME,
+      description: "The most any role in SiteStack can do, whatever it's granted.",
+      statements: [
+        new iam.PolicyStatement({
+          actions: ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          resources: ["*"],
+        }),
+        new iam.PolicyStatement({
+          actions: ["ses:SendEmail", "ses:SendRawEmail"],
+          resources: ["*"],
+        }),
+        new iam.PolicyStatement({
+          actions: [
+            "ssm:DescribeParameters",
+            "ssm:GetParameter",
+            "ssm:GetParameterHistory",
+            "ssm:GetParameters",
+          ],
+          resources: [
+            this.formatArn({
+              service: "ssm",
+              resource: "parameter",
+              resourceName: "personal-site/*",
+            }),
+          ],
+        }),
+        // The site's bucket, and the CDK staging bucket the build is read from.
+        new iam.PolicyStatement({
+          actions: [
+            "s3:Abort*",
+            "s3:DeleteObject*",
+            "s3:GetBucket*",
+            "s3:GetObject*",
+            "s3:List*",
+            "s3:PutObject*",
+          ],
+          resources: ["sitestack-*", "cdk-*"].flatMap((bucket) => [
+            `arn:${this.partition}:s3:::${bucket}`,
+            `arn:${this.partition}:s3:::${bucket}/*`,
+          ]),
+        }),
+        new iam.PolicyStatement({
+          actions: ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"],
+          resources: ["*"],
+        }),
+        // AWS-managed keys on the staging bucket and the Turnstile parameter, through those services.
+        new iam.PolicyStatement({
+          actions: ["kms:Decrypt", "kms:DescribeKey", "kms:GenerateDataKey*"],
+          resources: ["*"],
+          conditions: {
+            StringEquals: {
+              "kms:ViaService": [
+                `s3.${this.region}.amazonaws.com`,
+                `ssm.${this.region}.amazonaws.com`,
+              ],
+            },
+          },
+        }),
+      ],
+    });
+
     const executionPolicy = new iam.ManagedPolicy(this, "SiteStackExecutionPolicy", {
       description: executionPolicyDescription,
       statements: [
@@ -103,18 +178,27 @@ export class CiAccessStack extends Stack {
           resources: ["*"],
         }),
         new iam.PolicyStatement({ actions: handlerReads, resources: ["*"] }),
+        // These can give a role power, so the role must carry the boundary. There's no action to
+        // remove it, and none to change the boundary policy itself.
         new iam.PolicyStatement({
           actions: [
             "iam:AttachRolePolicy",
             "iam:CreateRole",
-            "iam:DeleteRole",
             "iam:DeleteRolePolicy",
             "iam:DetachRolePolicy",
+            "iam:PutRolePermissionsBoundary",
+            "iam:PutRolePolicy",
+          ],
+          resources: [siteStackRoles],
+          conditions: { StringEquals: { "iam:PermissionsBoundary": boundaryArn } },
+        }),
+        new iam.PolicyStatement({
+          actions: [
+            "iam:DeleteRole",
             "iam:GetRole",
             "iam:GetRolePolicy",
             "iam:ListAttachedRolePolicies",
             "iam:ListRolePolicies",
-            "iam:PutRolePolicy",
             "iam:TagRole",
             "iam:UntagRole",
             "iam:UpdateAssumeRolePolicy",

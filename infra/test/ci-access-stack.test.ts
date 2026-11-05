@@ -1,7 +1,12 @@
 import { Match, Template } from "aws-cdk-lib/assertions";
 import { beforeAll, describe, expect, it } from "vitest";
 import { defineApp } from "../src/app.ts";
-import { CiAccessStack, siteStackServices } from "../src/ci-access-stack.ts";
+import {
+  CiAccessStack,
+  executionPolicyDescription,
+  ROLE_BOUNDARY_NAME,
+  siteStackServices,
+} from "../src/ci-access-stack.ts";
 import { readSiteManifest } from "../src/site-manifest.ts";
 import { testApp, testConfig, testEnv } from "./stack-harness.ts";
 
@@ -102,10 +107,19 @@ describe("CiAccessStack: the CDK execution policy (contact-form R17.1)", () => {
     Condition?: unknown;
   };
 
+  type ManagedPolicy = {
+    Properties: {
+      Description: string;
+      ManagedPolicyName?: string;
+      PolicyDocument: { Statement: Statement[] };
+    };
+  };
+  const managedPolicies = () =>
+    Object.values(template.findResources("AWS::IAM::ManagedPolicy")) as ManagedPolicy[];
   const statements = () => {
-    const policies = Object.values(template.findResources("AWS::IAM::ManagedPolicy")) as {
-      Properties: { PolicyDocument: { Statement: Statement[] } };
-    }[];
+    const policies = managedPolicies().filter(
+      (policy) => policy.Properties.Description === executionPolicyDescription,
+    );
     expect(policies).toHaveLength(1);
     return policies[0]?.Properties.PolicyDocument.Statement ?? [];
   };
@@ -138,6 +152,37 @@ describe("CiAccessStack: the CDK execution policy (contact-form R17.1)", () => {
       "ssm:GetParameters",
     ]);
     expect(actions).not.toContainEqual(expect.stringMatching(/^(iam|ssm):.*\*/));
+  });
+
+  const boundaryArn = "arn:aws:iam::111111111111:policy/SiteStack-RoleBoundary";
+
+  it.each([
+    "iam:AttachRolePolicy",
+    "iam:CreateRole",
+    "iam:DeleteRolePolicy",
+    "iam:DetachRolePolicy",
+    "iam:PutRolePermissionsBoundary",
+    "iam:PutRolePolicy",
+  ])("requires the boundary for %s, so no role can exceed it", (action) => {
+    const matching = iamStatements().filter((statement) => actionsOf(statement).includes(action));
+
+    expect(matching).toHaveLength(1);
+    expect(matching[0]?.Condition).toEqual({
+      StringEquals: { "iam:PermissionsBoundary": boundaryArn },
+    });
+  });
+
+  it("can't remove the boundary from a role, or change the boundary policy itself", () => {
+    const actions = statements().flatMap(actionsOf);
+
+    for (const action of [
+      "iam:DeleteRolePermissionsBoundary",
+      "iam:CreatePolicyVersion",
+      "iam:SetDefaultPolicyVersion",
+      "iam:DeletePolicy",
+    ]) {
+      expect(actions).not.toContain(action);
+    }
   });
 
   it("limits IAM to roles named SiteStack-*", () => {
@@ -204,17 +249,17 @@ describe("CiAccessStack: the CDK execution policy (contact-form R17.1)", () => {
         { Type: string }
       >;
       const actions = new Set(statements().flatMap(actionsOf));
-      // IAM is scoped by name above, CDK::Metadata needs nothing, and a custom resource is a
-      // Lambda invocation.
-      const handled = new Set(["IAM", "CDK"]);
+      // IAM is covered above for these two types only, CDK::Metadata needs nothing, and a custom
+      // resource is a Lambda invocation.
+      const handled = new Set(["AWS::IAM::Role", "AWS::IAM::Policy", "AWS::CDK::Metadata"]);
 
       for (const { Type: type } of Object.values(resources)) {
         if (type.startsWith("Custom::")) {
           expect(actions, type).toContain("lambda:*");
           continue;
         }
+        if (handled.has(type)) continue;
         const namespace = type.split("::")[1] ?? "";
-        if (handled.has(namespace)) continue;
         const services = siteStackServices[namespace];
         expect(services, `${type} needs an entry in siteStackServices`).toBeDefined();
         for (const service of services ?? []) {
@@ -223,4 +268,93 @@ describe("CiAccessStack: the CDK execution policy (contact-form R17.1)", () => {
       }
     },
   );
+});
+
+describe("the role boundary (contact-form R17.1)", () => {
+  type Statement = { Action: string | string[]; Resource: unknown };
+  type Resource = {
+    Type: string;
+    Properties: {
+      ManagedPolicyArns?: unknown[];
+      PermissionsBoundary?: unknown;
+      PolicyDocument?: { Statement: Statement[] };
+      ManagedPolicyName?: string;
+    };
+  };
+
+  const boundary = () => {
+    const found = (
+      Object.values(template.findResources("AWS::IAM::ManagedPolicy")) as Resource[]
+    ).filter((policy) => policy.Properties.ManagedPolicyName === ROLE_BOUNDARY_NAME);
+    expect(found).toHaveLength(1);
+    return found[0]?.Properties.PolicyDocument?.Statement ?? [];
+  };
+  const allowed = () => boundary().flatMap((statement) => [statement.Action].flat());
+  const siteResources = (flatRatePlan: boolean) => {
+    const { site } = defineApp(testApp(), {
+      config: { ...testConfig, flatRatePlan },
+      manifest: readSiteManifest(testConfig.siteManifest, testConfig.siteDir),
+      account: testEnv.account,
+    });
+    return Object.values(Template.fromStack(site).toJSON().Resources as Record<string, Resource>);
+  };
+
+  it("grants nothing that could change IAM, or reach the rest of the account", () => {
+    expect(allowed()).not.toContain("*");
+    for (const service of ["iam", "sts", "organizations", "lambda", "cloudformation"]) {
+      expect(allowed().filter((action) => action.startsWith(`${service}:`))).toEqual([]);
+    }
+    expect(allowed()).not.toContainEqual(expect.stringMatching(/^[a-z0-9-]+:\*$/));
+  });
+
+  it("is attached to no role of this stack: only SiteStack's", () => {
+    template.resourcePropertiesCountIs(
+      "AWS::IAM::Role",
+      { PermissionsBoundary: Match.anyValue() },
+      0,
+    );
+  });
+
+  it.each([false, true])(
+    "is on every role in SiteStack, and covers all they're granted, with flatRatePlan %s",
+    (flatRatePlan) => {
+      const resources = siteResources(flatRatePlan);
+      const roles = resources.filter((resource) => resource.Type === "AWS::IAM::Role");
+      const toRegex = (pattern: string) => new RegExp(`^${pattern.replaceAll("*", ".*")}$`, "u");
+      const patterns = allowed().map(toRegex);
+
+      expect(roles.length).toBeGreaterThan(0);
+      for (const role of roles) {
+        expect(JSON.stringify(role.Properties.PermissionsBoundary)).toContain(
+          `policy/${ROLE_BOUNDARY_NAME}`,
+        );
+      }
+      const granted = resources
+        .filter((resource) => resource.Type === "AWS::IAM::Policy")
+        .flatMap((policy) => policy.Properties.PolicyDocument?.Statement ?? [])
+        .flatMap((statement) => [statement.Action].flat());
+      expect(granted.length).toBeGreaterThan(0);
+      for (const action of granted) {
+        // A wildcard grant such as s3:GetObject* has to be matched as written.
+        expect(
+          patterns.some((pattern) => pattern.test(action)),
+          action,
+        ).toBe(true);
+      }
+    },
+  );
+
+  it("covers the only managed policy SiteStack attaches", () => {
+    const managed = siteResources(true)
+      .filter((resource) => resource.Type === "AWS::IAM::Role")
+      .flatMap((role) => role.Properties.ManagedPolicyArns ?? []);
+
+    expect(managed.length).toBeGreaterThan(0);
+    for (const arn of managed) {
+      expect(JSON.stringify(arn)).toContain("AWSLambdaBasicExecutionRole");
+    }
+    expect(allowed()).toEqual(
+      expect.arrayContaining(["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]),
+    );
+  });
 });
