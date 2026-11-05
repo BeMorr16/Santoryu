@@ -249,10 +249,12 @@ export class SiteStack extends Stack {
               scopeDownStatement: {
                 byteMatchStatement: {
                   fieldToMatch: { uriPath: {} },
-                  positionalConstraint: "EXACTLY",
+                  // CloudFront normalizes a path to pick a behavior, then sends the raw one, so
+                  // /api//contact and //api/contact both reach the function. NORMALIZE_PATH leaves
+                  // leading slashes alone, so match the end. Anything extra only rate-limits a
+                  // path that gets the 404 page anyway.
+                  positionalConstraint: "ENDS_WITH",
                   searchString: "/api/contact",
-                  // CloudFront normalizes a path to pick a behavior, so /api//contact reaches the
-                  // function, and this rule has to see that same path.
                   textTransformations: [
                     { priority: 0, type: "URL_DECODE" },
                     { priority: 1, type: "NORMALIZE_PATH" },

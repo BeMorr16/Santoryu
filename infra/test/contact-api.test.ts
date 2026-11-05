@@ -365,7 +365,7 @@ describe("SiteStack: the /api/contact behavior (R8.6, R11.2)", () => {
 describe("SiteStack: the contact WAF rule (R8.1, R8.6)", () => {
   const flagOn = () => synth({ flatRatePlan: true, contactRateLimitPer5Minutes: 25 });
 
-  it("scopes the limit to the exact path and leaves the site-wide rule unchanged", () => {
+  it("scopes the limit to the API's path and leaves the site-wide rule unchanged", () => {
     const acl = resources(flagOn(), "AWS::WAFv2::WebACL")[0] as [string, Resource];
     const rules = acl[1].Properties.Rules as {
       Name: string;
@@ -379,7 +379,7 @@ describe("SiteStack: the contact WAF rule (R8.1, R8.6)", () => {
     expect(rules[1]?.Statement.RateBasedStatement).toMatchObject({
       Limit: 25,
       ScopeDownStatement: {
-        ByteMatchStatement: { PositionalConstraint: "EXACTLY", SearchString: "/api/contact" },
+        ByteMatchStatement: { PositionalConstraint: "ENDS_WITH", SearchString: "/api/contact" },
       },
     });
   });

@@ -12,7 +12,8 @@ import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
  * failed read isn't cached, so the next request tries again.
  */
 final class TurnstileSecret {
-  private static final Duration TIMEOUT = Duration.ofSeconds(2);
+  // The first read after a SnapStart restore also loads classes, gets credentials and does TLS.
+  private static final Duration TIMEOUT = Duration.ofSeconds(4);
 
   private final SsmClient client;
   private final String parameterName;

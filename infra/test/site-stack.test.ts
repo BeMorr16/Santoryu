@@ -440,7 +440,7 @@ describe("SiteStack: flat-rate plan flag on (R8.1, R8.2)", () => {
               ScopeDownStatement: {
                 ByteMatchStatement: {
                   FieldToMatch: { UriPath: {} },
-                  PositionalConstraint: "EXACTLY",
+                  PositionalConstraint: "ENDS_WITH",
                   SearchString: "/api/contact",
                   TextTransformations: [
                     { Priority: 0, Type: "URL_DECODE" },
@@ -620,6 +620,8 @@ describe.each([false, true])("safety checks with flatRatePlan %s", (flatRatePlan
         // Scoped by service, not by resource, as approved (contact-form R17.1). Its own tests are
         // in ci-access-stack.test.ts.
         if (resource.Properties?.Description === executionPolicyDescription) return [];
+        // A ceiling that grants nothing itself, also tested there.
+        if (resource.Properties?.ManagedPolicyName === "SiteStack-RoleBoundary") return [];
         if (resource.Type === "AWS::IAM::Policy" || resource.Type === "AWS::IAM::ManagedPolicy") {
           return (resource.Properties?.PolicyDocument as { Statement: Statement[] }).Statement;
         }
