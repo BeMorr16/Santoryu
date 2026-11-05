@@ -89,7 +89,12 @@ async function origin(uri: string): Promise<{ response: EdgeResponse; body: Buff
     if (!path.startsWith(clientDir.endsWith(sep) ? clientDir : clientDir + sep)) throw new Error();
     const body = await readFile(path);
     const headers: Headers = {
-      "content-type": { value: contentTypes[extname(uri)] ?? "application/octet-stream" },
+      "content-type": {
+        value:
+          uri === "/.well-known/security.txt"
+            ? "text/plain; charset=utf-8"
+            : (contentTypes[extname(uri)] ?? "application/octet-stream"),
+      },
     };
     if (uri.endsWith(".html")) {
       headers["x-amz-meta-csp-script-hashes"] = { value: manifest.scriptHashes.join(" ") };

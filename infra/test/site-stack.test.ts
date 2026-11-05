@@ -293,9 +293,9 @@ describe("SiteStack: publish groups (R3.1–R3.5, R6.3)", () => {
   const html = "text/html; charset=utf-8";
   const hashes = manifest.scriptHashes.join(" ");
 
-  it("has five groups, all from the same uploaded build", () => {
+  it("has six groups, all from the same uploaded build", () => {
     const all = Object.values(deployments());
-    expect(all).toHaveLength(5);
+    expect(all).toHaveLength(6);
     const sources = new Set(
       all.map((deployment) => JSON.stringify(deployment.Properties.SourceObjectKeys)),
     );
@@ -337,10 +337,18 @@ describe("SiteStack: publish groups (R3.1–R3.5, R6.3)", () => {
     ],
     [
       "other",
-      ["assets/*", "*.html", "*.xml"],
+      ["assets/*", "*.html", "*.xml", ".well-known/security.txt"],
       undefined,
       true,
       { "cache-control": revalidate },
+      {},
+    ],
+    [
+      "security-txt",
+      ["*"],
+      [".well-known/security.txt"],
+      true,
+      { "cache-control": revalidate, "content-type": "text/plain; charset=utf-8" },
       {},
     ],
   ] as const)(
@@ -355,14 +363,14 @@ describe("SiteStack: publish groups (R3.1–R3.5, R6.3)", () => {
     },
   );
 
-  it("invalidates /* and waits for it only from pages, after the other four groups", () => {
+  it("invalidates /* and waits for it only from pages, after the other five groups", () => {
     const [, pages] = group("pages");
     expect(pages.Properties).toMatchObject({
       DistributionId: { Ref: expect.stringMatching(/^SiteDistribution/) as unknown },
       DistributionPaths: ["/*"],
       WaitForDistributionInvalidation: true,
     });
-    for (const id of ["assets", "not-found", "xml", "other"]) {
+    for (const id of ["assets", "not-found", "xml", "other", "security-txt"]) {
       const [logicalId, deployment] = group(id);
       expect(pages.DependsOn, id).toContain(logicalId);
       expect(deployment.Properties).not.toHaveProperty("DistributionId");
@@ -374,7 +382,7 @@ describe("SiteStack: publish groups (R3.1–R3.5, R6.3)", () => {
     expect(assets.DependsOn ?? []).not.toEqual(
       expect.arrayContaining([expect.stringMatching(/CustomResource/)]),
     );
-    for (const id of ["pages", "not-found", "xml", "other"]) {
+    for (const id of ["pages", "not-found", "xml", "other", "security-txt"]) {
       expect(group(id)[1].DependsOn, id).toContain(assetsId);
     }
   });

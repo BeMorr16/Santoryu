@@ -317,6 +317,20 @@ test.describe("before it's interactive (R4)", () => {
   });
 });
 
+test("serves security.txt through the edge, as plain text, with the security headers (R14.1)", async ({
+  request,
+}) => {
+  const response = await request.get("/.well-known/security.txt");
+
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toBe("text/plain; charset=utf-8");
+  expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+  const text = await response.text();
+  expect(text).toMatch(/^Contact: https:\/\/.+\/contact$/m);
+  expect(text).toMatch(/^Expires: \d{4}-\d{2}-\d{2}T/m);
+  expect(text).toMatch(/^Preferred-Languages: en$/m);
+});
+
 test.describe("the card's width (R1.1)", () => {
   const widths = (page: Page) =>
     page.getByRole("region", { name: content.heading }).evaluate((card) => {
