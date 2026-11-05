@@ -8,7 +8,7 @@
     "personal-site:githubOidcSubject": "environment:production",
     "personal-site:flatRatePlan": true,
     "personal-site:rateLimitPer5Minutes": 500,
-    "personal-site:monthlyBudgetUsd": 5,
+    "personal-site:monthlyBudgetUsd": 2,
     "personal-site:siteDir": "../web/build/client",
     "personal-site:siteManifest": "../web/build/site-manifest.json",
     "personal-site:contactArtifact": "../services/contact/target/contact.jar",
