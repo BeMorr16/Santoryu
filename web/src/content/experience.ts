@@ -1,3 +1,7 @@
+import type { IconName } from "../components/Icon/registry.ts";
+import { designSystemPath } from "../design-system/components/pages.ts";
+import { repoUrl } from "../site.config.ts";
+
 /** The skills panel's categories, broad first (R6.1). */
 export const skillCategories = [
   "languages",
@@ -22,6 +26,7 @@ export const skills = [
   { id: "typescript", label: "TypeScript", category: "languages", aliases: ["TS"] },
   { id: "javascript", label: "JavaScript", category: "languages", aliases: ["JS"] },
   { id: "python", label: "Python", category: "languages" },
+  { id: "java", label: "Java", category: "languages" },
   { id: "sql", label: "SQL", category: "languages" },
   { id: "cypher", label: "Cypher", category: "languages" },
   { id: "html", label: "HTML", category: "languages" },
@@ -92,7 +97,18 @@ export const skills = [
   { id: "figma-rest-api", label: "Figma REST API", category: "design-systems" },
   { id: "chromatic", label: "Chromatic", category: "design-systems" },
 
-  { id: "aws", label: "AWS", category: "devops", aliases: ["Amazon Web Services", "EKS"] },
+  {
+    id: "aws",
+    label: "AWS",
+    category: "devops",
+    aliases: ["Amazon Web Services", "EKS", "Lambda", "CloudFront", "S3", "SES"],
+  },
+  {
+    id: "aws-cdk",
+    label: "AWS CDK",
+    category: "devops",
+    aliases: ["IaC", "Infrastructure as code"],
+  },
   { id: "kubernetes", label: "Kubernetes", category: "devops", aliases: ["K8s", "EKS"] },
   { id: "docker", label: "Docker", category: "devops" },
   { id: "gitlab-ci-cd", label: "GitLab CI/CD", category: "devops" },
@@ -126,8 +142,13 @@ export interface Highlight {
   skills: readonly SkillId[];
 }
 
-export interface Position {
+/** Anything with highlights: a position or a project. The filter and count cover every entry. */
+export interface Entry {
   id: string;
+  highlights: readonly Highlight[];
+}
+
+export interface Position extends Entry {
   title: string;
   company: string;
   start: YearMonth;
@@ -136,7 +157,6 @@ export interface Position {
   type?: "contract" | "part-time";
   location?: string;
   about?: string;
-  highlights: readonly Highlight[];
 }
 
 /** In display order (R4.1). Appendix A. */
@@ -440,6 +460,76 @@ export const positions = [
   },
 ] as const satisfies readonly Position[];
 
+export interface ProjectLink {
+  label: string;
+  /** A site path (`/…`, client-side) or an `https://` URL (experience-skills R5.6). */
+  href: string;
+  icon: IconName;
+}
+
+export interface Project extends Entry {
+  name: string;
+  start: YearMonth;
+  /** Absent: ongoing ("Present"). */
+  end?: YearMonth;
+  about: string;
+  links: readonly ProjectLink[];
+}
+
+/** In display order (experience-skills R2.1). Appendix A. */
+export const projects = [
+  {
+    id: "this-site",
+    name: "ben-morrison.com",
+    start: "2026-10",
+    about:
+      "This site: a prerendered React site with its own design system and theme creator, and a serverless contact API, planned spec by spec with a record for each decision.",
+    links: [
+      { label: "Source on GitHub", href: repoUrl, icon: "github" },
+      { label: "Design System", href: designSystemPath, icon: "palette" },
+    ],
+    highlights: [
+      {
+        id: "site-build",
+        title: "Design, build and deployment",
+        summary:
+          "Designed and built this site end to end: a token-driven library of 20+ accessible React components with a theme creator, prerendered to static HTML with Vite and React Router, and a Java 25 contact API on AWS Lambda, all deployed through AWS CDK behind 300+ browser tests.",
+        details: [
+          "Defined 550+ DTCG design tokens in three layers, compiled with Style Dictionary into CSS custom properties; built each component to WCAG 2.2 AA, with docs generated from the components and tokens, and a theme creator that saves themes site-wide and exports them as DTCG files.",
+          "Prerendered every route with React Router's framework mode on Vite, so each page arrives as complete HTML, then hydrates for its interactive parts.",
+          "Wrote Playwright tests in Chromium and WebKit against a local edge emulator running the production CloudFront Functions and CSP, behind strict TypeScript, ESLint and Vitest gates a GitHub Actions pipeline runs before deploying.",
+          "Built the contact API in Java 25 with SnapStart, verifying Cloudflare Turnstile and emailing through SES with nothing stored, and defined S3, CloudFront, DNS and the hash-based CSP in AWS CDK, deployed through OIDC with no long-lived keys.",
+        ],
+        skills: [
+          "typescript",
+          "react",
+          "css",
+          "design-tokens",
+          "style-dictionary",
+          "accessibility",
+          "vitest",
+          "vite",
+          "react-router",
+          "playwright",
+          "eslint",
+          "github-actions",
+          "pnpm",
+          "java",
+          "aws",
+          "aws-cdk",
+          "rest-apis",
+        ],
+      },
+    ],
+  },
+] as const satisfies readonly Project[];
+
+/**
+ * Every entry the skills panel covers: used skills and the count come from these
+ * (experience-skills R3.4, R3.5).
+ */
+export const entries: readonly Entry[] = [...positions, ...projects];
+
 export interface EducationEntry {
   id: string;
   credential: string;
@@ -477,6 +567,9 @@ export const experienceContent = {
   heading: "Experience",
   pdfLabel: "Download résumé (PDF)",
   workHeading: "Work",
+  projectsHeading: "Projects",
+  projectKind: "Personal project",
+  projectLinksLabel: "Links",
   skillsHeading: "Skills",
   skillsHint: "Choose skills to show only the work that used them.",
   searchLabel: "Search skills",

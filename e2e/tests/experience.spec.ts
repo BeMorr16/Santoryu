@@ -1,11 +1,14 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import {
+  entries,
   experienceContent,
   positions,
+  projects,
   type Highlight,
   type SkillId,
 } from "../../web/src/content/experience.ts";
+import { designSystemPath } from "../../web/src/design-system/components/pages.ts";
 import { categorySkills, countHighlights, usedSkillIds } from "../../web/src/experience/model.ts";
 import { resumePdfPath } from "../../web/src/site.config.ts";
 import {
@@ -21,13 +24,18 @@ import {
 } from "./support.ts";
 
 const path = "/experience";
-const highlights = positions.flatMap<Highlight>((position) => position.highlights);
-const frontendUsed = categorySkills("frontend", usedSkillIds(positions)).used;
+const highlights = entries.flatMap<Highlight>((entry) => entry.highlights);
+const used = usedSkillIds(entries);
+const frontendUsed = categorySkills("frontend", used).used;
 
 const panel = (page: Page) =>
   main(page).getByRole("region", { name: experienceContent.skillsHeading });
 const work = (page: Page) =>
   main(page).getByRole("region", { name: experienceContent.workHeading });
+const projectsRegion = (page: Page) =>
+  main(page).getByRole("region", { name: experienceContent.projectsHeading });
+const education = (page: Page) =>
+  main(page).getByRole("region", { name: experienceContent.educationHeading });
 const skill = (page: Page, name: string) => panel(page).getByRole("button", { name, exact: true });
 const category = (page: Page, name: string) =>
   panel(page).getByRole("heading", { level: 3, name }).getByRole("button");
@@ -58,7 +66,10 @@ test.describe("filtering (resume R7.2, R7.3, R12.1)", () => {
     page,
   }) => {
     await gotoSettled(page, path);
-    const { shown, total } = countHighlights(positions, new Set<SkillId>(["react"]));
+    const react = new Set<SkillId>(["react"]);
+    // The count covers every entry; Work shows the positions' share (experience-skills R3.4).
+    const { shown, total } = countHighlights(entries, react);
+    const shownInWork = countHighlights(positions, react).shown;
     expect(shown).toBeLessThan(total);
     await expect(count(page)).toHaveText(experienceContent.count(total, total));
 
@@ -67,7 +78,7 @@ test.describe("filtering (resume R7.2, R7.3, R12.1)", () => {
     await expect(skill(page, "React")).toHaveAttribute("aria-pressed", "true");
     await expect(count(page)).toHaveText(experienceContent.count(shown, total));
     const shownHighlights = work(page).getByRole("heading", { level: 4 });
-    await expect(shownHighlights).toHaveCount(shown);
+    await expect(shownHighlights).toHaveCount(shownInWork);
     for (const highlightHeading of await shownHighlights.all()) {
       const tags = highlightHeading.locator("xpath=..").getByRole("list", { name: "Skills" });
       await expect(tags.getByRole("listitem").filter({ hasText: /^React, selected$/ })).toHaveCount(
@@ -226,6 +237,101 @@ test.describe("at 1280×720 (resume R3.3, R12.6)", () => {
     await expect(last).toBeInViewport();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       await page.evaluate(() => document.documentElement.clientWidth),
+    );
+  });
+});
+
+test.describe("projects (experience-skills R1, R2, R6)", () => {
+  test.use({ viewport: { width: 1280, height: 720 } });
+
+  const [project] = projects;
+  const [source, designSystem] = project.links;
+  const links = (page: Page) =>
+    projectsRegion(page).getByRole("list", { name: experienceContent.projectLinksLabel });
+  const projectLink = (page: Page, label: string) =>
+    links(page).getByRole("link", { name: label, exact: true });
+
+  test("sits below Work, above Education, and left of the panel (R1.1, R1.4)", async ({ page }) => {
+    await gotoSettled(page, path);
+
+    const [workBox, projectsBox, educationBox, panelBox] = await Promise.all(
+      [work(page), projectsRegion(page), education(page), panel(page)].map((region) =>
+        region.boundingBox(),
+      ),
+    );
+    if (!workBox || !projectsBox || !educationBox || !panelBox) throw new Error("missing a box");
+    expect(projectsBox.y).toBeGreaterThanOrEqual(workBox.y + workBox.height);
+    expect(educationBox.y).toBeGreaterThanOrEqual(projectsBox.y + projectsBox.height);
+    expect(panelBox.x).toBeGreaterThanOrEqual(projectsBox.x + projectsBox.width);
+  });
+
+  test("tabs from the panel's last control to the project's links, then past Education, each with a 2px, 3:1 ring (R6.2)", async ({
+    page,
+    browserName,
+  }) => {
+    await gotoSettled(page, path);
+    // Work's content has nothing focusable, so the stop before Projects is the panel's last toggle.
+    const lastToggle = categorySkills("devops", used).used.at(-1);
+    if (!lastToggle) throw new Error("no used DevOps skill");
+    await skill(page, lastToggle.label).focus();
+
+    await page.keyboard.press(tabKey(browserName));
+    await expect(projectLink(page, source.label)).toBeFocused();
+    await page.keyboard.press(tabKey(browserName));
+    await expect(projectLink(page, designSystem.label)).toBeFocused();
+    await page.keyboard.press(tabKey(browserName));
+    expect(
+      await page.evaluate(
+        () => document.querySelector("main")?.contains(document.activeElement) ?? false,
+      ),
+    ).toBe(false);
+
+    await skill(page, lastToggle.label).focus();
+    const rings = (await walk(page, browserName)).slice(0, 2);
+    expect(rings.map((ring) => ring.label)).toEqual(
+      project.links.map((link) => `a "${link.label}"`),
+    );
+    expect(weakRings(rings)).toEqual([]);
+  });
+
+  test("gives each link a target at least 24px tall (R6.4)", async ({ page }) => {
+    await gotoSettled(page, path);
+
+    for (const link of await links(page).getByRole("link").all()) {
+      expect((await link.boundingBox())?.height).toBeGreaterThanOrEqual(24);
+    }
+  });
+
+  test("lands on the Design System h1 after following its link (R2.5)", async ({ page }) => {
+    await gotoSettled(page, path);
+
+    const link = projectLink(page, designSystem.label);
+    await expect(link).toHaveAttribute("href", designSystemPath);
+    await link.focus();
+    await page.keyboard.press("Enter");
+
+    await expect(page).toHaveURL(new RegExp(`${designSystemPath}$`));
+    await expect(main(page).getByRole("heading", { level: 1 })).toBeFocused();
+  });
+
+  test("selecting Java shows the project's one matching highlight, and the no-match line under each position with highlights (R3.2, R3.3)", async ({
+    page,
+  }) => {
+    await gotoSettled(page, path);
+
+    await skill(page, "Java").click();
+
+    await expect(skill(page, "Java")).toHaveAttribute("aria-pressed", "true");
+    const java = project.highlights.filter((highlight) =>
+      highlight.skills.some((id) => id === "java"),
+    );
+    await expect(projectsRegion(page).getByRole("heading", { level: 4 })).toHaveText(
+      java.map((highlight) => highlight.title),
+    );
+    await expect(links(page).getByRole("link")).toHaveCount(project.links.length);
+    await expect(work(page).getByRole("heading", { level: 4 })).toHaveCount(0);
+    await expect(work(page).getByText(experienceContent.noMatch)).toHaveCount(
+      positions.filter((position) => position.highlights.length > 0).length,
     );
   });
 });

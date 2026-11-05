@@ -3,22 +3,24 @@ import { Link } from "../components/Link/Link.tsx";
 import { cx } from "../components/shared/cx.ts";
 import { Stack } from "../components/Stack/Stack.tsx";
 import { Typography } from "../components/Typography/Typography.tsx";
-import { experienceContent, positions } from "../content/experience.ts";
+import { entries, experienceContent } from "../content/experience.ts";
 import page from "../shell/page.module.css";
 import { resumePdfPath } from "../site.config.ts";
 import { EducationSection } from "./EducationSection.tsx";
 import styles from "./Experience.module.css";
 import { countHighlights, emptySelection, type Selection } from "./model.ts";
+import { ProjectsSection } from "./ProjectsSection.tsx";
 import { SkillsPanel } from "./SkillsPanel.tsx";
 import { WorkSection } from "./WorkSection.tsx";
 
 /**
- * The Experience page: the intro, then the skills panel, work and education in one grid (R3.1).
+ * The Experience page: the intro, then the skills panel, work, projects and education in one grid
+ * (R3.1; experience-skills R1.1).
  * The selection is its only state; the counts are derived from it.
  */
 export function ExperiencePage() {
   const [selection, setSelection] = useState<Selection>(emptySelection);
-  const { shown, total } = countHighlights(positions, selection);
+  const { shown, total } = countHighlights(entries, selection);
   return (
     <div className={cx(page.column, styles.layout)}>
       <div className={styles.intro}>
@@ -46,6 +48,7 @@ export function ExperiencePage() {
         total={total}
       />
       <WorkSection selection={selection} />
+      <ProjectsSection selection={selection} />
       <EducationSection />
     </div>
   );

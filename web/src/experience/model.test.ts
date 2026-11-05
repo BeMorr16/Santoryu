@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { Highlight, Position, SkillId } from "../content/experience.ts";
+import {
+  skills,
+  type Entry,
+  type Highlight,
+  type Position,
+  type SkillId,
+} from "../content/experience.ts";
 import {
   categorySkills,
   countHighlights,
@@ -75,6 +81,20 @@ describe("usedSkillIds (resume R6.3)", () => {
       },
     ];
     expect(usedSkillIds(withDelta).has(delta)).toBe(true);
+  });
+});
+
+describe("entries mixing positions and projects (experience-skills R3.4, R3.5)", () => {
+  const project: Entry = { id: "side", highlights: [highlight("fifth", [delta])] };
+  const mixed: readonly Entry[] = [fixturePositions[1] as Position, project];
+
+  it("uses a skill only a project's highlight lists", () => {
+    expect(usedSkillIds(mixed)).toEqual(new Set([beta, delta]));
+  });
+
+  it("counts both kinds' highlights", () => {
+    expect(countHighlights(mixed, emptySelection)).toEqual({ shown: 2, total: 2 });
+    expect(countHighlights(mixed, select(delta))).toEqual({ shown: 1, total: 2 });
   });
 });
 
@@ -165,6 +185,22 @@ describe("matchesQuery (resume R8.1)", () => {
   it("matches everything for an empty or blank query", () => {
     expect(matchesQuery(betaSkill, "")).toBe(true);
     expect(matchesQuery(betaSkill, "   ")).toBe(true);
+  });
+});
+
+describe("matchesQuery over the content's skills (experience-skills R4.5)", () => {
+  const skill = (label: string) => {
+    const found = skills.find((candidate) => candidate.label === label);
+    if (!found) throw new Error(`no skill ${label}`);
+    return found;
+  };
+
+  it.each(["Lambda", "CloudFront", "S3", "SES"])("finds AWS for %s", (query) => {
+    expect(matchesQuery(skill("AWS"), query)).toBe(true);
+  });
+
+  it.each(["CDK", "IaC"])("finds AWS CDK for %s", (query) => {
+    expect(matchesQuery(skill("AWS CDK"), query)).toBe(true);
   });
 });
 

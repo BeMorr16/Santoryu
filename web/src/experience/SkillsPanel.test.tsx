@@ -4,8 +4,8 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "../../test/axe.ts";
 import {
+  entries,
   experienceContent,
-  positions,
   skillCategories,
   skills,
   type SkillId,
@@ -19,14 +19,14 @@ import {
 } from "./model.ts";
 import { SkillsPanel } from "./SkillsPanel.tsx";
 
-const used = usedSkillIds(positions);
+const used = usedSkillIds(entries);
 const frontend = categorySkills("frontend", used);
-const { total } = countHighlights(positions, emptySelection);
+const { total } = countHighlights(entries, emptySelection);
 
 /** The panel under page-like state, recording every selection it reports. */
 function Harness({ onChange }: { onChange: (selection: Selection) => void }) {
   const [selection, setSelection] = useState<Selection>(emptySelection);
-  const { shown } = countHighlights(positions, selection);
+  const { shown } = countHighlights(entries, selection);
   return (
     <SkillsPanel
       selection={selection}
@@ -211,6 +211,39 @@ describe("also worked with (resume R6.2)", () => {
   });
 });
 
+describe("skills this site's highlights use (experience-skills R4.4, R4.5)", () => {
+  it.each([
+    "Java",
+    "AWS CDK",
+    "Vite",
+    "React Router",
+    "Playwright",
+    "ESLint",
+    "Vitest",
+    "GitHub Actions",
+  ])("shows %s as a toggle, not under “Also worked with”", (label) => {
+    const { panel } = renderPanel();
+
+    expect(skillToggle(label)).toBeVisible();
+    const also = within(panel).queryAllByText(new RegExp(`^${experienceContent.alsoLabel}:`));
+    for (const line of also) {
+      expect(line.textContent.split(": ")[1]?.split(", "), label).not.toContain(label);
+    }
+  });
+
+  it("finds AWS by “Lambda” and AWS CDK by “IaC”", async () => {
+    const { user } = renderPanel();
+
+    await user.type(search(), "Lambda");
+    expect(skillToggle("AWS")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "AWS CDK" })).toBeNull();
+
+    await user.clear(search());
+    await user.type(search(), "IaC");
+    expect(skillToggle("AWS CDK")).toBeVisible();
+  });
+});
+
 describe("live count (resume R7.7)", () => {
   it("is a polite, atomic region that reads the new count after a change", async () => {
     const { user, panel } = renderPanel();
@@ -221,7 +254,7 @@ describe("live count (resume R7.7)", () => {
     expect(region).toHaveTextContent(`Showing all ${String(total)} highlights`);
 
     await user.click(skillToggle("Python"));
-    const { shown } = countHighlights(positions, new Set<SkillId>(["python"]));
+    const { shown } = countHighlights(entries, new Set<SkillId>(["python"]));
     expect(shown).toBeLessThan(total);
     expect(region).toHaveTextContent(`Showing ${String(shown)} of ${String(total)} highlights`);
   });
