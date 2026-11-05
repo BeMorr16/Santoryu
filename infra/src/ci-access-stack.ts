@@ -6,14 +6,45 @@ import type { SiteConfig } from "./config.ts";
 const GITHUB_OIDC_HOST = "token.actions.githubusercontent.com";
 const STS_AUDIENCE = "sts.amazonaws.com";
 
+/**
+ * The services SiteStack's resources need, by CloudFormation namespace: `AWS::<namespace>::*`. A
+ * test fails when SiteStack gains a resource type outside this list, so a new resource can't
+ * quietly break a deploy (contact-form R17.1).
+ */
+export const siteStackServices: Readonly<Record<string, readonly string[]>> = {
+  Budgets: ["budgets"],
+  CertificateManager: ["acm"],
+  CloudFront: ["cloudfront"],
+  CloudWatch: ["cloudwatch"],
+  Events: ["events"],
+  Lambda: ["lambda"],
+  Logs: ["logs"],
+  PricingPlanManager: ["pricingplanmanager"],
+  Route53: ["route53"],
+  S3: ["s3"],
+  SES: ["ses"],
+  SNS: ["sns"],
+  WAFv2: ["wafv2"],
+};
+
+/** Single reads the resource handlers make, per their CloudFormation schemas. */
+const handlerReads = [
+  "billing:GetBillingViewData", // Budgets
+  "payments:GetConnectedAccount", // WAF
+  "shield:ListProtections", // PricingPlanManager
+];
+
+export const executionPolicyDescription =
+  "What CloudFormation may do when deploying SiteStack, replacing bootstrap's AdministratorAccess.";
+
 export interface CiAccessStackProps extends StackProps {
   config: Pick<SiteConfig, "githubRepository" | "githubOidcSubject">;
 }
 
 /**
- * GitHub Actions OIDC provider and the deploy role (static-hosting design §7.2). Deployed once by
- * the owner; CI only deploys SiteStack. (With the default bootstrap policy this is a convention,
- * not an enforced boundary: decision 0005, C.)
+ * GitHub Actions OIDC provider, the deploy role (static-hosting design §7.2) and the CDK execution
+ * policy (contact-form design §12). Deployed by the owner; CI only deploys SiteStack, and once
+ * bootstrap uses this policy, CI can't change this stack.
  */
 export class CiAccessStack extends Stack {
   constructor(scope: Construct, id: string, props: CiAccessStackProps) {
@@ -55,6 +86,67 @@ export class CiAccessStack extends Stack {
         ),
       }),
     );
+
+    const siteStackRoles = this.formatArn({
+      service: "iam",
+      region: "",
+      resource: "role",
+      resourceName: "SiteStack-*",
+    });
+    const executionPolicy = new iam.ManagedPolicy(this, "SiteStackExecutionPolicy", {
+      description: executionPolicyDescription,
+      statements: [
+        new iam.PolicyStatement({
+          actions: Object.values(siteStackServices).flatMap((services) =>
+            services.map((service) => `${service}:*`),
+          ),
+          resources: ["*"],
+        }),
+        new iam.PolicyStatement({ actions: handlerReads, resources: ["*"] }),
+        new iam.PolicyStatement({
+          actions: [
+            "iam:AttachRolePolicy",
+            "iam:CreateRole",
+            "iam:DeleteRole",
+            "iam:DeleteRolePolicy",
+            "iam:DetachRolePolicy",
+            "iam:GetRole",
+            "iam:GetRolePolicy",
+            "iam:ListAttachedRolePolicies",
+            "iam:ListRolePolicies",
+            "iam:PutRolePolicy",
+            "iam:TagRole",
+            "iam:UntagRole",
+            "iam:UpdateAssumeRolePolicy",
+            "iam:UpdateRole",
+            "iam:UpdateRoleDescription",
+          ],
+          resources: [siteStackRoles],
+        }),
+        // Only to Lambda: no other resource in SiteStack takes a role.
+        new iam.PolicyStatement({
+          actions: ["iam:PassRole"],
+          resources: [siteStackRoles],
+          conditions: { StringEquals: { "iam:PassedToService": "lambda.amazonaws.com" } },
+        }),
+        // The bootstrap version check in every CDK template.
+        new iam.PolicyStatement({
+          actions: ["ssm:GetParameter", "ssm:GetParameters"],
+          resources: [
+            this.formatArn({
+              service: "ssm",
+              resource: "parameter",
+              resourceName: "cdk-bootstrap/*",
+            }),
+          ],
+        }),
+      ],
+    });
+
+    new CfnOutput(this, "ExecutionPolicyArn", {
+      value: executionPolicy.managedPolicyArn,
+      description: "Pass to cdk bootstrap --cloudformation-execution-policies.",
+    });
 
     new CfnOutput(this, "DeployRoleArn", {
       value: role.roleArn,

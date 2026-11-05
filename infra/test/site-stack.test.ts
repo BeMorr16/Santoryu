@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { Match, Template } from "aws-cdk-lib/assertions";
 import { beforeAll, describe, expect, it } from "vitest";
 import { defineApp } from "../src/app.ts";
+import { executionPolicyDescription } from "../src/ci-access-stack.ts";
 import type { SiteConfig } from "../src/config.ts";
 import { renderViewerRequest, renderViewerResponse } from "../src/edge-functions.ts";
 import { readSiteManifest } from "../src/site-manifest.ts";
@@ -616,6 +617,9 @@ describe.each([false, true])("safety checks with flatRatePlan %s", (flatRatePlan
     type Statement = { Effect: string; Action: string | string[]; Resource: unknown };
     const statements = stacks.flatMap((stack) =>
       resources(stack).flatMap((resource) => {
+        // Scoped by service, not by resource, as approved (contact-form R17.1). Its own tests are
+        // in ci-access-stack.test.ts.
+        if (resource.Properties?.Description === executionPolicyDescription) return [];
         if (resource.Type === "AWS::IAM::Policy" || resource.Type === "AWS::IAM::ManagedPolicy") {
           return (resource.Properties?.PolicyDocument as { Statement: Statement[] }).Statement;
         }
