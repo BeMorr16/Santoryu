@@ -428,34 +428,6 @@ describe("SiteStack: flat-rate plan flag on (R8.1, R8.2)", () => {
             MetricName: Match.anyValue(),
           },
         },
-        {
-          Name: "contact-rate-limit-per-ip",
-          Priority: 1,
-          Action: { Block: {} },
-          Statement: {
-            RateBasedStatement: {
-              AggregateKeyType: "IP",
-              Limit: 10,
-              EvaluationWindowSec: 300,
-              ScopeDownStatement: {
-                ByteMatchStatement: {
-                  FieldToMatch: { UriPath: {} },
-                  PositionalConstraint: "ENDS_WITH",
-                  SearchString: "/api/contact",
-                  TextTransformations: [
-                    { Priority: 0, Type: "URL_DECODE" },
-                    { Priority: 1, Type: "NORMALIZE_PATH" },
-                  ],
-                },
-              },
-            },
-          },
-          VisibilityConfig: {
-            CloudWatchMetricsEnabled: true,
-            SampledRequestsEnabled: true,
-            MetricName: Match.anyValue(),
-          },
-        },
       ],
     });
   });

@@ -16,7 +16,6 @@ const validContext = {
   "personal-site:siteDir": "test/fixtures/site",
   "personal-site:siteManifest": "test/fixtures/site-manifest.json",
   "personal-site:contactArtifact": "test/fixtures/contact-artifact",
-  "personal-site:contactRateLimitPer5Minutes": 10,
   "personal-site:turnstileSecretParameter": "/test/contact/turnstile-secret",
   budgetEmail: "alerts@example.test",
   contactEmail: "owner@example.test",
@@ -47,7 +46,6 @@ describe("readConfig", () => {
       siteManifest: "test/fixtures/site-manifest.json",
       budgetEmail: "alerts@example.test",
       contactArtifact: "test/fixtures/contact-artifact",
-      contactRateLimitPer5Minutes: 10,
       turnstileSecretParameter: "/test/contact/turnstile-secret",
       contactEmail: "owner@example.test",
     });
@@ -116,7 +114,6 @@ describe("readConfig", () => {
     ["contactEmail", "not-an-email"],
     ["contactEmail", "a@b"],
     ["personal-site:contactArtifact", ""],
-    ["personal-site:contactRateLimitPer5Minutes", 0],
     ["personal-site:turnstileSecretParameter", "no-leading-slash"],
     ["personal-site:turnstileSecretParameter", "/has space"],
   ])("throws naming %s when it is %j", (key, value) => {

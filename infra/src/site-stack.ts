@@ -74,7 +74,7 @@ export class SiteStack extends Stack {
 
     // WAF is included at $0 on the Free flat-rate plan; on pay-as-you-go it would be ~$6/mo (R8.3).
     const webAcl = config.flatRatePlan
-      ? this.rateLimitWebAcl(config.rateLimitPer5Minutes, config.contactRateLimitPer5Minutes)
+      ? this.rateLimitWebAcl(config.rateLimitPer5Minutes)
       : undefined;
 
     const contactApi = new ContactApi(this, "ContactApi", { config, zone });
@@ -214,10 +214,10 @@ export class SiteStack extends Stack {
   }
 
   /**
-   * L1: WAFv2 has no L2. IP rate-based rules that block over-limit IPs per 5 minutes: one across the
-   * site (R8.2), and a stricter one on the contact API alone (contact-form R8.1).
+   * L1: WAFv2 has no L2. One IP rate-based rule, blocking over-limit IPs per 5 minutes (R8.2). The
+   * Free plan rejected a second, contact-only rule (contact-form design §4), so the API shares it.
    */
-  private rateLimitWebAcl(limit: number, contactLimit: number): wafv2.CfnWebACL {
+  private rateLimitWebAcl(limit: number): wafv2.CfnWebACL {
     const visibility = (metricName: string) => ({
       cloudWatchMetricsEnabled: true,
       sampledRequestsEnabled: true,
@@ -236,34 +236,6 @@ export class SiteStack extends Stack {
             rateBasedStatement: { aggregateKeyType: "IP", limit, evaluationWindowSec: 300 },
           },
           visibilityConfig: visibility("rate-limit-per-ip"),
-        },
-        {
-          name: "contact-rate-limit-per-ip",
-          priority: 1,
-          action: { block: {} },
-          statement: {
-            rateBasedStatement: {
-              aggregateKeyType: "IP",
-              limit: contactLimit,
-              evaluationWindowSec: 300,
-              scopeDownStatement: {
-                byteMatchStatement: {
-                  fieldToMatch: { uriPath: {} },
-                  // CloudFront normalizes a path to pick a behavior, then sends the raw one, so
-                  // /api//contact and //api/contact both reach the function. NORMALIZE_PATH leaves
-                  // leading slashes alone, so match the end. Anything extra only rate-limits a
-                  // path that gets the 404 page anyway.
-                  positionalConstraint: "ENDS_WITH",
-                  searchString: "/api/contact",
-                  textTransformations: [
-                    { priority: 0, type: "URL_DECODE" },
-                    { priority: 1, type: "NORMALIZE_PATH" },
-                  ],
-                },
-              },
-            },
-          },
-          visibilityConfig: visibility("contact-rate-limit-per-ip"),
         },
       ],
     });

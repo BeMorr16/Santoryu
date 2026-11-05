@@ -17,7 +17,6 @@ export const testConfig: SiteConfig = {
   siteManifest: fileURLToPath(new URL("fixtures/site-manifest.json", import.meta.url)),
   budgetEmail: "alerts@example.test",
   contactArtifact: fileURLToPath(new URL("fixtures/contact-artifact", import.meta.url)),
-  contactRateLimitPer5Minutes: 10,
   turnstileSecretParameter: "/test/contact/turnstile-secret",
   contactEmail: "owner@example.test",
 };
