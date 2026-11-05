@@ -7,7 +7,11 @@ import { expect, vi } from "vitest";
  * R3.6: the prerendered markup hydrates with no mismatch, and hydration leaves it unchanged.
  * (Comparing renderToString with a client render would differ on useId by design.)
  */
-export function expectHydratesCleanly(ui: ReactElement): void {
+export function expectHydratesCleanly(
+  ui: ReactElement,
+  /** The one change hydration is meant to make, for markup that only applies before it. */
+  afterHydration: (prerendered: string) => string = (prerendered) => prerendered,
+): void {
   const container = document.createElement("div");
   container.innerHTML = renderToString(ui);
   const prerendered = container.innerHTML;
@@ -19,7 +23,7 @@ export function expectHydratesCleanly(ui: ReactElement): void {
 
   expect(onRecoverableError).not.toHaveBeenCalled();
   expect(consoleError).not.toHaveBeenCalled();
-  expect(container.innerHTML).toBe(prerendered);
+  expect(container.innerHTML).toBe(afterHydration(prerendered));
   consoleError.mockRestore();
   unmount();
   container.remove();

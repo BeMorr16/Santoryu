@@ -21,6 +21,13 @@
   font-weight: var(--component-text-field-label-weight);
 }
 
+/* Quieter than the label, so "(required)" doesn't read as part of the field's name. */
+.cue {
+  color: var(--component-text-field-hint-text);
+  font-size: var(--component-text-field-font-size-sm);
+  font-weight: var(--type-weight-body);
+}
+
 .hint,
 .error {
   margin: 0;

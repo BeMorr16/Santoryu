@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
 import { componentPath } from "../../web/src/design-system/components/pages.ts";
 import { example, main } from "./support.ts";
 
@@ -21,6 +21,29 @@ test.describe("TextField (ds-tokens R10)", () => {
     await page.keyboard.type("a");
     await expect(field).toHaveCSS("outline-style", "solid");
     await expect(field).not.toHaveCSS("outline-width", "0px");
+  });
+
+  test("sets the required and optional cues apart from the label (contact-form R15.3)", async ({
+    page,
+  }) => {
+    const look = (element: Locator) =>
+      element.evaluate((node) => {
+        const { color, fontSize, fontWeight } = getComputedStyle(node);
+        return { color, fontSize: parseFloat(fontSize), fontWeight: Number(fontWeight) };
+      });
+
+    for (const [title, cue] of [
+      ["Required", "(required)"],
+      ["Optional", "(optional)"],
+    ] as const) {
+      const label = example(main(page), title).locator("label");
+      const labelLook = await look(label);
+      const cueLook = await look(label.getByText(cue));
+
+      expect(cueLook.fontSize).toBeLessThan(labelLook.fontSize);
+      expect(cueLook.fontWeight).toBeLessThan(labelLook.fontWeight);
+      expect(cueLook.color).not.toBe(labelLook.color);
+    }
   });
 
   test("takes a multi-line message from the keyboard, then moves on with Tab (contact-form R15.1)", async ({

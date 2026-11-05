@@ -20,3 +20,6 @@ export const repoUrl = `${githubUrl}/Santoryu`;
 
 /** The owner's one-page résumé, from web/public/ (resume R10.1). The Experience page links it. */
 export const resumePdfPath = "/ben-morrison-resume.pdf";
+
+/** The Cloudflare Turnstile site key. Public by design: it ships in the page (contact-form R5.6). */
+export const turnstileSiteKey = "0x4AAAAAAFz_YOCVhVjdVvzJ";

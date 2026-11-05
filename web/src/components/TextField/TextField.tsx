@@ -126,9 +126,21 @@ export function TextField({
     <label htmlFor={id} className={styles.label}>
       {label}
       {/* Native `required` already announces it, so the visible words aren't read twice (R10.6). */}
-      {required && <span aria-hidden="true"> (required)</span>}
+      {required && (
+        <>
+          {" "}
+          <span aria-hidden="true" className={styles.cue}>
+            (required)
+          </span>
+        </>
+      )}
       {/* Nothing else announces this one, so it stays in the accessible name (contact-form R15.3). */}
-      {optional && " (optional)"}
+      {optional && (
+        <>
+          {" "}
+          <span className={styles.cue}>(optional)</span>
+        </>
+      )}
     </label>
   );
 

@@ -6,6 +6,7 @@ import {
   themeCreatorPath,
   type ComponentPageId,
 } from "../../web/src/design-system/components/pages.ts";
+import { contactFormContent } from "../../web/src/content/contact.ts";
 import { tokens } from "../../web/src/generated/tokens.ts";
 
 /** Every page, docs pages from the side menu's list (ds-components R7.3), and a missing one. */
@@ -228,3 +229,32 @@ export const weakRings = (rings: Ring[]) =>
   rings
     .filter((ring) => ring.width < 2 || ring.contrast < 3)
     .map((ring) => `${ring.label}: ${String(ring.width)}px, ${ring.contrast.toFixed(2)}:1`);
+
+/** Answers the form's requests to Cloudflare with a stand-in, so CI needs no network (contact-form R12.5). */
+export async function stubChallengeScript(page: Page) {
+  await page.route("https://challenges.cloudflare.com/**", (route) =>
+    route.fulfill({
+      contentType: "application/javascript",
+      body: `window.turnstile = {
+        render(container, options) {
+          setTimeout(() => options.callback("stub-token"));
+          return "stub-widget";
+        },
+        remove() {},
+      };`,
+    }),
+  );
+}
+
+/** Fills the form's required fields with valid values. */
+export async function fillContactForm(page: Page) {
+  const form = page.getByRole("region", { name: contactFormContent.heading });
+  await form.getByRole("textbox", { name: contactFormContent.labels.name }).fill("Ada Lovelace");
+  await form
+    .getByRole("textbox", { name: contactFormContent.labels.email })
+    .fill("ada@example.com");
+  await form.getByRole("textbox", { name: contactFormContent.labels.message }).fill("Hello");
+}
+
+export const contactSubmit = (page: Page) =>
+  page.getByRole("button", { name: contactFormContent.submit });

@@ -172,7 +172,7 @@ export const textFieldShowcase: Showcase = {
   a11y: [
     "A native <input> with a visible <label> tied to it, so clicking the label focuses the field and the label is its name. A label is required by the type.",
     "The hint and the error are read as the field's description, hint first. An error also sets aria-invalid, and shows a warning icon beside its text, so it isn't shown by color alone.",
-    'Required fields use native required, which screen readers announce. The visible "(required)" is hidden from them, so it isn\'t read twice.',
+    "Required fields use native required, which screen readers announce. The visible \"(required)\" is hidden from them, so it isn't read twice. It's smaller and muted, so it doesn't read as part of the label.",
     'Optional fields say so in the label. Nothing else announces "(optional)", so unlike "(required)" it stays in the accessible name.',
     "A multiline field is a native <textarea> with the same label, hint and error behavior, and Enter adds a line. It has no clear button, so a stray Escape can't wipe a long message, and it can be resized vertically.",
     "Disabled fields use native disabled: they can't be focused and aren't submitted with a form.",

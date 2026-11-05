@@ -88,6 +88,8 @@ describe("TextField (ds-tokens R10)", () => {
     const indicator = screen.getByText("(required)");
     expect(indicator).toBeVisible();
     expect(indicator).toHaveAttribute("aria-hidden", "true");
+    expect(indicator).toHaveClass(styles.cue ?? "");
+    expect(input).toHaveAccessibleName("Email");
   });
 
   it("uses a caller's id on the input, keeping its label tied to it", () => {
@@ -475,9 +477,11 @@ describe("TextField (ds-tokens R10)", () => {
 
       const input = screen.getByRole("textbox", { name: "Role or company (optional)" });
       expect(input).not.toBeRequired();
-      const cue = screen.getByText("Role or company (optional)");
+      const cue = screen.getByText("(optional)");
       expect(cue).toBeVisible();
-      expect(cue).toHaveAttribute("for", input.id);
+      expect(cue).not.toHaveAttribute("aria-hidden");
+      expect(cue).toHaveClass(styles.cue ?? "");
+      expect(cue.closest("label")).toHaveAttribute("for", input.id);
     });
 
     it("shows no cue unless asked", () => {
