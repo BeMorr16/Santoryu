@@ -362,34 +362,23 @@ describe("SiteStack: the /api/contact behavior (R8.6, R11.2)", () => {
   });
 });
 
-describe("SiteStack: the contact WAF rule (R8.1, R8.6)", () => {
-  const flagOn = () => synth({ flatRatePlan: true, contactRateLimitPer5Minutes: 25 });
-
-  it("scopes the limit to the API's path and leaves the site-wide rule unchanged", () => {
-    const acl = resources(flagOn(), "AWS::WAFv2::WebACL")[0] as [string, Resource];
+describe("SiteStack: rate limiting for the API (R8.1, R8.6)", () => {
+  // The Free plan rejected a second rule scoped to /api/contact on the first deploy (2026-11-05),
+  // so the API shares the site-wide rule (design §4's fallback).
+  it("keeps the single site-wide rule, which covers the API too, and no rule groups", () => {
+    const acl = resources(synth({ flatRatePlan: true }), "AWS::WAFv2::WebACL")[0] as [
+      string,
+      Resource,
+    ];
     const rules = acl[1].Properties.Rules as {
       Name: string;
       Statement: { RateBasedStatement: Record<string, unknown> };
     }[];
-    expect(rules.map((rule) => rule.Name)).toEqual([
-      "rate-limit-per-ip",
-      "contact-rate-limit-per-ip",
-    ]);
-    expect(rules[0]?.Statement.RateBasedStatement).not.toHaveProperty("ScopeDownStatement");
-    expect(rules[1]?.Statement.RateBasedStatement).toMatchObject({
-      Limit: 25,
-      ScopeDownStatement: {
-        ByteMatchStatement: { PositionalConstraint: "ENDS_WITH", SearchString: "/api/contact" },
-      },
-    });
-  });
 
-  it("stays within the Free plan: at most 5 rules, no rule groups", () => {
-    const acl = resources(flagOn(), "AWS::WAFv2::WebACL")[0] as [string, Resource];
-    const rules = acl[1].Properties.Rules as unknown[];
-    expect(rules.length).toBeLessThanOrEqual(5);
+    expect(rules.map((rule) => rule.Name)).toEqual(["rate-limit-per-ip"]);
+    expect(rules[0]?.Statement.RateBasedStatement).not.toHaveProperty("ScopeDownStatement");
     expect(JSON.stringify(rules)).not.toMatch(
-      /RuleGroupReferenceStatement|ManagedRuleGroupStatement/,
+      /RuleGroupReferenceStatement|ManagedRuleGroupStatement|ByteMatchStatement/,
     );
   });
 });

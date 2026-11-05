@@ -20,7 +20,6 @@ export interface SiteConfig {
   budgetEmail: string;
   /** Relative to infra/. The contact service's jar. */
   contactArtifact: string;
-  contactRateLimitPer5Minutes: number;
   /** The name of the SSM SecureString the owner creates. Its value is never in the template. */
   turnstileSecretParameter: string;
   /** Never committed; passed with --context contactEmail=… */
@@ -113,7 +112,6 @@ export function readConfig(node: Node): SiteConfig {
     siteManifest: string("siteManifest"),
     budgetEmail: email("budgetEmail"),
     contactArtifact: string("contactArtifact"),
-    contactRateLimitPer5Minutes: positiveInteger("contactRateLimitPer5Minutes"),
     turnstileSecretParameter: string(
       "turnstileSecretParameter",
       patterns.ssmParameter,
