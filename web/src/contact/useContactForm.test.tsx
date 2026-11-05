@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { SendResult } from "./api.ts";
 import type { Field } from "./model.ts";
+import type { requestToken as defaultRequestToken } from "./turnstile.ts";
 import { useContactForm } from "./useContactForm.ts";
 
 const valid: Record<Field, string> = {
@@ -12,9 +13,7 @@ const valid: Record<Field, string> = {
 };
 
 function setup(result: SendResult | Promise<SendResult> = { kind: "sent" }) {
-  const requestToken = vi.fn<(container: HTMLElement) => Promise<string>>(() =>
-    Promise.resolve("token"),
-  );
+  const requestToken = vi.fn<typeof defaultRequestToken>(() => Promise.resolve("token"));
   const sendMessage = vi.fn(() => Promise.resolve(result));
   const challengeContainer = { current: document.createElement("div") };
   const hook = renderHook(() => useContactForm({ challengeContainer, requestToken, sendMessage }));
@@ -53,7 +52,7 @@ describe("useContactForm", () => {
         email: "invalid",
         message: "missing",
       });
-      expect(result.current.focusRequest).toEqual({ target: "name" });
+      expect(result.current.focusRequest).toEqual({ target: "name", code: "missing" });
       expect(result.current.status).toBe("editing");
       expect(requestToken).not.toHaveBeenCalled();
       expect(sendMessage).not.toHaveBeenCalled();
@@ -100,7 +99,10 @@ describe("useContactForm", () => {
 
       await submit();
 
-      expect(requestToken).toHaveBeenCalledExactlyOnceWith(challengeContainer.current);
+      expect(requestToken).toHaveBeenCalledExactlyOnceWith(
+        challengeContainer.current,
+        expect.any(Object),
+      );
       expect(sendMessage).toHaveBeenCalledExactlyOnceWith({
         name: "Ada",
         email: "ada@example.com",
@@ -195,7 +197,7 @@ describe("useContactForm", () => {
       await submit();
 
       expect(result.current.errors).toEqual({ message: "tooLong", email: "invalid" });
-      expect(result.current.focusRequest).toEqual({ target: "email" });
+      expect(result.current.focusRequest).toEqual({ target: "email", code: "invalid" });
       expect(result.current.status).toBe("editing");
       expect(result.current.values).toEqual(valid);
       expect(result.current.alert).toBeNull();
@@ -216,6 +218,95 @@ describe("useContactForm", () => {
       expect(sendMessage).toHaveBeenLastCalledWith(
         expect.objectContaining({ challengeToken: "token-2" }),
       );
+    });
+  });
+
+  describe("after a failure (WCAG 2.4.3)", () => {
+    it.each([[{ kind: "failed" } as const], [{ kind: "challenge" } as const]])(
+      "asks to rescue focus on a %j result",
+      async (sendResult) => {
+        const { result, submit, fill } = setup(sendResult);
+        fill();
+
+        await submit();
+
+        expect(result.current.focusRequest).toEqual({ target: "submit" });
+      },
+    );
+
+    it("asks to rescue focus when the challenge fails", async () => {
+      const { result, submit, requestToken, fill } = setup();
+      requestToken.mockRejectedValue(new Error("blocked"));
+      fill();
+
+      await submit();
+
+      expect(result.current.focusRequest).toEqual({ target: "submit" });
+    });
+
+    it("clears an old alert when the next attempt finds field errors", async () => {
+      const { result, submit, fill } = setup({ kind: "failed" });
+      fill();
+      await submit();
+      expect(result.current.alert).toBe("failed");
+
+      fill({ name: "" });
+      await submit();
+
+      expect(result.current.alert).toBeNull();
+      expect(result.current.errors).toEqual({ name: "missing" });
+    });
+  });
+
+  describe("an interactive challenge (R5.3, WCAG 4.1.3)", () => {
+    it("says so while Cloudflare waits, asks to focus the prompt, then stops", async () => {
+      const { result, requestToken, fill } = setup();
+      let finish: (token: string) => void = () => undefined;
+      let callbacks: { onInteractive?: () => void; onInteractiveEnd?: () => void } = {};
+      requestToken.mockImplementation((_container, given) => {
+        callbacks = given ?? {};
+        return new Promise((resolve) => {
+          finish = resolve;
+        });
+      });
+      fill();
+      let submitted: Promise<void> = Promise.resolve();
+      act(() => {
+        submitted = result.current.submit();
+      });
+      expect(result.current.challengeWaiting).toBe(false);
+
+      act(() => {
+        callbacks.onInteractive?.();
+      });
+      expect(result.current.challengeWaiting).toBe(true);
+      expect(result.current.status).toBe("sending");
+      expect(result.current.focusRequest).toEqual({ target: "prompt" });
+
+      act(() => {
+        callbacks.onInteractiveEnd?.();
+      });
+      expect(result.current.challengeWaiting).toBe(false);
+
+      await act(async () => {
+        finish("token");
+        await submitted;
+      });
+      expect(result.current.status).toBe("sent");
+    });
+
+    it("stops waiting if the challenge fails during it", async () => {
+      const { result, requestToken, fill, submit } = setup();
+      requestToken.mockImplementation((_container, given) => {
+        given?.onInteractive?.();
+        return Promise.reject(new Error("timed out"));
+      });
+      fill();
+
+      await submit();
+
+      expect(result.current.challengeWaiting).toBe(false);
+      expect(result.current.alert).toBe("challenge");
     });
   });
 

@@ -8,6 +8,7 @@ import {
   gotoSettled,
   main,
   stubChallengeScript,
+  stubInteractiveChallenge,
   tabKey,
 } from "./support.ts";
 
@@ -94,9 +95,9 @@ test.describe("sending (R3)", () => {
   });
 
   test("shows sending, and sends once however often it's pressed (R3.2)", async ({ page }) => {
-    let requests = 0;
-    await page.route("**/api/contact", () => {
-      requests++;
+    const requests: (() => Promise<void>)[] = [];
+    await page.route("**/api/contact", (route) => {
+      requests.push(() => route.fulfill({ status: 204 }));
     });
     await openForm(page);
     await fillContactForm(page);
@@ -106,9 +107,16 @@ test.describe("sending (R3)", () => {
     const sending = page.getByRole("button", { name: content.sending });
     await expect(sending).toBeVisible();
     await expect(page.getByRole("status").filter({ hasText: content.sending })).toBeAttached();
-    await expect.poll(() => requests).toBe(1);
+    await expect.poll(() => requests.length).toBe(1);
     await sending.click();
-    expect(requests).toBe(1);
+    await sending.click();
+    // A second send would first get a token and hash its body, so give it time to arrive.
+    await page.waitForTimeout(250);
+    expect(requests).toHaveLength(1);
+
+    await requests[0]?.();
+    await expect(page.getByRole("heading", { name: content.successHeading })).toBeVisible();
+    expect(requests).toHaveLength(1);
   });
 
   for (const [name, status, json, message] of [
@@ -127,7 +135,9 @@ test.describe("sending (R3)", () => {
 
       const alert = page.getByRole("alert");
       await expect(alert).toContainText(message.before.trim());
-      await expect(alert.getByRole("link", { name: /LinkedIn/ })).toBeVisible();
+      const link = alert.getByRole("link", { name: /LinkedIn.*opens in new tab/ });
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute("target", "_blank");
       await expect(field(page, content.labels.message)).toHaveValue("Hello");
       await expect(contactSubmit(page)).toBeEnabled();
     });
@@ -161,11 +171,12 @@ test.describe("validation, from the keyboard (R2)", () => {
 
     await expect(name).toBeFocused();
     await expect(name).toHaveAttribute("aria-invalid", "true");
-    await expect(page.getByText(content.errors.name.missing)).toBeVisible();
+    await expect(name).toHaveAccessibleDescription(content.errors.name.missing);
     expect(sent).toHaveLength(0);
 
     await page.keyboard.type("Ada");
-    await expect(page.getByText(content.errors.name.missing)).toBeHidden();
+    await expect(name).toHaveAttribute("aria-invalid", "false");
+    await expect(name).toHaveAccessibleDescription("");
   });
 
   test("tabs through the fields in order, then the submit button", async ({
@@ -184,6 +195,113 @@ test.describe("validation, from the keyboard (R2)", () => {
       await page.keyboard.press(tabKey(browserName));
       await expect(next).toBeFocused();
     }
+  });
+});
+
+test.describe("when Cloudflare needs the visitor (R5.3)", () => {
+  test("says so, moves focus there, and one Tab reaches the check, which then sends", async ({
+    page,
+    browserName,
+  }) => {
+    const sent = await stubApi(page, 204);
+    await stubInteractiveChallenge(page);
+    await gotoSettled(page, "/contact");
+    await expect(contactSubmit(page)).toBeEnabled();
+    await fillContactForm(page);
+
+    await contactSubmit(page).focus();
+    await page.keyboard.press("Enter");
+
+    const prompt = page.getByText(content.challengePrompt, { exact: true }).first();
+    await expect(prompt).toBeVisible();
+    await expect(prompt).toBeFocused();
+    await expect(page.getByRole("button", { name: content.waiting })).toBeVisible();
+    await expect(
+      page.getByRole("status").filter({ hasText: content.challengePrompt }),
+    ).toBeAttached();
+    expect(sent).toHaveLength(0);
+
+    await page.keyboard.press(tabKey(browserName));
+    const check = page.getByRole("checkbox", { name: "Verify you are human" });
+    await expect(check).toBeFocused();
+    await page.keyboard.press("Space");
+
+    await expect(page.getByRole("heading", { name: content.successHeading })).toBeFocused();
+    expect(sent).toHaveLength(1);
+  });
+
+  test("rescues focus the widget drops when it closes after a failure (WCAG 2.4.3)", async ({
+    page,
+    browserName,
+  }) => {
+    await stubApi(page, 503, { error: "unavailable" });
+    await stubInteractiveChallenge(page);
+    await gotoSettled(page, "/contact");
+    await expect(contactSubmit(page)).toBeEnabled();
+    await fillContactForm(page);
+    await contactSubmit(page).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByText(content.challengePrompt, { exact: true }).first()).toBeFocused();
+    await page.keyboard.press(tabKey(browserName));
+
+    await page.keyboard.press("Space");
+
+    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(contactSubmit(page)).toBeFocused();
+  });
+});
+
+test.describe("announcing, and the labels (WCAG 4.1.3, R15.3)", () => {
+  test("reads the error aloud when the invalid field already has focus", async ({ page }) => {
+    await openForm(page);
+    const name = field(page, content.labels.name);
+
+    await name.focus();
+    await page.keyboard.press("Enter");
+
+    await expect(name).toBeFocused();
+    await expect(
+      page.getByRole("status").filter({ hasText: content.errors.name.missing }),
+    ).toBeAttached();
+  });
+
+  test("names the optional field with a space before its cue", async ({ page }) => {
+    await openForm(page);
+
+    await expect(
+      page.getByRole("textbox", { name: `${content.labels.subject} (optional)`, exact: true }),
+    ).toBeVisible();
+  });
+
+  test("doesn't report a half-typed email as invalid before any attempt (R2.5)", async ({
+    page,
+  }) => {
+    await openForm(page);
+    const email = field(page, content.labels.email);
+
+    await email.fill("ada@");
+
+    await expect(email).toHaveAttribute("aria-invalid", "false");
+  });
+});
+
+test.describe("custom themes (R1.6)", () => {
+  test("give the card an opaque surface, since their contrast checks don't cover the backdrop", async ({
+    page,
+  }) => {
+    await openForm(page);
+    const background = () =>
+      page
+        .getByRole("region", { name: content.heading })
+        .evaluate((card) => getComputedStyle(card).backgroundColor);
+    expect(await background()).toBe("rgba(0, 0, 0, 0)");
+
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("data-custom-theme", "");
+    });
+
+    await expect.poll(background).not.toBe("rgba(0, 0, 0, 0)");
+    expect(await background()).not.toMatch(/rgba\(.*, 0\.\d+\)/);
   });
 });
 
@@ -389,5 +507,19 @@ test.describe("at 320×640 (R1)", () => {
     await contactSubmit(page).click();
     await expect(page.getByRole("alert")).toBeVisible();
     expect(await noHorizontalScroll()).toBe(true);
+  });
+
+  test("never scrolls sideways once sent", async ({ page }) => {
+    await stubApi(page, 204);
+    await openForm(page);
+    await fillContactForm(page);
+    await contactSubmit(page).click();
+
+    await expect(page.getByRole("heading", { name: content.successHeading })).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
   });
 });

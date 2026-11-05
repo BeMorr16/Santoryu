@@ -16,6 +16,7 @@ import {
   setAllPanels,
   storeTheme,
   stubChallengeScript,
+  stubInteractiveChallenge,
   themes,
 } from "./support.ts";
 
@@ -61,6 +62,14 @@ test.describe("the contact form's states (contact-form R1.6)", () => {
       await fillContactForm(page);
       await contactSubmit(page).click();
       await expect(page.getByRole("button", { name: formContent.sending })).toBeVisible();
+    },
+    "waiting for the visitor": async (page) => {
+      await page.unroute("https://challenges.cloudflare.com/**");
+      await stubInteractiveChallenge(page);
+      await page.route("**/api/contact", (route) => route.fulfill({ status: 204 }));
+      await fillContactForm(page);
+      await contactSubmit(page).click();
+      await expect(page.getByRole("checkbox", { name: "Verify you are human" })).toBeVisible();
     },
     "send failed": async (page) => {
       await page.route("**/api/contact", (route) =>

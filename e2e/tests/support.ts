@@ -246,6 +246,38 @@ export async function stubChallengeScript(page: Page) {
   );
 }
 
+/**
+ * Like the stand-in above, for a visitor Cloudflare wants to check: it asks for interaction and
+ * shows a check box, and the token comes only once that's ticked.
+ */
+export async function stubInteractiveChallenge(page: Page) {
+  await page.route("https://challenges.cloudflare.com/**", (route) =>
+    route.fulfill({
+      contentType: "application/javascript",
+      body: `window.turnstile = {
+        render(container, options) {
+          setTimeout(() => {
+            options["before-interactive-callback"]();
+            const box = document.createElement("input");
+            box.type = "checkbox";
+            box.setAttribute("aria-label", "Verify you are human");
+            box.addEventListener("change", () => {
+              options["after-interactive-callback"]();
+              options.callback("stub-token");
+            });
+            container.append(box);
+            window.stubWidget = box;
+          });
+          return "stub-widget";
+        },
+        remove() {
+          window.stubWidget?.remove();
+        },
+      };`,
+    }),
+  );
+}
+
 /** Fills the form's required fields with valid values. */
 export async function fillContactForm(page: Page) {
   const form = page.getByRole("region", { name: contactFormContent.heading });

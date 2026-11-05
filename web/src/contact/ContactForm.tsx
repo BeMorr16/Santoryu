@@ -27,6 +27,11 @@ function useHydrated() {
   );
 }
 
+/** Different text from what's there, or a screen reader won't read a repeat. */
+function announcement(text: string, current: string | null) {
+  return current === text ? `${text}\u00a0` : text;
+}
+
 /** Starts loading Cloudflare's script. A failed load comes up again at submit (R5.1, R5.4). */
 function preloadChallenge() {
   loadTurnstile().catch(() => undefined);
@@ -58,21 +63,79 @@ export function ContactForm() {
   const subjectRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const challengeRef = useRef<HTMLDivElement>(null);
-  const { values, errors, status, alert, focusRequest, changeValue, submit, reset } =
-    useContactForm({ challengeContainer: challengeRef });
+  const formRef = useRef<HTMLFormElement>(null);
+  const promptRef = useRef<HTMLParagraphElement>(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
+  const submitAreaRef = useRef<HTMLDivElement>(null);
+  const statusRef = useRef<HTMLElement>(null);
+  const {
+    values,
+    errors,
+    status,
+    alert,
+    focusRequest,
+    challengeWaiting,
+    changeValue,
+    submit,
+    reset,
+  } = useContactForm({ challengeContainer: challengeRef });
+  const sending = status === "sending";
+
+  // The region's text is set here, not rendered, so the focus effect below can also use it.
+  useEffect(() => {
+    if (!statusRef.current) return;
+    statusRef.current.textContent = challengeWaiting
+      ? content.challengePrompt
+      : sending
+        ? content.sending
+        : "";
+  }, [sending, challengeWaiting]);
 
   // After the commit that shows the errors or the panel, so their text is there to be read.
   useEffect(() => {
     if (!focusRequest) return;
+    const { target, code } = focusRequest;
     const targets = {
       heading: headingRef,
+      prompt: promptRef,
+      submit: submitRef,
       name: nameRef,
       email: emailRef,
       subject: subjectRef,
       message: messageRef,
     };
-    targets[focusRequest.target].current?.focus();
+    const element = targets[target].current;
+    if (!element) return;
+    const active = document.activeElement;
+    const focusLost = active === null || active === document.body;
+
+    if (target === "submit") {
+      // Only rescue focus the widget dropped; a visitor who has moved on stays where they are.
+      if (focusLost) element.focus();
+      return;
+    }
+    if (target === "prompt") {
+      if (focusLost || formRef.current?.contains(active)) {
+        element.focus();
+        element.scrollIntoView({ block: "nearest" });
+      }
+      return;
+    }
+    if (element === active && code && target !== "heading" && statusRef.current) {
+      // Focusing it again says nothing, so a screen reader needs this to hear the error (WCAG 4.1.3).
+      statusRef.current.textContent = announcement(
+        errorMessages[target][code] ?? "",
+        statusRef.current.textContent,
+      );
+      return;
+    }
+    element.focus();
   }, [focusRequest]);
+
+  // Enter in a top field leaves the alert and button off-screen otherwise (WCAG 2.4.7).
+  useEffect(() => {
+    if (alert) submitAreaRef.current?.scrollIntoView({ block: "nearest" });
+  }, [alert]);
 
   const errorText = (field: Field) => {
     const code = errors[field];
@@ -88,6 +151,10 @@ export function ContactForm() {
       changeValue(field, event.target.value);
     },
     onFocus: preloadChallenge,
+    // Without this, Chromium reports a half-typed email as invalid before any attempt (R2.5).
+    "aria-invalid": false,
+    // What's sent is fixed once it's sending, and success would discard any edit.
+    readOnly: sending,
   });
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
@@ -113,7 +180,6 @@ export function ContactForm() {
     );
   }
 
-  const sending = status === "sending";
   return (
     <Card as="section" variant="outlined" aria-labelledby={headingId} className={styles.card}>
       <Stack gap="md">
@@ -123,7 +189,7 @@ export function ContactForm() {
         <noscript>
           <Typography>{content.noScript}</Typography>
         </noscript>
-        <form noValidate onSubmit={handleSubmit}>
+        <form ref={formRef} noValidate onSubmit={handleSubmit}>
           {/* A disabled fieldset stops native submission, so a message can't end up in a URL (R4.1). */}
           <fieldset disabled={!hydrated} className={styles.controls}>
             <Stack gap="md">
@@ -145,15 +211,34 @@ export function ContactForm() {
               <Typography variant="small" tone="muted">
                 {content.privacy}
               </Typography>
-              <div ref={challengeRef} className={styles.challenge} />
-              {alert === "failed" && <FailureAlert message={content.sendFailed} />}
-              {alert === "challenge" && <FailureAlert message={content.challengeFailed} />}
-              <div>
-                <Button type="submit" variant="primary" onFocus={preloadChallenge}>
-                  {sending ? content.sending : content.submit}
-                </Button>
-              </div>
-              <VisuallyHidden role="status">{sending ? content.sending : ""}</VisuallyHidden>
+              <Stack gap="md" ref={submitAreaRef}>
+                {alert === "failed" && <FailureAlert message={content.sendFailed} />}
+                {alert === "challenge" && <FailureAlert message={content.challengeFailed} />}
+                {challengeWaiting && (
+                  <Typography ref={promptRef} tabIndex={-1}>
+                    {content.challengePrompt}
+                  </Typography>
+                )}
+                <div>
+                  <div
+                    ref={challengeRef}
+                    className={challengeWaiting ? styles.challengeWaiting : undefined}
+                  />
+                  <Button
+                    ref={submitRef}
+                    type="submit"
+                    variant="primary"
+                    onFocus={preloadChallenge}
+                  >
+                    {challengeWaiting
+                      ? content.waiting
+                      : sending
+                        ? content.sending
+                        : content.submit}
+                  </Button>
+                </div>
+              </Stack>
+              <VisuallyHidden role="status" ref={statusRef} />
             </Stack>
           </fieldset>
         </form>

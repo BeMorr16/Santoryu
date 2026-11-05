@@ -3,6 +3,14 @@
   max-inline-size: var(--type-measure-text);
 }
 
+/*
+ * An outlined card has no fill, and custom themes' contrast checks don't measure text against the
+ * backdrop behind it, so they get an opaque surface, as glass cards do (decision 0017).
+ */
+:global(:root[data-custom-theme]) .card {
+  background-color: var(--color-surface-raised);
+}
+
 /* A bare group: its only job is disabling the controls until hydration (contact-form R4.1). */
 .controls {
   min-inline-size: 0;
@@ -24,9 +32,12 @@
   margin-block-start: calc((1lh - 1em) / 2);
 }
 
-/* Takes up room only once Cloudflare shows the widget (R5.3). */
-.challenge:empty {
-  display: none;
+/*
+ * Takes up room only while Cloudflare shows the widget (R5.3). It's never display: none, which could
+ * stop the widget running, and the real widget always leaves hidden nodes inside it.
+ */
+.challengeWaiting {
+  margin-block-end: var(--space-stack-md);
 }
 
 /* No inline style, which the CSP would block. The message in <noscript> replaces these (R4.2). */

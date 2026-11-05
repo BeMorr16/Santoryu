@@ -7,6 +7,7 @@ import {
   trimmed,
   validate,
   type Field,
+  type FieldErrorCode,
   type FieldErrors,
   type FormValues,
 } from "./model.ts";
@@ -16,8 +17,14 @@ export type FormStatus = "editing" | "sending" | "sent";
 
 export type FormAlert = "failed" | "challenge" | null;
 
-/** Where focus should go next. A new object each time, so asking twice moves focus twice. */
-export type FocusRequest = { target: Field | "heading" } | null;
+/**
+ * Where focus should go next. A new object each time, so asking twice moves focus twice. `code` is
+ * the error to announce if that field already has focus, since focusing it again says nothing.
+ */
+export type FocusRequest = {
+  target: Field | "heading" | "prompt" | "submit";
+  code?: FieldErrorCode | undefined;
+} | null;
 
 export interface UseContactFormOptions {
   /** Where Cloudflare can show the widget if it needs the visitor to interact. */
@@ -37,11 +44,18 @@ export function useContactForm({
   const [status, setStatus] = useState<FormStatus>("editing");
   const [alert, setAlert] = useState<FormAlert>(null);
   const [focusRequest, setFocusRequest] = useState<FocusRequest>(null);
+  const [challengeWaiting, setChallengeWaiting] = useState(false);
 
   function showErrors(found: FieldErrors) {
     setErrors(found);
     const target = firstInvalidField(found);
-    if (target) setFocusRequest({ target });
+    if (target) setFocusRequest({ target, code: found[target] });
+  }
+
+  /** A failure shows an alert, and the widget closing can drop focus to the page (WCAG 2.4.3). */
+  function showAlert(next: "failed" | "challenge") {
+    setAlert(next);
+    setFocusRequest({ target: "submit" });
   }
 
   /** An error appears only after a submit attempt, then follows the field's value (R2.4, R2.5). */
@@ -54,25 +68,35 @@ export function useContactForm({
 
   async function submit() {
     if (status === "sending") return;
+    setAlert(null);
     const found = validate(values);
     if (firstInvalidField(found)) {
       showErrors(found);
       return;
     }
     setErrors({});
-    setAlert(null);
     setStatus("sending");
 
     const container = challengeContainer.current;
     let challengeToken: string;
     try {
       if (!container) throw new Error("The form isn't mounted.");
-      challengeToken = await requestToken(container);
+      challengeToken = await requestToken(container, {
+        onInteractive: () => {
+          setChallengeWaiting(true);
+          setFocusRequest({ target: "prompt" });
+        },
+        onInteractiveEnd: () => {
+          setChallengeWaiting(false);
+        },
+      });
     } catch {
+      setChallengeWaiting(false);
       setStatus("editing");
-      setAlert("challenge");
+      showAlert("challenge");
       return;
     }
+    setChallengeWaiting(false);
 
     const result = await sendMessage({ ...trimmed(values), challengeToken });
     if (result.kind === "sent") {
@@ -82,7 +106,7 @@ export function useContactForm({
     }
     setStatus("editing");
     if (result.kind === "fields") showErrors(result.errors);
-    else setAlert(result.kind === "challenge" ? "challenge" : "failed");
+    else showAlert(result.kind === "challenge" ? "challenge" : "failed");
   }
 
   function reset() {
@@ -93,5 +117,15 @@ export function useContactForm({
     setFocusRequest({ target: "name" });
   }
 
-  return { values, errors, status, alert, focusRequest, changeValue, submit, reset };
+  return {
+    values,
+    errors,
+    status,
+    alert,
+    focusRequest,
+    challengeWaiting,
+    changeValue,
+    submit,
+    reset,
+  };
 }

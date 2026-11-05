@@ -28,6 +28,8 @@ export const contactFormContent = {
   },
   submit: "Send message",
   sending: "Sending…",
+  waiting: "Waiting for the check…",
+  challengePrompt: "One more step: please complete the check below to send your message.",
   privacy:
     "Your message goes to my inbox and isn't stored on this site. Cloudflare Turnstile helps block bots, and it receives your IP address.",
   successHeading: "Message sent",

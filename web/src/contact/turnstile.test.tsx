@@ -10,6 +10,10 @@ type Options = {
   "error-callback": () => void;
   "expired-callback": () => void;
   "timeout-callback": () => void;
+  "before-interactive-callback": () => void;
+  "after-interactive-callback": () => void;
+  size: string;
+  "refresh-timeout": string;
 };
 
 const scriptSelector = 'script[src*="challenges.cloudflare.com"]';
@@ -159,6 +163,103 @@ describe("requestToken (R5.2–R5.5)", () => {
 
     await expect(second).resolves.toBe("two");
     expect(remove).toHaveBeenCalledTimes(2);
+  });
+
+  it("uses the compact widget where the normal one wouldn't fit, and normal otherwise (WCAG 1.4.10)", async () => {
+    const { requestToken } = await loadModule();
+    const { render } = fakeTurnstile();
+    const sized = (width: number) => {
+      const container = document.createElement("div");
+      Object.defineProperty(container, "clientWidth", { value: width });
+      return container;
+    };
+
+    void requestToken(sized(258));
+    void requestToken(sized(300));
+    loadedScript();
+    await vi.waitFor(() => {
+      expect(render).toHaveBeenCalledTimes(2);
+    });
+
+    expect(render.mock.calls.map(([, options]) => options.size)).toEqual(["compact", "normal"]);
+  });
+
+  it("lets Cloudflare refresh its own check instead of failing the visitor (WCAG 2.2.1)", async () => {
+    const { options, token } = await started();
+
+    expect(options["refresh-timeout"]).toBe("auto");
+    options.callback("t");
+    await token;
+  });
+
+  it("reports when Cloudflare starts and stops waiting for the visitor", async () => {
+    const { requestToken } = await loadModule();
+    const { render } = fakeTurnstile();
+    const onInteractive = vi.fn();
+    const onInteractiveEnd = vi.fn();
+    const token = requestToken(document.createElement("div"), { onInteractive, onInteractiveEnd });
+    loadedScript();
+    await vi.waitFor(() => {
+      expect(render).toHaveBeenCalledOnce();
+    });
+    const options = render.mock.calls[0]?.[1] as Options;
+
+    options["before-interactive-callback"]();
+    expect(onInteractive).toHaveBeenCalledOnce();
+    expect(onInteractiveEnd).not.toHaveBeenCalled();
+    options["after-interactive-callback"]();
+    expect(onInteractiveEnd).toHaveBeenCalledOnce();
+
+    options.callback("t");
+    await expect(token).resolves.toBe("t");
+  });
+
+  it("sets no time limit while the visitor is working on the check, then starts one again (WCAG 2.2.1)", async () => {
+    vi.useFakeTimers();
+    const { requestToken } = await loadModule();
+    const { render, remove } = fakeTurnstile();
+    const token = requestToken(document.createElement("div"));
+    const outcome = expect(token).rejects.toThrow("challenge failed");
+    loadedScript();
+    await vi.advanceTimersByTimeAsync(0);
+    const options = render.mock.calls[0]?.[1] as Options;
+
+    options["before-interactive-callback"]();
+    await vi.advanceTimersByTimeAsync(600_000);
+    expect(remove).not.toHaveBeenCalled();
+
+    options["after-interactive-callback"]();
+    await vi.advanceTimersByTimeAsync(120_000);
+    await outcome;
+    expect(remove).toHaveBeenCalledOnce();
+  });
+
+  it("rejects when the script stalls and neither loads nor fails (R5.4)", async () => {
+    vi.useFakeTimers();
+    const { requestToken } = await loadModule();
+    const { render } = fakeTurnstile();
+    const token = requestToken(document.createElement("div"));
+    const outcome = expect(token).rejects.toThrow("challenge failed");
+
+    await vi.advanceTimersByTimeAsync(120_000);
+
+    await outcome;
+    expect(render).not.toHaveBeenCalled();
+  });
+
+  it("doesn't render a widget if the script loads after the limit passed", async () => {
+    vi.useFakeTimers();
+    const { requestToken } = await loadModule();
+    const { render } = fakeTurnstile();
+    const token = requestToken(document.createElement("div"));
+    const outcome = expect(token).rejects.toThrow("challenge failed");
+    await vi.advanceTimersByTimeAsync(120_000);
+    await outcome;
+
+    loadedScript();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(render).not.toHaveBeenCalled();
   });
 
   it("rejects when no callback fires within the overall limit", async () => {
