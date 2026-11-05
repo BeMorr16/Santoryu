@@ -52,7 +52,7 @@ describe("ContactApi: function and URL (R8.2, R8.3, R9.3, R11.1, R11.3)", () => 
       Runtime: "java25",
       Architectures: ["arm64"],
       Handler: "com.benmorrison.contact.ContactHandler",
-      MemorySize: 512,
+      MemorySize: 1024,
       Timeout: 12,
       SnapStart: { ApplyOn: "PublishedVersions" },
     });
