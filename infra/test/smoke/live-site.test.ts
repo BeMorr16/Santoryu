@@ -290,14 +290,15 @@ describe("R4 security headers", () => {
     }
   });
 
-  it("R4.6: HSTS preload readiness, except the preload directive", async () => {
-    // Same-host HTTP→HTTPS redirect, HTTPS on www, and HSTS (≥ 1 year, includeSubDomains) on the
-    // apex and on HTTPS redirects.
+  it("R4.6: HSTS preload readiness", async () => {
+    // Same-host HTTP→HTTPS redirect, HTTPS on www, and HSTS (≥ 1 year, includeSubDomains, preload)
+    // on the apex and on HTTPS redirects.
     expectRedirect(await request("/", { scheme: "http" }), `https://${apex}/`);
     for (const response of [await request("/"), await request("/", { host: www })]) {
       const hsts = response.headers.get("strict-transport-security") ?? "";
       expect(Number(/max-age=(\d+)/.exec(hsts)?.[1])).toBeGreaterThanOrEqual(31_536_000);
       expect(hsts).toContain("includeSubDomains");
+      expect(hsts).toContain("preload");
     }
   });
 });

@@ -5,7 +5,7 @@
 
 /** Sent on every function-handled response, including function-generated redirects. */
 export const SECURITY_HEADERS = {
-  "strict-transport-security": "max-age=63072000; includeSubDomains",
+  "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
   "x-content-type-options": "nosniff",
   "referrer-policy": "strict-origin-when-cross-origin",
   "x-frame-options": "DENY",

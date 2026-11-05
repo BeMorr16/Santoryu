@@ -4,7 +4,7 @@ import { buildCsp, cspParts, SECURITY_HEADERS } from "../src/security-headers.ts
 describe("SECURITY_HEADERS", () => {
   it("is exactly the static header set from design §5.1, with lower-case names", () => {
     expect(SECURITY_HEADERS).toEqual({
-      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
       "x-content-type-options": "nosniff",
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
