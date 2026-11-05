@@ -13,7 +13,7 @@ const siteDir = resolve(infraDir, config.siteDir);
 const manifest = readSiteManifest(resolve(infraDir, config.siteManifest), siteDir);
 
 defineApp(app, {
-  config: { ...config, siteDir },
+  config: { ...config, siteDir, contactArtifact: resolve(infraDir, config.contactArtifact) },
   manifest,
   account: process.env.CDK_DEFAULT_ACCOUNT,
 });

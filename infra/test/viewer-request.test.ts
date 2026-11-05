@@ -13,6 +13,7 @@ const testConfig = {
     "/design-system/index.html",
     "/design-system/tokens/index.html",
     "/robots.txt",
+    "/.well-known/security.txt",
     "/sitemap.xml",
   ],
 };
@@ -133,6 +134,7 @@ describe("viewer-request: routing (R2.1, R2.2, R2.5, R2.8)", () => {
     ["/design-system/tokens", "/design-system/tokens/index.html"],
     ["/design-system/components", "/design-system/components/index.html"],
     ["/robots.txt", "/robots.txt"],
+    ["/.well-known/security.txt", "/.well-known/security.txt"],
     ["/sitemap.xml", "/sitemap.xml"],
     ["/404.html", "/404.html"],
     ["/assets/app-1a2b.js", "/assets/app-1a2b.js"],

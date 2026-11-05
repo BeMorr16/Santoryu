@@ -1,0 +1,1 @@
+A stand-in for the contact service jar, so cdk synth in tests needs no Java build.

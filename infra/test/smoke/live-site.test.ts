@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { connect, type ConnectionOptions, type TLSSocket } from "node:tls";
 import { JSDOM } from "jsdom";
 import { describe, expect, it } from "vitest";
-import { buildCsp, SECURITY_HEADERS } from "../../src/security-headers.ts";
+import { buildCsp, CHALLENGE_ORIGIN, SECURITY_HEADERS } from "../../src/security-headers.ts";
 
 const cdkJson = JSON.parse(readFileSync(new URL("../../cdk.json", import.meta.url), "utf8")) as {
   context: Record<string, string>;
@@ -280,7 +280,7 @@ describe("R4 security headers", () => {
         csp.split("; ").find((directive) => directive.startsWith("script-src ")) ?? "";
       const hashes = scriptSrc
         .split(" ")
-        .slice(2)
+        .filter((source) => source.startsWith("'sha256-"))
         .map((source) => source.replace(/^'(.*)'$/, "$1"));
       expect(csp, path).toBe(buildCsp(hashes));
       const document = new JSDOM(await response.text()).window.document;
@@ -290,14 +290,15 @@ describe("R4 security headers", () => {
     }
   });
 
-  it("R4.6: HSTS preload readiness, except the preload directive", async () => {
-    // Same-host HTTP→HTTPS redirect, HTTPS on www, and HSTS (≥ 1 year, includeSubDomains) on the
-    // apex and on HTTPS redirects.
+  it("R4.6: HSTS preload readiness", async () => {
+    // Same-host HTTP→HTTPS redirect, HTTPS on www, and HSTS (≥ 1 year, includeSubDomains, preload)
+    // on the apex and on HTTPS redirects.
     expectRedirect(await request("/", { scheme: "http" }), `https://${apex}/`);
     for (const response of [await request("/"), await request("/", { host: www })]) {
       const hsts = response.headers.get("strict-transport-security") ?? "";
       expect(Number(/max-age=(\d+)/.exec(hsts)?.[1])).toBeGreaterThanOrEqual(31_536_000);
       expect(hsts).toContain("includeSubDomains");
+      expect(hsts).toContain("preload");
     }
   });
 });
@@ -318,6 +319,64 @@ describe("R10 crawl files", () => {
       expect(url.hostname, loc).toBe(apex);
       expect((await request(url.pathname)).status, loc).toBe(200);
     }
+  });
+});
+
+describe("contact-form R12.3 the contact API, with no real email", () => {
+  const post = (path: string, body: string, headers: Record<string, string>) =>
+    fetch(`https://${apex}${path}`, {
+      method: "POST",
+      redirect: "manual",
+      headers: {
+        "content-type": "application/json",
+        "x-amz-content-sha256": createHash("sha256").update(body).digest("hex"),
+        ...headers,
+      },
+      body,
+    });
+
+  it("answers an invalid body with a 400 and JSON, through CloudFront and the signed origin", async () => {
+    const response = await post("/api/contact", "{}", { origin: `https://${apex}` });
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get("content-type")).toBe("application/json");
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(await response.json()).toEqual({
+      error: "validation",
+      fields: { name: "missing", email: "missing", message: "missing" },
+    });
+  });
+
+  it("refuses another origin before reading the body", async () => {
+    const response = await post("/api/contact", "{}", { origin: "https://example.com" });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "badRequest" });
+  });
+
+  it("allows Cloudflare's script and frame in the policy (R10.1)", async () => {
+    const csp = (await request("/contact")).headers.get("content-security-policy") ?? "";
+
+    expect(csp.split("; ")).toContainEqual(expect.stringMatching(/^script-src 'self' https:/));
+    expect(csp).toContain(`script-src 'self' ${CHALLENGE_ORIGIN}`);
+    expect(csp).toContain(`frame-src ${CHALLENGE_ORIGIN}`);
+  });
+});
+
+describe("contact-form R14 security.txt", () => {
+  it("is served as UTF-8 plain text, with the contact page and a future expiry", async () => {
+    const response = await request("/.well-known/security.txt");
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("text/plain; charset=utf-8");
+    expect(response.headers.get("cache-control")).toBe(REVALIDATE);
+    const text = await response.text();
+    expect(text).toContain(`Contact: https://${apex}/contact\n`);
+    expect(text).toContain("Preferred-Languages: en\n");
+    const expires = new Date(/^Expires: (.+)$/m.exec(text)?.[1] ?? "").getTime();
+    expect(expires).toBeGreaterThan(Date.now());
+    expect(expires - Date.now()).toBeLessThan(365 * 24 * 60 * 60 * 1000);
   });
 });
 

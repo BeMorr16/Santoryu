@@ -34,6 +34,8 @@ describe("TextField page examples (ds-tokens §11.6)", () => {
       "Hint",
       "Error",
       "Required",
+      "Optional",
+      "Multiline",
       "Sizes",
       "Search",
       "Clearable",
@@ -46,6 +48,12 @@ describe("TextField page examples (ds-tokens §11.6)", () => {
     );
     expect(within(example("Error")).getByRole("textbox")).toBeInvalid();
     expect(within(example("Required")).getByRole("textbox")).toBeRequired();
+    expect(
+      within(example("Optional")).getByRole("textbox", { name: "Role or company (optional)" }),
+    ).not.toBeRequired();
+    expect(within(example("Multiline")).getByRole("textbox", { name: "Message" }).tagName).toBe(
+      "TEXTAREA",
+    );
     expect(within(example("Sizes")).getAllByRole("textbox")).toHaveLength(2);
     expect(
       within(example("Search")).getByRole("button", { name: "Clear Search the docs" }),
@@ -82,10 +90,13 @@ describe("TextField page examples (ds-tokens §11.6)", () => {
         [
           "label",
           "hideLabel",
+          "optional",
           "hint",
           "error",
           "type",
           "size",
+          "multiline",
+          "rows",
           "iconStart",
           "clearable",
           "clearLabel",
@@ -100,7 +111,7 @@ describe("TextField page examples (ds-tokens §11.6)", () => {
       within(keyboard)
         .getAllByRole("rowheader")
         .map((cell) => cell.textContent),
-    ).toEqual(["Tab", "Escape"]);
+    ).toEqual(["Tab", "Escape", "Enter"]);
     expect(screen.getByText(/^A native <input> with a visible <label>/)).toBeInTheDocument();
   });
 });

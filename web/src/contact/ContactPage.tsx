@@ -4,8 +4,9 @@ import { Typography } from "../components/Typography/Typography.tsx";
 import { contactContent } from "../content/contact.ts";
 import page from "../shell/page.module.css";
 import { githubUrl, linkedinUrl } from "../site.config.ts";
+import { ContactForm } from "./ContactForm.tsx";
 
-/** The contact page: heading, where the owner is based, the invitation, then the links (R2.1). */
+/** The contact page: heading, where the owner is based, the invitation, the links, then the form (R2.1). */
 export function ContactPage() {
   return (
     <Stack gap="md" className={page.column}>
@@ -24,6 +25,7 @@ export function ContactPage() {
           {contactContent.githubLabel}
         </Link>
       </Stack>
+      <ContactForm />
     </Stack>
   );
 }

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { Match, Template } from "aws-cdk-lib/assertions";
 import { beforeAll, describe, expect, it } from "vitest";
 import { defineApp } from "../src/app.ts";
+import { executionPolicyDescription } from "../src/ci-access-stack.ts";
 import type { SiteConfig } from "../src/config.ts";
 import { renderViewerRequest, renderViewerResponse } from "../src/edge-functions.ts";
 import { readSiteManifest } from "../src/site-manifest.ts";
@@ -151,8 +152,7 @@ describe("SiteStack: distribution (R1.2–R1.4, R1.9, R2.6, R3)", () => {
     });
   });
 
-  it("has one behavior: HTTPS redirect, GET/HEAD only, CachingOptimized, compression", () => {
-    expect(config()).not.toHaveProperty("CacheBehaviors");
+  it("has a default behavior: HTTPS redirect, GET/HEAD only, CachingOptimized, compression", () => {
     expect(config().DefaultCacheBehavior).toMatchObject({
       ViewerProtocolPolicy: "redirect-to-https",
       AllowedMethods: ["GET", "HEAD"],
@@ -229,8 +229,8 @@ describe("SiteStack: DNS (R1.5–R1.7)", () => {
     });
   });
 
-  it("creates only those five records and never deletes existing ones", () => {
-    template.resourceCountIs("AWS::Route53::RecordSet", 5);
+  it("creates only those five records, plus the contact API's three DKIM and one DMARC, and never deletes existing ones", () => {
+    template.resourceCountIs("AWS::Route53::RecordSet", 9);
     template.resourceCountIs("Custom::DeleteExistingRecordSet", 0);
   });
 });
@@ -249,6 +249,10 @@ describe.each([false, true])("tags and region with flatRatePlan %s (R5.6)", (fla
     "AWS::Logs::LogGroup",
     "AWS::IAM::OIDCProvider",
     "AWS::WAFv2::WebACL",
+    "AWS::SES::EmailIdentity",
+    "AWS::SNS::Topic",
+    "AWS::CloudWatch::Alarm",
+    "AWS::Events::Rule",
   ]);
 
   it("tags every taggable resource in both stacks project=personal-site, in us-east-1", () => {
@@ -290,9 +294,9 @@ describe("SiteStack: publish groups (R3.1–R3.5, R6.3)", () => {
   const html = "text/html; charset=utf-8";
   const hashes = manifest.scriptHashes.join(" ");
 
-  it("has five groups, all from the same uploaded build", () => {
+  it("has six groups, all from the same uploaded build", () => {
     const all = Object.values(deployments());
-    expect(all).toHaveLength(5);
+    expect(all).toHaveLength(6);
     const sources = new Set(
       all.map((deployment) => JSON.stringify(deployment.Properties.SourceObjectKeys)),
     );
@@ -334,10 +338,18 @@ describe("SiteStack: publish groups (R3.1–R3.5, R6.3)", () => {
     ],
     [
       "other",
-      ["assets/*", "*.html", "*.xml"],
+      ["assets/*", "*.html", "*.xml", ".well-known/security.txt"],
       undefined,
       true,
       { "cache-control": revalidate },
+      {},
+    ],
+    [
+      "security-txt",
+      ["*"],
+      [".well-known/security.txt"],
+      true,
+      { "cache-control": revalidate, "content-type": "text/plain; charset=utf-8" },
       {},
     ],
   ] as const)(
@@ -352,14 +364,14 @@ describe("SiteStack: publish groups (R3.1–R3.5, R6.3)", () => {
     },
   );
 
-  it("invalidates /* and waits for it only from pages, after the other four groups", () => {
+  it("invalidates /* and waits for it only from pages, after the other five groups", () => {
     const [, pages] = group("pages");
     expect(pages.Properties).toMatchObject({
       DistributionId: { Ref: expect.stringMatching(/^SiteDistribution/) as unknown },
       DistributionPaths: ["/*"],
       WaitForDistributionInvalidation: true,
     });
-    for (const id of ["assets", "not-found", "xml", "other"]) {
+    for (const id of ["assets", "not-found", "xml", "other", "security-txt"]) {
       const [logicalId, deployment] = group(id);
       expect(pages.DependsOn, id).toContain(logicalId);
       expect(deployment.Properties).not.toHaveProperty("DistributionId");
@@ -371,13 +383,13 @@ describe("SiteStack: publish groups (R3.1–R3.5, R6.3)", () => {
     expect(assets.DependsOn ?? []).not.toEqual(
       expect.arrayContaining([expect.stringMatching(/CustomResource/)]),
     );
-    for (const id of ["pages", "not-found", "xml", "other"]) {
+    for (const id of ["pages", "not-found", "xml", "other", "security-txt"]) {
       expect(group(id)[1].DependsOn, id).toContain(assetsId);
     }
   });
 
-  it("runs one shared handler that logs to a group kept for one month", () => {
-    template.resourceCountIs("AWS::Lambda::Function", 1);
+  it("runs one shared handler, beside the contact API's, that logs to a group kept for one month", () => {
+    template.resourceCountIs("AWS::Lambda::Function", 2);
     template.hasResourceProperties("AWS::Logs::LogGroup", { RetentionInDays: 30 });
     template.hasResourceProperties("AWS::Lambda::Function", {
       LoggingConfig: { LogGroup: { Ref: Match.stringLikeRegexp("^PublishLogGroup") } },
@@ -409,6 +421,34 @@ describe("SiteStack: flat-rate plan flag on (R8.1, R8.2)", () => {
           Action: { Block: {} },
           Statement: {
             RateBasedStatement: { AggregateKeyType: "IP", Limit: 750, EvaluationWindowSec: 300 },
+          },
+          VisibilityConfig: {
+            CloudWatchMetricsEnabled: true,
+            SampledRequestsEnabled: true,
+            MetricName: Match.anyValue(),
+          },
+        },
+        {
+          Name: "contact-rate-limit-per-ip",
+          Priority: 1,
+          Action: { Block: {} },
+          Statement: {
+            RateBasedStatement: {
+              AggregateKeyType: "IP",
+              Limit: 10,
+              EvaluationWindowSec: 300,
+              ScopeDownStatement: {
+                ByteMatchStatement: {
+                  FieldToMatch: { UriPath: {} },
+                  PositionalConstraint: "ENDS_WITH",
+                  SearchString: "/api/contact",
+                  TextTransformations: [
+                    { Priority: 0, Type: "URL_DECODE" },
+                    { Priority: 1, Type: "NORMALIZE_PATH" },
+                  ],
+                },
+              },
+            },
           },
           VisibilityConfig: {
             CloudWatchMetricsEnabled: true,
@@ -577,6 +617,11 @@ describe.each([false, true])("safety checks with flatRatePlan %s", (flatRatePlan
     type Statement = { Effect: string; Action: string | string[]; Resource: unknown };
     const statements = stacks.flatMap((stack) =>
       resources(stack).flatMap((resource) => {
+        // Scoped by service, not by resource, as approved (contact-form R17.1). Its own tests are
+        // in ci-access-stack.test.ts.
+        if (resource.Properties?.Description === executionPolicyDescription) return [];
+        // A ceiling that grants nothing itself, also tested there.
+        if (resource.Properties?.ManagedPolicyName === "SiteStack-RoleBoundary") return [];
         if (resource.Type === "AWS::IAM::Policy" || resource.Type === "AWS::IAM::ManagedPolicy") {
           return (resource.Properties?.PolicyDocument as { Statement: Statement[] }).Statement;
         }

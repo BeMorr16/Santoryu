@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { renderRobots, renderSitemap, writeCrawlFiles } from "./crawl-files.ts";
+import { renderRobots, renderSecurityTxt, renderSitemap, writeCrawlFiles } from "./crawl-files.ts";
 
 const siteUrl = "https://example.test";
 
@@ -40,6 +40,41 @@ describe("renderRobots", () => {
   });
 });
 
+describe("renderSecurityTxt (contact-form R14)", () => {
+  const now = new Date("2026-11-05T15:30:45.000Z");
+
+  it("has the contact page, an expiry and the language, in RFC 9116's form", () => {
+    expect(renderSecurityTxt(siteUrl, now)).toBe(
+      "Contact: https://example.test/contact\n" +
+        "Expires: 2027-11-04T00:00:00.000Z\n" +
+        "Preferred-Languages: en\n",
+    );
+  });
+
+  it("expires under a year out, however late in the day it's built", () => {
+    const line = renderSecurityTxt(siteUrl, new Date("2028-02-29T23:59:59.000Z"))
+      .split("\n")
+      .find((text) => text.startsWith("Expires: "));
+    const expires = new Date(line?.slice("Expires: ".length) ?? "");
+
+    expect(expires.getTime() - Date.UTC(2028, 1, 29, 23, 59, 59)).toBeLessThan(
+      365 * 24 * 60 * 60 * 1000,
+    );
+    expect(expires.getTime()).toBeGreaterThan(Date.UTC(2028, 1, 29, 23, 59, 59));
+  });
+
+  it("gives the same file for the whole day, so a rebuild changes nothing", () => {
+    expect(renderSecurityTxt(siteUrl, new Date("2026-11-05T00:00:01Z"))).toBe(
+      renderSecurityTxt(siteUrl, new Date("2026-11-05T23:59:59Z")),
+    );
+  });
+
+  it("publishes no email address", () => {
+    expect(renderSecurityTxt(siteUrl, now)).not.toContain("@");
+    expect(renderSecurityTxt(siteUrl, now)).not.toContain("mailto:");
+  });
+});
+
 describe("writeCrawlFiles", () => {
   let clientDir: string;
 
@@ -49,6 +84,16 @@ describe("writeCrawlFiles", () => {
 
   afterEach(async () => {
     await rm(clientDir, { recursive: true, force: true });
+  });
+
+  it("writes security.txt under .well-known, from the build's time", async () => {
+    const now = new Date("2026-11-05T12:00:00Z");
+
+    await writeCrawlFiles(clientDir, ["/"], siteUrl, now);
+
+    expect(await readFile(join(clientDir, ".well-known/security.txt"), "utf8")).toBe(
+      renderSecurityTxt(siteUrl, now),
+    );
   });
 
   it("writes sitemap.xml and robots.txt at the build root", async () => {

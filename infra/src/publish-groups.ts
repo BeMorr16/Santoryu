@@ -19,6 +19,7 @@ export interface PublishGroup {
 const IMMUTABLE = "public, max-age=31536000, immutable";
 const REVALIDATE = "public, max-age=0, must-revalidate";
 const HTML = "text/html; charset=utf-8";
+const SECURITY_TXT = ".well-known/security.txt";
 
 /** The groups in deploy order: `assets` first, `pages` last (it invalidates the cache). */
 export function publishGroups(scriptHashes: readonly string[]): PublishGroup[] {
@@ -52,8 +53,18 @@ export function publishGroups(scriptHashes: readonly string[]): PublishGroup[] {
     },
     {
       id: "other",
-      exclude: ["assets/*", "*.html", "*.xml"],
+      exclude: ["assets/*", "*.html", "*.xml", SECURITY_TXT],
       cacheControl: REVALIDATE,
+      metadata: {},
+      prune: true,
+    },
+    {
+      // RFC 9116 requires this exact type, and Python's MIME table omits the charset.
+      id: "security-txt",
+      exclude: ["*"],
+      include: [SECURITY_TXT],
+      cacheControl: REVALIDATE,
+      contentType: "text/plain; charset=utf-8",
       metadata: {},
       prune: true,
     },

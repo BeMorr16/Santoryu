@@ -12,6 +12,7 @@ import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import type { Construct } from "constructs";
 import { PROJECT_TAG, type SiteConfig } from "./config.ts";
+import { ContactApi } from "./contact-api.ts";
 import { renderViewerRequest, renderViewerResponse } from "./edge-functions.ts";
 import { publishGroups } from "./publish-groups.ts";
 import type { SiteManifest } from "./site-manifest.ts";
@@ -39,7 +40,7 @@ export class SiteStack extends Stack {
     });
 
     // Imported, not looked up, so synth needs no AWS credentials (R5.7).
-    const zone = route53.HostedZone.fromHostedZoneAttributes(this, "Zone", {
+    const zone = route53.PublicHostedZone.fromPublicHostedZoneAttributes(this, "Zone", {
       hostedZoneId: config.hostedZoneId,
       zoneName: config.domainName,
     });
@@ -73,8 +74,10 @@ export class SiteStack extends Stack {
 
     // WAF is included at $0 on the Free flat-rate plan; on pay-as-you-go it would be ~$6/mo (R8.3).
     const webAcl = config.flatRatePlan
-      ? this.rateLimitWebAcl(config.rateLimitPer5Minutes)
+      ? this.rateLimitWebAcl(config.rateLimitPer5Minutes, config.contactRateLimitPer5Minutes)
       : undefined;
+
+    const contactApi = new ContactApi(this, "ContactApi", { config, zone });
 
     const distribution = new cloudfront.Distribution(this, "SiteDistribution", {
       comment: config.domainName,
@@ -94,6 +97,19 @@ export class SiteStack extends Stack {
           { function: viewerRequest, eventType: cloudfront.FunctionEventType.VIEWER_REQUEST },
           { function: viewerResponse, eventType: cloudfront.FunctionEventType.VIEWER_RESPONSE },
         ],
+      },
+      // The viewer-request function is left off: it rewrites unknown paths to the 404 page.
+      additionalBehaviors: {
+        "/api/contact": {
+          origin: origins.FunctionUrlOrigin.withOriginAccessControl(contactApi.functionUrl),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.HTTPS_ONLY,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+          cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+          functionAssociations: [
+            { function: viewerResponse, eventType: cloudfront.FunctionEventType.VIEWER_RESPONSE },
+          ],
+        },
       },
       errorResponses: [notFound(403), notFound(404)],
       webAclId: webAcl?.attrArn,
@@ -115,6 +131,7 @@ export class SiteStack extends Stack {
     new CfnOutput(this, "DistributionId", { value: distribution.distributionId });
     new CfnOutput(this, "DistributionDomainName", { value: distribution.distributionDomainName });
     new CfnOutput(this, "BucketName", { value: bucket.bucketName });
+    new CfnOutput(this, "ContactFunctionUrl", { value: contactApi.functionUrl.url });
 
     if (webAcl) {
       // L1: PricingPlanManager has no L2. A rejected subscription fails and rolls back the deploy (R8.4).
@@ -196,8 +213,11 @@ export class SiteStack extends Stack {
     pages.node.addDependency(assets, ...rest);
   }
 
-  /** L1: WAFv2 has no L2. One IP rate-based rule, blocking over-limit IPs per 5 minutes (R8.2). */
-  private rateLimitWebAcl(limit: number): wafv2.CfnWebACL {
+  /**
+   * L1: WAFv2 has no L2. IP rate-based rules that block over-limit IPs per 5 minutes: one across the
+   * site (R8.2), and a stricter one on the contact API alone (contact-form R8.1).
+   */
+  private rateLimitWebAcl(limit: number, contactLimit: number): wafv2.CfnWebACL {
     const visibility = (metricName: string) => ({
       cloudWatchMetricsEnabled: true,
       sampledRequestsEnabled: true,
@@ -216,6 +236,34 @@ export class SiteStack extends Stack {
             rateBasedStatement: { aggregateKeyType: "IP", limit, evaluationWindowSec: 300 },
           },
           visibilityConfig: visibility("rate-limit-per-ip"),
+        },
+        {
+          name: "contact-rate-limit-per-ip",
+          priority: 1,
+          action: { block: {} },
+          statement: {
+            rateBasedStatement: {
+              aggregateKeyType: "IP",
+              limit: contactLimit,
+              evaluationWindowSec: 300,
+              scopeDownStatement: {
+                byteMatchStatement: {
+                  fieldToMatch: { uriPath: {} },
+                  // CloudFront normalizes a path to pick a behavior, then sends the raw one, so
+                  // /api//contact and //api/contact both reach the function. NORMALIZE_PATH leaves
+                  // leading slashes alone, so match the end. Anything extra only rate-limits a
+                  // path that gets the 404 page anyway.
+                  positionalConstraint: "ENDS_WITH",
+                  searchString: "/api/contact",
+                  textTransformations: [
+                    { priority: 0, type: "URL_DECODE" },
+                    { priority: 1, type: "NORMALIZE_PATH" },
+                  ],
+                },
+              },
+            },
+          },
+          visibilityConfig: visibility("contact-rate-limit-per-ip"),
         },
       ],
     });

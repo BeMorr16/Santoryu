@@ -4,7 +4,7 @@ import { buildCsp, cspParts, SECURITY_HEADERS } from "../src/security-headers.ts
 describe("SECURITY_HEADERS", () => {
   it("is exactly the static header set from design §5.1, with lower-case names", () => {
     expect(SECURITY_HEADERS).toEqual({
-      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
       "x-content-type-options": "nosniff",
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
@@ -21,7 +21,8 @@ describe("SECURITY_HEADERS", () => {
 describe("buildCsp", () => {
   it("allows only same-origin scripts when there are no inline script hashes", () => {
     expect(buildCsp([])).toBe(
-      "default-src 'none'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; " +
+      "default-src 'none'; script-src 'self' https://challenges.cloudflare.com; " +
+        "frame-src https://challenges.cloudflare.com; style-src 'self'; style-src-attr 'unsafe-inline'; " +
         "img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; " +
         "base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; " +
         "upgrade-insecure-requests",
@@ -30,7 +31,8 @@ describe("buildCsp", () => {
 
   it("adds each hash as a quoted script-src source, in order", () => {
     expect(buildCsp(["sha256-a", "sha256-b"])).toBe(
-      "default-src 'none'; script-src 'self' 'sha256-a' 'sha256-b'; style-src 'self'; " +
+      "default-src 'none'; script-src 'self' https://challenges.cloudflare.com 'sha256-a' 'sha256-b'; " +
+        "frame-src https://challenges.cloudflare.com; style-src 'self'; " +
         "style-src-attr 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; " +
         "manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; " +
         "object-src 'none'; upgrade-insecure-requests",
@@ -41,7 +43,7 @@ describe("buildCsp", () => {
     const scriptSrc = buildCsp(["sha256-a"])
       .split("; ")
       .find((directive) => directive.startsWith("script-src "));
-    expect(scriptSrc).toBe("script-src 'self' 'sha256-a'");
+    expect(scriptSrc).toBe("script-src 'self' https://challenges.cloudflare.com 'sha256-a'");
   });
 });
 

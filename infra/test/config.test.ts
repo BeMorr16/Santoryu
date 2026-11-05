@@ -15,7 +15,11 @@ const validContext = {
   "personal-site:monthlyBudgetUsd": 5,
   "personal-site:siteDir": "test/fixtures/site",
   "personal-site:siteManifest": "test/fixtures/site-manifest.json",
+  "personal-site:contactArtifact": "test/fixtures/contact-artifact",
+  "personal-site:contactRateLimitPer5Minutes": 10,
+  "personal-site:turnstileSecretParameter": "/test/contact/turnstile-secret",
   budgetEmail: "alerts@example.test",
+  contactEmail: "owner@example.test",
 };
 
 type ContextKey = keyof typeof validContext;
@@ -42,6 +46,10 @@ describe("readConfig", () => {
       siteDir: "test/fixtures/site",
       siteManifest: "test/fixtures/site-manifest.json",
       budgetEmail: "alerts@example.test",
+      contactArtifact: "test/fixtures/contact-artifact",
+      contactRateLimitPer5Minutes: 10,
+      turnstileSecretParameter: "/test/contact/turnstile-secret",
+      contactEmail: "owner@example.test",
     });
   });
 
@@ -105,8 +113,26 @@ describe("readConfig", () => {
     ["personal-site:siteManifest", 7],
     ["budgetEmail", "not-an-email"],
     ["budgetEmail", "a@b"],
+    ["contactEmail", "not-an-email"],
+    ["contactEmail", "a@b"],
+    ["personal-site:contactArtifact", ""],
+    ["personal-site:contactRateLimitPer5Minutes", 0],
+    ["personal-site:turnstileSecretParameter", "no-leading-slash"],
+    ["personal-site:turnstileSecretParameter", "/has space"],
   ])("throws naming %s when it is %j", (key, value) => {
     expect(configWith({ [key]: value })).toThrow(`Invalid CDK context value "${key}"`);
+  });
+
+  it("throws with the --context hint when contactEmail is missing", () => {
+    expect(configWith({ contactEmail: undefined })).toThrow(
+      'Missing CDK context value "contactEmail" (pass --context contactEmail=…)',
+    );
+  });
+
+  it("does not echo an invalid contactEmail, which would leak into public CI logs", () => {
+    expect(configWith({ contactEmail: "someone@invalid" })).toThrow(
+      expect.objectContaining({ message: expect.not.stringContaining("someone") as unknown }),
+    );
   });
 
   it("does not echo an invalid budgetEmail, which would leak into public CI logs", () => {

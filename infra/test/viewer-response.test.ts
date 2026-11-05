@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderViewerResponse } from "../src/edge-functions.ts";
-import { buildCsp, SECURITY_HEADERS } from "../src/security-headers.ts";
+import { buildCsp, CHALLENGE_ORIGIN, SECURITY_HEADERS } from "../src/security-headers.ts";
 import { loadHandler } from "../src/edge-runtime.ts";
 
 interface Response {
@@ -10,12 +10,16 @@ interface Response {
 
 const handler = loadHandler(renderViewerResponse());
 
-function run(statusCode: number, headers: Record<string, string> = {}): Response {
+function run(
+  statusCode: number,
+  headers: Record<string, string> = {},
+  uri = "/index.html",
+): Response {
   const response: Response = {
     statusCode,
     headers: Object.fromEntries(Object.entries(headers).map(([name, value]) => [name, { value }])),
   };
-  return handler({ request: { method: "GET", uri: "/index.html" }, response }) as Response;
+  return handler({ request: { method: "GET", uri }, response }) as Response;
 }
 
 const hashes = "sha256-AAAA sha256-BBBB";
@@ -69,6 +73,27 @@ describe("viewer-response: CSP (R4.2)", () => {
     const { headers } = run(304, { "x-amz-meta-csp-script-hashes": hashes });
     expect(headers["content-security-policy"]).toEqual({
       value: buildCsp(["sha256-AAAA", "sha256-BBBB"]),
+    });
+  });
+});
+
+describe("viewer-response: the contact page and API (contact-form R10)", () => {
+  it("sends the one policy, with Cloudflare trusted, on the contact page and others alike", () => {
+    for (const uri of ["/contact/index.html", "/index.html", "/404.html"]) {
+      const { headers } = run(200, { "x-amz-meta-csp-script-hashes": hashes }, uri);
+      expect(headers["content-security-policy"]).toEqual({
+        value: buildCsp(["sha256-AAAA", "sha256-BBBB"]),
+      });
+      expect(headers["content-security-policy"]?.value).toContain(CHALLENGE_ORIGIN);
+    }
+  });
+
+  it("gives the API's 204 the security headers and keeps its no-store", () => {
+    const { headers, statusCode } = run(204, { "cache-control": "no-store" }, "/api/contact");
+    expect(statusCode).toBe(204);
+    expect(headers["cache-control"]).toEqual({ value: "no-store" });
+    expect(headers["strict-transport-security"]).toEqual({
+      value: SECURITY_HEADERS["strict-transport-security"],
     });
   });
 });

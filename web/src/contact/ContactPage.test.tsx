@@ -7,7 +7,7 @@ import { expectHydratesCleanly } from "../../test/component.tsx";
 import { Icon } from "../components/Icon/Icon.tsx";
 import buttonStyles from "../components/shared/button-styles.module.css";
 import typographyStyles from "../components/Typography/Typography.module.css";
-import { contactContent } from "../content/contact.ts";
+import { contactContent, contactFormContent } from "../content/contact.ts";
 import { githubUrl, linkedinUrl } from "../site.config.ts";
 import { ContactPage } from "./ContactPage.tsx";
 
@@ -25,12 +25,12 @@ function renderPage() {
 }
 
 describe("ContactPage (contact R2)", () => {
-  it("shows the h1, then the location, then the invitation, then the links, and nothing after (R2.1)", () => {
+  it("shows the h1, then the location, the invitation, the links, then the form, and nothing after (R2.1)", () => {
     const container = renderPage();
 
     const [column, ...rest] = [...container.children];
     expect(rest).toEqual([]);
-    const [h1, location, invitation, links, ...after] = [...(column?.children ?? [])];
+    const [h1, location, invitation, links, form, ...after] = [...(column?.children ?? [])];
     expect(h1).toBe(screen.getByRole("heading", { level: 1, name: contactContent.heading }));
     expect(h1).toHaveClass(typographyStyles.display ?? "");
     expect(location).toHaveTextContent(contactContent.location);
@@ -41,13 +41,14 @@ describe("ContactPage (contact R2)", () => {
       typographyStyles["tone-muted"] ?? "",
     );
     expect([...(links?.children ?? [])]).toEqual(screen.getAllByRole("link"));
+    expect(form).toBe(screen.getByRole("region", { name: contactFormContent.heading }));
     expect(after).toEqual([]);
   });
 
-  it("has exactly one heading, the h1 (R2.2)", () => {
+  it("has one h1, and the form's h2 under it (R2.2, contact-form R1.1)", () => {
     renderPage();
 
-    expect(screen.getAllByRole("heading")).toHaveLength(1);
+    expect(screen.getAllByRole("heading").map((heading) => heading.tagName)).toEqual(["H1", "H2"]);
   });
 
   it.each([
@@ -75,7 +76,7 @@ describe("ContactPage (contact R2)", () => {
     expect(container.innerHTML).not.toContain("mailto:");
   });
 
-  it("tabs LinkedIn, then GitHub (R5.3)", async () => {
+  it("tabs LinkedIn, then GitHub, then into the form (R5.3)", async () => {
     const user = userEvent.setup();
     renderPage();
 
@@ -83,13 +84,15 @@ describe("ContactPage (contact R2)", () => {
     expect(screen.getByRole("link", { name: contactContent.linkedinLabel })).toHaveFocus();
     await user.tab();
     expect(screen.getByRole("link", { name: contactContent.githubLabel })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole("textbox", { name: contactFormContent.labels.name })).toHaveFocus();
   });
 
   it("has no axe violations", async () => {
     await expectNoAxeViolations(renderPage());
   });
 
-  it("hydrates cleanly", () => {
-    expectHydratesCleanly(page);
+  it("hydrates cleanly, only enabling the form (contact-form R4.3)", () => {
+    expectHydratesCleanly(page, (html) => html.replace('<fieldset disabled=""', "<fieldset"));
   });
 });

@@ -2,6 +2,7 @@ import { readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig, type Plugin } from "vite";
+import { contactApiMock } from "./dev/contact-api-mock.ts";
 import { resolveStaticPath } from "./scripts/static-routing.ts";
 
 /** Makes `vite preview` route like the static host, so visual review sees each page's own HTML. */
@@ -36,7 +37,7 @@ function previewLikeStaticHost(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [reactRouter(), previewLikeStaticHost()],
+  plugins: [contactApiMock(), reactRouter(), previewLikeStaticHost()],
   // Resolves the `@/components/*` alias from web/tsconfig.json (ds-components design §11).
   resolve: { tsconfigPaths: true },
   // The CSP (img-src 'self', font-src 'self') blocks data: URIs, so never inline an asset (refinement R18.8).

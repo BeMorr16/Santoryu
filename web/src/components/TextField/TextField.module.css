@@ -21,6 +21,13 @@
   font-weight: var(--component-text-field-label-weight);
 }
 
+/* Quieter than the label, so "(required)" doesn't read as part of the field's name. */
+.cue {
+  color: var(--component-text-field-hint-text);
+  font-size: var(--component-text-field-font-size-sm);
+  font-weight: var(--type-weight-body);
+}
+
 .hint,
 .error {
   margin: 0;
@@ -64,6 +71,13 @@
   color: var(--component-text-field-text);
   font: inherit;
   font-size: var(--_font-size);
+}
+
+/* Its first line sits where a single-line field's text would. */
+.multiline {
+  display: block;
+  padding-block: calc((var(--_height) - 1lh) / 2 - var(--component-text-field-border-width));
+  resize: vertical;
 }
 
 .input::placeholder {

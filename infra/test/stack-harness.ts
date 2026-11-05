@@ -16,6 +16,10 @@ export const testConfig: SiteConfig = {
   siteDir: fileURLToPath(new URL("fixtures/site", import.meta.url)),
   siteManifest: fileURLToPath(new URL("fixtures/site-manifest.json", import.meta.url)),
   budgetEmail: "alerts@example.test",
+  contactArtifact: fileURLToPath(new URL("fixtures/contact-artifact", import.meta.url)),
+  contactRateLimitPer5Minutes: 10,
+  turnstileSecretParameter: "/test/contact/turnstile-secret",
+  contactEmail: "owner@example.test",
 };
 
 export const testEnv = { account: "111111111111", region: testConfig.region };

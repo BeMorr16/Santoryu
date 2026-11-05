@@ -5,13 +5,18 @@ import {
   componentPath,
   componentsPath,
 } from "../../web/src/design-system/components/pages.ts";
+import { contactFormContent as formContent } from "../../web/src/content/contact.ts";
 import {
   componentPage,
+  contactSubmit,
   example,
+  fillContactForm,
   openAllAccordions,
   pages,
   setAllPanels,
   storeTheme,
+  stubChallengeScript,
+  stubInteractiveChallenge,
   themes,
 } from "./support.ts";
 
@@ -41,6 +46,62 @@ for (const theme of themes) {
     });
   }
 }
+
+test.describe("the contact form's states (contact-form R1.6)", () => {
+  // Contrast is judged on settled colors: with no transitions, axe can't sample a color midway.
+  test.use({ reducedMotion: "reduce" });
+
+  const reach: Record<string, (page: Page) => Promise<unknown>> = {
+    "field errors": async (page) => {
+      await contactSubmit(page).click();
+      await expect(page.getByText(formContent.errors.name.missing)).toBeVisible();
+    },
+    sending: async (page) => {
+      // Never answered, so the form stays in this state.
+      await page.route("**/api/contact", () => undefined);
+      await fillContactForm(page);
+      await contactSubmit(page).click();
+      await expect(page.getByRole("button", { name: formContent.sending })).toBeVisible();
+    },
+    "waiting for the visitor": async (page) => {
+      await page.unroute("https://challenges.cloudflare.com/**");
+      await stubInteractiveChallenge(page);
+      await page.route("**/api/contact", (route) => route.fulfill({ status: 204 }));
+      await fillContactForm(page);
+      await contactSubmit(page).click();
+      await expect(page.getByRole("checkbox", { name: "Verify you are human" })).toBeVisible();
+    },
+    "send failed": async (page) => {
+      await page.route("**/api/contact", (route) =>
+        route.fulfill({ status: 503, json: { error: "unavailable" } }),
+      );
+      await fillContactForm(page);
+      await contactSubmit(page).click();
+      await expect(page.getByRole("alert")).toBeVisible();
+    },
+    sent: async (page) => {
+      await page.route("**/api/contact", (route) => route.fulfill({ status: 204 }));
+      await fillContactForm(page);
+      await contactSubmit(page).click();
+      await expect(page.getByRole("heading", { name: formContent.successHeading })).toBeVisible();
+    },
+  };
+
+  for (const theme of themes) {
+    for (const [state, arrive] of Object.entries(reach)) {
+      test(`in ${theme}, ${state}, has no axe violations`, async ({ page }) => {
+        await storeTheme(page, theme);
+        await stubChallengeScript(page);
+        await page.goto("/contact");
+        await expect(contactSubmit(page)).toBeEnabled();
+
+        await arrive(page);
+
+        expect(await violations(page)).toEqual([]);
+      });
+    }
+  }
+});
 
 test.describe("preview panels", () => {
   // Contrast is judged on settled colors: with no transitions, axe can't sample a color midway.

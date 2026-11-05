@@ -1,0 +1,246 @@
+{
+  "limits": { "name": 100, "email": 254, "subject": 100, "message": 5000 },
+  "emailPattern": "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]{1,64}@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$",
+  "base": { "name": "Ada Lovelace", "email": "ada@example.com", "subject": "", "message": "Hello" },
+  "cases": [
+    { "description": "a complete request is valid", "input": {}, "errors": {} },
+    { "description": "role or company is accepted", "input": { "subject": "Acme" }, "errors": {} },
+    {
+      "description": "fields are trimmed",
+      "input": { "name": "  Ada  ", "subject": " Acme\t", "message": "\n Hi \n" },
+      "errors": {},
+      "trimmed": { "name": "Ada", "subject": "Acme", "message": "Hi" }
+    },
+    {
+      "description": "no-break space and BOM are trimmed the same on both sides",
+      "input": { "name": " ﻿Ada　" },
+      "errors": {},
+      "trimmed": { "name": "Ada" }
+    },
+
+    { "description": "name empty", "input": { "name": "" }, "errors": { "name": "missing" } },
+    {
+      "description": "name only whitespace",
+      "input": { "name": " \t " },
+      "errors": { "name": "missing" }
+    },
+    {
+      "description": "name at the limit",
+      "input": { "name": { "repeat": "a", "times": 100 } },
+      "errors": {}
+    },
+    {
+      "description": "name at the limit once trimmed",
+      "input": { "name": { "prefix": "  ", "repeat": "a", "times": 100, "suffix": "  " } },
+      "errors": {}
+    },
+    {
+      "description": "name over the limit",
+      "input": { "name": { "repeat": "a", "times": 101 } },
+      "errors": { "name": "tooLong" }
+    },
+    {
+      "description": "name with CR",
+      "input": { "name": "Ada\rBcc: x@example.com" },
+      "errors": { "name": "invalid" }
+    },
+    {
+      "description": "name with LF",
+      "input": { "name": "Ada\nBcc: x@example.com" },
+      "errors": { "name": "invalid" }
+    },
+    {
+      "description": "name with a tab inside",
+      "input": { "name": "Ada\tLovelace" },
+      "errors": { "name": "invalid" }
+    },
+    {
+      "description": "name with NUL",
+      "input": { "name": "Ada\u0000" },
+      "errors": { "name": "invalid" }
+    },
+    {
+      "description": "name with DEL",
+      "input": { "name": "Ada\u007fL" },
+      "errors": { "name": "invalid" }
+    },
+    {
+      "description": "name with a C1 control",
+      "input": { "name": "Ada\u0085L" },
+      "errors": { "name": "invalid" }
+    },
+    {
+      "description": "name with a Unicode line separator",
+      "input": { "name": "Ada L" },
+      "errors": { "name": "invalid" }
+    },
+    { "description": "name with non-Latin letters", "input": { "name": "山田太郎" }, "errors": {} },
+
+    { "description": "email empty", "input": { "email": "" }, "errors": { "email": "missing" } },
+    {
+      "description": "email at the limit",
+      "input": {
+        "email": {
+          "prefix": "user@",
+          "repeat": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.",
+          "times": 4,
+          "suffix": "z"
+        }
+      },
+      "errors": {}
+    },
+    {
+      "description": "email over the limit",
+      "input": {
+        "email": {
+          "prefix": "user@",
+          "repeat": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.",
+          "times": 4,
+          "suffix": "zz"
+        }
+      },
+      "errors": { "email": "tooLong" }
+    },
+    {
+      "description": "email without an at sign",
+      "input": { "email": "ada.example.com" },
+      "errors": { "email": "invalid" }
+    },
+    {
+      "description": "email without a dot in the domain",
+      "input": { "email": "ada@example" },
+      "errors": { "email": "invalid" }
+    },
+    {
+      "description": "email with two at signs",
+      "input": { "email": "ada@b@example.com" },
+      "errors": { "email": "invalid" }
+    },
+    {
+      "description": "email with a space inside",
+      "input": { "email": "ada l@example.com" },
+      "errors": { "email": "invalid" }
+    },
+    {
+      "description": "email with a comma, which would add a recipient",
+      "input": { "email": "a@example.com,b@example.com" },
+      "errors": { "email": "invalid" }
+    },
+    {
+      "description": "email with angle brackets",
+      "input": { "email": "Ada <ada@example.com>" },
+      "errors": { "email": "invalid" }
+    },
+    {
+      "description": "email with LF",
+      "input": { "email": "ada@example.com\nBcc: x@example.com" },
+      "errors": { "email": "invalid" }
+    },
+    {
+      "description": "email with a trailing LF is trimmed, then valid",
+      "input": { "email": "ada@example.com\n" },
+      "errors": {},
+      "trimmed": { "email": "ada@example.com" }
+    },
+    {
+      "description": "email with a non-ASCII local part, which SES can't send to",
+      "input": { "email": "adá@example.com" },
+      "errors": { "email": "invalid" }
+    },
+    {
+      "description": "email with a local part over 64 characters",
+      "input": { "email": { "repeat": "a", "times": 65, "suffix": "@example.com" } },
+      "errors": { "email": "invalid" }
+    },
+    {
+      "description": "email with a plus tag",
+      "input": { "email": "ada+site@mail.example.co.uk" },
+      "errors": {}
+    },
+
+    {
+      "description": "subject at the limit",
+      "input": { "subject": { "repeat": "a", "times": 100 } },
+      "errors": {}
+    },
+    {
+      "description": "subject over the limit",
+      "input": { "subject": { "repeat": "a", "times": 101 } },
+      "errors": { "subject": "tooLong" }
+    },
+    {
+      "description": "subject only whitespace counts as empty",
+      "input": { "subject": "   " },
+      "errors": {},
+      "trimmed": { "subject": "" }
+    },
+    {
+      "description": "subject with CR",
+      "input": { "subject": "Acme\rX: y" },
+      "errors": { "subject": "invalid" }
+    },
+    {
+      "description": "subject with LF",
+      "input": { "subject": "Acme\nX: y" },
+      "errors": { "subject": "invalid" }
+    },
+
+    {
+      "description": "message empty",
+      "input": { "message": "" },
+      "errors": { "message": "missing" }
+    },
+    {
+      "description": "message only line breaks",
+      "input": { "message": "\r\n\n" },
+      "errors": { "message": "missing" }
+    },
+    {
+      "description": "message keeps its line breaks",
+      "input": { "message": "one\ntwo\r\nthree\ttabbed" },
+      "errors": {},
+      "trimmed": { "message": "one\ntwo\r\nthree\ttabbed" }
+    },
+    {
+      "description": "message at the limit",
+      "input": { "message": { "repeat": "a", "times": 5000 } },
+      "errors": {}
+    },
+    {
+      "description": "message over the limit",
+      "input": { "message": { "repeat": "a", "times": 5001 } },
+      "errors": { "message": "tooLong" }
+    },
+    {
+      "description": "message of 5,000 three-byte characters",
+      "input": { "message": { "repeat": "語", "times": 5000 } },
+      "errors": {}
+    },
+    {
+      "description": "message at the limit in UTF-16 units",
+      "input": { "message": { "repeat": "😀", "times": 2500 } },
+      "errors": {}
+    },
+    {
+      "description": "message over the limit in UTF-16 units",
+      "input": { "message": { "repeat": "😀", "times": 2501 } },
+      "errors": { "message": "tooLong" }
+    },
+
+    {
+      "description": "every field wrong at once",
+      "input": {
+        "name": "",
+        "email": "nope",
+        "subject": { "repeat": "a", "times": 101 },
+        "message": " "
+      },
+      "errors": {
+        "name": "missing",
+        "email": "invalid",
+        "subject": "tooLong",
+        "message": "missing"
+      }
+    }
+  ]
+}

@@ -78,6 +78,15 @@ if (!("getAnimations" in Element.prototype)) {
   });
 }
 
+/** jsdom has no layout, so it has no scrollIntoView. Real scrolling is covered by e2e. */
+if (!("scrollIntoView" in Element.prototype)) {
+  Object.assign(Element.prototype, {
+    scrollIntoView(): void {
+      return undefined;
+    },
+  });
+}
+
 /**
  * Minimal modal dialog shim (theme-creator design §16): jsdom 30 has no showModal. showModal and
  * close toggle `open` and fire `close`; Escape fires a cancelable `cancel` at the open modal, then
