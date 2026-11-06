@@ -1,7 +1,7 @@
 import {
   skills,
+  type Entry,
   type Highlight,
-  type Position,
   type Skill,
   type SkillCategoryId,
   type SkillId,
@@ -17,9 +17,9 @@ export type ListedSkill = Skill & { id: SkillId };
 /** Nothing selected: every highlight shows (R7.1). */
 export const emptySelection: Selection = new Set();
 
-/** Skills at least one highlight lists (R6.3). */
-export function usedSkillIds(list: readonly Position[]): ReadonlySet<SkillId> {
-  return new Set(list.flatMap((position) => position.highlights.flatMap((h) => h.skills)));
+/** Skills at least one entry's highlight lists (R6.3; experience-skills R3.5). */
+export function usedSkillIds(list: readonly Entry[]): ReadonlySet<SkillId> {
+  return new Set(list.flatMap((entry) => entry.highlights.flatMap((h) => h.skills)));
 }
 
 /**
@@ -44,12 +44,12 @@ export function matchesSelection(highlight: Highlight, selection: Selection): bo
   return selection.size === 0 || highlight.skills.some((id) => selection.has(id));
 }
 
-/** How many highlights the selection shows, out of all of them (R7.7). */
+/** How many highlights the selection shows, out of all of them (R7.7; experience-skills R3.4). */
 export function countHighlights(
-  list: readonly Position[],
+  list: readonly Entry[],
   selection: Selection,
 ): { shown: number; total: number } {
-  const all = list.flatMap((position) => position.highlights);
+  const all = list.flatMap((entry) => entry.highlights);
   return {
     shown: all.filter((highlight) => matchesSelection(highlight, selection)).length,
     total: all.length,

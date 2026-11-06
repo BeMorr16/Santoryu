@@ -1,7 +1,7 @@
-/* One column in source order: intro, panel, work, education (R3.1). */
+/* One column in source order: intro, panel, work, projects, education (R3.1; experience-skills R1.1). */
 .layout {
   display: grid;
-  grid-template-areas: "intro" "panel" "work" "education";
+  grid-template-areas: "intro" "panel" "work" "projects" "education";
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-stack-lg) var(--space-layout-sm);
   overflow-wrap: break-word;
@@ -22,18 +22,26 @@
   grid-area: work;
 }
 
+.projects {
+  grid-area: projects;
+}
+
 .education {
   grid-area: education;
 }
 
-/* size.breakpoint.md: the panel is a sticky column at the inline end, beside work and education (R3.3). */
+/*
+ * size.breakpoint.md: the panel is a sticky column at the inline end, beside work, projects and
+ * education (R3.3; experience-skills R1.4).
+ */
 @media (min-width: 48em) {
   .layout {
     grid-template-areas:
       "intro intro"
       "work panel"
+      "projects panel"
       "education panel";
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto auto auto 1fr;
     grid-template-columns: minmax(0, 1fr) var(--size-column-md);
   }
 

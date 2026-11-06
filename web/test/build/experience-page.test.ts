@@ -3,14 +3,21 @@ import { fileURLToPath } from "node:url";
 import { within } from "@testing-library/dom";
 import { JSDOM } from "jsdom";
 import { beforeAll, describe, expect, it } from "vitest";
-import { experienceContent, positions, type Highlight } from "../../src/content/experience.ts";
+import {
+  entries,
+  experienceContent,
+  positions,
+  projects,
+  type Highlight,
+} from "../../src/content/experience.ts";
 import { resumePdfPath, siteUrl } from "../../src/site.config.ts";
 
 const clientDir = fileURLToPath(new URL("../../build/client/", import.meta.url));
 const experienceHtml = `${clientDir}experience/index.html`;
 const pdfFile = `${clientDir}${resumePdfPath.slice(1)}`;
 
-const highlights = positions.flatMap<Highlight>((position) => position.highlights);
+// Positions' and projects' highlights alike (experience-skills R3.4).
+const highlights = entries.flatMap<Highlight>((entry) => entry.highlights);
 
 let html: string;
 let document: Document;
@@ -34,22 +41,29 @@ describe("Experience page, prerendered (resume R1, R3, R7.10)", () => {
     expect(existsSync(experienceHtml)).toBe(true);
   });
 
-  it("has one h1 and the three h2s, in order (R3.1, R3.2)", () => {
+  it("has one h1 and the four h2s, in order (R3.1, R3.2; experience-skills R1.1)", () => {
     expect(headingTexts(1)).toEqual([experienceContent.heading]);
     expect(headingTexts(2)).toEqual([
       experienceContent.skillsHeading,
       experienceContent.workHeading,
+      experienceContent.projectsHeading,
       experienceContent.educationHeading,
     ]);
   });
 
-  it("prerenders every position h3 and every highlight h4, in order (R7.10)", () => {
+  it("prerenders every position and project h3 and every highlight h4, in order (R7.10)", () => {
     const work = main().getByRole("region", { name: experienceContent.workHeading });
     expect(
       within(work)
         .getAllByRole("heading", { level: 3 })
         .map((heading) => heading.textContent),
     ).toEqual(positions.map((position) => `${position.title}, ${position.company}`));
+    const projectsRegion = main().getByRole("region", { name: experienceContent.projectsHeading });
+    expect(
+      within(projectsRegion)
+        .getAllByRole("heading", { level: 3 })
+        .map((heading) => heading.textContent),
+    ).toEqual(projects.map((project) => project.name));
     expect(headingTexts(4)).toEqual(highlights.map((highlight) => highlight.title));
   });
 

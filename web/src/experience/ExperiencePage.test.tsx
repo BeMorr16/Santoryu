@@ -5,7 +5,13 @@ import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "../../test/axe.ts";
 import { expectHydratesCleanly } from "../../test/component.tsx";
 import buttonStyles from "../components/shared/button-styles.module.css";
-import { experienceContent, positions, type Highlight } from "../content/experience.ts";
+import {
+  entries,
+  experienceContent,
+  positions,
+  projects,
+  type Highlight,
+} from "../content/experience.ts";
 import { resumePdfPath } from "../site.config.ts";
 import { ExperiencePage } from "./ExperiencePage.tsx";
 
@@ -17,7 +23,7 @@ const page = (
   </MemoryRouter>
 );
 
-const highlights = positions.flatMap<Highlight>((position) => position.highlights);
+const highlights = entries.flatMap<Highlight>((entry) => entry.highlights);
 
 function renderPage() {
   return { user: userEvent.setup(), container: render(page).container };
@@ -27,7 +33,7 @@ const pdfLink = () => screen.getByRole("link", { name: experienceContent.pdfLabe
 const h4s = () => screen.getAllByRole("heading", { level: 4 }).map((h) => h.textContent);
 
 describe("ExperiencePage structure (resume R3.1, R3.2, R12.4)", () => {
-  it("shows the h1, the PDF link, the Skills region, the Work region, then Education", () => {
+  it("shows the h1, the PDF link, the Skills region, the Work region, the Projects region, then Education", () => {
     renderPage();
 
     const order = [
@@ -35,6 +41,7 @@ describe("ExperiencePage structure (resume R3.1, R3.2, R12.4)", () => {
       pdfLink(),
       screen.getByRole("region", { name: experienceContent.skillsHeading }),
       screen.getByRole("region", { name: experienceContent.workHeading }),
+      screen.getByRole("region", { name: experienceContent.projectsHeading }),
       screen.getByRole("heading", { level: 2, name: experienceContent.educationHeading }),
     ];
     for (let index = 1; index < order.length; index++) {
@@ -44,7 +51,7 @@ describe("ExperiencePage structure (resume R3.1, R3.2, R12.4)", () => {
     }
   });
 
-  it("has one h1, the h2s Skills, Work and Education, and skips no level", () => {
+  it("has one h1, the h2s Skills, Work, Projects and Education, and skips no level (experience-skills R1.1, R1.2)", () => {
     renderPage();
 
     const headings = screen.getAllByRole("heading");
@@ -57,6 +64,7 @@ describe("ExperiencePage structure (resume R3.1, R3.2, R12.4)", () => {
     expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual([
       experienceContent.skillsHeading,
       experienceContent.workHeading,
+      experienceContent.projectsHeading,
       experienceContent.educationHeading,
     ]);
   });
@@ -102,6 +110,30 @@ describe("filtering (resume R7.1, R7.3)", () => {
         .map((h) => h.textContent),
     ).toEqual(positionHeadings);
     expect(within(work).getAllByText(experienceContent.noMatch).length).toBeGreaterThan(0);
+  });
+});
+
+describe("projects in the filter and count (experience-skills R3.2, R3.4)", () => {
+  const total = highlights.length;
+
+  it("counts positions' and projects' highlights alike", () => {
+    renderPage();
+
+    const positionsCount = positions.flatMap<Highlight>((position) => position.highlights).length;
+    const projectsCount = projects.flatMap<Highlight>((project) => project.highlights).length;
+    expect(total).toBe(positionsCount + projectsCount);
+    expect(screen.getByText(experienceContent.count(total, total))).toBeVisible();
+  });
+
+  it("shows only this site's highlight when Java is selected", async () => {
+    const { user } = renderPage();
+
+    await user.click(screen.getByRole("button", { name: "Java" }));
+
+    const [site] = projects[0].highlights;
+    expect(h4s()).toEqual([site.title]);
+    const region = screen.getByRole("region", { name: experienceContent.projectsHeading });
+    expect(within(region).getByRole("heading", { level: 4 })).toHaveTextContent(site.title);
   });
 });
 

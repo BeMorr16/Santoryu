@@ -1,18 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
   education,
+  entries,
   experienceContent,
   positions,
+  projects,
   skillCategories,
   skills,
   type Highlight,
   type Position,
+  type Project,
   type Skill,
 } from "./experience.ts";
 
 const skillList: readonly Skill[] = skills;
 const positionList: readonly Position[] = positions;
-const highlights: readonly Highlight[] = positionList.flatMap((position) => position.highlights);
+const projectList: readonly Project[] = projects;
+// Positions' and projects' highlights alike (experience-skills R5.3).
+const highlights: readonly Highlight[] = entries.flatMap((entry) => entry.highlights);
 
 /** Every string in a value, walked recursively; functions are called with sample arguments. */
 function strings(value: unknown, path: string): { path: string; text: string }[] {
@@ -66,6 +71,38 @@ describe("skills (resume R11.3)", () => {
   });
 });
 
+describe("skills from this site (experience-skills R4.1–R4.3)", () => {
+  const ids = (category: Skill["category"]) =>
+    skillList.filter((skill) => skill.category === category).map((skill) => skill.id);
+  const byId = (id: string) => skillList.find((skill) => skill.id === id);
+
+  it("puts Java right after Python in Languages (R4.1)", () => {
+    const languages = ids("languages");
+    expect(languages[languages.indexOf("python") + 1]).toBe("java");
+    expect(byId("java")?.label).toBe("Java");
+  });
+
+  it("puts AWS CDK right after AWS in DevOps & tooling, with its aliases (R4.2)", () => {
+    const devops = ids("devops");
+    expect(devops[devops.indexOf("aws") + 1]).toBe("aws-cdk");
+    expect(byId("aws-cdk")).toMatchObject({
+      label: "AWS CDK",
+      aliases: ["IaC", "Infrastructure as code"],
+    });
+  });
+
+  it("adds Lambda, CloudFront, S3 and SES to AWS's aliases, keeping its others (R4.3)", () => {
+    expect(byId("aws")?.aliases).toEqual([
+      "Amazon Web Services",
+      "EKS",
+      "Lambda",
+      "CloudFront",
+      "S3",
+      "SES",
+    ]);
+  });
+});
+
 describe("highlights (resume R11.3)", () => {
   it("lists one or more skills per highlight, with no duplicates", () => {
     for (const highlight of highlights) {
@@ -81,14 +118,14 @@ describe("highlights (resume R11.3)", () => {
     }
   });
 
-  it("gives every position and highlight a unique id", () => {
-    expect(new Set(positionList.map((position) => position.id)).size).toBe(positionList.length);
+  it("gives every entry and highlight a unique id, across positions and projects (experience-skills R5.4)", () => {
+    expect(new Set(entries.map((entry) => entry.id)).size).toBe(entries.length);
     expect(new Set(highlights.map((highlight) => highlight.id)).size).toBe(highlights.length);
   });
 });
 
 describe("contact details (resume R11.4)", () => {
-  const all = strings({ experienceContent, positions, education, skills }, "content");
+  const all = strings({ experienceContent, positions, projects, education, skills }, "content");
 
   it("walks every string, templates included", () => {
     expect(all.some(({ path }) => path.endsWith(".count(3, 13)"))).toBe(true);
@@ -113,12 +150,29 @@ describe("dates and metadata (resume R11.5)", () => {
     }
   });
 
+  it("never ends a project before it starts (experience-skills R5.5)", () => {
+    for (const project of projectList) {
+      if (project.end === undefined) continue;
+      expect(project.end >= project.start, project.id).toBe(true);
+    }
+  });
+
   it("keeps the meta description within 160 characters", () => {
     expect(experienceContent.description.length).toBeLessThanOrEqual(160);
   });
 
   it("has a label for every category", () => {
     expect(Object.keys(experienceContent.categories)).toEqual([...skillCategories]);
+  });
+});
+
+describe("project links (experience-skills R5.6)", () => {
+  it("points every link at a site path or an https:// URL", () => {
+    for (const project of projectList) {
+      for (const link of project.links) {
+        expect(link.href, `${project.id}: ${link.label}`).toMatch(/^(\/(?!\/)|https:\/\/)/);
+      }
+    }
   });
 });
 

@@ -10,6 +10,13 @@ minimumReleaseAgeExclude:
   - jsdom@30.1.3
   - vitest@5.0.5
 
+# Dependabot alerts 11 and 12 (decision 0027). Style Dictionary's bundled glob and ESLint's
+# config-array pin the majors with the fixes' predecessors. Remove each line once no parent pins a
+# vulnerable version (`pnpm why -r glob minimatch`).
+overrides:
+  "glob@>=9.0.0 <14.0.2": "^14.0.2"
+  "minimatch@>=7.0.0 <11.0.1": "^11.0.2"
+
 peerDependencyRules:
   allowedVersions:
     eslint-plugin-jsx-a11y>eslint: "10"

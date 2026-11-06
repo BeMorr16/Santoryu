@@ -3,13 +3,13 @@ import { Button } from "../components/Button/Button.tsx";
 import { Stack } from "../components/Stack/Stack.tsx";
 import { TextField } from "../components/TextField/TextField.tsx";
 import { Typography } from "../components/Typography/Typography.tsx";
-import { experienceContent, positions, skillCategories } from "../content/experience.ts";
+import { entries, experienceContent, skillCategories } from "../content/experience.ts";
 import styles from "./Experience.module.css";
 import { categorySkills, emptySelection, usedSkillIds, type Selection } from "./model.ts";
 import { groupMatches, SkillCategory, type SkillGroup } from "./SkillCategory.tsx";
 
 // Content only, so computed once (design §4).
-const used = usedSkillIds(positions);
+const used = usedSkillIds(entries);
 const groups: readonly SkillGroup[] = skillCategories.map((category) => ({
   category,
   ...categorySkills(category, used),

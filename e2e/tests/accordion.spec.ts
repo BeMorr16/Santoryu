@@ -150,6 +150,16 @@ test.describe("Accordion (refinement R13)", () => {
     expect(reveal.height).toBeCloseTo(reveal.content, 0);
 
     // The instant reveal lasts one change: the item's own button animates again.
+    // The reveal re-checks `hidden` on the next frame (refinement R13.4). A press before that frame
+    // would be re-hidden mid-close, so the item's own change starts once the check has run.
+    await panel.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            resolve();
+          });
+        }),
+    );
     const closing = await pressAndSampleMidway(button, panel);
     expect(closing).not.toBeNull();
     expect(closing?.height).toBeGreaterThan(0);
